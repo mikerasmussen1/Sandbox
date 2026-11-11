@@ -171,19 +171,38 @@ async function boot(): Promise<void> {
     const debug = window as unknown as {
       __cam: () => { zoom: number; camX: number; camY: number; w: number; h: number };
       __ui: () => { call: { x: number; y: number }; lanes: { path: number; x: number; y: number }[]; menu: { x: number; y: number }[] };
-      __siege: () => { phase: string; wave: number; jade: number; towers: number; units: number; integrity: number; offer: boolean } | null;
+      __siege: () => {
+        phase: string; wave: number; jade: number; towers: number; units: number; integrity: number; offer: boolean;
+        saves: number; kills: number; ready: number;
+        leaker: { x: number; y: number; d: number } | null;
+        hero: { x: number; y: number };
+      } | null;
     };
     debug.__cam = () => ({ zoom, camX, camY, w: app.screen.width, h: app.screen.height });
     debug.__ui = () => ({ call: hud.callAnchor(), lanes: hud.laneAnchors(), menu: view.menuAnchors() });
-    debug.__siege = () => sim ? {
-      phase: sim.phase,
-      wave: sim.wave,
-      jade: sim.jade,
-      towers: sim.towers.length,
-      units: sim.enemies.filter((e) => e.alive).length,
-      integrity: sim.integrity,
-      offer: sim.pendingOffer !== null,
-    } : null;
+    debug.__siege = () => {
+      if (!sim) return null;
+      let leaker: { x: number; y: number; d: number } | null = null;
+      for (const e of sim.enemies) {
+        if (!e.alive) continue;
+        const d = Math.hypot(e.x - sim.map.sun.x, e.y - sim.map.sun.y);
+        if (!leaker || d < leaker.d) leaker = { x: e.x, y: e.y, d };
+      }
+      return {
+        phase: sim.phase,
+        wave: sim.wave,
+        jade: sim.jade,
+        towers: sim.towers.length,
+        units: sim.enemies.filter((e) => e.alive).length,
+        integrity: sim.integrity,
+        offer: sim.pendingOffer !== null,
+        saves: sim.guardianSaves,
+        kills: sim.guardianKills,
+        ready: sim.guardianReady,
+        leaker,
+        hero: sim.heroAt(),
+      };
+    };
   }
   let fpsFrames = 0;
   let fpsStamp = performance.now();
@@ -535,6 +554,15 @@ async function boot(): Promise<void> {
     const wx = (sx - camX - view.shakeX) / zoom;
     const wy = (sy - camY - view.shakeY) / zoom;
     if (view.menuPad >= 0) view.closeMenu();
+    const strike = sim.strikeAt(wx, wy);
+    if (strike === "hit") {
+      audio.play("dart");
+      return;
+    }
+    if (strike === "cool") {
+      audio.play("deny");
+      return;
+    }
     let towerId = 0;
     let best = 72;
     for (const tower of sim.towers) {
@@ -632,6 +660,7 @@ async function boot(): Promise<void> {
       speed,
       flare: live.flare,
       flareReady: live.flare >= BALANCE.flare.need && live.time >= live.flareLock,
+      guardian: live.guardianReady,
       buildLeft: live.buildLeft,
       hint: hintFor(save, live),
       offer: live.pendingOffer?.map((id) => ({ id, name: BALANCE.relics[id].name, blurb: BALANCE.relics[id].blurb })) ?? null,
@@ -696,7 +725,8 @@ async function boot(): Promise<void> {
     if (live.phase === "wave" && seenWave !== live.wave) {
       seenWave = live.wave;
       audio.play("horn");
-      hud.announce(`Wave ${live.wave + 1}`);
+      const firstStrike = live.world === 0 && live.wave === 0 && save.taught < 3;
+      hud.announce(firstStrike ? "Tap raiders that slip through to strike them yourself." : `Wave ${live.wave + 1}`);
       teach(2);
     }
     if (finished) return;
@@ -721,6 +751,7 @@ function hintFor(save: SaveData, live: Siege): string {
   if (live.world === 1 && live.wave === 0 && live.phase === "build") return "Three trails feed this crater. Cover each one.";
   if (live.world === 2 && live.wave === 0 && live.phase === "build") return "Night Crater is the hard valley. Upgrade before the colossus.";
   if (live.world !== 0) return "";
+  if (live.phase === "wave" && live.wave === 0) return "Tap raiders that slip through to strike them yourself.";
   if (live.towers.length === 0 && live.phase === "build") {
     return "Protect the Sunstone. Tap the glowing pad. Darts hit one raider. 50 Jade.";
   }

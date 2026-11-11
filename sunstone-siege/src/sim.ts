@@ -96,6 +96,21 @@ export interface Shot {
   towerId: number;
 }
 
+/** A sun spear the Guardian has already thrown. One target, then it is gone. */
+export interface Spear {
+  sx: number;
+  sy: number;
+  tx: number;
+  ty: number;
+  age: number;
+  flight: number;
+  targetId: number;
+  raw: number;
+  saved: boolean;
+  struck: boolean;
+  alive: boolean;
+}
+
 export type FxKind = "impact" | "death" | "jade" | "drum" | "chain" | "crack" | "flare" | "slam" | "boss" | "place" | "streak" | "relic" | "aegis" | "rally" | "banner" | "multi" | "callout";
 
 export interface Fx {
@@ -152,6 +167,15 @@ export class Siege {
   earlyGranted = false;
   flare = 0;
   flareLock = 0;
+  /** Facing of the plaza Guardian. Angle 0 is east, and y grows downward. */
+  guardianAim = Math.PI / 2;
+  /** Seconds left on the throw pose. */
+  guardianCast = 0;
+  guardianKills = 0;
+  /** Saved strikes that actually stopped a leaker. */
+  guardianSaves = 0;
+  readonly spears: Spear[] = [];
+  private guardianNext = 0;
   pendingOffer: RelicId[] | null = null;
   offerLeft = 0;
   readonly relics: RelicId[] = [];
@@ -304,6 +328,61 @@ export class Siege {
     return true;
   }
 
+  /** Where the Guardian stands, on the near rim of the plaza. */
+  heroAt(): { x: number; y: number } {
+    return { x: this.map.sun.x, y: this.map.sun.y + this.map.plaza * 0.55 };
+  }
+
+  /** 1 when a throw is ready, 0 the instant one leaves the hand. */
+  get guardianReady(): number {
+    const left = this.guardianNext - this.time;
+    if (left <= 0) return 1;
+    return 1 - Math.min(1, left / BALANCE.guardian.cooldown);
+  }
+
+  /**
+   * Throw at the nearest raider inside the tap radius.
+   * "miss" means the tap was not an attack and the caller may select a totem.
+   * "cool" still consumes the tap so a fat-finger does not open a build pad.
+   */
+  strikeAt(x: number, y: number): "hit" | "cool" | "miss" {
+    if (this.phase === "victory" || this.phase === "defeat") return "miss";
+    let best: Enemy | null = null;
+    let bestD: number = BALANCE.guardian.tap;
+    for (const e of this.enemies) {
+      if (!e.alive || stealthed(e.kind, e.age)) continue;
+      const d = Math.hypot(e.x - x, e.y - y);
+      if (d < bestD) {
+        bestD = d;
+        best = e;
+      }
+    }
+    if (!best) return "miss";
+    if (this.time < this.guardianNext) return "cool";
+    const from = this.heroAt();
+    const saved = this.slipped(best);
+    const aimX = best.x;
+    const aimY = best.y - 18;
+    this.guardianAim = Math.atan2(aimY - from.y, aimX - from.x);
+    this.guardianCast = BALANCE.guardian.cast;
+    this.guardianNext = this.time + BALANCE.guardian.cooldown;
+    const dist = Math.hypot(aimX - from.x, aimY - (from.y - 64));
+    this.spears.push({
+      sx: from.x + Math.cos(this.guardianAim) * 28,
+      sy: from.y - 64 + Math.sin(this.guardianAim) * 18,
+      tx: aimX,
+      ty: aimY,
+      age: 0,
+      flight: Math.max(0.3, Math.min(BALANCE.guardian.flight, dist / 900)),
+      targetId: best.id,
+      raw: saved ? BALANCE.guardian.saved : BALANCE.guardian.damage,
+      saved,
+      struck: false,
+      alive: true,
+    });
+    return "hit";
+  }
+
   chooseRelic(id: RelicId): boolean {
     if (!this.pendingOffer?.includes(id)) return false;
     this.applyRelic(id);
@@ -357,10 +436,15 @@ export class Siege {
       }
     }
 
+    this.guardianCast = Math.max(0, this.guardianCast - dt);
     if (this.phase === "wave") this.spawn();
-    if (this.move(dt)) return;
+    if (this.move(dt)) {
+      this.spearAct(dt);
+      return;
+    }
     this.towersAct(dt);
     this.shotsAct(dt);
+    this.spearAct(dt);
     this.compact();
     if (this.phase === "wave" && this.q >= this.queue.length && !this.enemies.some((e) => e.alive)) {
       const spec = BALANCE.worlds[this.world].waves[this.wave];
@@ -727,6 +811,49 @@ export class Siege {
     });
     this.fx.push({ kind: "chain", x: tower.x, y: tower.y, pts });
     this.noteMulti(tower.x, tower.y, killed);
+  }
+
+  private slipped(e: Enemy): boolean {
+    if (Math.hypot(e.x - this.map.sun.x, e.y - this.map.sun.y) <= BALANCE.guardian.savedRadius) return true;
+    return this.routeLen(e) - e.dist <= BALANCE.guardian.savedRemain;
+  }
+
+  private spearAct(dt: number): void {
+    for (let i = this.spears.length - 1; i >= 0; i--) {
+      const spear = this.spears[i];
+      if (!spear.alive) {
+        this.spears.splice(i, 1);
+        continue;
+      }
+      const target = this.enemies.find((e) => e.id === spear.targetId && e.alive);
+      if (target) {
+        spear.tx = target.x;
+        spear.ty = target.y - 18;
+      }
+      spear.age += dt;
+      if (spear.age >= spear.flight && !spear.struck) {
+        spear.struck = true;
+        if (target) {
+          let shown = Math.max(BALANCE.minHit, spear.raw - target.armor);
+          if (target.boss && target.aegisUntil > this.time) shown *= BALANCE.boss.aegisMul;
+          const killed = this.hurt(target, spear.raw, true, undefined, spear.sx, spear.sy);
+          if (killed) {
+            this.guardianKills += 1;
+            if (spear.saved) this.guardianSaves += 1;
+          }
+          this.fx.push({
+            kind: "impact",
+            x: target.x,
+            y: target.y,
+            text: String(Math.round(shown)),
+            n: spear.saved ? 1 : 0,
+          });
+        } else {
+          this.fx.push({ kind: "impact", x: spear.tx, y: spear.ty });
+        }
+      }
+      if (spear.age >= spear.flight + 0.22) this.spears.splice(i, 1);
+    }
   }
 
   private shotsAct(dt: number): void {
