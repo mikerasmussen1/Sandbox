@@ -5,12 +5,12 @@
 import { Application, Rectangle } from "pixi.js";
 import { loadArt } from "./art";
 import { AudioBus } from "./audio";
-import { BALANCE, starsFor, towerCost, towerDelta, towerRange, towerReadout, worldCount } from "./balance";
+import { BALANCE, starsFor, towerCost, towerFacts, towerRange, worldCount } from "./balance";
 import { Hud, type TowerCard } from "./hud";
 import { MAP_H, MAP_W } from "./maps";
 import { isUnlocked, loadSave, recordStars, writeSave, type SaveData } from "./save";
 import { Siege, type Fx, type Tower } from "./sim";
-import type { TowerKind } from "./types";
+import { TOWER_KINDS, type TowerKind } from "./types";
 import { RANGE_COLOR, WorldView } from "./view";
 
 const params = new URLSearchParams(location.search);
@@ -146,6 +146,15 @@ async function boot(): Promise<void> {
       }
     },
   }, save);
+  let lastChime = 0;
+  view.setCollect((n) => {
+    hud.collect(n);
+    if (save.reduced) return;
+    const now = performance.now();
+    if (now - lastChime < 160) return;
+    lastChime = now;
+    audio.play("jade");
+  });
 
   app.stage.addChild(view.world, view.overlay, hud.root);
   hud.setBackdrop(art.title);
@@ -161,9 +170,11 @@ async function boot(): Promise<void> {
   if (fpsOn) {
     const debug = window as unknown as {
       __cam: () => { zoom: number; camX: number; camY: number; w: number; h: number };
+      __ui: () => { call: { x: number; y: number }; lanes: { path: number; x: number; y: number }[]; menu: { x: number; y: number }[] };
       __siege: () => { phase: string; wave: number; jade: number; towers: number; units: number; integrity: number; offer: boolean } | null;
     };
     debug.__cam = () => ({ zoom, camX, camY, w: app.screen.width, h: app.screen.height });
+    debug.__ui = () => ({ call: hud.callAnchor(), lanes: hud.laneAnchors(), menu: view.menuAnchors() });
     debug.__siege = () => sim ? {
       phase: sim.phase,
       wave: sim.wave,
@@ -207,6 +218,7 @@ async function boot(): Promise<void> {
       frameFight(dt);
       view.menuScale(zoom, camX, camY);
       if (view.menuPad >= 0) view.refreshMenu(sim.jade);
+      aimPlacement();
       present(sim);
       watch(sim);
     }
@@ -232,6 +244,7 @@ async function boot(): Promise<void> {
   let dragY = 0;
   let moved = 0;
   let pinch = 0;
+  let hover = { x: 0, y: 0 };
 
   const point = (e: PointerEvent): { x: number; y: number } => {
     const rect = app.canvas.getBoundingClientRect();
@@ -257,8 +270,9 @@ async function boot(): Promise<void> {
   });
 
   window.addEventListener("pointermove", (e) => {
-    if (!pointers.has(e.pointerId)) return;
     const p = point(e);
+    hover = p;
+    if (!pointers.has(e.pointerId)) return;
     pointers.set(e.pointerId, p);
     if (pointers.size >= 2 && mode === "play") {
       const next = span();
@@ -568,6 +582,34 @@ async function boot(): Promise<void> {
     selected = sim.towers[sim.towers.length - 1]?.id ?? 0;
   }
 
+  function aimPlacement(): void {
+    if (!sim || view.menuPad < 0) {
+      view.aimGhost(0, 0, null, false);
+      return;
+    }
+    const kind = view.armedKind();
+    const live = sim;
+    if (!kind || !live) {
+      view.aimGhost(0, 0, null, false);
+      return;
+    }
+    const wx = (hover.x - camX - view.shakeX) / zoom;
+    const wy = (hover.y - camY - view.shakeY) / zoom;
+    let pad = -1;
+    let best = 90;
+    live.pads.forEach((at, i) => {
+      if (live.towers.some((t) => t.pad === i)) return;
+      const d = Math.hypot(at.x - wx, at.y - wy);
+      if (d < best) {
+        best = d;
+        pad = i;
+      }
+    });
+    const afford = live.jade >= towerCost(kind, 0);
+    if (pad >= 0) view.aimGhost(live.pads[pad].x, live.pads[pad].y, kind, afford);
+    else view.aimGhost(wx, wy, kind, false);
+  }
+
   function present(live: Siege): void {
     const tower = live.towers.find((t) => t.id === selected);
     view.rangeScale = live.rangeScale;
@@ -576,6 +618,10 @@ async function boot(): Promise<void> {
       else view.hideRange();
     }
     hud.setCard(tower ? describe(tower, live.jade, live.rangeScale) : null);
+    const goal = nextSpend(live);
+    hud.setGoal(goal.text, goal.cost, goal.lit, goal.kind);
+    hud.setVaultTip(world === 0 && save.taught === 0 && live.phase === "build" && !live.pendingOffer && view.menuPad < 0);
+    hud.syncLanes(live.lanePlan(), { zoom, camX, camY }, live.phase === "build", live.pendingOffer !== null);
     const boss = live.enemies.find((e) => e.alive && e.boss);
     hud.sync({
       integrity: live.integrity,
@@ -616,14 +662,10 @@ async function boot(): Promise<void> {
 
   function voice(fx: Fx[]): void {
     let deaths = 0;
-    let jades = 0;
     for (const event of fx) {
       if (event.kind === "death") {
         deaths += 1;
         if (deaths <= 8) audio.play("death");
-      } else if (event.kind === "jade") {
-        jades += 1;
-        if (jades <= 4) audio.play("jade");
       } else if (event.kind === "banner" && event.text) hud.announce(event.text);
       else if (event.kind === "multi") audio.play(event.n && event.n >= 5 ? "streak" : "drum");
       else if (event.kind === "callout") audio.play("streak");
@@ -690,19 +732,66 @@ function hintFor(save: SaveData, live: Siege): string {
 }
 
 function describe(tower: Tower, jade: number, rangeScale: number): TowerCard {
-  const read = towerReadout(tower.kind, tower.tier);
+  const facts = towerFacts(tower.kind, tower.tier);
   const next = tower.tier < 2 ? towerCost(tower.kind, tower.tier + 1) : null;
+  const rangeNow = Math.round(facts.range * rangeScale);
+  let delta = "Fully built";
+  if (tower.tier < 2) {
+    const up = towerFacts(tower.kind, tower.tier + 1);
+    const rangeNext = Math.round(up.range * rangeScale);
+    delta = `DPS ${facts.dpsText} → ${up.dpsText}    RANGE ${rangeNow} → ${rangeNext}`;
+  }
   return {
     name: BALANCE.towerName[tower.kind],
-    blurb: `${read.role}. ${BALANCE.towerBlurb[tower.kind]}`,
+    blurb: BALANCE.towerBlurb[tower.kind],
     tier: `Tier ${tower.tier + 1}`,
-    line: `${read.stat}  ${read.pips}    RANGE ${Math.round(read.range * rangeScale)}`,
-    delta: towerDelta(tower.kind, tower.tier) ?? "Fully built",
-    dealt: `Dealt ${Math.round(tower.dealt)}`,
-    upgrade: next === null ? null : `Upgrade ${next}`,
+    dps: `DPS  ${facts.dpsText}`,
+    range: `RANGE  ${rangeNow}`,
+    targets: `Targets  ${facts.targets}`,
+    chip: facts.chip,
+    delta,
+    dealt: `Kills  ${Math.round(tower.dealt)}`,
+    upgrade: next === null ? null : `Upgrade  ${next}`,
     sell: `Sell +${Math.floor(tower.spent * BALANCE.sellRefund)}`,
     canUpgrade: next !== null && jade >= next,
   };
+}
+
+function nextSpend(live: Siege): { text: string; cost: number; lit: boolean; kind: TowerKind } {
+  const options: { cost: number; kind: TowerKind; text: string }[] = [];
+  const free = live.pads.some((_, i) => !live.towers.some((t) => t.pad === i));
+  if (free) {
+    for (const kind of TOWER_KINDS) {
+      options.push({ cost: towerCost(kind, 0), kind, text: BALANCE.towerName[kind] });
+    }
+  }
+  for (const tower of live.towers) {
+    if (tower.tier >= 2) continue;
+    options.push({
+      cost: towerCost(tower.kind, tower.tier + 1),
+      kind: tower.kind,
+      text: `Upgrade ${BALANCE.towerName[tower.kind]}`,
+    });
+  }
+  options.sort((a, b) => a.cost - b.cost);
+  if (!options.length) return { text: "Valley ready", cost: 1, lit: false, kind: "dart" };
+  const cheapest = options[0];
+  const ahead = options.find((o) => o.cost > live.jade);
+  const lit = live.jade >= cheapest.cost;
+  const focus = !lit || !ahead ? cheapest : ahead;
+  const text = !lit
+    ? `${shortTower(cheapest.kind)}  ${cheapest.cost}`
+    : ahead
+      ? `Next ${shortTower(ahead.kind)}  ${ahead.cost}`
+      : `${shortTower(cheapest.kind)}  ${cheapest.cost}`;
+  return { text, cost: focus.cost, lit, kind: lit ? cheapest.kind : focus.kind };
+}
+
+function shortTower(kind: TowerKind): string {
+  if (kind === "dart") return "Dart";
+  if (kind === "lens") return "Lens";
+  if (kind === "drum") return "Drum";
+  return "Spire";
 }
 
 boot().catch((err: unknown) => {

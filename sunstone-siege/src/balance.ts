@@ -6,7 +6,7 @@
  * the reference clip. The clip shows a map, walking units and a beam; it does
  * not show a HUD, a currency, or any number. Tune the game here and nowhere else.
  */
-import type { EnemyKind, RelicId, SpawnGroup, TowerKind, WaveDef } from "./types";
+import { TOWER_KINDS, type EnemyKind, type RelicId, type SpawnGroup, type TowerKind, type WaveDef } from "./types";
 
 export interface DartTier {
   cost: number;
@@ -337,4 +337,64 @@ export function towerDelta(kind: TowerKind, tier: number): string | null {
   const left = now.tag === "DPS" || now.tag === "AREA" ? (now.tag === "AREA" ? now.value.toFixed(1) : String(Math.round(now.value))) : now.stat.replace(`${now.tag} `, "");
   const right = next.tag === "DPS" || next.tag === "AREA" ? (next.tag === "AREA" ? next.value.toFixed(1) : String(Math.round(next.value))) : next.stat.replace(`${next.tag} `, "");
   return `${now.tag} ${left} → ${right}    RANGE ${Math.round(now.range)} → ${Math.round(next.range)}`;
+}
+
+export interface TowerFacts {
+  /** Damage per second on a shared scale with the other three towers. */
+  dps: number;
+  dpsText: string;
+  range: number;
+  role: string;
+  targets: string;
+  /** Special effect chip: stun, chain, burn, or fast. */
+  chip: string;
+}
+
+function dpsText(n: number): string {
+  const rounded = Math.round(n * 10) / 10;
+  return Number.isInteger(rounded) ? String(rounded) : rounded.toFixed(1);
+}
+
+/**
+ * Build-card facts. These read the existing combat numbers and do not change them.
+ * DPS is damage / interval (lens uses its base beam, before the ramp).
+ * Range is the tower's reach in world units, the same unit the range ring uses.
+ */
+export function towerFacts(kind: TowerKind, tier: number): TowerFacts {
+  if (kind === "dart") {
+    const s = BALANCE.dart[tier];
+    const dps = s.damage / s.interval;
+    return { dps, dpsText: dpsText(dps), range: s.range, role: "Single", targets: "First raider", chip: "fast" };
+  }
+  if (kind === "lens") {
+    const s = BALANCE.lens[tier];
+    return {
+      dps: s.dps,
+      dpsText: `${s.dps}–${s.dps + s.rampMax}`,
+      range: s.range,
+      role: "Beam",
+      targets: "One raider",
+      chip: "burn",
+    };
+  }
+  if (kind === "drum") {
+    const s = BALANCE.drum[tier];
+    const dps = s.damage / s.interval;
+    return { dps, dpsText: dpsText(dps), range: s.radius, role: "Area", targets: "Every raider in the ring", chip: "stun" };
+  }
+  const s = BALANCE.spire[tier];
+  const dps = s.damage / s.interval;
+  return { dps, dpsText: dpsText(dps), range: s.range, role: "Chain", targets: "A crowd", chip: "chain" };
+}
+
+/** Shared bar ceilings so a Drum and a Dart are compared on the same scale. */
+export function sharedScales(tier: number): { dps: number; range: number } {
+  let dps = 1;
+  let range = 1;
+  for (const kind of TOWER_KINDS) {
+    const facts = towerFacts(kind, tier);
+    dps = Math.max(dps, facts.dps);
+    range = Math.max(range, facts.range);
+  }
+  return { dps, range };
 }

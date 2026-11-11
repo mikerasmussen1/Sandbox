@@ -4,7 +4,7 @@
  */
 import { Container, Graphics, Sprite, Text, Texture } from "pixi.js";
 import type { ArtSet, Clip } from "./art";
-import { BALANCE, TOWER_HUE, TOWER_ICON, towerCost, towerRange, towerReadout } from "./balance";
+import { BALANCE, TOWER_HUE, TOWER_ICON, sharedScales, towerCost, towerFacts, towerRange, towerReadout } from "./balance";
 import type { MapDef } from "./maps";
 import type { Enemy, Fx, Siege } from "./sim";
 import { TOWER_KINDS, type EnemyKind, type TowerKind, type Vec } from "./types";
@@ -22,6 +22,11 @@ const ELITE: ReadonlySet<EnemyKind> = new Set(["shield", "golem", "boss"]);
 /** Sheets are authored at 2× and were drawn at half size. Use the full frame. */
 const ENEMY_DRAW = 2;
 const TOWER_DRAW = 1.35;
+/** Screen-pixel radius of the build cards. The menu is scaled by 1/zoom so this stays constant. */
+const MENU_REACH = 220;
+/** Clear the Jade vault and the top bar, and the Flare button along the bottom. */
+const MENU_TOP = 168;
+const MENU_BOTTOM = 96;
 
 function bodyScale(kind: EnemyKind, clipDraw: number): number {
   let scale = clipDraw * ENEMY_DRAW;
@@ -55,7 +60,7 @@ interface Ghost {
 
 interface Bit { s: Sprite; vx: number; vy: number; life: number; max: number }
 interface Floater { t: Text; life: number; vy: number }
-interface Gem { s: Sprite; x: number; y: number; vx: number; vy: number; life: number }
+interface Gem { s: Sprite; x: number; y: number; vx: number; vy: number; life: number; n: number }
 interface Bucket { x: number; y: number; n: number; age: number }
 interface RingFx { s: Sprite; life: number; max: number; grow: number }
 
@@ -146,6 +151,15 @@ export class WorldView {
   private readonly menuStats: Text[] = [];
   private readonly menuRings: Graphics[] = [];
   private readonly menuSprites: Sprite[] = [];
+  private readonly menuBars: Graphics[] = [];
+  private readonly menuBadges: Graphics[] = [];
+  private readonly menuDps: Text[] = [];
+  private readonly menuRange: Text[] = [];
+  private readonly menuChips: Text[] = [];
+  private readonly placeGhost: Sprite;
+  private ghostKind: TowerKind | null = null;
+  private menuFit = 1;
+  private onCollect: ((n: number) => void) | null = null;
   private gemGoal = { x: 80, y: 40 };
   private selected = 0;
   private armed: TowerKind | null = null;
@@ -203,6 +217,12 @@ export class WorldView {
     this.callout.eventMode = "none";
     this.callout.visible = false;
     this.overlay.addChild(this.flashRect, this.callout);
+    this.placeGhost = new Sprite(Texture.EMPTY);
+    this.placeGhost.anchor.set(0.5, 0.85);
+    this.placeGhost.alpha = 0.8;
+    this.placeGhost.visible = false;
+    this.placeGhost.eventMode = "none";
+    this.actors.addChild(this.placeGhost);
     this.buildMenu();
   }
 
@@ -245,7 +265,52 @@ export class WorldView {
     this.zoom = zoom;
     this.camX = camX;
     this.camY = camY;
-    if (this.menu.visible) this.menu.scale.set(1 / zoom);
+    const fit = Math.min(
+      1,
+      (this.viewW - 16) / (MENU_REACH * 2 + 220),
+      (this.viewH - MENU_TOP - MENU_BOTTOM) / (MENU_REACH * 2 + 260),
+    );
+    this.menuFit = Math.max(0.55, fit);
+    if (this.menu.visible) this.menu.scale.set(this.menuFit / zoom);
+  }
+
+  /** Follow the cursor with a tower ghost. Red when the spot cannot be built on. */
+  aimGhost(x: number, y: number, kind: TowerKind | null, ok: boolean): void {
+    if (!kind || !this.menu.visible) {
+      this.placeGhost.visible = false;
+      return;
+    }
+    if (this.ghostKind !== kind) {
+      const clip = this.art.clip(towerAsset(kind, 0), "idle");
+      this.placeGhost.texture = clip?.frames[0][0] ?? Texture.EMPTY;
+      if (clip) {
+        this.placeGhost.anchor.set(clip.anchorX, clip.anchorY);
+        this.placeGhost.scale.set(clip.draw * TOWER_DRAW);
+      }
+      this.ghostKind = kind;
+    }
+    this.placeGhost.visible = true;
+    this.placeGhost.position.set(x, y);
+    this.placeGhost.zIndex = y + 1;
+    this.placeGhost.tint = ok ? 0xffffff : 0xff5a4a;
+    this.placeGhost.alpha = ok ? 0.84 : 0.72;
+    this.showRange(x, y, towerRange(kind, 0) * this.rangeScale, ok ? TOWER_HUE[kind] : 0xff5a4a);
+  }
+
+  menuAnchors(): { x: number; y: number }[] {
+    if (!this.menu.visible) return [];
+    return this.menuButtons.map((button) => {
+      const p = button.getGlobalPosition();
+      return { x: p.x, y: p.y };
+    });
+  }
+
+  armedKind(): TowerKind | null {
+    return this.menu.visible ? this.armed : null;
+  }
+
+  setCollect(fn: (n: number) => void): void {
+    this.onCollect = fn;
   }
 
   select(id: number): void {
@@ -271,45 +336,67 @@ export class WorldView {
     this.armed = null;
     this.menu.visible = true;
     this.zoom = zoom;
-    this.menu.scale.set(1 / zoom);
+    this.menu.scale.set(this.menuFit / zoom);
     this.placeMenu(at);
     this.refreshMenu(jade);
     this.showRange(at.x, at.y, towerRange("dart", 0) * this.rangeScale, TOWER_HUE.dart);
   }
 
   refreshMenu(jade: number): void {
+    const scales = sharedScales(0);
+    let cheapest = Infinity;
+    for (const kind of TOWER_KINDS) {
+      const cost = towerCost(kind, 0);
+      if (jade >= cost) cheapest = Math.min(cheapest, cost);
+    }
     TOWER_KINDS.forEach((kind, i) => {
       const cost = towerCost(kind, 0);
-      const read = towerReadout(kind, 0);
+      const facts = towerFacts(kind, 0);
       const afford = jade >= cost;
+      const lit = afford && cost === cheapest;
       this.menuCosts[i].text = String(cost);
-      this.menuCosts[i].style.fill = afford ? 0xfff6df : 0xff5a4a;
-      this.menuStats[i].text = `${read.stat}  ${read.pips}`;
-      this.menuButtons[i].alpha = afford ? 1 : 1;
+      this.menuCosts[i].style.fill = afford ? 0xfff6df : 0xffd2cc;
+      this.menuDps[i].text = facts.dpsText;
+      this.menuRange[i].text = String(Math.round(facts.range));
+      this.menuStats[i].text = facts.role;
+      this.menuChips[i].text = facts.chip;
+      this.menuChips[i].style.fill = TOWER_HUE[kind];
       this.menuSprites[i].tint = afford ? 0xffffff : 0x9a9088;
       this.menuSprites[i].alpha = afford ? 1 : 0.55;
       const became = afford && this.lastJade < cost;
       if (became) this.fresh.set(kind, 0.45);
       const bounce = this.fresh.get(kind) ?? 0;
       const pop = bounce > 0 ? 1 + Math.sin((0.45 - bounce) * 18) * 0.06 : 1;
-      this.menuButtons[i].scale.set(this.armed === kind ? 1.08 * pop : pop);
+      const glow = lit ? 1.06 : 1;
+      this.menuButtons[i].scale.set((this.armed === kind ? 1.06 : 1) * pop * glow);
+      const bars = this.menuBars[i];
+      bars.clear();
+      bars.roundRect(-44, 11, 72, 11, 4).fill({ color: 0x2a2218 });
+      bars.roundRect(-44, 11, 72 * Math.max(0.06, Math.min(1, facts.dps / scales.dps)), 11, 4).fill({ color: 0xffe08a });
+      bars.roundRect(-44, 41, 72, 11, 4).fill({ color: 0x2a2218 });
+      bars.roundRect(-44, 41, 72 * Math.max(0.06, Math.min(1, facts.range / scales.range)), 11, 4).fill({ color: 0x8fd0ff });
+      const badge = this.menuBadges[i];
+      badge.clear();
+      badge.roundRect(-58, 92, 116, 36, 12).fill({ color: afford ? 0x1e6b3a : 0x7a241c });
+      badge.roundRect(-58, 92, 116, 36, 12).stroke({ width: 3, color: afford ? 0xc8ffd8 : 0xff8a7a });
       this.menuRings[i].clear();
       if (!afford && cost > 0) {
         const p = Math.max(0, Math.min(1, jade / cost));
-        this.menuRings[i].arc(0, -6, 50, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * p).stroke({ width: 4, color: TOWER_HUE[kind], alpha: 0.9 });
+        this.menuRings[i].arc(0, -46, 46, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * p).stroke({ width: 5, color: TOWER_HUE[kind], alpha: 0.95 });
       }
-      if (this.armed === kind) {
-        this.menuRings[i].circle(0, -6, 52).stroke({ width: 3, color: 0xfff1c2, alpha: 0.95 });
+      if (this.armed === kind || lit) {
+        this.menuRings[i].circle(0, -46, 48).stroke({ width: 3, color: lit ? 0xffe08a : 0xfff1c2, alpha: 0.95 });
       }
     });
     this.lastJade = jade;
   }
 
   private placeMenu(at: Vec): void {
-    const marginX = 150;
-    const marginTop = 86;
-    const marginBot = 140;
-    const reach = 158;
+    const fit = this.menuFit;
+    const marginX = 110 * fit + 12;
+    const marginTop = MENU_TOP + 108 * fit;
+    const marginBot = MENU_BOTTOM + 140 * fit;
+    const reach = MENU_REACH * fit;
     let shiftX = 0;
     let shiftY = 0;
     for (const [lx, ly] of [[0, -reach], [reach, 0], [0, reach], [-reach, 0]]) {
@@ -329,6 +416,7 @@ export class WorldView {
     this.armed = null;
     this.onPlace = null;
     this.onShort = null;
+    this.placeGhost.visible = false;
   }
 
   blocks(x: number, y: number): boolean {
@@ -453,51 +541,83 @@ export class WorldView {
   private buildMenu(): void {
     this.menu.visible = false;
     this.menu.eventMode = "passive";
+    const tiny = { fontFamily: SANS, fontSize: 12, fill: 0xd9cbb0, fontWeight: "bold" as const };
     TOWER_KINDS.forEach((kind, i) => {
       const angle = -Math.PI / 2 + (i / TOWER_KINDS.length) * Math.PI * 2;
       const button = new Container();
-      button.position.set(Math.cos(angle) * 158, Math.sin(angle) * 158);
+      button.position.set(Math.cos(angle) * MENU_REACH, Math.sin(angle) * MENU_REACH);
       const plate = new Graphics();
-      plate.roundRect(-80, -62, 160, 158, 18).fill({ color: 0x140e0a, alpha: 0.94 });
-      plate.circle(0, -10, 38).stroke({ width: 4, color: TOWER_HUE[kind] });
+      plate.roundRect(-102, -108, 204, 248, 20).fill({ color: 0x140e0a, alpha: 0.94 });
+      plate.circle(0, -48, 40).stroke({ width: 4, color: TOWER_HUE[kind] });
       const clip = this.art.clip(towerAsset(kind, 0), "idle");
       const icon = new Sprite(clip?.frames[0][0] ?? Texture.EMPTY);
       if (clip) {
         icon.anchor.set(clip.anchorX, clip.anchorY);
-        icon.scale.set(clip.draw * 0.26);
+        icon.scale.set(clip.draw * 0.36);
       }
-      icon.position.set(0, 14);
+      icon.position.set(0, -22);
       const badge = new Text({
         text: TOWER_ICON[kind],
         style: { fontFamily: SANS, fontSize: 18, fill: TOWER_HUE[kind], fontWeight: "bold" },
       });
       badge.anchor.set(0.5);
-      badge.position.set(46, -42);
+      badge.position.set(52, -78);
       const name = new Text({
         text: BALANCE.towerName[kind],
-        style: { fontFamily: SANS, fontSize: 13, fill: 0xfff6df, fontWeight: "bold", align: "center" },
+        style: { fontFamily: SANS, fontSize: 15, fill: 0xfff6df, fontWeight: "bold", align: "center" },
       });
       name.anchor.set(0.5);
-      name.position.set(0, 36);
-      const stat = new Text({
-        text: "",
-        style: { fontFamily: SANS, fontSize: 12, fill: 0xffe0a0, align: "center" },
+      name.position.set(0, -2);
+      const dpsLabel = new Text({ text: "DPS", style: tiny });
+      dpsLabel.anchor.set(0, 0.5);
+      dpsLabel.position.set(-96, 16);
+      const dpsNum = new Text({
+        text: "0",
+        style: { fontFamily: SANS, fontSize: 13, fill: 0xfff6df, fontWeight: "bold" },
       });
-      stat.anchor.set(0.5);
-      stat.position.set(0, 54);
+      dpsNum.anchor.set(1, 0.5);
+      dpsNum.position.set(96, 16);
+      const rangeLabel = new Text({ text: "RANGE", style: tiny });
+      rangeLabel.anchor.set(0, 0.5);
+      rangeLabel.position.set(-96, 46);
+      const rangeNum = new Text({
+        text: "0",
+        style: { fontFamily: SANS, fontSize: 13, fill: 0xfff6df, fontWeight: "bold" },
+      });
+      rangeNum.anchor.set(1, 0.5);
+      rangeNum.position.set(96, 46);
+      const roleLabel = new Text({ text: "ROLE", style: tiny });
+      roleLabel.anchor.set(0, 0.5);
+      roleLabel.position.set(-96, 76);
+      const role = new Text({
+        text: "",
+        style: { fontFamily: SANS, fontSize: 14, fill: 0xfff6df, fontWeight: "bold" },
+      });
+      role.anchor.set(0, 0.5);
+      role.position.set(-40, 76);
+      const chip = new Text({
+        text: "",
+        style: { fontFamily: SANS, fontSize: 13, fill: TOWER_HUE[kind], fontWeight: "bold" },
+      });
+      chip.anchor.set(1, 0.5);
+      chip.position.set(96, 76);
+      const bars = new Graphics();
+      bars.eventMode = "none";
+      const costBadge = new Graphics();
+      costBadge.eventMode = "none";
       const cost = new Text({
         text: "0",
-        style: { fontFamily: SANS, fontSize: 22, fill: 0xfff6df, fontWeight: "bold" },
+        style: { fontFamily: SANS, fontSize: 26, fill: 0xfff6df, fontWeight: "bold" },
       });
       cost.anchor.set(0.5);
-      cost.position.set(10, 78);
+      cost.position.set(16, 110);
       const gem = new Sprite(this.art.frame("jade"));
       gem.anchor.set(0.5);
-      gem.scale.set(0.2);
-      gem.position.set(-22, 78);
+      gem.scale.set(0.32);
+      gem.position.set(-30, 110);
       const ring = new Graphics();
       ring.eventMode = "none";
-      button.addChild(plate, icon, badge, name, stat, gem, cost, ring);
+      button.addChild(plate, icon, badge, name, dpsLabel, dpsNum, rangeLabel, rangeNum, roleLabel, role, chip, bars, costBadge, gem, cost, ring);
       button.eventMode = "static";
       button.cursor = "pointer";
       button.on("pointerover", () => {
@@ -522,9 +642,14 @@ export class WorldView {
       this.menu.addChild(button);
       this.menuButtons.push(button);
       this.menuCosts.push(cost);
-      this.menuStats.push(stat);
+      this.menuStats.push(role);
       this.menuRings.push(ring);
       this.menuSprites.push(icon);
+      this.menuBars.push(bars);
+      this.menuBadges.push(costBadge);
+      this.menuDps.push(dpsNum);
+      this.menuRange.push(rangeNum);
+      this.menuChips.push(chip);
     });
   }
 
@@ -946,27 +1071,31 @@ export class WorldView {
     bucket.n += amount;
     bucket.x = x;
     bucket.y = y;
-    if (this.gems.length < 36) {
-      const gem = this.gemPool.pop() ?? this.makeGem();
-      gem.x = x;
-      gem.y = y - 10;
-      gem.vx = (Math.random() - 0.5) * 80;
-      gem.vy = -70 - Math.random() * 40;
-      gem.life = 0;
-      gem.s.visible = true;
-      gem.s.position.set(gem.x, gem.y);
-      gem.s.alpha = 1;
-      this.gems.push(gem);
+    if (this.reduced || this.gems.length >= 36) {
+      this.onCollect?.(amount);
+      return;
     }
+    const gem = this.gemPool.pop() ?? this.makeGem();
+    gem.n = amount;
+    gem.x = x;
+    gem.y = y - 10;
+    gem.vx = (Math.random() - 0.5) * 70;
+    gem.vy = -90 - Math.random() * 50;
+    gem.life = 0;
+    gem.s.visible = true;
+    gem.s.alpha = 1;
+    gem.s.scale.set(0.55);
+    gem.s.position.set(gem.x, gem.y);
+    this.gems.push(gem);
   }
 
   private makeGem(): Gem {
     const s = new Sprite(this.art.frame("jade"));
     s.anchor.set(0.5);
-    s.scale.set(0.2);
+    s.scale.set(0.55);
     s.eventMode = "none";
     this.fxLayer.addChild(s);
-    return { s, x: 0, y: 0, vx: 0, vy: 0, life: 0 };
+    return { s, x: 0, y: 0, vx: 0, vy: 0, life: 0, n: 0 };
   }
 
   private flushBuckets(): void {
@@ -984,16 +1113,24 @@ export class WorldView {
     for (let i = this.gems.length - 1; i >= 0; i--) {
       const gem = this.gems[i];
       gem.life += dt;
-      if (gem.life < 0.12) {
+      if (gem.life < 0.14) {
         gem.x += gem.vx * dt;
         gem.y += gem.vy * dt;
         gem.s.position.set(gem.x, gem.y);
+        const pop = 0.85 + Math.sin(Math.min(1, gem.life / 0.14) * Math.PI) * 0.35;
+        gem.s.scale.set(0.55 * pop);
       } else {
-        const t = Math.min(1, (gem.life - 0.12) / 0.42);
+        const t = Math.min(1, (gem.life - 0.14) / 0.7);
         const e = t * t;
-        gem.s.position.set(gem.x + (this.gemGoal.x - gem.x) * e, gem.y + (this.gemGoal.y - gem.y) * e);
-        gem.s.alpha = 1 - t * 0.2;
+        const arc = Math.sin(t * Math.PI) * -160;
+        gem.s.position.set(
+          gem.x + (this.gemGoal.x - gem.x) * e,
+          gem.y + (this.gemGoal.y - gem.y) * e + arc,
+        );
+        gem.s.scale.set(0.55 * (1 - t * 0.25));
+        gem.s.alpha = 1 - t * 0.15;
         if (t >= 1) {
+          this.onCollect?.(gem.n);
           gem.s.visible = false;
           this.gems.splice(i, 1);
           this.gemPool.push(gem);

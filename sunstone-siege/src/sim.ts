@@ -7,6 +7,19 @@ import { poseAt, type Route } from "./geom";
 import { mapDef, type MapDef } from "./maps";
 import type { EnemyKind, Phase, RelicId, TowerKind, Vec } from "./types";
 
+export interface LanePlan {
+  path: number;
+  x: number;
+  y: number;
+  /** Direction the lane travels, radians. */
+  angle: number;
+  lead: EnemyKind;
+  leadCount: number;
+  parts: { kind: EnemyKind; count: number }[];
+  /** wait: still coming. soon: about to spawn. gone: this lane has started. */
+  state: "wait" | "soon" | "gone";
+}
+
 export interface Enemy {
   id: number;
   kind: EnemyKind;
@@ -863,6 +876,59 @@ export class Siege {
       prev = best;
     }
     return { primary, chain };
+  }
+
+  /**
+   * Where the next wave enters, and which unit leads each lane.
+   * Read-only: it does not change the spawn queue or any combat number.
+   */
+  lanePlan(): LanePlan[] {
+    if (this.phase === "victory" || this.phase === "defeat") return [];
+    if (this.wave < 0 || this.wave >= this.waveCount) return [];
+    const spec = BALANCE.worlds[this.world].waves[this.wave];
+    if (!spec) return [];
+    const partsByPath = new Map<number, { kind: EnemyKind; count: number }[]>();
+    for (const g of spec.groups) {
+      const list = partsByPath.get(g.path) ?? [];
+      const hit = list.find((p) => p.kind === g.kind);
+      if (hit) hit.count += g.count;
+      else list.push({ kind: g.kind, count: g.count });
+      partsByPath.set(g.path, list);
+    }
+    const clock = this.phase === "wave" ? this.time - this.waveStartedAt : -1;
+    const out: LanePlan[] = [];
+    for (const [path, parts] of partsByPath) {
+      if (!parts.length) continue;
+      const flying = parts.every((p) => BALANCE.enemies[p.kind].flying);
+      const route = (flying ? this.map.flights[path] : this.map.routes[path]) ?? this.map.routes[path];
+      if (!route || route.pts.length === 0) continue;
+      const a = route.pts[0];
+      const b = route.pts[Math.min(1, route.pts.length - 1)];
+      const lead = parts.reduce((best, p) => (p.count > best.count ? p : best), parts[0]);
+      let state: LanePlan["state"] = "wait";
+      if (this.phase === "wave") {
+        let first = Infinity;
+        let started = false;
+        for (const s of this.queue) {
+          if (s.path !== path) continue;
+          if (s.t <= clock) started = true;
+          else first = Math.min(first, s.t);
+        }
+        if (started) state = "gone";
+        else if (first - clock < 1.35) state = "soon";
+      } else if (this.buildLeft < 2.2) state = "soon";
+      out.push({
+        path,
+        x: a.x,
+        y: a.y,
+        angle: Math.atan2(b.y - a.y, b.x - a.x),
+        lead: lead.kind,
+        leadCount: lead.count,
+        parts,
+        state,
+      });
+    }
+    return out;
   }
 
   /** Push neighbors apart across the trail so a pack is a crowd, not a file. */

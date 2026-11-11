@@ -2,11 +2,12 @@
  * Title, valley select, the battle bar, and the end screens.
  * Jade shown here is the demo token from the simulation. It is not a balance.
  */
-import { Container, Graphics, NineSliceSprite, Rectangle, Sprite, Text, type Texture } from "pixi.js";
+import { Container, Graphics, NineSliceSprite, Rectangle, Sprite, Text, Texture } from "pixi.js";
 import type { ArtSet } from "./art";
 import { BALANCE, worldCount } from "./balance";
 import { isUnlocked, type SaveData } from "./save";
-import type { Phase, RelicId } from "./types";
+import type { LanePlan } from "./sim";
+import type { EnemyKind, Phase, RelicId, TowerKind } from "./types";
 
 const SERIF = 'Palatino, "Palatino Linotype", Georgia, "Times New Roman", serif';
 const SANS = 'Palatino, "Palatino Linotype", Georgia, serif';
@@ -34,12 +35,26 @@ export interface TowerCard {
   name: string;
   blurb: string;
   tier: string;
-  line: string;
+  dps: string;
+  range: string;
+  targets: string;
+  chip: string;
   delta: string;
   dealt: string;
   upgrade: string | null;
   sell: string;
   canUpgrade: boolean;
+}
+
+interface LaneNode {
+  root: Container;
+  plate: Graphics;
+  arrow: Graphics;
+  badge: Sprite;
+  title: Text;
+  extras: Text;
+  icons: Sprite[];
+  path: number;
 }
 
 export interface HudHooks {
@@ -117,6 +132,45 @@ export class Hud {
   private readonly reducedText: Text;
   private bar!: Graphics;
   private jadeIcon!: Sprite;
+  private readonly vault = new Container();
+  private readonly vaultPlate = new Graphics();
+  private readonly vaultBar = new Graphics();
+  private readonly vaultGlow = new Graphics();
+  private readonly vaultPlus: Text;
+  private readonly vaultGoal: Text;
+  private readonly vaultTip: Text;
+  private readonly vaultTipPlate = new Graphics();
+  private vaultTower!: Sprite;
+  private readonly laneLayer = new Container();
+  private readonly laneNodes: LaneNode[] = [];
+  private readonly laneTip = new Container();
+  private readonly laneTipBg = new Graphics();
+  private readonly laneTipText: Text;
+  private lanePlans: LanePlan[] = [];
+  private laneCam = { zoom: 1, camX: 0, camY: 0 };
+  private laneBuilding = false;
+  private laneOffer = false;
+  private openLane = -1;
+  private laneTime = 0;
+  private readonly laneFade = new Map<number, number>();
+  private shownJade = 0;
+  private jadeGoalN = 0;
+  private landed = 0;
+  private plusLife = 0;
+  private plusShown = 0;
+  private vaultBump = 0;
+  private jadeCatch = 0;
+  private jadePrimed = false;
+  private goalCost = 50;
+  private goalLabel = "Dart Totem  50";
+  private vaultLit = false;
+  private goalKind: TowerKind = "dart";
+  private showTip = false;
+  private vaultW = 340;
+  private vaultH = 86;
+  private readonly cardRange: Text;
+  private readonly cardTargets: Text;
+  private readonly cardChip: Text;
   private speedButton!: Container;
   private pauseButton!: Container;
   private gearButton!: Container;
@@ -133,7 +187,7 @@ export class Hud {
 
     this.integrityText = label("Sunstone 0", 16, 0xf6e7c1);
     this.integrityFill = new Graphics();
-    this.jadeText = label("0", 18, 0xc8ffd8);
+    this.jadeText = label("0", 48, 0xf3ffe8);
     this.waveText = label("Wave 1/5", 16, 0xf6e7c1);
     this.speedText = label("1x", 16, 0x1a1208);
     this.callText = label("Call wave", 16, 0x1a1208);
@@ -148,9 +202,16 @@ export class Hud {
     this.flareRing = new Graphics();
     this.cardName = label("", 18, 0xf6e7c1);
     this.cardBody = label("", 13, 0xd9cbb0);
-    this.cardLine = label("", 15, 0xffe0a0);
-    this.cardDelta = label("", 14, 0xb6f7a4);
-    this.cardDealt = label("", 13, 0xf6e7c1);
+    this.cardLine = label("", 34, 0xfff6df);
+    this.cardRange = label("", 22, 0xffe0a0);
+    this.cardTargets = label("", 18, 0xf6e7c1);
+    this.cardChip = label("", 16, 0xffe08a);
+    this.cardDelta = label("", 20, 0x9dff8a);
+    this.cardDealt = label("", 18, 0xf6e7c1);
+    this.vaultPlus = label("", 28, 0xc8ffd8);
+    this.vaultGoal = label("", 15, 0xffe08a);
+    this.vaultTip = wrap("Defeat raiders to earn Jade. Spend Jade to build totems.", 300, 16, 0xfff6df);
+    this.laneTipText = wrap("", 240, 16, 0xfff6df);
     this.upgradeText = label("Upgrade", 15, 0x1a1208);
     this.streakText = label("", 16, 0xffd56a);
     this.bossText = label("", 16, 0xffb0a0);
@@ -256,7 +317,13 @@ export class Hud {
     this.integrityFill.clear();
     this.integrityFill.roundRect(0, 0, 148, 8, 4).fill({ color: 0x1a120c });
     this.integrityFill.roundRect(0, 0, 148 * k, 8, 4).fill({ color: k > 0.45 ? 0xf0c14a : 0xff5a3c });
-    this.jadeText.text = String(state.jade);
+    this.jadeGoalN = state.jade;
+    if (!this.jadePrimed) {
+      this.shownJade = state.jade;
+      this.jadePrimed = true;
+    }
+    if (this.shownJade > this.jadeGoalN) this.shownJade = this.jadeGoalN;
+    this.jadeText.text = String(Math.round(this.shownJade));
     this.waveText.text = `Wave ${state.wave}/${state.waves}`;
     this.speedText.text = state.speed === 2 ? "2x" : "1x";
     this.streakText.text = state.streak >= 3 ? `${state.streak} streak` : "";
@@ -269,7 +336,7 @@ export class Hud {
       this.callText.text = state.buildLeft > 0.3 ? `Call early +${BALANCE.earlyCall}  ·  ${secs}s` : "Call wave";
     }
     this.hint.text = state.hint;
-    this.hint.visible = state.hint.length > 0 && !state.offer;
+    this.hint.visible = state.hint.length > 0 && !state.offer && this.bannerLife <= 0;
     this.syncOffer(state);
     if (state.offer) this.card.visible = false;
     const charge = state.flare / BALANCE.flare.need;
@@ -288,18 +355,64 @@ export class Hud {
     if (!card) return;
     this.cardName.text = `${card.name}  ${card.tier}`;
     this.cardBody.text = card.blurb;
-    this.cardLine.text = card.line;
+    this.cardLine.text = card.dps;
+    this.cardRange.text = card.range;
+    this.cardTargets.text = card.targets;
+    this.cardChip.text = card.chip;
     this.cardDelta.text = card.delta;
     this.cardDealt.text = card.dealt;
     this.upgradeButton.visible = card.upgrade !== null;
     if (card.upgrade) this.upgradeText.text = card.upgrade;
     this.upgradeText.style.fill = card.canUpgrade ? INK : 0x8e1c14;
-    this.upgradeButton.alpha = 1;
+    this.upgradeButton.alpha = card.canUpgrade ? 1 : 0.85;
     this.sellText.text = card.sell;
   }
 
+  callAnchor(): { x: number; y: number } {
+    const p = this.callButton.getGlobalPosition();
+    return { x: p.x, y: p.y };
+  }
+
+  laneAnchors(): { path: number; x: number; y: number }[] {
+    return this.laneNodes.filter((n) => n.root.visible).map((n) => {
+      const p = n.root.getGlobalPosition();
+      return { path: n.path, x: p.x, y: p.y };
+    });
+  }
+
+  /** Screen position of the gem the flying Jade aims at. */
   jadeAnchor(): { x: number; y: number } {
-    return { x: this.jadeIcon?.position.x ?? 210, y: this.jadeIcon?.position.y ?? 28 };
+    const icon = this.jadeIcon;
+    if (!icon) return { x: this.w / 2, y: 90 };
+    const p = icon.getGlobalPosition();
+    return { x: p.x, y: p.y };
+  }
+
+  /** Jade arrived in the vault. The number rolls up from here. */
+  collect(n: number): void {
+    if (n <= 0) return;
+    this.landed += n;
+    this.plusShown += n;
+    this.plusLife = 1.05;
+    this.vaultBump = 1;
+  }
+
+  setGoal(text: string, cost: number, lit: boolean, kind: TowerKind): void {
+    this.goalLabel = text;
+    this.goalCost = Math.max(1, cost);
+    this.vaultLit = lit;
+    this.goalKind = kind;
+  }
+
+  setVaultTip(show: boolean): void {
+    this.showTip = show;
+  }
+
+  syncLanes(plans: LanePlan[], cam: { zoom: number; camX: number; camY: number }, building: boolean, offer: boolean): void {
+    this.lanePlans = plans;
+    this.laneCam = cam;
+    this.laneBuilding = building;
+    this.laneOffer = offer;
   }
 
   announce(text: string): void {
@@ -310,6 +423,9 @@ export class Hud {
   }
 
   tick(dt: number): void {
+    this.laneTime += dt;
+    this.drawVault(dt);
+    this.drawLanes(dt);
     if (this.bannerLife <= 0) return;
     this.bannerLife -= dt;
     this.banner.alpha = Math.max(0, this.bannerLife / 0.4);
@@ -439,29 +555,49 @@ export class Hud {
       this.hooks.flare();
     });
     this.hint.text = "Tap a stone pad beside a trail.";
-    this.cardName.position.set(96, 64);
+    this.cardName.position.set(96, 28);
+    this.cardChip.position.set(96, 64);
+    this.cardLine.position.set(96, 96);
+    this.cardRange.position.set(96, 142);
+    this.cardTargets.position.set(96, 176);
     this.cardBody.style.wordWrap = true;
-    this.cardBody.style.wordWrapWidth = 360;
-    this.cardBody.position.set(96, 90);
-    this.cardLine.position.set(96, 124);
-    this.cardDelta.position.set(96, 146);
-    this.cardDealt.position.set(96, 168);
-    this.upgradeButton = this.button(this.upgradeText, 170, 44, () => this.hooks.upgrade());
-    this.upgradeButton.position.set(180, 206);
-    const sell = this.button(this.sellText, 150, 44, () => this.hooks.sell());
-    sell.position.set(370, 206);
-    const cardBg = this.panel(560, 340);
-    cardBg.position.set(280, 170);
+    this.cardBody.style.wordWrapWidth = 420;
+    this.cardBody.position.set(96, 206);
+    this.cardDelta.position.set(96, 252);
+    this.cardDealt.position.set(96, 284);
+    this.upgradeButton = this.button(this.upgradeText, 230, 58, () => this.hooks.upgrade());
+    this.upgradeButton.position.set(175, 338);
+    const upGem = new Sprite(art.frame("jade"));
+    upGem.anchor.set(0.5);
+    upGem.scale.set(0.28);
+    upGem.position.set(96, 338);
+    upGem.eventMode = "none";
+    const sell = this.button(this.sellText, 180, 58, () => this.hooks.sell());
+    sell.position.set(430, 338);
+    const cardBg = this.panel(600, 400);
+    cardBg.position.set(300, 200);
     cardBg.eventMode = "none";
-    this.card.addChild(cardBg, this.cardName, this.cardBody, this.cardLine, this.cardDelta, this.cardDealt, this.upgradeButton, sell);
+    this.card.addChild(cardBg, this.cardName, this.cardChip, this.cardLine, this.cardRange, this.cardTargets, this.cardBody, this.cardDelta, this.cardDealt, upGem, this.upgradeButton, sell);
     this.card.visible = false;
     this.bar = bar;
     this.jadeIcon = jadeIcon;
     this.speedButton = speed;
     this.pauseButton = pause;
     this.gearButton = gear;
-    this.play.addChild(bar, this.integrityText, this.integrityFill, jadeIcon, this.jadeText, this.purseText, this.waveText, this.streakText, this.bossText, speed, pause, gear, this.callButton, this.flareButton, this.hint, this.banner, this.card, this.offerLayer);
-    this.hits.push(speed, pause, gear, this.callButton, this.flareButton, this.card, bar);
+    this.vaultTower = new Sprite(Texture.EMPTY);
+    this.vaultTower.anchor.set(0.5, 0.85);
+    this.vaultTower.eventMode = "none";
+    this.vaultPlus.anchor.set(0, 0.5);
+    this.vaultGoal.anchor.set(0, 0.5);
+    this.vaultTip.anchor.set(0.5, 0);
+    this.vault.addChild(this.vaultPlate, this.vaultGlow, this.vaultBar, jadeIcon, this.jadeText, this.vaultPlus, this.vaultGoal, this.vaultTower, this.vaultTipPlate, this.vaultTip);
+    this.vault.eventMode = "static";
+    this.laneTip.addChild(this.laneTipBg, this.laneTipText);
+    this.laneTip.visible = false;
+    this.laneTip.eventMode = "static";
+    this.laneLayer.eventMode = "passive";
+    this.play.addChild(bar, this.integrityText, this.integrityFill, this.waveText, this.streakText, this.bossText, speed, pause, gear, this.vault, this.purseText, this.laneLayer, this.laneTip, this.callButton, this.flareButton, this.hint, this.banner, this.card, this.offerLayer);
+    this.hits.push(speed, pause, gear, this.callButton, this.flareButton, this.card, bar, this.vault, this.laneTip);
     this.banner.visible = false;
   }
 
@@ -478,9 +614,11 @@ export class Hud {
     bar.hitArea = new Rectangle(0, 0, w, barH);
     this.integrityText.position.set(16, 8);
     this.integrityFill.position.set(16, 34);
-    jadeIcon.position.set(210, 28);
-    this.jadeText.position.set(232, 16);
     const narrow = w < 760;
+    this.vaultW = narrow ? Math.max(220, w - 16) : 360;
+    this.vaultH = narrow ? 72 : 88;
+    this.vault.position.set(narrow ? 8 : (w - this.vaultW) / 2, narrow ? barH + 6 : barH + 6);
+    this.layoutVault(narrow);
     this.waveText.anchor.set(narrow ? 1 : 0.5, 0);
     this.waveText.position.set(narrow ? w - 12 : w / 2, 8);
     this.streakText.anchor.set(narrow ? 1 : 0, 0);
@@ -497,15 +635,18 @@ export class Hud {
       speed.position.set(w - 326, 28);
     }
     this.flareButton.position.set(w - 64, h - 64);
-    this.callButton.position.set(narrow ? Math.max(150, w / 2 - 46) : w / 2, h - 48);
+    this.callButton.position.set(narrow ? Math.max(150, w / 2 - 70) : w / 2, h - 48);
+    const belowVault = this.vault.y + this.vaultH;
     this.hint.style.wordWrap = true;
     this.hint.style.wordWrapWidth = Math.max(160, w - 28);
-    this.hint.position.set(w / 2, narrow ? 140 : 78);
-    this.banner.position.set(w / 2, narrow ? 206 : 120);
-    this.card.position.set(12, h - 356);
+    this.hint.position.set(w / 2, belowVault + (narrow ? 22 : 28));
+    this.banner.position.set(w / 2, belowVault + (narrow ? 58 : 64));
+    const cardScale = Math.min(1, (w - 8) / 600, Math.max(0.62, (h * 0.5) / 400));
+    this.card.scale.set(cardScale);
+    this.card.position.set(8, h - 400 * cardScale - 8);
     this.bossText.anchor.set(0.5, 0);
-    this.bossText.position.set(w / 2, w < 760 ? 128 : 96);
-    this.purseText.position.set(188, 62);
+    this.bossText.position.set(w / 2, belowVault + (narrow ? 8 : 4));
+    this.purseText.position.set(this.vault.x + 16, this.vault.y + this.vaultH + 4);
     this.offerLayer.position.set(w / 2, h / 2 + 10);
   }
 
@@ -686,6 +827,262 @@ export class Hud {
     return c;
   }
 
+  private iconBase = 0.5;
+
+  private layoutVault(narrow: boolean): void {
+    const w = this.vaultW;
+    const h = this.vaultH;
+    this.vaultPlate.clear();
+    this.vaultPlate.roundRect(0, 0, w, h, 20).fill({ color: 0x102018, alpha: 0.94 });
+    this.vaultPlate.roundRect(0, 0, w, h, 20).stroke({ width: 5, color: 0x3d8f62 });
+    const icon = narrow ? 46 : 64;
+    this.iconBase = icon / Math.max(1, this.jadeIcon.texture.width);
+    this.jadeIcon.scale.set(this.iconBase);
+    this.jadeIcon.position.set(14 + icon / 2, h * 0.42);
+    this.jadeText.style.fontSize = narrow ? 36 : 50;
+    this.jadeText.position.set(14 + icon + 10, narrow ? 4 : 2);
+    this.vaultPlus.position.set(14 + icon + 10, h * 0.42 + (narrow ? 18 : 22));
+    this.vaultGoal.position.set(Math.min(w - 150, 14 + icon + 108), h - 22);
+    this.vaultTower.position.set(w - 28, h - 10);
+    this.vaultTip.position.set(w / 2, h + 6);
+    this.vaultTip.style.wordWrapWidth = Math.min(360, Math.max(180, w - 8));
+    this.vault.hitArea = new Rectangle(-6, -6, w + 12, h + 8);
+  }
+
+  private drawVault(dt: number): void {
+    if (this.screen !== "play") return;
+    if (this.landed > 0) {
+      const step = Math.max(1, this.landed * Math.min(1, dt * 9));
+      const add = Math.min(this.landed, step);
+      this.shownJade = Math.min(this.jadeGoalN, this.shownJade + add);
+      this.landed -= add;
+      this.vaultBump = Math.max(this.vaultBump, 0.6);
+    } else if (this.shownJade < this.jadeGoalN - 0.4) {
+      this.jadeCatch += dt;
+      if (this.jadeCatch > 0.65) this.shownJade += (this.jadeGoalN - this.shownJade) * Math.min(1, dt * 5);
+    } else this.jadeCatch = 0;
+    if (this.shownJade > this.jadeGoalN) this.shownJade = this.jadeGoalN;
+    this.jadeText.text = String(Math.round(this.shownJade));
+    const pop = 1 + Math.min(0.16, this.vaultBump * 0.16);
+    this.jadeText.scale.set(pop);
+    this.jadeIcon.scale.set(this.iconBase * (1 + Math.min(0.12, this.vaultBump * 0.12)));
+    this.vaultGlow.clear();
+    if (this.vaultBump > 0.04) {
+      this.vaultGlow.roundRect(-6, -6, this.vaultW + 12, this.vaultH + 12, 22).stroke({ width: 7, color: 0xd8ffe8, alpha: Math.min(0.95, this.vaultBump) });
+    }
+    this.vaultBump = Math.max(0, this.vaultBump - dt * 2.2);
+    this.plusLife -= dt;
+    this.vaultPlus.visible = this.plusLife > 0 && this.plusShown > 0;
+    this.vaultPlus.alpha = Math.max(0, Math.min(1, this.plusLife));
+    this.vaultPlus.text = `+${Math.round(this.plusShown)}`;
+    this.vaultPlus.position.set(this.jadeText.x + this.jadeText.width + 10, this.jadeText.y + 8 - (1 - Math.max(0, this.plusLife)) * 8);
+    if (this.plusLife <= 0) this.plusShown = 0;
+    const progress = Math.max(0, Math.min(1, this.shownJade / this.goalCost));
+    const barW = Math.max(40, this.vaultW - 86);
+    this.vaultBar.clear();
+    this.vaultBar.roundRect(16, this.vaultH - 16, barW, 9, 4).fill({ color: 0x1a120c });
+    this.vaultBar.roundRect(16, this.vaultH - 16, barW * progress, 9, 4).fill({ color: this.vaultLit ? 0xc8ffd8 : 0x3d8f62 });
+    this.vaultGoal.text = this.goalLabel;
+    this.paintGoalTower();
+    this.vaultTip.visible = this.showTip;
+    this.vaultTipPlate.visible = this.showTip;
+    this.vaultTipPlate.clear();
+    if (this.showTip) {
+      const tw = Math.min(this.vaultW - 8, 360);
+      const tx = (this.vaultW - tw) / 2;
+      const ty = this.vaultH + 10;
+      this.vaultTipPlate.roundRect(tx, ty, tw, 54, 12).fill({ color: 0x140e0a, alpha: 0.94 });
+      this.vaultTipPlate.roundRect(tx, ty, tw, 54, 12).stroke({ width: 3, color: 0xffe08a });
+      const cx = this.vaultW / 2;
+      this.vaultTipPlate.poly([cx - 9, ty, cx + 9, ty, cx, ty - 10], true).fill({ color: 0xffe08a });
+      this.vaultTip.position.set(this.vaultW / 2, ty + 8);
+    }
+    const extra = this.showTip ? 68 : 0;
+    this.hint.y = this.vault.y + this.vaultH + extra + 14;
+    this.banner.y = this.hint.y + 32;
+    if (this.vaultLit) {
+      this.vaultGlow.circle(this.vaultW - 28, this.vaultH - 28, 22).stroke({ width: 3, color: 0xffe08a, alpha: 0.9 });
+    }
+  }
+
+  private paintGoalTower(): void {
+    const name = this.goalKind === "spire" ? "serpent" : this.goalKind;
+    const clip = this.art.clip(`tower_${name}_t1`, "idle");
+    if (!clip) return;
+    const frame = clip.frames[0][0];
+    this.vaultTower.texture = frame;
+    this.vaultTower.anchor.set(clip.anchorX, clip.anchorY);
+    const target = this.w < 760 ? 34 : 42;
+    this.vaultTower.scale.set(target / Math.max(1, frame.width));
+    this.vaultTower.tint = this.vaultLit ? 0xffffff : 0x6e6860;
+    this.vaultTower.alpha = this.vaultLit ? 1 : 0.45;
+  }
+
+  private ensureLanes(count: number): void {
+    while (this.laneNodes.length < count) {
+      const root = new Container();
+      const arrow = new Graphics();
+      const plate = new Graphics();
+      const badge = new Sprite(Texture.EMPTY);
+      badge.anchor.set(0.5, 0.82);
+      badge.eventMode = "none";
+      const title = label("", 18, 0xfff6df);
+      title.anchor.set(0.5, 0);
+      const extras = label("", 13, 0xffe0a0);
+      extras.anchor.set(0.5, 0);
+      const icons: Sprite[] = [];
+      for (let i = 0; i < 3; i++) {
+        const icon = new Sprite(Texture.EMPTY);
+        icon.anchor.set(0.5, 0.85);
+        icon.eventMode = "none";
+        icon.visible = false;
+        icons.push(icon);
+      }
+      root.addChild(arrow, plate, badge, ...icons, title, extras);
+      root.eventMode = "static";
+      root.cursor = "pointer";
+      root.hitArea = new Rectangle(-78, -78, 156, 170);
+      const node: LaneNode = { root, plate, arrow, badge, title, extras, icons, path: -1 };
+      root.on("pointerover", () => { this.openLane = node.path; });
+      root.on("pointertap", (e) => {
+        e.stopPropagation();
+        this.openLane = this.openLane === node.path ? -1 : node.path;
+      });
+      this.laneLayer.addChild(root);
+      this.hits.push(root);
+      this.laneNodes.push(node);
+    }
+  }
+
+  private drawLanes(dt: number): void {
+    const show = this.screen === "play" && !this.laneOffer && (this.laneBuilding || this.lanePlans.some((p) => p.state !== "gone"));
+    this.laneLayer.visible = show;
+    if (!show) {
+      this.laneTip.visible = false;
+      return;
+    }
+    const plans = this.lanePlans;
+    this.ensureLanes(plans.length);
+    for (let i = plans.length; i < this.laneNodes.length; i++) this.laneNodes[i].root.visible = false;
+    const top = this.vault.y + this.vaultH + (this.showTip ? 64 : 10);
+    const bottom = this.h - 92;
+    const left = 84;
+    const right = this.w - 84;
+    const placed: { x: number; y: number }[] = [];
+    let callX = 0;
+    let callY = 0;
+    let callN = 0;
+    let tipAt: { x: number; y: number; plan: LanePlan } | null = null;
+    for (let i = 0; i < plans.length; i++) {
+      const plan = plans[i];
+      const node = this.laneNodes[i];
+      node.path = plan.path;
+      let fade = this.laneFade.get(plan.path) ?? 1;
+      if (plan.state === "gone") fade = Math.max(0, fade - dt * 1.7);
+      else fade = 1;
+      this.laneFade.set(plan.path, fade);
+      if (fade < 0.05) {
+        node.root.visible = false;
+        continue;
+      }
+      node.root.visible = true;
+      const sx = this.laneCam.camX + plan.x * this.laneCam.zoom;
+      const sy = this.laneCam.camY + plan.y * this.laneCam.zoom;
+      const inside = sx > left && sx < right && sy > top && sy < bottom;
+      let px = sx;
+      let py = sy;
+      let point = plan.angle;
+      if (!inside) {
+        px = Math.max(left, Math.min(right, sx));
+        py = Math.max(top, Math.min(bottom, sy));
+        point = Math.atan2(sy - py, sx - px);
+      }
+      for (const other of placed) {
+        if (Math.hypot(other.x - px, other.y - py) < 108) py = Math.min(bottom, py + 108);
+      }
+      placed.push({ x: px, y: py });
+      const bob = Math.sin(this.laneTime * 6 + plan.path * 1.4) * (plan.state === "gone" ? 2 : 8);
+      node.root.position.set(px - Math.cos(point) * bob, py - Math.sin(point) * bob);
+      const pulse = plan.state === "soon" ? 1 + Math.sin(this.laneTime * 10) * 0.1 : 1;
+      const shrink = plan.state === "gone" ? 0.72 : 1;
+      node.root.scale.set(pulse * shrink);
+      node.root.alpha = plan.state === "gone" ? Math.max(0.2, fade) : 1;
+      this.paintArrow(node.arrow, point);
+      const tail = -34;
+      const bx = Math.cos(point) * tail;
+      const by = Math.sin(point) * tail;
+      node.plate.clear();
+      node.plate.circle(bx, by, 36).fill({ color: 0x140e0a, alpha: 0.94 });
+      node.plate.circle(bx, by, 36).stroke({ width: 5, color: plan.state === "soon" ? 0xfff1c2 : 0xffe08a });
+      const icon = enemyIcon(this.art, plan.lead);
+      node.badge.texture = icon.texture;
+      node.badge.anchor.set(icon.anchorX, icon.anchorY);
+      node.badge.scale.set(icon.scale);
+      node.badge.position.set(bx, by + 6);
+      const leadName = BALANCE.enemies[plan.lead].name;
+      node.title.text = `${leadName} x${plan.leadCount}`;
+      node.title.position.set(bx, by + 34);
+      const extras = plan.parts.filter((p) => p.kind !== plan.lead);
+      node.extras.text = extras.map((p) => `${BALANCE.enemies[p.kind].name} x${p.count}`).join("  ");
+      node.extras.position.set(bx, by + 56);
+      const marks = extras.filter((p) => p.kind === "boss" || p.kind === "golem" || p.kind === "shield" || p.kind === "jaguar" || p.kind === "glider");
+      node.icons.forEach((sprite, s) => {
+        const mark = marks[s];
+        if (!mark) {
+          sprite.visible = false;
+          return;
+        }
+        const face = enemyIcon(this.art, mark.kind);
+        sprite.texture = face.texture;
+        sprite.anchor.set(face.anchorX, face.anchorY);
+        sprite.scale.set(face.scale * 0.55);
+        sprite.position.set(bx + (s - (marks.length - 1) / 2) * 28, by + 78);
+        sprite.visible = true;
+      });
+      callX += node.root.position.x;
+      callY += node.root.position.y;
+      callN += 1;
+      if (plan.path === this.openLane) tipAt = { x: node.root.position.x, y: node.root.position.y, plan };
+    }
+    if (this.laneBuilding && callN > 0) {
+      let x = callX / callN;
+      let y = callY / callN + 92;
+      x = Math.max(140, Math.min(this.w - 140, x));
+      y = Math.max(top + 36, Math.min(this.h - 40, y));
+      if (Math.hypot(x - (this.w - 64), y - (this.h - 64)) < 90) x = Math.max(140, this.w - 210);
+      this.callButton.position.set(x, y);
+    }
+    if (this.card.visible || !tipAt || !this.lanePlans.some((p) => p.path === this.openLane && p.state !== "gone")) {
+      this.laneTip.visible = false;
+      if (!this.lanePlans.some((p) => p.path === this.openLane)) this.openLane = -1;
+      return;
+    }
+    const lines = tipAt.plan.parts.map((p) => `${BALANCE.enemies[p.kind].name}  x${p.count}`).join("\n");
+    this.laneTipText.text = lines;
+    const tw = 220;
+    const th = 28 + tipAt.plan.parts.length * 22;
+    let tx = tipAt.x + 88;
+    let ty = tipAt.y - 20;
+    if (tx + tw > this.w - 8) tx = tipAt.x - tw - 40;
+    ty = Math.max(top, Math.min(this.h - th - 8, ty));
+    this.laneTipBg.clear();
+    this.laneTipBg.roundRect(0, 0, tw, th, 12).fill({ color: 0x140e0a, alpha: 0.94 });
+    this.laneTipBg.roundRect(0, 0, tw, th, 12).stroke({ width: 3, color: 0xffe08a });
+    this.laneTipText.anchor.set(0.5, 0);
+    this.laneTipText.position.set(tw / 2, 12);
+    this.laneTip.position.set(tx, ty);
+    this.laneTip.visible = true;
+  }
+
+  private paintArrow(g: Graphics, angle: number): void {
+    g.clear();
+    g.rotation = angle;
+    g.roundRect(-78, -16, 86, 32, 12).fill({ color: 0xffe08a });
+    g.roundRect(-78, -16, 86, 32, 12).stroke({ width: 5, color: 0x2a1608 });
+    g.poly([8, -32, 58, 0, 8, 32], true).fill({ color: 0xff4a32 });
+    g.poly([8, -32, 58, 0, 8, 32], true).stroke({ width: 5, color: 0x2a1608 });
+  }
+
   private fitModal(layer: Container, w: number, h: number): void {
     layer.scale.set(Math.max(0.6, Math.min(1, Math.min(w / 720, h / 560))));
   }
@@ -767,6 +1164,20 @@ function fullDim(): Graphics {
   const g = new Graphics().rect(-4000, -3000, 8000, 6000).fill({ color: 0x070c08, alpha: 0.9 });
   g.eventMode = "static";
   return g;
+}
+
+function enemyIcon(art: ArtSet, kind: EnemyKind): { texture: Texture; scale: number; anchorX: number; anchorY: number } {
+  const asset = kind === "shield" ? "enemy_shieldbearer" : kind === "shard" ? "enemy_golem" : `enemy_${kind}`;
+  const loco = kind === "skitter" || kind === "jaguar" ? "run" : kind === "glider" ? "fly" : "walk";
+  const clip = art.clip(asset, loco) ?? art.clip(asset, "idle");
+  if (!clip) return { texture: Texture.EMPTY, scale: 0.2, anchorX: 0.5, anchorY: 0.5 };
+  const frame = clip.frames[0][0];
+  return {
+    texture: frame,
+    scale: 84 / Math.max(1, frame.height),
+    anchorX: 0.5,
+    anchorY: 0.62,
+  };
 }
 
 function chainVisible(c: Container): boolean {
