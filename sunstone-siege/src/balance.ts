@@ -69,6 +69,11 @@ function group(kind: EnemyKind, count: number, interval: number, path: number, g
   return { kind, count, interval, path, gap };
 }
 
+/** A Skitter blob. The sim spawns these in clumps of ten. */
+function skitter(count: number, path: number, gap = 0): SpawnGroup {
+  return group("skitter", count, 0.1, path, gap);
+}
+
 export const BALANCE = {
   /** Cracks the Sunstone can take. Zero ends the valley. */
   integrity: 22,
@@ -102,8 +107,13 @@ export const BALANCE = {
     slowDart: 0.7,
     stunnedSpire: 1.3,
   },
-  /** Kills inside this window add a streak. Invented. */
-  combo: { window: 2.35, start: 3, jade: 2 },
+  /**
+   * Kills inside this window build a streak. Jade is paid at milestones
+   * (5, 10, 25, 50, then every 50), not per kill. A per-kill cap of 6 still
+   * minted thousands of Jade across a horde, so the milestone alternative
+   * from the 2.5D spec is what the sim pays. Invented, tune in play.
+   */
+  combo: { window: 2.35, start: 3, jade: 2, cap: 6 },
   /** Seconds to pick a relic before the first offer is taken for you. Invented. */
   offerSeconds: 9,
   relics: {
@@ -149,6 +159,10 @@ export const BALANCE = {
     spire: "Jade arcs that leap across a crowd. A stunned target takes the heavier arc.",
   } as const satisfies Record<TowerKind, string>,
   enemies: {
+    // Skitter is the horde fodder. Four of them stand in for one Runner:
+    // HP 32, bounty 8, charge 8, leak 1, against the Runner's 30 / 7 / 9 / 1.
+    // That 2 to 4 percent drift is the invented rounding from the 2.5D spec.
+    skitter: { name: "Skitter", hp: 8, speed: 104, armor: 0, reward: 2, leak: 0.25, charge: 2, flying: false },
     runner: { name: "Runner", hp: 30, speed: 104, armor: 0, reward: 7, leak: 1, charge: 9, flying: false },
     shield: { name: "Shieldbearer", hp: 96, speed: 52, armor: 6, reward: 12, leak: 2, charge: 12, flying: false },
     jaguar: { name: "Jaguar Stalker", hp: 48, speed: 92, armor: 0, reward: 11, leak: 1, charge: 11, flying: false },
@@ -180,11 +194,11 @@ export const BALANCE = {
       hp: 1,
       speed: 1,
       waves: [
-        { bonus: 28, groups: [group("runner", 7, 0.84, 0)] },
-        { bonus: 34, groups: [group("runner", 6, 0.58, 0), group("runner", 6, 0.58, 2, 1.1)] },
-        { bonus: 40, groups: [group("shield", 5, 0.95, 1), group("jaguar", 4, 0.8, 3, 0.4), group("runner", 6, 0.5, 0, 2)] },
-        { bonus: 48, groups: [group("glider", 5, 0.72, 2), group("shield", 4, 1, 3, 0.5), group("golem", 2, 2.4, 0, 1.2)] },
-        { bonus: 70, groups: [group("runner", 8, 0.5, 0), group("boss", 1, 0.2, 2, 0.8), group("shield", 4, 0.9, 1, 1.4), group("jaguar", 3, 0.75, 3, 1.6)] },
+        { bonus: 28, groups: [skitter(28, 0)] },
+        { bonus: 34, groups: [skitter(24, 0), skitter(24, 2, 1.1)] },
+        { bonus: 40, groups: [group("shield", 5, 0.95, 1), group("jaguar", 4, 0.8, 3, 0.4), skitter(24, 0, 2)] },
+        { bonus: 48, groups: [group("glider", 5, 0.72, 2), group("shield", 4, 1, 3, 0.5), group("golem", 2, 2.4, 0, 1.2), skitter(64, 0, 0.3), skitter(64, 2), skitter(32, 1), skitter(32, 3)] },
+        { bonus: 70, groups: [skitter(32, 0), group("boss", 1, 0.2, 2, 0.8), group("shield", 4, 0.9, 1, 1.4), group("jaguar", 3, 0.75, 3, 1.6), skitter(70, 0, 0.2), skitter(70, 2), skitter(36, 1), skitter(36, 3)] },
       ],
     },
     {
@@ -193,12 +207,12 @@ export const BALANCE = {
       hp: 1.32,
       speed: 1.04,
       waves: [
-        { bonus: 32, groups: [group("runner", 6, 0.62, 0), group("runner", 5, 0.62, 1, 1)] },
-        { bonus: 38, groups: [group("shield", 4, 0.95, 0), group("runner", 5, 0.55, 3, 1.2)] },
+        { bonus: 32, groups: [skitter(24, 0), skitter(20, 1, 1)] },
+        { bonus: 38, groups: [group("shield", 4, 0.95, 0), skitter(20, 3, 1.2)] },
         { bonus: 44, groups: [group("jaguar", 5, 0.7, 1), group("glider", 5, 0.65, 0, 0.6)] },
         { bonus: 50, groups: [group("golem", 3, 2.1, 2), group("shield", 5, 0.9, 1, 0.8)] },
-        { bonus: 56, groups: [group("glider", 7, 0.55, 0), group("jaguar", 5, 0.7, 1, 0.4), group("shield", 4, 0.85, 2, 1.2)] },
-        { bonus: 80, groups: [group("shield", 5, 0.8, 0), group("boss", 1, 0.2, 1, 0.6), group("glider", 5, 0.6, 2, 1), group("golem", 2, 2.2, 0, 1.5)] },
+        { bonus: 56, groups: [group("glider", 7, 0.55, 0), group("jaguar", 5, 0.7, 1, 0.4), group("shield", 4, 0.85, 2, 1.2), skitter(56, 0, 0.3), skitter(48, 1), skitter(28, 2), skitter(28, 3)] },
+        { bonus: 80, groups: [group("shield", 5, 0.8, 0), group("boss", 1, 0.2, 1, 0.6), group("glider", 5, 0.6, 2, 1), group("golem", 2, 2.2, 0, 1.5), skitter(70, 0, 0.2), skitter(64, 1), skitter(36, 2), skitter(36, 3)] },
       ],
     },
     {
@@ -207,13 +221,13 @@ export const BALANCE = {
       hp: 1.85,
       speed: 1.1,
       waves: [
-        { bonus: 36, groups: [group("runner", 10, 0.48, 0)] },
-        { bonus: 42, groups: [group("runner", 8, 0.45, 0), group("runner", 8, 0.45, 1, 0.6)] },
+        { bonus: 36, groups: [skitter(40, 0)] },
+        { bonus: 42, groups: [skitter(32, 0), skitter(32, 1, 0.6)] },
         { bonus: 48, groups: [group("shield", 6, 0.75, 2), group("jaguar", 6, 0.62, 0, 0.4)] },
         { bonus: 54, groups: [group("glider", 6, 0.5, 1), group("golem", 3, 1.8, 3, 0.8)] },
         { bonus: 60, groups: [group("shield", 8, 0.62, 2), group("glider", 7, 0.42, 1, 0.3), group("jaguar", 6, 0.5, 0, 0.8)] },
-        { bonus: 66, groups: [group("golem", 4, 1.5, 0), group("golem", 3, 1.5, 2, 0.4), group("runner", 10, 0.32, 1, 0.6)] },
-        { bonus: 90, groups: [group("shield", 7, 0.55, 0), group("boss", 1, 0.2, 1, 0.3), group("glider", 8, 0.4, 2, 0.5), group("jaguar", 6, 0.48, 0, 0.8)] },
+        { bonus: 66, groups: [group("golem", 4, 1.5, 0), group("golem", 3, 1.5, 2, 0.4), skitter(40, 1, 0.6), skitter(60, 0, 0.2), skitter(56, 2), skitter(32, 3)] },
+        { bonus: 90, groups: [group("shield", 7, 0.55, 0), group("boss", 1, 0.2, 1, 0.3), group("glider", 8, 0.4, 2, 0.5), group("jaguar", 6, 0.48, 0, 0.8), skitter(72, 0, 0.2), skitter(64, 1), skitter(40, 2), skitter(36, 3)] },
       ],
     },
   ] as const satisfies readonly WorldBalance[],
@@ -258,4 +272,66 @@ export function towerRange(kind: TowerKind, tier: number): number {
   if (kind === "lens") return BALANCE.lens[tier].range;
   if (kind === "drum") return BALANCE.drum[tier].radius;
   return BALANCE.spire[tier].range;
+}
+
+/** One hue per tower, used on cards, rings, and the selection badge. */
+export const TOWER_HUE: Record<TowerKind, number> = {
+  dart: 0x3cbe4a,
+  lens: 0xffc14a,
+  drum: 0x7b4dff,
+  spire: 0x2ee0d0,
+};
+
+export const TOWER_ICON: Record<TowerKind, string> = {
+  dart: "➤",
+  lens: "☀",
+  drum: "◎",
+  spire: "⚡",
+};
+
+export interface TowerReadout {
+  tag: string;
+  /** The one number that defines the role, already formatted. */
+  stat: string;
+  role: string;
+  /** Targets this tower prefers, for the selection panel. */
+  targets: string;
+  value: number;
+  pips: string;
+  range: number;
+}
+
+function pips(value: number, max: number): string {
+  const n = Math.max(1, Math.min(5, Math.round((value / max) * 5)));
+  return "■".repeat(n) + "□".repeat(5 - n);
+}
+
+/** Role line for a card. DPS figures are damage / interval. Pips compare inside the role. */
+export function towerReadout(kind: TowerKind, tier: number): TowerReadout {
+  if (kind === "dart") {
+    const s = BALANCE.dart[tier];
+    const value = s.damage / s.interval;
+    return { tag: "DPS", stat: `DPS ${Math.round(value)}`, role: "Single target", targets: "First raider", value, pips: pips(value, 322), range: s.range };
+  }
+  if (kind === "lens") {
+    const s = BALANCE.lens[tier];
+    const top = s.dps + s.rampMax;
+    return { tag: "BEAM", stat: `BEAM ${s.dps} to ${top}`, role: "Ramping beam", targets: "One raider", value: top, pips: pips(top, 322), range: s.range };
+  }
+  if (kind === "drum") {
+    const s = BALANCE.drum[tier];
+    const value = s.damage / s.interval;
+    return { tag: "AREA", stat: `AREA ${value.toFixed(1)} per enemy`, role: "Area stun", targets: "Every raider in the ring", value, pips: pips(value, 40.8), range: s.radius };
+  }
+  const s = BALANCE.spire[tier];
+  return { tag: "CHAIN", stat: `CHAIN ${s.jumps} targets`, role: "Chain", targets: "A crowd", value: s.jumps, pips: pips(s.jumps, 5), range: s.range };
+}
+
+export function towerDelta(kind: TowerKind, tier: number): string | null {
+  if (tier >= 2) return null;
+  const now = towerReadout(kind, tier);
+  const next = towerReadout(kind, tier + 1);
+  const left = now.tag === "DPS" || now.tag === "AREA" ? (now.tag === "AREA" ? now.value.toFixed(1) : String(Math.round(now.value))) : now.stat.replace(`${now.tag} `, "");
+  const right = next.tag === "DPS" || next.tag === "AREA" ? (next.tag === "AREA" ? next.value.toFixed(1) : String(Math.round(next.value))) : next.stat.replace(`${next.tag} `, "");
+  return `${now.tag} ${left} → ${right}    RANGE ${Math.round(now.range)} → ${Math.round(next.range)}`;
 }

@@ -5,7 +5,7 @@
 import { Application, Rectangle } from "pixi.js";
 import { loadArt } from "./art";
 import { AudioBus } from "./audio";
-import { BALANCE, starsFor, towerCost, towerRange, worldCount } from "./balance";
+import { BALANCE, starsFor, towerCost, towerDelta, towerRange, towerReadout, worldCount } from "./balance";
 import { Hud, type TowerCard } from "./hud";
 import { MAP_H, MAP_W } from "./maps";
 import { isUnlocked, loadSave, recordStars, writeSave, type SaveData } from "./save";
@@ -170,6 +170,9 @@ async function boot(): Promise<void> {
     if (sim && mode === "play") {
       const fx = sim.fx.splice(0, sim.fx.length);
       view.apply(fx);
+      view.select(selected);
+      const jadeAt = hud.jadeAnchor();
+      view.setGemGoal((jadeAt.x - camX) / zoom, (jadeAt.y - camY) / zoom);
       voice(fx);
       noteHits(fx);
       if (!save.reduced) {
@@ -180,7 +183,7 @@ async function boot(): Promise<void> {
         }
       }
       view.update(running && !freeze ? dt : 0, sim, freeze);
-      view.menuScale(zoom);
+      view.menuScale(zoom, camX, camY);
       if (view.menuPad >= 0) view.refreshMenu(sim.jade);
       present(sim);
       watch(sim);
@@ -194,7 +197,7 @@ async function boot(): Promise<void> {
       const now = performance.now();
       if (now - fpsStamp >= 500) {
         const fps = Math.round((fpsFrames * 1000) / (now - fpsStamp));
-        fpsNode.textContent = `${fps} fps`;
+        fpsNode.textContent = `${fps} fps  ${view.shownUnits} units`;
         fpsFrames = 0;
         fpsStamp = now;
       }
@@ -352,7 +355,7 @@ async function boot(): Promise<void> {
     seenWave = -1;
     view.closeMenu();
     view.hideRange();
-    view.setMap(art.map(sim.map.biome), sim.map.biome, sim.pads);
+    view.setMap(art.map(sim.map.biome), sim.map);
     view.setReduced(save.reduced);
     hud.showSettings(false);
     hud.showPause(false);
@@ -361,7 +364,7 @@ async function boot(): Promise<void> {
     layout();
     fit();
     audio.loop(sim.map.biome);
-    hud.announce(BALANCE.worlds[index].name);
+    hud.announce(`${BALANCE.worlds[index].name}  ·  Start ${BALANCE.worlds[index].jade} Jade`);
   }
 
   function layout(): void {
@@ -444,7 +447,10 @@ async function boot(): Promise<void> {
     }
     if (pad >= 0) {
       selected = 0;
-      view.openMenu(pad, pads[pad], zoom, sim.jade, (kind) => tryPlace(kind, pad));
+      view.openMenu(pad, pads[pad], zoom, sim.jade, (kind) => tryPlace(kind, pad), (kind, need) => {
+        hud.announce(`Need ${need} more Jade for ${BALANCE.towerName[kind]}`);
+        audio.play("deny");
+      });
       return;
     }
     selected = 0;
@@ -469,7 +475,8 @@ async function boot(): Promise<void> {
       if (tower) view.showRange(tower.x, tower.y, towerRange(tower.kind, tower.tier) * live.rangeScale, RANGE_COLOR[tower.kind]);
       else view.hideRange();
     }
-    hud.setCard(tower ? describe(tower, live.jade) : null);
+    hud.setCard(tower ? describe(tower, live.jade, live.rangeScale) : null);
+    const boss = live.enemies.find((e) => e.alive && e.boss);
     hud.sync({
       integrity: live.integrity,
       jade: live.jade,
@@ -483,6 +490,9 @@ async function boot(): Promise<void> {
       hint: hintFor(save, live),
       offer: live.pendingOffer?.map((id) => ({ id, name: BALANCE.relics[id].name, blurb: BALANCE.relics[id].blurb })) ?? null,
       offerLeft: live.offerLeft,
+      streak: live.streak,
+      purse: `Kills ${live.purse.kills}   Waves ${live.purse.waves}\nEarly ${live.purse.early}   Streaks ${live.purse.streaks}`,
+      boss: boss ? `${boss.kind === "boss" ? "Colossus" : "Boss"}  ${Math.ceil(boss.hp)} / ${Math.ceil(boss.maxHp)}` : "",
     });
   }
 
@@ -495,15 +505,28 @@ async function boot(): Promise<void> {
   function noteHits(fx: Fx[]): void {
     if (world !== 0) return;
     for (const event of fx) {
-      if (event.kind === "death" && save.taught < 3) teach(3);
+      if (event.kind === "death" && save.taught < 3) {
+        teach(3);
+        hitStop = Math.max(hitStop, 0.4);
+        hud.announce("Raiders drop Jade.");
+      }
       if (event.kind === "place" && save.taught < 1) teach(1);
     }
   }
 
   function voice(fx: Fx[]): void {
+    let deaths = 0;
+    let jades = 0;
     for (const event of fx) {
-      if (event.kind === "death") audio.play("death");
-      else if (event.kind === "jade") audio.play("jade");
+      if (event.kind === "death") {
+        deaths += 1;
+        if (deaths <= 8) audio.play("death");
+      } else if (event.kind === "jade") {
+        jades += 1;
+        if (jades <= 4) audio.play("jade");
+      } else if (event.kind === "banner" && event.text) hud.announce(event.text);
+      else if (event.kind === "multi") audio.play(event.n && event.n >= 5 ? "streak" : "drum");
+      else if (event.kind === "callout") audio.play("streak");
       else if (event.kind === "crack") audio.play("crack");
       else if (event.kind === "drum" || event.kind === "slam") audio.play("drum");
       else if (event.kind === "chain") audio.play("chain");
@@ -553,44 +576,31 @@ async function boot(): Promise<void> {
 
 function hintFor(save: SaveData, live: Siege): string {
   if (live.pendingOffer) return "";
-  if (live.world === 1 && live.wave === 0 && live.phase === "build") return "Three gates feed this crater. Cover each trail.";
+  if (live.world === 1 && live.wave === 0 && live.phase === "build") return "Three trails feed this crater. Cover each one.";
   if (live.world === 2 && live.wave === 0 && live.phase === "build") return "Night Crater is the hard valley. Upgrade before the colossus.";
-  if (live.world !== 0 || save.taught >= 4) return "";
-  if (live.towers.length === 0 && live.phase === "build" && !live.pendingOffer) {
-    return "Tap a glowing pad, then choose the Dart Totem.";
+  if (live.world !== 0) return "";
+  if (live.towers.length === 0 && live.phase === "build") {
+    return "Protect the Sunstone. Tap the glowing pad. Darts hit one raider. 50 Jade.";
   }
-  if (save.taught <= 1 && live.phase === "build" && !live.pendingOffer) {
-    return `Call the wave early for +${BALANCE.earlyCall} Jade, or wait out the timer.`;
-  }
-  if (save.taught <= 2 && live.phase === "wave") return "Totems fire on their own. Drag to look around the valley.";
-  if (save.taught <= 3 && !live.pendingOffer) return "Tap your totem to upgrade it. A drum's stun makes a Sun Lens hit harder.";
+  if (save.taught < 3 && live.phase === "wave") return "Defeat raiders and clear waves to earn Jade.";
+  if (save.taught <= 1 && live.phase === "build") return `Call early +${BALANCE.earlyCall} Jade, or wait out the timer.`;
+  if (live.wave === 1 && live.phase === "build") return "Quake Drums hit every raider in the ring.";
+  if (save.taught <= 3) return "Tap a totem to see its DPS, then upgrade it. A drum's stun makes a Sun Lens hit harder.";
   return "";
 }
 
-function describe(tower: Tower, jade: number): TowerCard {
-  const tier = tower.tier;
-  let line = "";
-  if (tower.kind === "dart") {
-    const s = BALANCE.dart[tier];
-    line = `Damage ${s.damage}    Range ${s.range}    Every ${s.interval.toFixed(2)}s`;
-  } else if (tower.kind === "lens") {
-    const s = BALANCE.lens[tier];
-    line = `Beam ${s.dps} to ${s.dps + s.rampMax}    Range ${s.range}`;
-  } else if (tower.kind === "drum") {
-    const s = BALANCE.drum[tier];
-    line = `Ring ${s.damage}    Radius ${s.radius}    Stun ${s.stun.toFixed(2)}s`;
-  } else {
-    const s = BALANCE.spire[tier];
-    line = `Arc ${s.damage}    Jumps ${s.jumps}    Range ${s.range}`;
-  }
-  const next = tier < 2 ? towerCost(tower.kind, tier + 1) : null;
+function describe(tower: Tower, jade: number, rangeScale: number): TowerCard {
+  const read = towerReadout(tower.kind, tower.tier);
+  const next = tower.tier < 2 ? towerCost(tower.kind, tower.tier + 1) : null;
   return {
     name: BALANCE.towerName[tower.kind],
-    blurb: BALANCE.towerBlurb[tower.kind],
-    tier: `Tier ${tier + 1}`,
-    line,
+    blurb: `${read.role}. ${BALANCE.towerBlurb[tower.kind]}`,
+    tier: `Tier ${tower.tier + 1}`,
+    line: `${read.stat}  ${read.pips}    RANGE ${Math.round(read.range * rangeScale)}`,
+    delta: towerDelta(tower.kind, tower.tier) ?? "Fully built",
+    dealt: `Dealt ${Math.round(tower.dealt)}`,
     upgrade: next === null ? null : `Upgrade ${next}`,
-    sell: `Sell ${Math.floor(tower.spent * BALANCE.sellRefund)}`,
+    sell: `Sell +${Math.floor(tower.spent * BALANCE.sellRefund)}`,
     canUpgrade: next !== null && jade >= next,
   };
 }

@@ -25,6 +25,9 @@ export interface HudState {
   hint: string;
   offer: { id: RelicId; name: string; blurb: string }[] | null;
   offerLeft: number;
+  streak: number;
+  purse: string;
+  boss: string;
 }
 
 export interface TowerCard {
@@ -32,6 +35,8 @@ export interface TowerCard {
   blurb: string;
   tier: string;
   line: string;
+  delta: string;
+  dealt: string;
   upgrade: string | null;
   sell: string;
   canUpgrade: boolean;
@@ -92,7 +97,12 @@ export class Hud {
   private readonly cardName: Text;
   private readonly cardBody: Text;
   private readonly cardLine: Text;
+  private readonly cardDelta: Text;
+  private readonly cardDealt: Text;
   private readonly upgradeText: Text;
+  private readonly streakText: Text;
+  private readonly bossText: Text;
+  private readonly purseText: Text;
   private upgradeButton!: Container;
   private readonly sellText: Text;
   private readonly endTitle: Text;
@@ -138,8 +148,14 @@ export class Hud {
     this.flareRing = new Graphics();
     this.cardName = label("", 18, 0xf6e7c1);
     this.cardBody = label("", 13, 0xd9cbb0);
-    this.cardLine = label("", 14, 0xffe0a0);
+    this.cardLine = label("", 15, 0xffe0a0);
+    this.cardDelta = label("", 14, 0xb6f7a4);
+    this.cardDealt = label("", 13, 0xf6e7c1);
     this.upgradeText = label("Upgrade", 15, 0x1a1208);
+    this.streakText = label("", 16, 0xffd56a);
+    this.bossText = label("", 16, 0xffb0a0);
+    this.purseText = wrap("", 280, 15, 0xfff6df);
+    this.purseText.visible = false;
     this.sellText = label("Sell", 15, 0xf6e7c1);
     this.endTitle = label("", 36, 0xfff1c8);
     this.endTitle.anchor.set(0.5);
@@ -233,11 +249,14 @@ export class Hud {
     this.jadeText.text = String(state.jade);
     this.waveText.text = `Wave ${state.wave}/${state.waves}`;
     this.speedText.text = state.speed === 2 ? "2x" : "1x";
+    this.streakText.text = state.streak >= 3 ? `${state.streak} streak` : "";
+    this.bossText.text = state.boss;
+    this.purseText.text = state.purse;
     const building = state.phase === "build";
     this.callButton.visible = building && !state.offer;
     if (building) {
       const secs = Math.max(0, Math.ceil(state.buildLeft));
-      this.callText.text = state.buildLeft > 0.3 ? `Call wave  ${secs}s  +${BALANCE.earlyCall}` : "Wave incoming";
+      this.callText.text = state.buildLeft > 0.3 ? `Call early +${BALANCE.earlyCall}  ·  ${secs}s` : "Call wave";
     }
     this.hint.text = state.hint;
     this.hint.visible = state.hint.length > 0 && !state.offer;
@@ -260,10 +279,17 @@ export class Hud {
     this.cardName.text = `${card.name}  ${card.tier}`;
     this.cardBody.text = card.blurb;
     this.cardLine.text = card.line;
+    this.cardDelta.text = card.delta;
+    this.cardDealt.text = card.dealt;
     this.upgradeButton.visible = card.upgrade !== null;
     if (card.upgrade) this.upgradeText.text = card.upgrade;
-    this.upgradeButton.alpha = card.canUpgrade ? 1 : 0.45;
+    this.upgradeText.style.fill = card.canUpgrade ? INK : 0x8e1c14;
+    this.upgradeButton.alpha = 1;
     this.sellText.text = card.sell;
+  }
+
+  jadeAnchor(): { x: number; y: number } {
+    return { x: this.jadeIcon?.position.x ?? 210, y: this.jadeIcon?.position.y ?? 28 };
   }
 
   announce(text: string): void {
@@ -376,7 +402,12 @@ export class Hud {
     const jadeIcon = new Sprite(art.frame("jade"));
     jadeIcon.anchor.set(0.5);
     jadeIcon.scale.set(0.38);
-    jadeIcon.eventMode = "none";
+    jadeIcon.eventMode = "static";
+    jadeIcon.cursor = "pointer";
+    jadeIcon.on("pointertap", (e) => {
+      e.stopPropagation();
+      this.purseText.visible = !this.purseText.visible;
+    });
     const speed = this.button(this.speedText, 86, 42, () => this.hooks.speed());
     const pause = this.button(label("Pause", 15, INK), 118, 42, () => this.hooks.pause());
     const gear = this.button(label("Settings", 14, INK), 132, 42, () => this.hooks.openSettings());
@@ -398,26 +429,28 @@ export class Hud {
       this.hooks.flare();
     });
     this.hint.text = "Tap a stone pad beside a trail.";
-    this.cardName.position.set(96, 78);
+    this.cardName.position.set(96, 64);
     this.cardBody.style.wordWrap = true;
     this.cardBody.style.wordWrapWidth = 360;
-    this.cardBody.position.set(96, 108);
-    this.cardLine.position.set(96, 156);
+    this.cardBody.position.set(96, 90);
+    this.cardLine.position.set(96, 124);
+    this.cardDelta.position.set(96, 146);
+    this.cardDealt.position.set(96, 168);
     this.upgradeButton = this.button(this.upgradeText, 170, 44, () => this.hooks.upgrade());
     this.upgradeButton.position.set(180, 206);
     const sell = this.button(this.sellText, 150, 44, () => this.hooks.sell());
     sell.position.set(370, 206);
-    const cardBg = this.panel(560, 270);
-    cardBg.position.set(280, 135);
+    const cardBg = this.panel(560, 340);
+    cardBg.position.set(280, 170);
     cardBg.eventMode = "none";
-    this.card.addChild(cardBg, this.cardName, this.cardBody, this.cardLine, this.upgradeButton, sell);
+    this.card.addChild(cardBg, this.cardName, this.cardBody, this.cardLine, this.cardDelta, this.cardDealt, this.upgradeButton, sell);
     this.card.visible = false;
     this.bar = bar;
     this.jadeIcon = jadeIcon;
     this.speedButton = speed;
     this.pauseButton = pause;
     this.gearButton = gear;
-    this.play.addChild(bar, this.integrityText, this.integrityFill, jadeIcon, this.jadeText, this.waveText, speed, pause, gear, this.callButton, this.flareButton, this.hint, this.banner, this.card, this.offerLayer);
+    this.play.addChild(bar, this.integrityText, this.integrityFill, jadeIcon, this.jadeText, this.purseText, this.waveText, this.streakText, this.bossText, speed, pause, gear, this.callButton, this.flareButton, this.hint, this.banner, this.card, this.offerLayer);
     this.hits.push(speed, pause, gear, this.callButton, this.flareButton, this.card, bar);
     this.banner.visible = false;
   }
@@ -445,7 +478,11 @@ export class Hud {
     this.callButton.position.set(w / 2, h - 48);
     this.hint.position.set(w / 2, 78);
     this.banner.position.set(w / 2, 120);
-    this.card.position.set(12, h - 286);
+    this.card.position.set(12, h - 356);
+    this.streakText.position.set(w / 2 + 90, 16);
+    this.bossText.anchor.set(0.5, 0);
+    this.bossText.position.set(w / 2, 96);
+    this.purseText.position.set(188, 62);
     this.offerLayer.position.set(w / 2, h / 2 + 10);
   }
 

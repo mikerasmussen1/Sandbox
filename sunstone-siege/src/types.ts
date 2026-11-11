@@ -1,7 +1,7 @@
 /** Shared literals for Sunstone Siege. Combat numbers live in balance.ts. */
 
 export type TowerKind = "dart" | "lens" | "drum" | "spire";
-export type EnemyKind = "runner" | "shield" | "jaguar" | "golem" | "shard" | "glider" | "boss";
+export type EnemyKind = "skitter" | "runner" | "shield" | "jaguar" | "golem" | "shard" | "glider" | "boss";
 export type Biome = "valley" | "ruins" | "crater";
 export type Phase = "build" | "wave" | "victory" | "defeat";
 export type RelicId = "keen" | "kindling" | "war" | "leap" | "rite" | "ward" | "heart" | "focus";

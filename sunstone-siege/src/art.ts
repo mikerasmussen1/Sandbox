@@ -1,12 +1,22 @@
 /**
- * Rendered art. The pictures live in public/art as WebP. Units share one
- * atlas. Maps, the Sunstone layers, and the stone UI stay whole because they
- * are large or nine-sliced.
+ * 2.5D art. Towers and raiders are pre-rendered sprite sheets (8 facings for
+ * raiders, one facing for towers). Maps, the Sunstone, and the stone UI stay
+ * as whole images.
  */
-import { Assets, Spritesheet, Texture } from "pixi.js";
+import { Assets, Rectangle, Texture } from "pixi.js";
+
+export interface Clip {
+  frames: Texture[][];
+  fps: number;
+  loop: boolean;
+  anchorX: number;
+  anchorY: number;
+  draw: number;
+}
 
 export interface ArtSet {
   frame(name: string): Texture;
+  clip(id: string, name: string): Clip | null;
   map(biome: "valley" | "ruins" | "crater"): Texture;
   title: Texture;
   valley: Texture;
@@ -18,29 +28,75 @@ export interface ArtSet {
   glow: Texture;
 }
 
-const ATLAS = "art/units.json";
-const FILES = [
-  "art/map-jungle.webp",
-  "art/map-river.webp",
-  "art/map-night.webp",
-  "art/title.webp",
-  "art/valley.webp",
-  "art/logo.webp",
-  "art/sun-core.webp",
-  "art/sun-inner.webp",
-  "art/sun-outer.webp",
-  "art/panel.webp",
-  "art/button.webp",
-  "art/button-down.webp",
-  "art/shadow.webp",
-  "art/glow.webp",
-];
+interface ClipMeta {
+  file: string;
+  frames: number;
+  loop: boolean;
+  fps: number;
+  frame_w: number;
+  frame_h: number;
+  draw: number;
+}
+
+interface UnitMeta {
+  id: string;
+  anchor: [number, number];
+  rows: string[];
+  clips: Record<string, ClipMeta>;
+}
+
+interface Manifest {
+  units: UnitMeta[];
+  ui: string[];
+  maps: string[];
+  plates: string[];
+}
 
 export async function loadArt(onProgress?: (progress: number) => void): Promise<ArtSet> {
-  const loaded = await Assets.load<Spritesheet | Texture>([ATLAS, ...FILES], onProgress);
-  const sheet = loaded[ATLAS] as Spritesheet;
-  const frames = sheet.textures;
-  const tex = (url: string): Texture => loaded[url] as Texture;
+  const manifest = await fetch("./art/sprites/manifest.json").then((res) => {
+    if (!res.ok) throw new Error("sunstone-siege: missing sprite manifest");
+    return res.json() as Promise<Manifest>;
+  });
+  const urls: string[] = [];
+  for (const unit of manifest.units) {
+    for (const clip of Object.values(unit.clips)) urls.push(clip.file);
+  }
+  urls.push(...manifest.ui, ...manifest.maps, ...manifest.plates);
+  const loaded = await Assets.load<Texture>(urls, onProgress);
+  const tex = (url: string): Texture => loaded[url];
+
+  const frames = new Map<string, Texture>();
+  for (const url of manifest.ui) frames.set(url.slice(url.lastIndexOf("/") + 1, -5), tex(url));
+  frames.set("sun-core", tex("art/sun-core.webp"));
+  frames.set("sun-inner", tex("art/sun-inner.webp"));
+  frames.set("sun-outer", tex("art/sun-outer.webp"));
+
+  const clips = new Map<string, Clip>();
+  for (const unit of manifest.units) {
+    for (const [name, clip] of Object.entries(unit.clips)) {
+      const sheet = tex(clip.file);
+      const rows: Texture[][] = [];
+      for (let r = 0; r < unit.rows.length; r++) {
+        const row: Texture[] = [];
+        for (let c = 0; c < clip.frames; c++) {
+          row.push(new Texture({
+            source: sheet.source,
+            frame: new Rectangle(c * clip.frame_w, r * clip.frame_h, clip.frame_w, clip.frame_h),
+          }));
+        }
+        rows.push(row);
+      }
+      clips.set(`${unit.id}:${name}`, {
+        frames: rows,
+        fps: clip.fps,
+        loop: clip.loop,
+        anchorX: unit.anchor[0],
+        anchorY: unit.anchor[1],
+        draw: clip.draw,
+      });
+    }
+  }
+
   const maps = {
     valley: tex("art/map-jungle.webp"),
     ruins: tex("art/map-river.webp"),
@@ -50,14 +106,10 @@ export async function loadArt(onProgress?: (progress: number) => void): Promise<
     map.source.scaleMode = "linear";
     map.source.autoGenerateMipmaps = true;
   }
-  const sun = {
-    "sun-core": tex("art/sun-core.webp"),
-    "sun-inner": tex("art/sun-inner.webp"),
-    "sun-outer": tex("art/sun-outer.webp"),
-  };
-  const lookup = (name: string): Texture => frames[name] ?? sun[name as keyof typeof sun];
+
   return {
-    frame: lookup,
+    frame: (name) => frames.get(name) ?? Texture.EMPTY,
+    clip: (id, name) => clips.get(`${id}:${name}`) ?? null,
     map: (biome) => maps[biome],
     title: tex("art/title.webp"),
     valley: tex("art/valley.webp"),

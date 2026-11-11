@@ -1,41 +1,86 @@
 /**
- * The valley: painted map, rendered totems and raiders, the layered Sunstone,
- * and pooled effects. Combat decisions stay in sim.ts.
+ * 2.5D valley. Raiders and totems are pre-rendered sprites, sorted by their
+ * feet. Combat decisions stay in sim.ts.
  */
-import { Container, Graphics, Sprite, Text, type Texture } from "pixi.js";
-import type { ArtSet } from "./art";
-import { BALANCE, towerRange } from "./balance";
-import { MAP_H, MAP_W, SUN } from "./maps";
-import { stealthed, type Fx, type Siege } from "./sim";
+import { Container, Graphics, Sprite, Text, Texture } from "pixi.js";
+import type { ArtSet, Clip } from "./art";
+import { BALANCE, TOWER_HUE, TOWER_ICON, towerCost, towerRange, towerReadout } from "./balance";
+import type { MapDef } from "./maps";
+import type { Enemy, Fx, Siege } from "./sim";
 import { TOWER_KINDS, type EnemyKind, type TowerKind, type Vec } from "./types";
 
 const SANS = 'Palatino, "Palatino Linotype", Georgia, serif';
-const TOWER_SCALE = 0.62;
-const SUN_SCALE = 0.36;
+export const RANGE_COLOR = TOWER_HUE;
 
-const ENEMY_SCALE: Record<EnemyKind, number> = {
-  runner: 0.58,
-  shield: 0.62,
-  jaguar: 0.6,
-  golem: 0.68,
-  shard: 0.28,
-  glider: 0.54,
-  boss: 0.48,
+const PLAY: Record<string, number> = {
+  walk: 1.2, run: 1.25, fly: 1.15, idle: 1,
+  attack: 1.8, hit: 1.85, block: 1.6, death: 1.7,
+  slam: 1.65, roar: 1.7, build: 1.15, sell: 1.25,
 };
 
-export const RANGE_COLOR: Record<TowerKind, number> = {
-  dart: 0xf0d7a2,
-  lens: 0xffb03a,
-  drum: 0x7dffe0,
-  spire: 0x5dffb0,
-};
+const ELITE: ReadonlySet<EnemyKind> = new Set(["shield", "golem", "boss"]);
 
-interface Ghost { s: Sprite; shadow: Sprite; life: number }
-interface Bit { s: Sprite; vx: number; vy: number; life: number; max: number; spin: number; gravity: number; shrink: number }
+interface Actor {
+  body: Sprite;
+  outline: Sprite;
+  shadow: Sprite;
+  clip: string;
+  time: number;
+  tier: number;
+  cool: number;
+}
+
+interface Ghost {
+  body: Sprite;
+  outline: Sprite;
+  shadow: Sprite;
+  clip: Clip;
+  row: number;
+  time: number;
+  fodder: boolean;
+  x: number;
+  y: number;
+}
+
+interface Bit { s: Sprite; vx: number; vy: number; life: number; max: number }
 interface Floater { t: Text; life: number; vy: number }
-interface Ring { x: number; y: number; radius: number; life: number; max: number; color: number }
-interface Arc { pts: Vec[]; life: number }
-interface Boom { s: Sprite; life: number; max: number }
+interface Gem { s: Sprite; x: number; y: number; vx: number; vy: number; life: number }
+interface Bucket { x: number; y: number; n: number; age: number }
+interface RingFx { s: Sprite; life: number; max: number; grow: number }
+
+function towerAsset(kind: TowerKind, tier: number): string {
+  const name = kind === "spire" ? "serpent" : kind;
+  return `tower_${name}_t${tier + 1}`;
+}
+
+function enemyAsset(kind: EnemyKind): string {
+  if (kind === "shield") return "enemy_shieldbearer";
+  if (kind === "shard") return "enemy_golem";
+  return `enemy_${kind}`;
+}
+
+function locomote(kind: EnemyKind): string {
+  if (kind === "skitter" || kind === "jaguar") return "run";
+  if (kind === "glider") return "fly";
+  return "walk";
+}
+
+/** Sheet rows are S, SE, E, NE, N, NW, W, SW. Angle 0 points east, and y grows downward. */
+function facingRow(angle: number, rows: number): number {
+  if (rows <= 1) return 0;
+  const a = ((angle % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+  const i = Math.round(a / (Math.PI / 4)) % 8;
+  return [2, 1, 0, 7, 6, 5, 4, 3][i];
+}
+
+function frameAt(clip: Clip, row: number, time: number, name: string): { texture: Texture; done: boolean } {
+  const speed = PLAY[name] ?? 1.6;
+  const count = clip.frames[row]?.length ?? 1;
+  const raw = Math.floor(time * clip.fps * speed);
+  const done = !clip.loop && raw >= count;
+  const index = clip.loop ? raw % count : Math.min(count - 1, Math.max(0, raw));
+  return { texture: clip.frames[Math.min(row, clip.frames.length - 1)][index], done };
+}
 
 export class WorldView {
   readonly world = new Container();
@@ -45,18 +90,22 @@ export class WorldView {
   shakeY = 0;
   menuPad = -1;
   rangeScale = 1;
+  shownUnits = 0;
+  shownSprites = 0;
+  private viewW = 1280;
+  private viewH = 720;
+  private camX = 0;
+  private camY = 0;
+  private zoom = 1;
   private readonly art: ArtSet;
   private readonly mapSprite = new Sprite();
-  private readonly grade = new Graphics();
+  private readonly pads = new Graphics();
   private readonly range = new Graphics();
-  private readonly shadows = new Container();
-  private readonly towers = new Container();
-  private readonly enemies = new Container();
-  private readonly shots = new Container();
+  private readonly link = new Graphics();
   private readonly bars = new Graphics();
+  private readonly actors = new Container();
+  private readonly shadowLayer = new Container();
   private readonly fxLayer = new Container();
-  private readonly bitsLayer = new Container();
-  private readonly floatLayer = new Container();
   private readonly sun = new Container();
   private readonly glow: Sprite;
   private readonly bloom: Sprite;
@@ -65,85 +114,93 @@ export class WorldView {
   private readonly disk: Sprite;
   private readonly cracks = new Graphics();
   private readonly flashRect = new Graphics();
-  private readonly towerSpr = new Map<number, Sprite>();
-  private readonly towerShadow = new Map<number, Sprite>();
-  private readonly lensGlow = new Map<number, Sprite>();
-  private readonly spireGold = new Map<number, Sprite>();
-  private readonly enemySpr = new Map<number, Sprite>();
-  private readonly enemyShadow = new Map<number, Sprite>();
-  private readonly shotSpr: Sprite[] = [];
-  private readonly beamSpr: Sprite[] = [];
-  private readonly ringSpr: Sprite[] = [];
-  private readonly boltSpr: Sprite[] = [];
-  private readonly spritePool: Sprite[] = [];
-  private readonly shadowPool: Sprite[] = [];
+  private readonly tag: Text;
+  private readonly towers = new Map<number, Actor>();
+  private readonly enemies = new Map<number, Actor>();
+  private readonly beams: Sprite[] = [];
   private readonly ghosts: Ghost[] = [];
+  private readonly ghostPool: Ghost[] = [];
   private readonly bits: Bit[] = [];
   private readonly bitPool: Bit[] = [];
   private readonly floats: Floater[] = [];
   private readonly floatPool: Floater[] = [];
-  private readonly rings: Ring[] = [];
-  private readonly arcs: Arc[] = [];
-  private readonly booms: Boom[] = [];
-  private readonly boomPool: Boom[] = [];
-  private readonly padSpr: Sprite[] = [];
+  private readonly gems: Gem[] = [];
+  private readonly gemPool: Gem[] = [];
+  private readonly buckets: Bucket[] = [];
+  private readonly rings: RingFx[] = [];
   private readonly menuButtons: Container[] = [];
   private readonly menuCosts: Text[] = [];
-  private rangeKey = "";
-  private crackKey = -1;
-  private trauma = 0;
-  private flash = 0;
+  private readonly menuStats: Text[] = [];
+  private readonly menuRings: Graphics[] = [];
+  private readonly menuSprites: Sprite[] = [];
+  private gemGoal = { x: 80, y: 40 };
+  private selected = 0;
+  private armed: TowerKind | null = null;
+  private onPlace: ((kind: TowerKind) => void) | null = null;
+  private onShort: ((kind: TowerKind, need: number) => void) | null = null;
+  private lastJade = 0;
+  private fresh = new Map<TowerKind, number>();
   private time = 0;
   private reduced = false;
-  private held = false;
-  private biome: "valley" | "ruins" | "crater" = "valley";
-  private onPlace: ((kind: TowerKind) => void) | null = null;
+  private plaza = 160;
+  private sunAt = { x: 960, y: 540 };
+  private beamCursor = 0;
 
   constructor(art: ArtSet) {
     this.art = art;
     this.mapSprite.eventMode = "none";
-    this.shadows.eventMode = "none";
-    this.world.addChild(this.mapSprite, this.shadows, this.range, this.towers, this.enemies, this.shots);
-    this.sun.position.set(SUN.x, SUN.y);
-    this.glow = this.sunSprite(art.glow, "add");
-    this.bloom = this.sunSprite(art.frame("sun-core"), "add");
-    this.ring = this.sunSprite(art.frame("sun-outer"), "normal");
-    this.inner = this.sunSprite(art.frame("sun-inner"), "normal");
-    this.disk = this.sunSprite(art.frame("sun-core"), "normal");
-    this.sun.addChild(this.glow, this.bloom, this.ring, this.inner, this.disk, this.cracks);
-    this.enemies.sortableChildren = true;
-    this.towers.sortableChildren = true;
+    this.pads.eventMode = "none";
+    this.range.eventMode = "none";
+    this.link.eventMode = "none";
+    this.bars.eventMode = "none";
+    this.shadowLayer.eventMode = "none";
     this.fxLayer.eventMode = "none";
-    this.world.addChild(this.sun, this.bars, this.fxLayer, this.bitsLayer, this.floatLayer, this.menu);
-    this.grade.eventMode = "none";
+    this.actors.sortableChildren = true;
+    this.actors.eventMode = "none";
+    this.glow = this.makeSun(art.glow, "add");
+    this.bloom = this.makeSun(art.frame("sun-core"), "add");
+    this.ring = this.makeSun(art.frame("sun-outer"), "normal");
+    this.inner = this.makeSun(art.frame("sun-inner"), "normal");
+    this.disk = this.makeSun(art.frame("sun-core"), "normal");
+    this.sun.addChild(this.glow, this.bloom, this.ring, this.inner, this.disk, this.cracks);
+    this.sun.eventMode = "none";
+    this.tag = new Text({
+      text: "",
+      style: { fontFamily: SANS, fontSize: 28, fill: 0xfff6df, fontWeight: "bold", align: "center", dropShadow: shadowStyle() },
+    });
+    this.tag.anchor.set(0.5, 1);
+    this.tag.eventMode = "none";
+    this.world.addChild(this.mapSprite, this.pads, this.shadowLayer, this.range, this.actors, this.link, this.bars, this.fxLayer, this.tag, this.menu);
+    this.actors.addChild(this.sun);
     this.flashRect.eventMode = "none";
     this.flashRect.blendMode = "add";
     this.overlay.eventMode = "none";
-    this.overlay.addChild(this.grade, this.flashRect);
+    this.overlay.addChild(this.flashRect);
     this.buildMenu();
   }
 
-  setMap(texture: Texture, biome: "valley" | "ruins" | "crater", pads: readonly Vec[]): void {
+  setMap(texture: Texture, map: MapDef): void {
     this.mapSprite.texture = texture;
-    this.mapSprite.width = MAP_W;
-    this.mapSprite.height = MAP_H;
-    this.biome = biome;
-    for (const s of this.padSpr) s.destroy();
-    this.padSpr.length = 0;
-    for (const pad of pads) {
-      const s = new Sprite(this.art.frame("pad"));
-      s.anchor.set(0.5);
-      s.scale.set(0.42);
-      s.position.set(pad.x, pad.y);
-      s.eventMode = "none";
-      this.padSpr.push(s);
-      this.world.addChildAt(s, 1);
-    }
-    this.crackKey = -1;
+    this.mapSprite.width = 1920;
+    this.mapSprite.height = 1080;
+    this.plaza = map.plaza;
+    this.sunAt = map.sun;
+    this.sun.position.set(map.sun.x, map.sun.y);
+    this.sun.zIndex = map.sun.y;
+    const disk = map.plaza * 1.72;
+    const scale = disk / Math.max(1, this.disk.texture.width);
+    this.disk.scale.set(scale);
+    this.inner.scale.set(scale);
+    this.ring.scale.set(scale * 1.04);
+    this.bloom.scale.set(scale * 1.15);
+    this.glow.scale.set(scale * 1.8);
+    for (const g of this.ghosts) this.retireGhost(g);
+    this.ghosts.length = 0;
   }
 
   layout(w: number, h: number): void {
-    this.grade.clear();
+    this.viewW = w;
+    this.viewH = h;
     this.flashRect.clear();
     this.flashRect.rect(0, 0, w, h).fill({ color: 0xffe0a0 });
   }
@@ -153,143 +210,214 @@ export class WorldView {
   }
 
   parallax(_camX: number, _camY: number): void {
-    /* The painted map carries its own depth. */
+    /* The painted ground already has its depth. */
   }
 
-  menuScale(zoom: number): void {
+  menuScale(zoom: number, camX = 0, camY = 0): void {
+    this.zoom = zoom;
+    this.camX = camX;
+    this.camY = camY;
     if (this.menu.visible) this.menu.scale.set(1 / zoom);
   }
 
-  openMenu(pad: number, at: Vec, zoom: number, jade: number, onPlace: (kind: TowerKind) => void): void {
+  select(id: number): void {
+    this.selected = id;
+  }
+
+  setGemGoal(x: number, y: number): void {
+    this.gemGoal.x = x;
+    this.gemGoal.y = y;
+  }
+
+  openMenu(
+    pad: number,
+    at: Vec,
+    zoom: number,
+    jade: number,
+    onPlace: (kind: TowerKind) => void,
+    onShort?: (kind: TowerKind, need: number) => void,
+  ): void {
     this.menuPad = pad;
     this.onPlace = onPlace;
+    this.onShort = onShort ?? null;
+    this.armed = null;
     this.menu.visible = true;
-    this.menu.position.set(at.x, at.y);
+    this.zoom = zoom;
     this.menu.scale.set(1 / zoom);
+    this.placeMenu(at);
     this.refreshMenu(jade);
+    this.showRange(at.x, at.y, towerRange("dart", 0) * this.rangeScale, TOWER_HUE.dart);
   }
 
   refreshMenu(jade: number): void {
     TOWER_KINDS.forEach((kind, i) => {
-      this.menuCosts[i].text = String(towerCostLabel(kind));
-      this.menuButtons[i].alpha = jade >= towerCostLabel(kind) ? 1 : 0.45;
+      const cost = towerCost(kind, 0);
+      const read = towerReadout(kind, 0);
+      const afford = jade >= cost;
+      this.menuCosts[i].text = String(cost);
+      this.menuCosts[i].style.fill = afford ? 0xfff6df : 0xff5a4a;
+      this.menuStats[i].text = `${read.stat}  ${read.pips}`;
+      this.menuButtons[i].alpha = afford ? 1 : 1;
+      this.menuSprites[i].tint = afford ? 0xffffff : 0x9a9088;
+      this.menuSprites[i].alpha = afford ? 1 : 0.55;
+      const became = afford && this.lastJade < cost;
+      if (became) this.fresh.set(kind, 0.45);
+      const bounce = this.fresh.get(kind) ?? 0;
+      const pop = bounce > 0 ? 1 + Math.sin((0.45 - bounce) * 18) * 0.06 : 1;
+      this.menuButtons[i].scale.set(this.armed === kind ? 1.08 * pop : pop);
+      this.menuRings[i].clear();
+      if (!afford && cost > 0) {
+        const p = Math.max(0, Math.min(1, jade / cost));
+        this.menuRings[i].arc(0, -6, 50, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * p).stroke({ width: 4, color: TOWER_HUE[kind], alpha: 0.9 });
+      }
+      if (this.armed === kind) {
+        this.menuRings[i].circle(0, -6, 52).stroke({ width: 3, color: 0xfff1c2, alpha: 0.95 });
+      }
     });
+    this.lastJade = jade;
+  }
+
+  private placeMenu(at: Vec): void {
+    const marginX = 150;
+    const marginTop = 86;
+    const marginBot = 140;
+    const reach = 158;
+    let shiftX = 0;
+    let shiftY = 0;
+    for (const [lx, ly] of [[0, -reach], [reach, 0], [0, reach], [-reach, 0]]) {
+      const sx = this.camX + at.x * this.zoom + lx;
+      const sy = this.camY + at.y * this.zoom + ly;
+      if (sx < marginX) shiftX = Math.max(shiftX, marginX - sx);
+      if (sx > this.viewW - marginX) shiftX = Math.min(shiftX, this.viewW - marginX - sx);
+      if (sy < marginTop) shiftY = Math.max(shiftY, marginTop - sy);
+      if (sy > this.viewH - marginBot) shiftY = Math.min(shiftY, this.viewH - marginBot - sy);
+    }
+    this.menu.position.set(at.x + shiftX / Math.max(0.2, this.zoom), at.y + shiftY / Math.max(0.2, this.zoom));
   }
 
   closeMenu(): void {
     this.menu.visible = false;
     this.menuPad = -1;
+    this.armed = null;
     this.onPlace = null;
+    this.onShort = null;
   }
 
   blocks(x: number, y: number): boolean {
     if (!this.menu.visible) return false;
     for (const button of this.menuButtons) {
       const b = button.getBounds();
-      if (x >= b.x && y <= b.y + b.height && x <= b.x + b.width && x >= b.x && y >= b.y) return true;
+      if (x >= b.x && y >= b.y && x <= b.x + b.width && y <= b.y + b.height) return true;
     }
     return false;
   }
 
   showRange(x: number, y: number, radius: number, color: number): void {
-    const key = `${radius}:${color}`;
-    if (key !== this.rangeKey) {
-      this.range.clear();
-      this.range.circle(0, 0, radius).fill({ color, alpha: 0.12 });
-      this.range.circle(0, 0, radius).stroke({ width: 3, color, alpha: 0.9 });
-      this.rangeKey = key;
-    }
+    this.range.clear();
+    this.range.circle(x, y, radius).fill({ color, alpha: 0.14 });
+    this.range.circle(x, y, radius).stroke({ width: 3, color, alpha: 0.9 });
     this.range.visible = true;
-    this.range.position.set(x, y);
   }
 
   hideRange(): void {
     this.range.visible = false;
+    this.range.clear();
+    this.link.clear();
+    this.tag.visible = false;
   }
 
   update(dt: number, sim: Siege, hold = false): void {
-    this.held = hold;
-    const step = hold ? 0 : dt > 0 ? dt : 0;
-    this.time += hold ? 0 : step > 0 ? step : 0.016;
-    this.syncTowers(sim);
-    this.syncEnemies(sim);
-    this.syncShots(sim);
+    const step = hold ? 0 : dt;
+    this.time += step > 0 ? step : 0.016;
+    for (const [kind, left] of this.fresh) {
+      const next = left - (step || 0.016);
+      if (next <= 0) this.fresh.delete(kind);
+      else this.fresh.set(kind, next);
+    }
+    this.syncTowers(sim, step);
+    this.syncEnemies(sim, step);
+    this.drawPads(sim);
+    this.drawSelection(sim);
     this.drawBars(sim);
     this.drawSun(step, sim);
-    this.drawFx(step);
+    this.drawGhosts(step);
     this.drawBits(step);
+    this.drawRings(step);
+    this.drawGems(step);
     this.drawFloats(step);
-    const fade = hold ? 0 : step > 0 ? step : 0.016;
-    this.flash = Math.max(0, this.flash - fade * (this.reduced ? 2.4 : 1.3));
-    this.flashRect.alpha = this.flash;
-    this.flashRect.visible = this.flash > 0.02;
+    this.flushBuckets();
+    const fade = step > 0 ? step : 0.016;
+    this.flashRect.alpha = Math.max(0, (this.flashRect.alpha || 0) - fade * (this.reduced ? 2.4 : 1.3));
+    this.flashRect.visible = this.flashRect.alpha > 0.02;
     if (this.reduced) {
-      this.trauma = 0;
       this.shakeX = 0;
       this.shakeY = 0;
     } else {
-      this.trauma = Math.max(0, this.trauma - (step > 0 ? step : 0.016) * 1.6);
-      this.shakeX = Math.sin(this.time * 46) * this.trauma * 18;
-      this.shakeY = Math.cos(this.time * 37) * this.trauma * 12;
+      this.shakeX = Math.sin(this.time * 46) * this.trauma * 8;
+      this.shakeY = Math.cos(this.time * 37) * this.trauma * 6;
+      this.trauma = Math.max(0, this.trauma - fade * 2.2);
     }
-    const pulse = this.reduced ? 0.85 : 0.62 + Math.sin(this.time * 3) * 0.2;
-    const fresh = sim.towers.length === 0 && sim.wave === 0 && sim.phase === "build";
-    this.padSpr.forEach((s, i) => {
-      s.visible = !sim.towers.some((t) => t.pad === i);
-      s.alpha = fresh ? 1 : pulse;
-    });
+    this.shownUnits = sim.aliveCount;
+    this.shownSprites = this.enemies.size + this.towers.size + this.ghosts.length;
   }
 
   apply(fx: readonly Fx[]): void {
     for (const event of fx) {
-      if (event.kind === "impact") this.burst(event.x, event.y, 0xfff0c2, 6, 110);
-      else if (event.kind === "death") {
-        const boss = event.enemy === "boss";
-        this.boom(event.x, event.y, boss ? 1.15 : 0.55);
-        this.burst(event.x, event.y, boss ? 0xffb03a : 0xff6a4a, boss ? 16 : 8, boss ? 220 : 150);
-        this.bump(boss ? 0.7 : event.enemy === "golem" ? 0.28 : 0.08);
-      } else if (event.kind === "jade" && event.text) {
-        this.floatText(event.x, event.y, event.text, 0xc8ffd8, 16);
-        this.burst(event.x, event.y, 0x7dffc4, 5, 80);
-      } else if (event.kind === "streak" && event.text) {
-        this.floatText(event.x, event.y, event.text, 0xffe08a, 22);
-        this.bump((event.n ?? 0) >= 6 ? 0.2 : 0.08);
+      if (event.kind === "impact") this.burst(event.x, event.y, 0xfff0c2, 5);
+      else if (event.kind === "death") this.onDeath(event);
+      else if (event.kind === "jade" && event.n) this.onJade(event.x, event.y, event.n);
+      else if (event.kind === "multi" && event.text) {
+        this.floatText(event.x, event.y, event.text, 0xfff1c2, event.n && event.n >= 10 ? 40 : 30);
+        this.bump(event.n && event.n >= 10 ? 0.35 : 0.16);
+      } else if (event.kind === "callout" && event.text) {
+        this.floatText(event.x, event.y, event.text, 0xffd56a, 36);
+        this.bump(0.2);
       } else if (event.kind === "relic" && event.text) this.floatText(event.x, event.y, event.text, 0xfff1c8, 26);
-      else if (event.kind === "aegis") {
-        this.rings.push({ x: event.x, y: event.y, radius: 86, life: 0.4, max: 0.4, color: 0x9a90c8 });
-        this.bump(0.16);
-      } else if (event.kind === "rally" && event.n) this.rings.push({ x: event.x, y: event.y, radius: event.n, life: 0.45, max: 0.45, color: 0xff7a3a });
-      else if (event.kind === "drum" && event.n) this.rings.push({ x: event.x, y: event.y, radius: event.n, life: 0.42, max: 0.42, color: 0x9dffd8 });
+      else if (event.kind === "drum" && event.n) this.ringFx(event.x, event.y, event.n, 0xb9a0ff);
       else if (event.kind === "slam" && event.n) {
-        this.rings.push({ x: event.x, y: event.y, radius: event.n, life: 0.36, max: 0.36, color: 0xff7a4a });
-        this.bump(0.35);
-      } else if (event.kind === "chain" && event.pts) this.arcs.push({ pts: event.pts, life: 0.28 });
-      else if (event.kind === "crack") {
-        this.bump(0.3);
-        this.flash = Math.max(this.flash, this.reduced ? 0.1 : 0.2);
-      } else if (event.kind === "flare") {
-        this.rings.push({ x: SUN.x, y: SUN.y, radius: 640, life: 0.55, max: 0.55, color: 0xffe0a0 });
-        this.flash = Math.max(this.flash, this.reduced ? 0.25 : 0.7);
-        this.bump(0.75);
-        this.burst(SUN.x, SUN.y, 0xffe6b0, this.reduced ? 6 : 22, 280);
-      } else if (event.kind === "place") this.burst(event.x, event.y, 0xf0d7a2, 6, 70);
-      else if (event.kind === "boss") {
-        this.rings.push({ x: event.x, y: event.y, radius: 240, life: 0.7, max: 0.7, color: 0xffb03a });
-        this.bump(0.55);
-        this.flash = Math.max(this.flash, this.reduced ? 0.12 : 0.35);
-      }
+        this.ringFx(event.x, event.y, event.n, 0xff7a4a);
+        this.bump(0.45);
+      } else if (event.kind === "aegis") this.ringFx(event.x, event.y, 90, 0xc8c0e8);
+      else if (event.kind === "rally" && event.n) this.ringFx(event.x, event.y, event.n, 0xff7a3a);
+      else if (event.kind === "chain" && event.pts) this.drawChain(event.pts);
+      else if (event.kind === "crack") this.bump(0.12 + Math.min(0.3, event.n ?? 1) * 0.15);
+      else if (event.kind === "flare") {
+        this.ringFx(this.sunAt.x, this.sunAt.y, 640, 0xffe0a0);
+        this.flashRect.alpha = Math.max(this.flashRect.alpha, this.reduced ? 0.2 : 0.55);
+        this.bump(0.7);
+      } else if (event.kind === "boss") {
+        this.ringFx(event.x, event.y, 220, 0xffb03a);
+        this.bump(0.4);
+      } else if (event.kind === "place") this.burst(event.x, event.y, 0xf0d7a2, 6);
     }
   }
+
+  private trauma = 0;
 
   private bump(amount: number): void {
     if (!this.reduced) this.trauma = Math.min(1, this.trauma + amount);
   }
 
-  private sunSprite(texture: Texture, blend: "add" | "normal"): Sprite {
+  private makeSun(texture: Texture, blend: "add" | "normal"): Sprite {
     const s = new Sprite(texture);
     s.anchor.set(0.5);
-    s.scale.set(SUN_SCALE);
     s.blendMode = blend;
+    s.eventMode = "none";
+    return s;
+  }
+
+  private takeSprite(texture: Texture): Sprite {
+    const s = new Sprite(texture);
+    s.eventMode = "none";
+    return s;
+  }
+
+  private shadowSprite(): Sprite {
+    const s = new Sprite(this.art.shadow);
+    s.anchor.set(0.5, 0.5);
+    s.alpha = 0.35;
+    s.blendMode = "multiply";
+    s.tint = 0x1a120c;
     s.eventMode = "none";
     return s;
   }
@@ -300,502 +428,692 @@ export class WorldView {
     TOWER_KINDS.forEach((kind, i) => {
       const angle = -Math.PI / 2 + (i / TOWER_KINDS.length) * Math.PI * 2;
       const button = new Container();
-      button.position.set(Math.cos(angle) * 104, Math.sin(angle) * 104);
-      const plate = new Graphics().circle(0, 0, 34).fill({ color: 0x1a140e, alpha: 0.92 }).stroke({ width: 2, color: 0xe6c27a });
-      const icon = new Sprite(this.art.frame(`tower-${kind}-0`));
-      icon.anchor.set(0.5, 0.72);
-      icon.scale.set(0.22);
+      button.position.set(Math.cos(angle) * 158, Math.sin(angle) * 158);
+      const plate = new Graphics();
+      plate.roundRect(-80, -62, 160, 158, 18).fill({ color: 0x140e0a, alpha: 0.94 });
+      plate.circle(0, -10, 38).stroke({ width: 4, color: TOWER_HUE[kind] });
+      const clip = this.art.clip(towerAsset(kind, 0), "idle");
+      const icon = new Sprite(clip?.frames[0][0] ?? Texture.EMPTY);
+      if (clip) {
+        icon.anchor.set(clip.anchorX, clip.anchorY);
+        icon.scale.set(clip.draw * 0.26);
+      }
+      icon.position.set(0, 14);
+      const badge = new Text({
+        text: TOWER_ICON[kind],
+        style: { fontFamily: SANS, fontSize: 18, fill: TOWER_HUE[kind], fontWeight: "bold" },
+      });
+      badge.anchor.set(0.5);
+      badge.position.set(46, -42);
+      const name = new Text({
+        text: BALANCE.towerName[kind],
+        style: { fontFamily: SANS, fontSize: 13, fill: 0xfff6df, fontWeight: "bold", align: "center" },
+      });
+      name.anchor.set(0.5);
+      name.position.set(0, 36);
+      const stat = new Text({
+        text: "",
+        style: { fontFamily: SANS, fontSize: 12, fill: 0xffe0a0, align: "center" },
+      });
+      stat.anchor.set(0.5);
+      stat.position.set(0, 54);
       const cost = new Text({
         text: "0",
-        style: { fontFamily: SANS, fontSize: 15, fill: 0xfff1c8, fontWeight: "bold", dropShadow: shadow() },
+        style: { fontFamily: SANS, fontSize: 22, fill: 0xfff6df, fontWeight: "bold" },
       });
       cost.anchor.set(0.5);
-      cost.position.set(0, 40);
-      button.addChild(plate, icon, cost);
+      cost.position.set(10, 78);
+      const gem = new Sprite(this.art.frame("jade"));
+      gem.anchor.set(0.5);
+      gem.scale.set(0.2);
+      gem.position.set(-22, 78);
+      const ring = new Graphics();
+      ring.eventMode = "none";
+      button.addChild(plate, icon, badge, name, stat, gem, cost, ring);
       button.eventMode = "static";
       button.cursor = "pointer";
       button.on("pointerover", () => {
-        this.showRange(this.menu.position.x, this.menu.position.y, towerRange(kind, 0) * this.rangeScale, RANGE_COLOR[kind]);
+        this.armed = kind;
+        this.showRange(this.menu.position.x, this.menu.position.y, towerRange(kind, 0) * this.rangeScale, TOWER_HUE[kind]);
       });
       button.on("pointertap", (e) => {
         e.stopPropagation();
+        const price = towerCost(kind, 0);
+        if (this.lastJade < price) {
+          this.onShort?.(kind, price - this.lastJade);
+          return;
+        }
+        if (this.armed !== kind) {
+          this.armed = kind;
+          this.showRange(this.menu.position.x, this.menu.position.y, towerRange(kind, 0) * this.rangeScale, TOWER_HUE[kind]);
+          this.refreshMenu(this.lastJade);
+          return;
+        }
         this.onPlace?.(kind);
       });
       this.menu.addChild(button);
       this.menuButtons.push(button);
       this.menuCosts.push(cost);
+      this.menuStats.push(stat);
+      this.menuRings.push(ring);
+      this.menuSprites.push(icon);
     });
   }
 
-  private syncTowers(sim: Siege): void {
+  private actor(clip: Clip): Actor {
+    const body = this.takeSprite(clip.frames[0][0]);
+    body.anchor.set(clip.anchorX, clip.anchorY);
+    const outline = this.takeSprite(clip.frames[0][0]);
+    outline.anchor.set(clip.anchorX, clip.anchorY);
+    outline.tint = 0x14080c;
+    const shadow = this.shadowSprite();
+    this.shadowLayer.addChild(shadow);
+    this.actors.addChild(outline, body);
+    return { body, outline, shadow, clip: "", time: 0, tier: 0, cool: 0 };
+  }
+
+  private freeActor(actor: Actor): void {
+    actor.body.removeFromParent();
+    actor.outline.removeFromParent();
+    actor.shadow.removeFromParent();
+    actor.body.destroy();
+    actor.outline.destroy();
+    actor.shadow.destroy();
+  }
+
+  private paint(actor: Actor, clip: Clip, row: number, name: string, draw: number): void {
+    const posed = frameAt(clip, row, actor.time, name);
+    actor.body.texture = posed.texture;
+    actor.outline.texture = posed.texture;
+    actor.body.anchor.set(clip.anchorX, clip.anchorY);
+    actor.outline.anchor.set(clip.anchorX, clip.anchorY);
+    actor.body.scale.set(draw);
+    const outline = draw * 1.06;
+    actor.outline.scale.set(outline);
+  }
+
+  private syncTowers(sim: Siege, step: number): void {
     const seen = new Set<number>();
     for (const tower of sim.towers) {
       seen.add(tower.id);
-      let spr = this.towerSpr.get(tower.id);
-      let shade = this.towerShadow.get(tower.id);
-      if (!spr || !shade) {
-        spr = this.takeSprite();
-        spr.anchor.set(0.5, 0.98);
-        shade = this.takeShadow();
-        this.towers.addChild(spr);
-        this.shadows.addChild(shade);
-        this.towerSpr.set(tower.id, spr);
-        this.towerShadow.set(tower.id, shade);
+      let actor = this.towers.get(tower.id);
+      const asset = towerAsset(tower.kind, tower.tier);
+      if (!actor) {
+        const clip = this.art.clip(asset, "build") ?? this.art.clip(asset, "idle");
+        if (!clip) continue;
+        actor = this.actor(clip);
+        actor.clip = "build";
+        actor.tier = tower.tier;
+        this.towers.set(tower.id, actor);
       }
-      spr.texture = this.art.frame(`tower-${tower.kind}-${tower.tier}`);
-      spr.position.set(tower.x, tower.y);
-      shade.position.set(tower.x, tower.y - 4);
-      shade.scale.set(0.85);
-      const interval = tower.kind === "dart" ? BALANCE.dart[tower.tier].interval : tower.kind === "drum" ? BALANCE.drum[tower.tier].interval : tower.kind === "spire" ? BALANCE.spire[tower.tier].interval : 0;
-      const kick = interval > 0 && tower.cooldown > interval * 0.82;
-      const pop = kick ? 1.07 : 1;
-      const squash = kick ? 0.94 : 1;
-      spr.scale.set(TOWER_SCALE * pop, TOWER_SCALE * squash);
-      spr.zIndex = tower.y;
-      spr.tint = tower.stunnedUntil > sim.time ? 0x9aa8b4 : 0xffffff;
-      this.syncLensGlow(tower.id, tower.kind === "lens", tower.x, tower.y);
-      this.syncSpireGold(tower.id, tower.kind === "spire" ? tower.tier : -1, tower.x, tower.y);
+      if (actor.tier !== tower.tier) {
+        actor.tier = tower.tier;
+        actor.clip = "build";
+        actor.time = 0;
+      } else if (tower.cooldown > actor.cool + 0.04 && actor.clip !== "build") {
+        actor.clip = "attack";
+        actor.time = 0;
+      }
+      actor.cool = tower.cooldown;
+      actor.time += step > 0 ? step : 0;
+      const current = this.art.clip(asset, actor.clip) ?? this.art.clip(asset, "idle");
+      const idle = this.art.clip(asset, "idle");
+      if (!current || !idle) continue;
+      const posed = frameAt(current, 0, actor.time, actor.clip);
+      if (posed.done) {
+        actor.clip = "idle";
+        actor.time = 0;
+      }
+      const shown = actor.clip === "idle" ? idle : current;
+      const draw = shown.draw * (tower.stunnedUntil > sim.time ? 0.98 : 1);
+      this.paint(actor, shown, 0, actor.clip, draw);
+      actor.body.position.set(tower.x, tower.y);
+      actor.outline.position.set(tower.x, tower.y + 2);
+      actor.body.zIndex = tower.y;
+      actor.outline.zIndex = tower.y - 0.2;
+      actor.body.tint = tower.stunnedUntil > sim.time ? 0xb7c4d4 : 0xffffff;
+      actor.shadow.position.set(tower.x, tower.y + 6);
+      actor.shadow.scale.set(1.15, 0.62);
+      if (actor.clip === "attack" && actor.time < 0.09) this.burst(tower.x, tower.y - 70, TOWER_HUE[tower.kind], 3);
     }
-    for (const [id, spr] of this.towerSpr) {
+    for (const [id, actor] of this.towers) {
       if (seen.has(id)) continue;
-      this.towerSpr.delete(id);
-      spr.removeFromParent();
-      this.spritePool.push(spr);
-      const shade = this.towerShadow.get(id);
-      if (shade) {
-        shade.removeFromParent();
-        this.shadowPool.push(shade);
-        this.towerShadow.delete(id);
-      }
-      this.retire(this.lensGlow, id);
-      this.retire(this.spireGold, id);
+      this.spawnGhost(actor, "sell", false);
+      this.towers.delete(id);
+      actor.body.removeFromParent();
+      actor.outline.removeFromParent();
+      actor.body.destroy();
+      actor.outline.destroy();
     }
+    this.drawBeams(sim);
   }
 
-  private syncLensGlow(id: number, on: boolean, x: number, y: number): void {
-    let glow = this.lensGlow.get(id);
-    if (!on) {
-      if (glow) glow.visible = false;
-      return;
-    }
-    if (!glow) {
-      glow = new Sprite(this.art.glow);
-      glow.anchor.set(0.5);
-      glow.blendMode = "add";
-      glow.eventMode = "none";
-      this.fxLayer.addChild(glow);
-      this.lensGlow.set(id, glow);
-    }
-    glow.visible = true;
-    glow.position.set(x, y - 102);
-    const pulse = this.reduced ? 1 : 1 + Math.sin(this.time * 6 + id) * 0.08;
-    glow.scale.set(0.42 * pulse);
-    glow.alpha = 0.75;
-    glow.tint = 0xffc14a;
-  }
-
-  private syncSpireGold(id: number, tier: number, x: number, y: number): void {
-    let gold = this.spireGold.get(id);
-    if (tier < 1) {
-      if (gold) gold.visible = false;
-      return;
-    }
-    if (!gold) {
-      gold = new Sprite(this.art.frame("fx-orb"));
-      gold.anchor.set(0.5);
-      gold.blendMode = "add";
-      gold.eventMode = "none";
-      this.fxLayer.addChild(gold);
-      this.spireGold.set(id, gold);
-    }
-    gold.visible = true;
-    gold.position.set(x + 6, y - (tier === 1 ? 112 : 124));
-    gold.scale.set(tier === 1 ? 0.22 : 0.3);
-    gold.tint = tier === 1 ? 0xffd56a : 0x9dffc8;
-    gold.alpha = this.reduced ? 0.7 : 0.55 + Math.sin(this.time * 5 + id) * 0.2;
-  }
-
-  private retire(map: Map<number, Sprite>, id: number): void {
-    const s = map.get(id);
-    if (!s) return;
-    s.removeFromParent();
-    s.destroy();
-    map.delete(id);
-  }
-
-  private syncEnemies(sim: Siege): void {
+  private syncEnemies(sim: Siege, step: number): void {
     const seen = new Set<number>();
     for (const e of sim.enemies) {
       if (!e.alive) continue;
       seen.add(e.id);
-      let spr = this.enemySpr.get(e.id);
-      let shade = this.enemyShadow.get(e.id);
-      if (!spr || !shade) {
-        spr = this.takeSprite();
-        shade = this.takeShadow();
-        this.enemies.addChild(spr);
-        this.shadows.addChild(shade);
-        this.enemySpr.set(e.id, spr);
-        this.enemyShadow.set(e.id, shade);
+      const asset = enemyAsset(e.kind);
+      let actor = this.enemies.get(e.id);
+      if (!actor) {
+        const clip = this.art.clip(asset, locomote(e.kind));
+        if (!clip) continue;
+        actor = this.actor(clip);
+        actor.clip = locomote(e.kind);
+        this.enemies.set(e.id, actor);
       }
-      const kind = e.kind === "shard" ? "golem" : e.kind;
-      const frame = Math.floor(this.time * (e.flying ? 6 : 5) + e.id * 0.7) % 2;
-      spr.texture = this.art.frame(`enemy-${kind}-${frame}`);
-      const flying = e.flying;
-      spr.anchor.set(flying ? 0.5 : 0.5, flying ? 0.55 : 0.97);
-      const bob = flying ? Math.sin(this.time * 6 + e.id) * 8 : Math.sin(this.time * 8 + e.id) * 1.5;
-      spr.position.set(e.x, e.y + bob);
-      shade.position.set(e.x, e.y + (flying ? 16 : 2));
-      shade.scale.set(flying ? 0.55 : e.kind === "boss" ? 1.15 : 0.72);
-      shade.alpha = flying ? 0.28 : 0.5;
-      spr.zIndex = e.y;
-      let sc = ENEMY_SCALE[e.kind];
-      if (e.kind === "boss") sc *= Math.min(1, 0.35 + e.age * 1.6);
-      if (e.flash > 0) sc *= 1.06;
-      const face = e.kind === "shard" ? 1 : Math.cos(e.angle) >= 0 ? 1 : -1;
-      spr.scale.set(sc * face, sc);
-      spr.rotation = e.kind === "shard" ? this.time * 2 + e.id : 0;
-      spr.alpha = stealthed(e.kind, e.age) ? 0.22 : e.boss && e.aegisUntil > sim.time ? 0.78 : 1;
-      spr.tint = e.flash > 0 ? 0xfff4ee : e.boss && e.aegisUntil > sim.time ? 0xc8bdd8 : 0xffffff;
+      const want = this.enemyClip(e, asset);
+      if (want !== actor.clip) {
+        actor.clip = want;
+        actor.time = 0;
+      }
+      actor.time += step > 0 ? step : 0;
+      const clip = this.art.clip(asset, actor.clip) ?? this.art.clip(asset, locomote(e.kind));
+      if (!clip) continue;
+      const row = facingRow(e.angle, clip.frames.length);
+      let draw = clip.draw;
+      if (e.kind === "shard") draw *= 0.5;
+      else if (ELITE.has(e.kind)) draw *= 1.1;
+      const squash = e.flash > 0 ? 0.96 : 1;
+      this.paint(actor, clip, row, actor.clip, draw * squash);
+      const hop = e.hop > 0 ? Math.sin((0.16 - e.hop) * 40) * 6 : 0;
+      const lift = e.flying ? 18 + Math.sin(this.time * 6 + e.id) * 6 : 0;
+      actor.body.position.set(e.x, e.y - lift - hop);
+      actor.outline.position.set(e.x, e.y - lift - hop + 2);
+      actor.body.zIndex = e.y;
+      actor.outline.zIndex = e.y - 0.2;
+      actor.body.tint = e.flash > 0 ? 0xfff4f0 : 0xffffff;
+      actor.body.alpha = stealthedFade(e);
+      actor.outline.alpha = e.kind === "skitter" ? 0.55 : 0.85;
+      actor.shadow.position.set(e.x, e.y + (e.flying ? 10 : 4));
+      actor.shadow.scale.set(e.kind === "boss" ? 1.5 : e.kind === "skitter" ? 0.45 : 0.72, e.flying ? 0.28 : 0.4);
+      actor.shadow.tint = ELITE.has(e.kind) ? 0x6a5420 : 0x1a120c;
+      actor.shadow.alpha = ELITE.has(e.kind) ? 0.55 : 0.35;
     }
-    for (const [id, spr] of this.enemySpr) {
+    for (const [id, actor] of this.enemies) {
       if (seen.has(id)) continue;
-      this.enemySpr.delete(id);
-      const shade = this.enemyShadow.get(id);
-      this.enemyShadow.delete(id);
-      if (shade) this.ghosts.push({ s: spr, shadow: shade, life: 0.4 });
+      this.enemies.delete(id);
+      this.freeActor(actor);
     }
   }
 
-  private syncShots(sim: Siege): void {
-    let shown = 0;
-    for (const shot of sim.shots) {
-      if (!shot.alive) continue;
-      let spr = this.shotSpr[shown];
-      if (!spr) {
-        spr = new Sprite(this.art.frame("fx-dart"));
-        spr.anchor.set(0.35, 0.5);
-        spr.scale.set(0.55);
-        this.shots.addChild(spr);
-        this.shotSpr[shown] = spr;
-      }
-      spr.visible = true;
-      spr.position.set(shot.x, shot.y);
-      spr.rotation = Math.atan2(shot.y - shot.py, shot.x - shot.px);
-      shown += 1;
+  private enemyClip(e: Enemy, asset: string): string {
+    if (e.emote > 0 && this.art.clip(asset, "roar")) return "roar";
+    if (e.react === "block" && this.art.clip(asset, "block")) return "block";
+    if (e.react === "hit" && this.art.clip(asset, "hit")) return "hit";
+    if (e.striking) {
+      if (e.kind === "boss" && this.art.clip(asset, "slam")) return "slam";
+      return "attack";
     }
-    for (let i = shown; i < this.shotSpr.length; i++) this.shotSpr[i].visible = false;
+    return locomote(e.kind);
+  }
+
+  private drawPads(sim: Siege): void {
+    this.pads.clear();
+    const pulse = this.reduced ? 0.85 : 0.55 + Math.sin(this.time * 3) * 0.25;
+    const fresh = sim.towers.length === 0 && sim.wave === 0 && sim.phase === "build";
+    sim.pads.forEach((pad, i) => {
+      if (sim.towers.some((t) => t.pad === i)) return;
+      const hot = fresh && i === this.firstWest(sim);
+      this.pads.circle(pad.x, pad.y, hot ? 34 : 28).fill({ color: 0xfff1c8, alpha: hot ? 0.28 : 0.12 });
+      this.pads.circle(pad.x, pad.y, hot ? 34 : 28).stroke({ width: hot ? 5 : 3, color: hot ? 0xffe08a : 0xf0d7a2, alpha: hot ? 1 : pulse });
+    });
+  }
+
+  private firstWest(sim: Siege): number {
+    let best = 0;
+    let score = -1;
+    sim.pads.forEach((pad, i) => {
+      const along = pad.x < this.sunAt.x ? this.sunAt.x - pad.x : 0;
+      if (along > score) {
+        score = along;
+        best = i;
+      }
+    });
+    return best;
+  }
+
+  private drawSelection(sim: Siege): void {
+    this.link.clear();
+    const tower = sim.towers.find((t) => t.id === this.selected);
+    if (!tower || this.menu.visible) {
+      this.tag.visible = false;
+      return;
+    }
+    const read = towerReadout(tower.kind, tower.tier);
+    const radius = towerRange(tower.kind, tower.tier) * sim.rangeScale;
+    this.showRange(tower.x, tower.y, radius, TOWER_HUE[tower.kind]);
+    if (tower.tier < 2) {
+      const next = towerRange(tower.kind, tower.tier + 1) * sim.rangeScale;
+      this.dashCircle(tower.x, tower.y, next, TOWER_HUE[tower.kind]);
+    }
+    if (tower.kind === "drum") {
+      const pulse = 0.35 + ((this.time % BALANCE.drum[tower.tier].interval) / BALANCE.drum[tower.tier].interval) * 0.65;
+      this.link.circle(tower.x, tower.y, radius * pulse).stroke({ width: 3, color: TOWER_HUE.drum, alpha: 0.45 });
+      for (const e of sim.enemies) {
+        if (!e.alive) continue;
+        if (Math.hypot(e.x - tower.x, e.y - tower.y) <= radius) {
+          this.link.circle(e.x, e.y + 8, 10).stroke({ width: 3, color: 0xd8c6ff, alpha: 0.9 });
+        }
+      }
+    }
+    const aim = sim.aim(tower);
+    if (tower.kind === "dart" && aim.primary) {
+      this.link.moveTo(tower.x, tower.y - 40).lineTo(aim.primary.x, aim.primary.y).stroke({ width: 2, color: TOWER_HUE.dart, alpha: 0.7 });
+    } else if (tower.kind === "lens" && aim.primary) {
+      this.dash(tower.x, tower.y - 50, aim.primary.x, aim.primary.y, TOWER_HUE.lens);
+    } else if (tower.kind === "spire" && aim.chain.length) {
+      let x = tower.x;
+      let y = tower.y - 40;
+      for (const e of aim.chain) {
+        this.link.moveTo(x, y).lineTo(e.x, e.y).stroke({ width: 2, color: TOWER_HUE.spire, alpha: 0.75 });
+        x = e.x;
+        y = e.y;
+      }
+    }
+    this.tag.visible = true;
+    this.tag.text = `${TOWER_ICON[tower.kind]}  ${read.stat}   ${read.targets}`;
+    this.tag.position.set(tower.x, tower.y - 128);
+    this.tag.zIndex = 0;
+  }
+
+  private dashCircle(x: number, y: number, radius: number, color: number): void {
+    const steps = 28;
+    for (let i = 0; i < steps; i += 2) {
+      const a0 = (i / steps) * Math.PI * 2;
+      const a1 = ((i + 1) / steps) * Math.PI * 2;
+      this.link.moveTo(x + Math.cos(a0) * radius, y + Math.sin(a0) * radius);
+      this.link.lineTo(x + Math.cos(a1) * radius, y + Math.sin(a1) * radius);
+    }
+    this.link.stroke({ width: 2, color, alpha: 0.75 });
+  }
+
+  private dash(x0: number, y0: number, x1: number, y1: number, color: number): void {
+    const n = 8;
+    for (let i = 0; i < n; i += 2) {
+      const a = i / n;
+      const b = (i + 1) / n;
+      this.link.moveTo(x0 + (x1 - x0) * a, y0 + (y1 - y0) * a);
+      this.link.lineTo(x0 + (x1 - x0) * b, y0 + (y1 - y0) * b);
+    }
+    this.link.stroke({ width: 3, color, alpha: 0.8 });
   }
 
   private drawBars(sim: Siege): void {
     this.bars.clear();
     for (const e of sim.enemies) {
-      if (!e.alive || e.hp >= e.maxHp - 0.2) continue;
-      const w = e.boss ? 64 : 32;
-      const k = Math.max(0, Math.min(1, e.hp / e.maxHp));
-      const y = e.y - (e.boss ? 78 : 46);
-      this.bars.roundRect(e.x - w / 2, y, w, 5, 2).fill({ color: 0x140e0c, alpha: 0.85 });
-      this.bars.roundRect(e.x - w / 2, y, w * k, 5, 2).fill({ color: k > 0.35 ? 0xc6f27a : 0xff5a3c });
+      if (!e.alive || e.kind === "skitter" || e.hp >= e.maxHp - 0.1) continue;
+      const w = e.boss ? 74 : e.kind === "golem" || e.kind === "shield" ? 40 : 28;
+      const h = e.boss ? 7 : 4;
+      const x = e.x - w / 2;
+      const y = e.y - (e.boss ? 150 : e.kind === "golem" ? 96 : 70);
+      this.bars.rect(x, y, w, h).fill({ color: 0x140e0a, alpha: 0.8 });
+      if (e.armor > 0) this.bars.rect(x, y, Math.min(w, e.armor * 2), h).fill({ color: 0x8d8a86 });
+      const ratio = Math.max(0, e.hp / e.maxHp);
+      this.bars.rect(x, y, w * ratio, h).fill({ color: ratio > 0.45 ? 0xe24b4b : 0xffd0a0 });
     }
   }
 
-  private drawSun(dt: number, sim: Siege): void {
+  private drawSun(step: number, sim: Siege): void {
+    const spin = this.reduced ? 0 : step;
+    this.ring.rotation += spin * 0.25;
+    this.inner.rotation -= spin * 0.4;
     const charge = sim.flare / BALANCE.flare.need;
-    const spin = (this.reduced ? 0.04 : 0.22) * (1 + charge * 1.2);
-    if (dt > 0) {
-      this.ring.rotation += dt * spin;
-      this.inner.rotation -= dt * spin * 0.72;
-    }
-    const pulse = this.reduced ? 0 : Math.sin(this.time * (2 + charge * 4)) * 0.03;
-    this.glow.scale.set(SUN_SCALE * (2.1 + charge * 1.6 + pulse));
-    this.glow.alpha = 0.18 + charge * 0.7;
-    this.glow.tint = 0xffc14a;
-    this.bloom.scale.set(SUN_SCALE * (1.05 + charge * 0.2));
-    this.bloom.alpha = 0.15 + charge * 0.55;
-    this.bloom.tint = 0xffe0a0;
-    this.disk.scale.set(SUN_SCALE * (1 + charge * 0.04 + pulse));
-    this.ring.scale.set(SUN_SCALE);
-    this.inner.scale.set(SUN_SCALE);
-    const cracks = Math.ceil((1 - sim.integrity / BALANCE.integrity) * 7);
-    if (cracks !== this.crackKey) {
-      this.crackKey = cracks;
-      this.cracks.clear();
-      for (let i = 0; i < cracks; i++) {
-        const a = (i / 7) * Math.PI * 2 + 0.4;
-        this.cracks.moveTo(Math.cos(a) * 18, Math.sin(a) * 18).lineTo(Math.cos(a + 0.35) * 70, Math.sin(a + 0.15) * 60).stroke({ width: 3, color: 0x2a100c, alpha: 0.9 });
+    this.glow.alpha = 0.28 + charge * 0.45;
+    this.bloom.alpha = 0.18 + charge * 0.4;
+    const cracks = 1 - sim.integrity / BALANCE.integrity;
+    this.cracks.clear();
+    if (cracks > 0.04) {
+      const n = Math.ceil(cracks * 6);
+      for (let i = 0; i < n; i++) {
+        const a = (i / n) * Math.PI * 2;
+        this.cracks.moveTo(Math.cos(a) * 20, Math.sin(a) * 20);
+        this.cracks.lineTo(Math.cos(a + 0.4) * this.plaza * 0.7, Math.sin(a + 0.2) * this.plaza * 0.45);
       }
+      this.cracks.stroke({ width: 3, color: 0x2a140c, alpha: 0.8 });
     }
-    let beams = 0;
+  }
+
+  private drawBeams(sim: Siege): void {
+    this.beamCursor = 0;
     for (const tower of sim.towers) {
-      if (tower.kind !== "lens" || tower.targetId === 0) continue;
+      if (tower.kind !== "lens" || !tower.targetId) continue;
       const target = sim.enemies.find((e) => e.id === tower.targetId && e.alive);
       if (!target) continue;
-      const x1 = tower.x;
-      const y1 = tower.y - 104;
-      const wobble = this.reduced ? 0 : Math.sin(this.time * 22 + tower.id) * 3;
-      const x2 = target.x + Math.cos(target.angle + Math.PI / 2) * wobble;
-      const y2 = target.y - 20 + Math.sin(target.angle + Math.PI / 2) * wobble;
-      const dx = x2 - x1;
-      const dy = y2 - y1;
-      const len = Math.hypot(dx, dy) || 1;
-      let beam = this.beamSpr[beams];
+      let beam = this.beams[this.beamCursor];
       if (!beam) {
         beam = new Sprite(this.art.frame("fx-beam"));
         beam.anchor.set(0, 0.5);
         beam.blendMode = "add";
         beam.eventMode = "none";
         this.fxLayer.addChild(beam);
-        this.beamSpr[beams] = beam;
+        this.beams.push(beam);
       }
+      const x = tower.x;
+      const y = tower.y - 78;
+      const dx = target.x - x;
+      const dy = target.y - y;
       beam.visible = true;
-      beam.position.set(x1, y1);
+      beam.position.set(x, y);
       beam.rotation = Math.atan2(dy, dx);
-      beam.scale.set(len / 512, 0.55);
-      beam.alpha = 0.9;
-      beam.tint = 0xffc14a;
-      beams += 1;
+      beam.width = Math.hypot(dx, dy);
+      beam.height = 18;
+      beam.tint = 0xffd27a;
+      beam.alpha = 0.85;
+      this.beamCursor += 1;
     }
-    for (let i = beams; i < this.beamSpr.length; i++) this.beamSpr[i].visible = false;
+    for (let i = this.beamCursor; i < this.beams.length; i++) this.beams[i].visible = false;
   }
 
-  private animStep(dt: number): number {
-    if (this.held) return 0;
-    return dt > 0 ? dt : 0.016;
+  private onDeath(event: Fx): void {
+    const kind = event.enemy ?? "runner";
+    const fodder = kind === "skitter" || kind === "shard";
+    const asset = enemyAsset(kind);
+    const clip = this.art.clip(asset, "death");
+    if (!clip) {
+      this.burst(event.x, event.y, 0xff5a4a, fodder ? 8 : 6);
+      return;
+    }
+    const row = facingRow(event.n ?? 0, clip.frames.length);
+    const ghost = this.ghostPool.pop() ?? this.makeGhost();
+    ghost.clip = clip;
+    ghost.row = row;
+    ghost.time = 0;
+    ghost.fodder = fodder;
+    ghost.x = event.x;
+    ghost.y = event.y;
+    ghost.body.visible = true;
+    ghost.outline.visible = !fodder;
+    ghost.shadow.visible = true;
+    const draw = clip.draw * (kind === "shard" ? 0.5 : ELITE.has(kind) ? 1.1 : 1);
+    this.paintGhost(ghost, draw);
+    this.ghosts.push(ghost);
+    if (fodder) this.burst(event.x, event.y, 0x8a1820, 8);
   }
 
-  private drawFx(dt: number): void {
-    const step = this.animStep(dt);
-    let rings = 0;
-    for (let i = this.rings.length - 1; i >= 0; i--) {
-      const ring = this.rings[i];
-      ring.life -= step;
-      if (ring.life <= 0) {
-        this.rings.splice(i, 1);
-        continue;
-      }
-      const k = 1 - ring.life / ring.max;
-      let spr = this.ringSpr[rings];
-      if (!spr) {
-        spr = new Sprite(this.art.frame("fx-stun"));
-        spr.anchor.set(0.5);
-        spr.blendMode = "add";
-        spr.eventMode = "none";
-        this.fxLayer.addChild(spr);
-        this.ringSpr[rings] = spr;
-      }
-      const size = 8 + ring.radius * k;
-      spr.visible = true;
-      spr.position.set(ring.x, ring.y);
-      spr.scale.set(size / 128);
-      spr.alpha = ring.life / ring.max;
-      spr.tint = ring.color;
-      rings += 1;
+  private spawnGhost(actor: Actor, name: string, fodder: boolean): void {
+    const clip = this.art.clip("tower_dart_t1", name);
+    void clip;
+    actor.shadow.removeFromParent();
+    actor.shadow.destroy();
+    if (!fodder && name === "sell") {
+      this.burst(actor.body.x, actor.body.y, 0xf0d7a2, 5);
     }
-    for (let i = rings; i < this.ringSpr.length; i++) this.ringSpr[i].visible = false;
+  }
 
-    let bolts = 0;
-    for (let i = this.arcs.length - 1; i >= 0; i--) {
-      const arc = this.arcs[i];
-      arc.life -= step;
-      if (arc.life <= 0) {
-        this.arcs.splice(i, 1);
-        continue;
-      }
-      for (let p = 1; p < arc.pts.length; p++) {
-        const a = arc.pts[p - 1];
-        const b = arc.pts[p];
-        const dx = b.x - a.x;
-        const dy = b.y - a.y;
-        const len = Math.hypot(dx, dy) || 1;
-        let bolt = this.boltSpr[bolts];
-        if (!bolt) {
-          bolt = new Sprite(this.art.frame("fx-lightning"));
-          bolt.anchor.set(0, 0.5);
-          bolt.blendMode = "add";
-          bolt.eventMode = "none";
-          this.fxLayer.addChild(bolt);
-          this.boltSpr[bolts] = bolt;
-        }
-        bolt.visible = true;
-        bolt.position.set(a.x, a.y - 16);
-        bolt.rotation = Math.atan2(dy, dx);
-        bolt.scale.set(len / 512, 0.45);
-        bolt.alpha = arc.life / 0.28;
-        bolt.tint = 0xb8ffd0;
-        bolts += 1;
-      }
-    }
-    for (let i = bolts; i < this.boltSpr.length; i++) this.boltSpr[i].visible = false;
+  private makeGhost(): Ghost {
+    const body = this.takeSprite(Texture.EMPTY);
+    const outline = this.takeSprite(Texture.EMPTY);
+    outline.tint = 0x14080c;
+    const shadow = this.shadowSprite();
+    this.actors.addChild(outline, body);
+    this.shadowLayer.addChild(shadow);
+    return { body, outline, shadow, clip: { frames: [[Texture.EMPTY]], fps: 1, loop: false, anchorX: 0.5, anchorY: 0.8, draw: 0.5 }, row: 0, time: 0, fodder: false, x: 0, y: 0 };
+  }
 
-    for (let i = this.booms.length - 1; i >= 0; i--) {
-      const boom = this.booms[i];
-      boom.life -= step;
-      const k = Math.max(0, boom.life / boom.max);
-      boom.s.alpha = k;
-      boom.s.scale.set((1.15 - k) * (boom.max > 0.4 ? 1.3 : 0.7));
-      if (boom.life <= 0) {
-        boom.s.visible = false;
-        this.boomPool.push(boom);
-        this.booms.splice(i, 1);
-      }
-    }
+  private paintGhost(ghost: Ghost, draw: number): void {
+    const posed = frameAt(ghost.clip, ghost.row, ghost.time, "death");
+    ghost.body.texture = posed.texture;
+    ghost.outline.texture = posed.texture;
+    ghost.body.anchor.set(ghost.clip.anchorX, ghost.clip.anchorY);
+    ghost.outline.anchor.set(ghost.clip.anchorX, ghost.clip.anchorY);
+    ghost.body.scale.set(draw);
+    ghost.outline.scale.set(draw * 1.05);
+    ghost.body.position.set(ghost.x, ghost.y);
+    ghost.outline.position.set(ghost.x, ghost.y + 2);
+    ghost.body.zIndex = ghost.y;
+    ghost.outline.zIndex = ghost.y - 0.2;
+    ghost.shadow.position.set(ghost.x, ghost.y + 4);
+    ghost.shadow.scale.set(0.6, 0.32);
+  }
 
+  private drawGhosts(step: number): void {
     for (let i = this.ghosts.length - 1; i >= 0; i--) {
-      const g = this.ghosts[i];
-      g.life -= step;
-      const k = Math.max(0, g.life / 0.4);
-      g.s.alpha = k;
-      g.s.y -= step * 18;
-      g.shadow.alpha = k * 0.4;
-      if (g.life <= 0) {
-        g.s.removeFromParent();
-        g.shadow.removeFromParent();
-        g.s.scale.set(1);
-        g.s.rotation = 0;
-        this.spritePool.push(g.s);
-        this.shadowPool.push(g.shadow);
-        this.ghosts.splice(i, 1);
+      const ghost = this.ghosts[i];
+      ghost.time += step > 0 ? step : 0.016;
+      const draw = ghost.clip.draw;
+      if (ghost.fodder) {
+        const t = Math.min(1, ghost.time / 0.22);
+        this.paintGhost(ghost, draw * (1 - t));
+        ghost.body.alpha = 1 - t;
+        if (t >= 1) {
+          this.ghosts.splice(i, 1);
+          this.retireGhost(ghost);
+        }
+      } else {
+        this.paintGhost(ghost, draw);
+        const posed = frameAt(ghost.clip, ghost.row, ghost.time, "death");
+        if (posed.done) {
+          ghost.body.alpha -= (step || 0.016) * 2.5;
+          if (ghost.body.alpha <= 0) {
+            this.ghosts.splice(i, 1);
+            this.retireGhost(ghost);
+          }
+        }
       }
     }
   }
 
-  private drawBits(dt: number): void {
-    if (dt > 0 && !this.reduced && this.bits.length < 40 && Math.random() < dt * 4) {
-      const leaf = this.biome !== "crater" && Math.random() > 0.4;
-      this.bit(Math.random() * MAP_W, -10, leaf ? 0x8fbf62 : 0xd6ffb0, (Math.random() - 0.5) * 14, 16 + Math.random() * 18, 5, 0, leaf ? "mote" : "mote");
+  private retireGhost(ghost: Ghost): void {
+    ghost.body.alpha = 1;
+    ghost.body.removeFromParent();
+    ghost.outline.removeFromParent();
+    ghost.shadow.removeFromParent();
+    this.ghostPool.push(ghost);
+  }
+
+  private onJade(x: number, y: number, amount: number): void {
+    const keyX = Math.round(x / 150);
+    const keyY = Math.round(y / 150);
+    let bucket = this.buckets.find((b) => Math.round(b.x / 150) === keyX && Math.round(b.y / 150) === keyY);
+    if (!bucket) {
+      bucket = { x, y, n: 0, age: 0 };
+      this.buckets.push(bucket);
     }
-    const step = this.animStep(dt);
-    for (let i = this.bits.length - 1; i >= 0; i--) {
-      const b = this.bits[i];
-      b.life -= step;
-      if (b.life <= 0 || b.s.y > MAP_H + 20) {
-        b.s.visible = false;
-        this.bitPool.push(b);
-        this.bits.splice(i, 1);
-        continue;
-      }
-      if (dt > 0) {
-        b.vy += b.gravity * dt;
-        b.s.x += b.vx * dt;
-        b.s.y += b.vy * dt;
-        b.s.rotation += b.spin * dt;
-      }
-      b.s.alpha = Math.max(0, b.life / b.max);
-      if (b.shrink) b.s.scale.set((b.life / b.max) * b.shrink);
+    bucket.n += amount;
+    bucket.x = x;
+    bucket.y = y;
+    if (this.gems.length < 36) {
+      const gem = this.gemPool.pop() ?? this.makeGem();
+      gem.x = x;
+      gem.y = y - 10;
+      gem.vx = (Math.random() - 0.5) * 80;
+      gem.vy = -70 - Math.random() * 40;
+      gem.life = 0;
+      gem.s.visible = true;
+      gem.s.position.set(gem.x, gem.y);
+      gem.s.alpha = 1;
+      this.gems.push(gem);
     }
   }
 
-  private drawFloats(dt: number): void {
-    const step = this.animStep(dt);
-    for (let i = this.floats.length - 1; i >= 0; i--) {
-      const f = this.floats[i];
-      f.life -= step;
-      f.t.y += f.vy * step;
-      f.t.alpha = Math.max(0, f.life / 0.85);
-      if (f.life <= 0) {
-        f.t.visible = false;
-        this.floatPool.push(f);
-        this.floats.splice(i, 1);
-      }
-    }
-  }
-
-  private boom(x: number, y: number, scale: number): void {
-    const pooled = this.boomPool.pop();
-    const s = pooled?.s ?? new Sprite(this.art.frame("fx-boom"));
+  private makeGem(): Gem {
+    const s = new Sprite(this.art.frame("jade"));
     s.anchor.set(0.5);
-    s.position.set(x, y);
-    s.visible = true;
-    s.alpha = 1;
-    s.scale.set(scale * 0.35);
-    s.blendMode = "normal";
-    s.tint = 0xffffff;
-    if (!s.parent) this.fxLayer.addChild(s);
-    const row = pooled ?? { s, life: 0.35, max: 0.35 };
-    row.life = scale > 1 ? 0.5 : 0.32;
-    row.max = row.life;
-    this.booms.push(row);
+    s.scale.set(0.2);
+    s.eventMode = "none";
+    this.fxLayer.addChild(s);
+    return { s, x: 0, y: 0, vx: 0, vy: 0, life: 0 };
   }
 
-  private burst(x: number, y: number, color: number, count: number, speed: number): void {
+  private flushBuckets(): void {
+    for (let i = this.buckets.length - 1; i >= 0; i--) {
+      const bucket = this.buckets[i];
+      bucket.age += 0.016;
+      if (bucket.age < 0.22) continue;
+      this.floatText(bucket.x, bucket.y - 18, `+${bucket.n}`, 0xc8ffd8, bucket.n >= 12 ? 22 : 16);
+      this.buckets.splice(i, 1);
+    }
+  }
+
+  private drawGems(step: number): void {
+    const dt = step > 0 ? step : 0.016;
+    for (let i = this.gems.length - 1; i >= 0; i--) {
+      const gem = this.gems[i];
+      gem.life += dt;
+      if (gem.life < 0.12) {
+        gem.x += gem.vx * dt;
+        gem.y += gem.vy * dt;
+        gem.s.position.set(gem.x, gem.y);
+      } else {
+        const t = Math.min(1, (gem.life - 0.12) / 0.42);
+        const e = t * t;
+        gem.s.position.set(gem.x + (this.gemGoal.x - gem.x) * e, gem.y + (this.gemGoal.y - gem.y) * e);
+        gem.s.alpha = 1 - t * 0.2;
+        if (t >= 1) {
+          gem.s.visible = false;
+          this.gems.splice(i, 1);
+          this.gemPool.push(gem);
+        }
+      }
+    }
+  }
+
+  private burst(x: number, y: number, color: number, count: number): void {
     const n = this.reduced ? Math.min(4, count) : count;
     for (let i = 0; i < n; i++) {
+      if (this.bits.length > 300) {
+        const old = this.bits.shift();
+        if (old) {
+          old.s.visible = false;
+          this.bitPool.push(old);
+        }
+      }
+      const bit = this.bitPool.pop() ?? this.makeBit();
       const a = Math.random() * Math.PI * 2;
-      const v = speed * (0.35 + Math.random() * 0.65);
-      this.bit(x, y, color, Math.cos(a) * v, Math.sin(a) * v, 0.25 + Math.random() * 0.25, 0.55, "spark");
+      const sp = 40 + Math.random() * 90;
+      bit.s.position.set(x, y);
+      bit.s.tint = color;
+      bit.s.alpha = 1;
+      bit.s.visible = true;
+      bit.s.scale.set(0.12 + Math.random() * 0.12);
+      bit.vx = Math.cos(a) * sp;
+      bit.vy = Math.sin(a) * sp - 20;
+      bit.life = 0.35;
+      bit.max = 0.35;
+      this.bits.push(bit);
     }
   }
 
-  private bit(x: number, y: number, color: number, vx: number, vy: number, life: number, shrink: number, frame: string): void {
-    if (this.bits.length > 180) return;
-    const pooled = this.bitPool.pop();
-    const s = pooled?.s ?? new Sprite();
-    s.texture = frame === "spark" ? this.art.frame("fx-orb") : this.art.frame("fx-orb");
+  private makeBit(): Bit {
+    const s = new Sprite(this.art.frame("fx-orb"));
     s.anchor.set(0.5);
-    s.position.set(x, y);
-    s.tint = color;
-    s.visible = true;
-    s.alpha = 1;
     s.blendMode = "add";
-    s.scale.set(frame === "spark" ? 0.12 : 0.16);
-    s.rotation = Math.random() * 6;
-    if (!s.parent) this.bitsLayer.addChild(s);
-    const row = pooled ?? { s, vx, vy, life, max: life, spin: 0, gravity: 0, shrink };
-    row.vx = vx;
-    row.vy = vy;
-    row.life = life;
-    row.max = life;
-    row.spin = (Math.random() - 0.5) * 4;
-    row.gravity = frame === "spark" ? 0 : 8;
-    row.shrink = shrink;
-    this.bits.push(row);
+    s.eventMode = "none";
+    this.fxLayer.addChild(s);
+    return { s, vx: 0, vy: 0, life: 0, max: 0.3 };
   }
 
-  private floatText(x: number, y: number, text: string, color: number, size = 16): void {
-    const pooled = this.floatPool.pop();
-    const t = pooled?.t ?? new Text({ text, style: { fontFamily: SANS, fontSize: size, fill: color, fontWeight: "bold", dropShadow: shadow() } });
-    t.text = text;
-    t.style.fontSize = size;
-    t.style.fill = color;
+  private drawBits(step: number): void {
+    const dt = step > 0 ? step : 0;
+    if (dt <= 0) return;
+    for (let i = this.bits.length - 1; i >= 0; i--) {
+      const bit = this.bits[i];
+      bit.life -= dt;
+      bit.s.x += bit.vx * dt;
+      bit.s.y += bit.vy * dt;
+      bit.vy += 80 * dt;
+      bit.s.alpha = Math.max(0, bit.life / bit.max);
+      if (bit.life <= 0) {
+        bit.s.visible = false;
+        this.bits.splice(i, 1);
+        this.bitPool.push(bit);
+      }
+    }
+  }
+
+  private ringFx(x: number, y: number, radius: number, color: number): void {
+    const ring = new Sprite(this.art.frame("fx-stun"));
+    ring.anchor.set(0.5);
+    ring.blendMode = "add";
+    ring.tint = color;
+    ring.position.set(x, y);
+    ring.eventMode = "none";
+    const target = (radius * 2) / Math.max(1, ring.texture.width);
+    ring.scale.set(target * 0.45);
+    this.fxLayer.addChild(ring);
+    this.rings.push({ s: ring, life: 0.42, max: 0.42, grow: target });
+  }
+
+  private drawRings(step: number): void {
+    const dt = step > 0 ? step : 0.016;
+    for (let i = this.rings.length - 1; i >= 0; i--) {
+      const ring = this.rings[i];
+      ring.life -= dt;
+      const t = 1 - Math.max(0, ring.life) / ring.max;
+      if (ring.grow > 0) ring.s.scale.set(ring.grow * (0.45 + t * 0.7));
+      ring.s.alpha = Math.max(0, 1 - t);
+      if (ring.life <= 0) {
+        ring.s.destroy();
+        this.rings.splice(i, 1);
+      }
+    }
+  }
+
+  private drawChain(pts: Vec[]): void {
+    for (let i = 1; i < pts.length; i++) {
+      const a = pts[i - 1];
+      const b = pts[i];
+      const bolt = new Sprite(this.art.frame("fx-lightning"));
+      bolt.anchor.set(0, 0.5);
+      bolt.blendMode = "add";
+      bolt.position.set(a.x, a.y);
+      bolt.rotation = Math.atan2(b.y - a.y, b.x - a.x);
+      bolt.width = Math.hypot(b.x - a.x, b.y - a.y);
+      bolt.height = 36;
+      bolt.eventMode = "none";
+      this.fxLayer.addChild(bolt);
+      this.rings.push({ s: bolt, life: 0.2, max: 0.2, grow: 0 });
+    }
+  }
+
+  private floatText(x: number, y: number, text: string, fill: number, size: number): void {
+    const floater = this.floatPool.pop() ?? this.makeFloat();
+    floater.t.text = text;
+    floater.t.style.fontSize = size;
+    floater.t.style.fill = fill;
+    floater.t.position.set(x, y);
+    floater.t.alpha = 1;
+    floater.t.visible = true;
+    floater.life = 0.8;
+    floater.vy = -36;
+    this.floats.push(floater);
+  }
+
+  private makeFloat(): Floater {
+    const t = new Text({
+      text: "",
+      style: { fontFamily: SANS, fontSize: 16, fill: 0xffffff, fontWeight: "bold", dropShadow: shadowStyle() },
+    });
     t.anchor.set(0.5);
-    t.position.set(x, y);
-    t.visible = true;
-    t.alpha = 1;
-    if (!t.parent) this.floatLayer.addChild(t);
-    const row = pooled ?? { t, life: 0.85, vy: -34 };
-    row.life = 0.85;
-    row.vy = -34;
-    this.floats.push(row);
+    t.eventMode = "none";
+    this.fxLayer.addChild(t);
+    return { t, life: 0, vy: -30 };
   }
 
-  private takeSprite(): Sprite {
-    const s = this.spritePool.pop() ?? new Sprite();
-    s.visible = true;
-    s.alpha = 1;
-    s.tint = 0xffffff;
-    s.scale.set(1);
-    s.rotation = 0;
-    s.blendMode = "normal";
-    return s;
-  }
-
-  private takeShadow(): Sprite {
-    const s = this.shadowPool.pop() ?? new Sprite(this.art.shadow);
-    s.texture = this.art.shadow;
-    s.anchor.set(0.5, 0.5);
-    s.visible = true;
-    s.alpha = 0.5;
-    s.tint = 0x000000;
-    s.scale.set(0.8);
-    s.rotation = 0;
-    return s;
+  private drawFloats(step: number): void {
+    const dt = step > 0 ? step : 0;
+    if (dt <= 0) return;
+    for (let i = this.floats.length - 1; i >= 0; i--) {
+      const floater = this.floats[i];
+      floater.life -= dt;
+      floater.t.y += floater.vy * dt;
+      floater.t.alpha = Math.max(0, floater.life / 0.8);
+      if (floater.life <= 0) {
+        floater.t.visible = false;
+        this.floats.splice(i, 1);
+        this.floatPool.push(floater);
+      }
+    }
   }
 }
 
-function towerCostLabel(kind: TowerKind): number {
-  return kind === "dart" ? BALANCE.dart[0].cost : kind === "lens" ? BALANCE.lens[0].cost : kind === "drum" ? BALANCE.drum[0].cost : BALANCE.spire[0].cost;
+function stealthedFade(e: Enemy): number {
+  if (e.kind !== "jaguar") return 1;
+  const m = e.age % BALANCE.jaguar.cycle;
+  return m > BALANCE.jaguar.cycle - BALANCE.jaguar.dur ? 0.28 : 1;
 }
 
-function shadow(): { alpha: number; angle: number; blur: number; color: number; distance: number } {
-  return { alpha: 0.8, angle: Math.PI / 2, blur: 3, color: 0x140c06, distance: 1 };
+function shadowStyle(): { alpha: number; color: number; distance: number; blur: number } {
+  return { alpha: 0.7, color: 0x140e0a, distance: 2, blur: 2 };
 }
