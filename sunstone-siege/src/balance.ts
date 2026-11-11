@@ -159,10 +159,13 @@ export const BALANCE = {
     spire: "Jade arcs that leap across a crowd. A stunned target takes the heavier arc.",
   } as const satisfies Record<TowerKind, string>,
   enemies: {
-    // Skitter is the horde fodder. Four of them stand in for one Runner:
-    // HP 32, bounty 8, charge 8, leak 1, against the Runner's 30 / 7 / 9 / 1.
-    // That 2 to 4 percent drift is the invented rounding from the 2.5D spec.
-    skitter: { name: "Skitter", hp: 8, speed: 104, armor: 0, reward: 2, leak: 0.25, charge: 2, flying: false },
+    // Skitter is the horde fodder. A 150-body line at the new size turns into a
+    // smear, so the jungle's biggest pack is 110 (was 244) and the later
+    // valleys field fewer still, because their HP multiplier stacks on this.
+    // HP 60 means a tier-1 Dart (24) needs three hits and a tier-2 Dart (58)
+    // needs two. Reward 4 and leak 0.4 keep bounty and leak pressure near the
+    // old one-shot swarm.
+    skitter: { name: "Skitter", hp: 60, speed: 108, armor: 0, reward: 4, leak: 0.4, charge: 4, flying: false },
     runner: { name: "Runner", hp: 30, speed: 104, armor: 0, reward: 7, leak: 1, charge: 9, flying: false },
     shield: { name: "Shieldbearer", hp: 96, speed: 52, armor: 6, reward: 12, leak: 2, charge: 12, flying: false },
     jaguar: { name: "Jaguar Stalker", hp: 48, speed: 92, armor: 0, reward: 11, leak: 1, charge: 11, flying: false },
@@ -194,11 +197,11 @@ export const BALANCE = {
       hp: 1,
       speed: 1,
       waves: [
-        { bonus: 28, groups: [skitter(28, 0)] },
-        { bonus: 34, groups: [skitter(24, 0), skitter(24, 2, 1.1)] },
-        { bonus: 40, groups: [group("shield", 5, 0.95, 1), group("jaguar", 4, 0.8, 3, 0.4), skitter(24, 0, 2)] },
-        { bonus: 48, groups: [group("glider", 5, 0.72, 2), group("shield", 4, 1, 3, 0.5), group("golem", 2, 2.4, 0, 1.2), skitter(64, 0, 0.3), skitter(64, 2), skitter(32, 1), skitter(32, 3)] },
-        { bonus: 70, groups: [skitter(32, 0), group("boss", 1, 0.2, 2, 0.8), group("shield", 4, 0.9, 1, 1.4), group("jaguar", 3, 0.75, 3, 1.6), skitter(70, 0, 0.2), skitter(70, 2), skitter(36, 1), skitter(36, 3)] },
+        { bonus: 28, groups: [skitter(16, 0)] },
+        { bonus: 34, groups: [skitter(14, 0), skitter(14, 2, 1.1)] },
+        { bonus: 40, groups: [group("shield", 5, 0.95, 1), group("jaguar", 4, 0.8, 3, 0.4), skitter(14, 0, 2)] },
+        { bonus: 48, groups: [group("glider", 5, 0.72, 2), group("shield", 4, 1, 3, 0.5), group("golem", 2, 2.4, 0, 1.2), skitter(36, 0, 0.3), skitter(36, 2), skitter(18, 1), skitter(18, 3)] },
+        { bonus: 70, groups: [skitter(14, 0), group("boss", 1, 0.2, 2, 0.8), group("shield", 4, 0.9, 1, 1.4), group("jaguar", 3, 0.75, 3, 1.6), skitter(32, 0, 0.2), skitter(32, 2), skitter(16, 1), skitter(16, 3)] },
       ],
     },
     {
@@ -207,12 +210,12 @@ export const BALANCE = {
       hp: 1.32,
       speed: 1.04,
       waves: [
-        { bonus: 32, groups: [skitter(24, 0), skitter(20, 1, 1)] },
-        { bonus: 38, groups: [group("shield", 4, 0.95, 0), skitter(20, 3, 1.2)] },
+        { bonus: 32, groups: [skitter(14, 0), skitter(12, 1, 1)] },
+        { bonus: 38, groups: [group("shield", 4, 0.95, 0), skitter(12, 3, 1.2)] },
         { bonus: 44, groups: [group("jaguar", 5, 0.7, 1), group("glider", 5, 0.65, 0, 0.6)] },
         { bonus: 50, groups: [group("golem", 3, 2.1, 2), group("shield", 5, 0.9, 1, 0.8)] },
-        { bonus: 56, groups: [group("glider", 7, 0.55, 0), group("jaguar", 5, 0.7, 1, 0.4), group("shield", 4, 0.85, 2, 1.2), skitter(56, 0, 0.3), skitter(48, 1), skitter(28, 2), skitter(28, 3)] },
-        { bonus: 80, groups: [group("shield", 5, 0.8, 0), group("boss", 1, 0.2, 1, 0.6), group("glider", 5, 0.6, 2, 1), group("golem", 2, 2.2, 0, 1.5), skitter(70, 0, 0.2), skitter(64, 1), skitter(36, 2), skitter(36, 3)] },
+        { bonus: 56, groups: [group("glider", 7, 0.55, 0), group("jaguar", 5, 0.7, 1, 0.4), group("shield", 4, 0.85, 2, 1.2), skitter(22, 0, 0.3), skitter(18, 1), skitter(12, 2), skitter(12, 3)] },
+        { bonus: 80, groups: [group("shield", 5, 0.8, 0), group("boss", 1, 0.2, 1, 0.6), group("glider", 5, 0.6, 2, 1), group("golem", 2, 2.2, 0, 1.5), skitter(26, 0, 0.2), skitter(22, 1), skitter(14, 2), skitter(12, 3)] },
       ],
     },
     {
@@ -221,13 +224,13 @@ export const BALANCE = {
       hp: 1.85,
       speed: 1.1,
       waves: [
-        { bonus: 36, groups: [skitter(40, 0)] },
-        { bonus: 42, groups: [skitter(32, 0), skitter(32, 1, 0.6)] },
+        { bonus: 36, groups: [skitter(22, 0)] },
+        { bonus: 42, groups: [skitter(18, 0), skitter(18, 1, 0.6)] },
         { bonus: 48, groups: [group("shield", 6, 0.75, 2), group("jaguar", 6, 0.62, 0, 0.4)] },
         { bonus: 54, groups: [group("glider", 6, 0.5, 1), group("golem", 3, 1.8, 3, 0.8)] },
         { bonus: 60, groups: [group("shield", 8, 0.62, 2), group("glider", 7, 0.42, 1, 0.3), group("jaguar", 6, 0.5, 0, 0.8)] },
-        { bonus: 66, groups: [group("golem", 4, 1.5, 0), group("golem", 3, 1.5, 2, 0.4), skitter(40, 1, 0.6), skitter(60, 0, 0.2), skitter(56, 2), skitter(32, 3)] },
-        { bonus: 90, groups: [group("shield", 7, 0.55, 0), group("boss", 1, 0.2, 1, 0.3), group("glider", 8, 0.4, 2, 0.5), group("jaguar", 6, 0.48, 0, 0.8), skitter(72, 0, 0.2), skitter(64, 1), skitter(40, 2), skitter(36, 3)] },
+        { bonus: 66, groups: [group("golem", 4, 1.5, 0), group("golem", 3, 1.5, 2, 0.4), skitter(16, 1, 0.6), skitter(24, 0, 0.2), skitter(22, 2), skitter(12, 3)] },
+        { bonus: 90, groups: [group("shield", 7, 0.55, 0), group("boss", 1, 0.2, 1, 0.3), group("glider", 8, 0.4, 2, 0.5), group("jaguar", 6, 0.48, 0, 0.8), skitter(28, 0, 0.2), skitter(24, 1), skitter(16, 2), skitter(14, 3)] },
       ],
     },
   ] as const satisfies readonly WorldBalance[],

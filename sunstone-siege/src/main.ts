@@ -152,10 +152,27 @@ async function boot(): Promise<void> {
   setMode("title");
   layout();
 
-  const fpsNode = params.get("fps") === "1" ? document.createElement("div") : null;
+  const fpsOn = params.get("fps") === "1";
+  const fpsNode = fpsOn ? document.createElement("div") : null;
   if (fpsNode) {
     fpsNode.style.cssText = "position:fixed;left:8px;bottom:8px;color:#f6e7c1;font:12px sans-serif;pointer-events:none;opacity:0.8";
     host.appendChild(fpsNode);
+  }
+  if (fpsOn) {
+    const debug = window as unknown as {
+      __cam: () => { zoom: number; camX: number; camY: number; w: number; h: number };
+      __siege: () => { phase: string; wave: number; jade: number; towers: number; units: number; integrity: number; offer: boolean } | null;
+    };
+    debug.__cam = () => ({ zoom, camX, camY, w: app.screen.width, h: app.screen.height });
+    debug.__siege = () => sim ? {
+      phase: sim.phase,
+      wave: sim.wave,
+      jade: sim.jade,
+      towers: sim.towers.length,
+      units: sim.enemies.filter((e) => e.alive).length,
+      integrity: sim.integrity,
+      offer: sim.pendingOffer !== null,
+    } : null;
   }
   let fpsFrames = 0;
   let fpsStamp = performance.now();
@@ -180,9 +197,14 @@ async function boot(): Promise<void> {
           if (event.kind === "death" && (event.enemy === "boss" || event.enemy === "golem")) {
             hitStop = Math.max(hitStop, event.enemy === "boss" ? 0.1 : 0.055);
           }
+          if (event.kind === "multi") {
+            const n = event.n ?? 3;
+            hitStop = Math.max(hitStop, n >= 10 ? 0.08 : 0.045);
+          }
         }
       }
       view.update(running && !freeze ? dt : 0, sim, freeze);
+      frameFight(dt);
       view.menuScale(zoom, camX, camY);
       if (view.menuPad >= 0) view.refreshMenu(sim.jade);
       present(sim);
@@ -254,6 +276,7 @@ async function boot(): Promise<void> {
     if (moved > 6) {
       camX += dx;
       camY += dy;
+      userCam = 2.4;
       clamp();
     }
     dragX = p.x;
@@ -373,18 +396,94 @@ async function boot(): Promise<void> {
     app.stage.hitArea = new Rectangle(0, 0, w, h);
     hud.layout(w, h);
     view.layout(w, h);
+    const limits = zoomLimits(w, h);
+    zoomMin = limits.min;
+    zoomMax = limits.max;
+    zoom = Math.max(zoomMin, Math.min(zoomMax, zoom));
     clamp();
+  }
+
+  let userCam = 0;
+
+  function zoomLimits(w: number, h: number): { min: number; max: number; start: number } {
+    const fitted = Math.min(w / MAP_W, h / MAP_H);
+    const tall = h > w * 1.15;
+    const max = Math.min(1.85, Math.max(fitted * 2.6, fitted + 0.25, tall ? (h / MAP_H) * 0.92 : 0));
+    const start = Math.min(max, tall ? Math.min((h / MAP_H) * 0.92, w / 620) : fitted * 1.42);
+    return { min: fitted, max, start: Math.max(fitted, start) };
   }
 
   function fit(): void {
     const w = app.screen.width;
     const h = app.screen.height;
-    const z = Math.min(w / MAP_W, h / MAP_H);
-    zoomMin = z;
-    zoomMax = Math.max(z * 2.5, z + 0.15);
-    zoom = z;
-    camX = (w - MAP_W * zoom) / 2;
-    camY = (h - MAP_H * zoom) / 2;
+    const limits = zoomLimits(w, h);
+    zoomMin = limits.min;
+    zoomMax = limits.max;
+    zoom = limits.start;
+    const sun = sim?.map.sun ?? { x: MAP_W / 2, y: MAP_H / 2 };
+    camX = w / 2 - sun.x * zoom;
+    camY = h / 2 - sun.y * zoom;
+    userCam = 0;
+    clamp();
+  }
+
+  function frameFight(dt: number): void {
+    if (!sim || mode !== "play" || paused || settingsOpen) return;
+    if (view.menuPad >= 0) userCam = Math.max(userCam, 0.35);
+    if (userCam > 0) {
+      userCam = Math.max(0, userCam - dt);
+      return;
+    }
+    const w = app.screen.width;
+    const h = app.screen.height;
+    let x = sim.map.sun.x;
+    let y = sim.map.sun.y;
+    if (sim.phase === "wave") {
+      const alive = sim.enemies.filter((e) => e.alive);
+      let bestX = 0;
+      let bestY = 0;
+      let bestN = 0;
+      for (const e of alive) {
+        let n = 0;
+        let sx = 0;
+        let sy = 0;
+        for (const other of alive) {
+          if (Math.hypot(other.x - e.x, other.y - e.y) > 260) continue;
+          n += 1;
+          sx += other.x;
+          sy += other.y;
+        }
+        if (n > bestN) {
+          bestN = n;
+          bestX = sx / n;
+          bestY = sy / n;
+        }
+      }
+      if (bestN > 0) {
+        x = sim.map.sun.x * 0.2 + bestX * 0.8;
+        y = sim.map.sun.y * 0.2 + bestY * 0.8;
+      }
+    } else if (sim.towers.length === 0) {
+      let bestX = x;
+      let bestY = y;
+      let score = -1;
+      for (const pad of sim.pads) {
+        const along = sim.map.sun.x - pad.x;
+        if (along > score) {
+          score = along;
+          bestX = pad.x;
+          bestY = pad.y;
+        }
+      }
+      x = sim.map.sun.x * 0.62 + bestX * 0.38;
+      y = sim.map.sun.y * 0.62 + bestY * 0.38;
+    }
+    const tx = w / 2 - x * zoom;
+    const ty = h / 2 - y * zoom;
+    const k = 1 - Math.exp(-dt * 2.4);
+    camX += (tx - camX) * k;
+    camY += (ty - camY) * k;
+    clamp();
   }
 
   function clamp(): void {
@@ -402,6 +501,7 @@ async function boot(): Promise<void> {
     zoom = Math.max(zoomMin, Math.min(zoomMax, zoom * factor));
     camX = sx - beforeX * zoom;
     camY = sy - beforeY * zoom;
+    userCam = 2.4;
     clamp();
   }
 
@@ -422,7 +522,7 @@ async function boot(): Promise<void> {
     const wy = (sy - camY - view.shakeY) / zoom;
     if (view.menuPad >= 0) view.closeMenu();
     let towerId = 0;
-    let best = 42;
+    let best = 72;
     for (const tower of sim.towers) {
       const d = Math.hypot(tower.x - wx, tower.y - wy);
       if (d < best) {
@@ -435,7 +535,7 @@ async function boot(): Promise<void> {
       return;
     }
     let pad = -1;
-    best = 48;
+    best = 80;
     const pads = sim.pads;
     for (let i = 0; i < pads.length; i++) {
       if (sim.towers.some((t) => t.pad === i)) continue;

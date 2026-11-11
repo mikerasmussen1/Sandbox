@@ -208,8 +208,18 @@ export class Hud {
     }
     this.title.position.set(w / 2, h / 2);
     this.title.scale.set(Math.max(0.62, Math.min(1, Math.min(w / 980, h / 640))));
+    const narrowLevels = w < 700;
     this.levels.position.set(w / 2, h / 2);
-    this.levels.scale.set(Math.max(0.58, Math.min(1, Math.min(w / 1040, h / 620))));
+    this.levels.scale.set(narrowLevels
+      ? Math.min(1, w / 340, (h - 24) / 860)
+      : Math.max(0.58, Math.min(1, Math.min(w / 1040, h / 620))));
+    const heading = this.levels.children[0] as Container | undefined;
+    const back = this.levels.children[1] as Container | undefined;
+    if (heading) heading.position.y = narrowLevels ? -430 : -210;
+    if (back) back.position.y = narrowLevels ? 400 : 230;
+    this.levelCards.forEach((card, i) => {
+      card.position.set(narrowLevels ? 0 : (i - 1) * 300, narrowLevels ? (i - 1) * 230 - 20 : 10);
+    });
     this.placePlay(w, h);
     this.pauseLayer.position.set(w / 2, h / 2);
     this.settingsLayer.position.set(w / 2, h / 2);
@@ -462,26 +472,39 @@ export class Hud {
     const pause = this.pauseButton;
     const gear = this.gearButton;
     if (!bar || !jadeIcon || !speed || !pause || !gear) return;
+    const barH = w < 760 ? 112 : 56;
     bar.clear();
-    bar.rect(0, 0, w, 56).fill({ color: 0x140e0a, alpha: 0.84 });
-    bar.hitArea = new Rectangle(0, 0, w, 56);
+    bar.rect(0, 0, w, barH).fill({ color: 0x140e0a, alpha: 0.84 });
+    bar.hitArea = new Rectangle(0, 0, w, barH);
     this.integrityText.position.set(16, 8);
     this.integrityFill.position.set(16, 34);
     jadeIcon.position.set(210, 28);
     this.jadeText.position.set(232, 16);
-    this.waveText.anchor.set(0.5, 0);
-    this.waveText.position.set(w / 2, 16);
-    gear.position.set(w - 78, 28);
-    pause.position.set(w - 214, 28);
-    speed.position.set(w - 326, 28);
+    const narrow = w < 760;
+    this.waveText.anchor.set(narrow ? 1 : 0.5, 0);
+    this.waveText.position.set(narrow ? w - 12 : w / 2, 8);
+    this.streakText.anchor.set(narrow ? 1 : 0, 0);
+    this.streakText.position.set(narrow ? w - 12 : w / 2 + 90, narrow ? 30 : 16);
+    if (narrow) {
+      const gap = 8;
+      const right = w - 10;
+      gear.position.set(right - 66, 84);
+      pause.position.set(right - 132 - gap - 59, 84);
+      speed.position.set(right - 132 - gap - 118 - gap - 43, 84);
+    } else {
+      gear.position.set(w - 78, 28);
+      pause.position.set(w - 214, 28);
+      speed.position.set(w - 326, 28);
+    }
     this.flareButton.position.set(w - 64, h - 64);
-    this.callButton.position.set(w / 2, h - 48);
-    this.hint.position.set(w / 2, 78);
-    this.banner.position.set(w / 2, 120);
+    this.callButton.position.set(narrow ? Math.max(150, w / 2 - 46) : w / 2, h - 48);
+    this.hint.style.wordWrap = true;
+    this.hint.style.wordWrapWidth = Math.max(160, w - 28);
+    this.hint.position.set(w / 2, narrow ? 140 : 78);
+    this.banner.position.set(w / 2, narrow ? 206 : 120);
     this.card.position.set(12, h - 356);
-    this.streakText.position.set(w / 2 + 90, 16);
     this.bossText.anchor.set(0.5, 0);
-    this.bossText.position.set(w / 2, 96);
+    this.bossText.position.set(w / 2, w < 760 ? 128 : 96);
     this.purseText.position.set(188, 62);
     this.offerLayer.position.set(w / 2, h / 2 + 10);
   }

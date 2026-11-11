@@ -118,6 +118,14 @@ export function stealthed(kind: EnemyKind, age: number): boolean {
   return m > BALANCE.jaguar.cycle - BALANCE.jaguar.dur;
 }
 
+/** How much trail a body wants. Bigger sprites need a wider crowd. */
+function girth(kind: EnemyKind): number {
+  if (kind === "boss") return 86;
+  if (kind === "golem") return 72;
+  if (kind === "shield" || kind === "glider") return 58;
+  return 62;
+}
+
 export class Siege {
   readonly map: MapDef;
   readonly world: number;
@@ -370,10 +378,13 @@ export class Siege {
       if (g.kind === "skitter") {
         if (skitterAt < 0) skitterAt = t + g.gap;
         let at = skitterAt;
-        const wall = g.count >= 48;
-        const step = wall ? 0.045 : 0.1;
-        const clump = wall ? 10 : 8;
-        const breathe = wall ? 0.05 : 0.22;
+        // Packs of four, then a gap, so the crowd reads as clumps instead of a line.
+        // Big packs still arrive together, or each tower along the trail
+        // picks them off one at a time and the wave stops being a fight.
+        const wall = g.count >= 28;
+        const step = wall ? 0.07 : 0.14;
+        const clump = wall ? 6 : 4;
+        const breathe = wall ? 0.22 : 0.55;
         for (let i = 0; i < g.count; i++) {
           queue.push({ t: at, kind: g.kind, path: g.path });
           at += step;
@@ -433,7 +444,7 @@ export class Siege {
     e.rushUntil = 0;
     e.flash = 0;
     e.alive = true;
-    e.lane = ((e.id * 37) % 49) - 24;
+    e.lane = ((e.id * 37) % 97) - 48;
     e.striking = false;
     e.strikeLeft = 0;
     e.guard = 0;
@@ -463,6 +474,7 @@ export class Siege {
 
   /** Returns true when a leak cracks the Sunstone and the valley is lost. */
   private move(dt: number): boolean {
+    this.crowd();
     for (const e of this.enemies) {
       if (!e.alive) continue;
       e.age += dt;
@@ -742,7 +754,7 @@ export class Siege {
     const applied = Math.min(e.hp, dealt);
     e.hp -= applied;
     if (tower) tower.dealt += applied;
-    e.flash = 0.06;
+    e.flash = e.kind === "skitter" || e.kind === "runner" ? 0.16 : 0.12;
     if (mitigate && (e.kind === "shield" || e.kind === "boss") && fromX !== undefined && fromY !== undefined) {
       const fx = Math.cos(e.angle);
       const fy = Math.sin(e.angle);
@@ -851,6 +863,37 @@ export class Siege {
       prev = best;
     }
     return { primary, chain };
+  }
+
+  /** Push neighbors apart across the trail so a pack is a crowd, not a file. */
+  private crowd(): void {
+    const alive = this.enemies.filter((e) => e.alive && !e.striking);
+    for (let i = 0; i < alive.length; i++) {
+      const a = alive[i];
+      for (let j = i + 1; j < alive.length; j++) {
+        const b = alive[j];
+        if (a.path !== b.path || a.flying !== b.flying) continue;
+        const dx = a.x - b.x;
+        const dy = a.y - b.y;
+        const d = Math.hypot(dx, dy) || 0.001;
+        const want = (girth(a.kind) + girth(b.kind)) * 0.5;
+        if (d >= want) continue;
+        const push = (want - d) * 0.42;
+        const lx = Math.cos(a.angle + Math.PI / 2);
+        const ly = Math.sin(a.angle + Math.PI / 2);
+        const side = dx * lx + dy * ly >= 0 ? 1 : -1;
+        a.lane += side * push * 0.55;
+        b.lane -= side * push * 0.55;
+        if (Math.abs(a.dist - b.dist) < want * 0.65) {
+        if (a.dist >= b.dist) a.dist += push * 0.14;
+        else b.dist += push * 0.14;
+        }
+      }
+    }
+    for (const e of alive) {
+      const cap = e.boss ? 34 : e.flying ? 26 : 72;
+      e.lane = Math.max(-cap, Math.min(cap, e.lane));
+    }
   }
 
   private pose(e: Enemy, route: Route): void {

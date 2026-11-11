@@ -19,6 +19,16 @@ const PLAY: Record<string, number> = {
 };
 
 const ELITE: ReadonlySet<EnemyKind> = new Set(["shield", "golem", "boss"]);
+/** Sheets are authored at 2× and were drawn at half size. Use the full frame. */
+const ENEMY_DRAW = 2;
+const TOWER_DRAW = 1.35;
+
+function bodyScale(kind: EnemyKind, clipDraw: number): number {
+  let scale = clipDraw * ENEMY_DRAW;
+  if (kind === "shard") scale *= 0.5;
+  else if (ELITE.has(kind)) scale *= 1.1;
+  return scale;
+}
 
 interface Actor {
   body: Sprite;
@@ -38,6 +48,7 @@ interface Ghost {
   row: number;
   time: number;
   fodder: boolean;
+  draw: number;
   x: number;
   y: number;
 }
@@ -94,6 +105,8 @@ export class WorldView {
   shownSprites = 0;
   private viewW = 1280;
   private viewH = 720;
+  private callout!: Text;
+  private calloutLife = 0;
   private camX = 0;
   private camY = 0;
   private zoom = 1;
@@ -175,7 +188,21 @@ export class WorldView {
     this.flashRect.eventMode = "none";
     this.flashRect.blendMode = "add";
     this.overlay.eventMode = "none";
-    this.overlay.addChild(this.flashRect);
+    this.callout = new Text({
+      text: "",
+      style: {
+        fontFamily: SANS,
+        fontSize: 40,
+        fill: 0xfff1c2,
+        fontWeight: "bold",
+        align: "center",
+        dropShadow: shadowStyle(),
+      },
+    });
+    this.callout.anchor.set(0.5);
+    this.callout.eventMode = "none";
+    this.callout.visible = false;
+    this.overlay.addChild(this.flashRect, this.callout);
     this.buildMenu();
   }
 
@@ -201,6 +228,7 @@ export class WorldView {
   layout(w: number, h: number): void {
     this.viewW = w;
     this.viewH = h;
+    this.callout.position.set(w / 2, w < 760 ? 248 : 168);
     this.flashRect.clear();
     this.flashRect.rect(0, 0, w, h).fill({ color: 0xffe0a0 });
   }
@@ -345,6 +373,7 @@ export class WorldView {
     this.drawRings(step);
     this.drawGems(step);
     this.drawFloats(step);
+    this.drawCallout(step > 0 ? step : 0.016);
     this.flushBuckets();
     const fade = step > 0 ? step : 0.016;
     this.flashRect.alpha = Math.max(0, (this.flashRect.alpha || 0) - fade * (this.reduced ? 2.4 : 1.3));
@@ -367,11 +396,10 @@ export class WorldView {
       else if (event.kind === "death") this.onDeath(event);
       else if (event.kind === "jade" && event.n) this.onJade(event.x, event.y, event.n);
       else if (event.kind === "multi" && event.text) {
-        this.floatText(event.x, event.y, event.text, 0xfff1c2, event.n && event.n >= 10 ? 40 : 30);
-        this.bump(event.n && event.n >= 10 ? 0.35 : 0.16);
+        this.floatText(event.x, event.y - 78, event.text, 0xfff1c2, event.n && event.n >= 10 ? 42 : 32);
+        this.bump(event.n && event.n >= 10 ? 0.55 : 0.28);
       } else if (event.kind === "callout" && event.text) {
-        this.floatText(event.x, event.y, event.text, 0xffd56a, 36);
-        this.bump(0.2);
+        this.showCallout(event.text);
       } else if (event.kind === "relic" && event.text) this.floatText(event.x, event.y, event.text, 0xfff1c8, 26);
       else if (event.kind === "drum" && event.n) this.ringFx(event.x, event.y, event.n, 0xb9a0ff);
       else if (event.kind === "slam" && event.n) {
@@ -565,7 +593,7 @@ export class WorldView {
         actor.time = 0;
       }
       const shown = actor.clip === "idle" ? idle : current;
-      const draw = shown.draw * (tower.stunnedUntil > sim.time ? 0.98 : 1);
+      const draw = shown.draw * TOWER_DRAW * (tower.stunnedUntil > sim.time ? 0.98 : 1);
       this.paint(actor, shown, 0, actor.clip, draw);
       actor.body.position.set(tower.x, tower.y);
       actor.outline.position.set(tower.x, tower.y + 2);
@@ -573,7 +601,7 @@ export class WorldView {
       actor.outline.zIndex = tower.y - 0.2;
       actor.body.tint = tower.stunnedUntil > sim.time ? 0xb7c4d4 : 0xffffff;
       actor.shadow.position.set(tower.x, tower.y + 6);
-      actor.shadow.scale.set(1.15, 0.62);
+      actor.shadow.scale.set(1.45, 0.78);
       if (actor.clip === "attack" && actor.time < 0.09) this.burst(tower.x, tower.y - 70, TOWER_HUE[tower.kind], 3);
     }
     for (const [id, actor] of this.towers) {
@@ -611,22 +639,22 @@ export class WorldView {
       const clip = this.art.clip(asset, actor.clip) ?? this.art.clip(asset, locomote(e.kind));
       if (!clip) continue;
       const row = facingRow(e.angle, clip.frames.length);
-      let draw = clip.draw;
-      if (e.kind === "shard") draw *= 0.5;
-      else if (ELITE.has(e.kind)) draw *= 1.1;
-      const squash = e.flash > 0 ? 0.96 : 1;
-      this.paint(actor, clip, row, actor.clip, draw * squash);
+      const draw = bodyScale(e.kind, clip.draw);
+      const punch = e.flash > 0 ? 1 + Math.min(0.34, e.flash * 1.6) : 1;
+      this.paint(actor, clip, row, actor.clip, draw * punch);
       const hop = e.hop > 0 ? Math.sin((0.16 - e.hop) * 40) * 6 : 0;
       const lift = e.flying ? 18 + Math.sin(this.time * 6 + e.id) * 6 : 0;
       actor.body.position.set(e.x, e.y - lift - hop);
       actor.outline.position.set(e.x, e.y - lift - hop + 2);
       actor.body.zIndex = e.y;
       actor.outline.zIndex = e.y - 0.2;
-      actor.body.tint = e.flash > 0 ? 0xfff4f0 : 0xffffff;
+      actor.body.tint = e.flash > 0 ? 0xfff3c4 : 0xffffff;
+      actor.outline.tint = e.flash > 0 ? 0xffe08a : 0x14080c;
       actor.body.alpha = stealthedFade(e);
-      actor.outline.alpha = e.kind === "skitter" ? 0.55 : 0.85;
-      actor.shadow.position.set(e.x, e.y + (e.flying ? 10 : 4));
-      actor.shadow.scale.set(e.kind === "boss" ? 1.5 : e.kind === "skitter" ? 0.45 : 0.72, e.flying ? 0.28 : 0.4);
+      actor.outline.alpha = e.flash > 0 ? 1 : e.kind === "skitter" ? 0.7 : 0.9;
+      actor.shadow.position.set(e.x, e.y + (e.flying ? 14 : 6));
+      const shadow = e.kind === "boss" ? 2.2 : e.kind === "golem" ? 1.7 : e.kind === "skitter" ? 0.85 : 1.15;
+      actor.shadow.scale.set(shadow, e.flying ? 0.42 : 0.58);
       actor.shadow.tint = ELITE.has(e.kind) ? 0x6a5420 : 0x1a120c;
       actor.shadow.alpha = ELITE.has(e.kind) ? 0.55 : 0.35;
     }
@@ -713,7 +741,9 @@ export class WorldView {
     }
     this.tag.visible = true;
     this.tag.text = `${TOWER_ICON[tower.kind]}  ${read.stat}   ${read.targets}`;
-    this.tag.position.set(tower.x, tower.y - 128);
+    const above = this.camY + (tower.y - 168) * this.zoom;
+    if (above < 112) this.tag.position.set(tower.x + 130, tower.y - 70);
+    else this.tag.position.set(tower.x, tower.y - 168);
     this.tag.zIndex = 0;
   }
 
@@ -746,7 +776,7 @@ export class WorldView {
       const w = e.boss ? 74 : e.kind === "golem" || e.kind === "shield" ? 40 : 28;
       const h = e.boss ? 7 : 4;
       const x = e.x - w / 2;
-      const y = e.y - (e.boss ? 150 : e.kind === "golem" ? 96 : 70);
+      const y = e.y - (e.boss ? 250 : e.kind === "golem" ? 170 : 118);
       this.bars.rect(x, y, w, h).fill({ color: 0x140e0a, alpha: 0.8 });
       if (e.armor > 0) this.bars.rect(x, y, Math.min(w, e.armor * 2), h).fill({ color: 0x8d8a86 });
       const ratio = Math.max(0, e.hp / e.maxHp);
@@ -790,7 +820,7 @@ export class WorldView {
         this.beams.push(beam);
       }
       const x = tower.x;
-      const y = tower.y - 78;
+      const y = tower.y - 104;
       const dx = target.x - x;
       const dy = target.y - y;
       beam.visible = true;
@@ -825,10 +855,12 @@ export class WorldView {
     ghost.body.visible = true;
     ghost.outline.visible = !fodder;
     ghost.shadow.visible = true;
-    const draw = clip.draw * (kind === "shard" ? 0.5 : ELITE.has(kind) ? 1.1 : 1);
-    this.paintGhost(ghost, draw);
+    ghost.draw = bodyScale(kind, clip.draw);
+    this.paintGhost(ghost, ghost.draw);
     this.ghosts.push(ghost);
-    if (fodder) this.burst(event.x, event.y, 0x8a1820, 8);
+    this.burst(event.x, event.y - 18, 0xfff3d2, fodder ? 12 : 7);
+    this.burst(event.x, event.y, fodder ? 0xff5a3a : 0xffb070, fodder ? 8 : 5);
+    this.ringFx(event.x, event.y, fodder ? 70 : 110, 0xffc48a);
   }
 
   private spawnGhost(actor: Actor, name: string, fodder: boolean): void {
@@ -848,7 +880,7 @@ export class WorldView {
     const shadow = this.shadowSprite();
     this.actors.addChild(outline, body);
     this.shadowLayer.addChild(shadow);
-    return { body, outline, shadow, clip: { frames: [[Texture.EMPTY]], fps: 1, loop: false, anchorX: 0.5, anchorY: 0.8, draw: 0.5 }, row: 0, time: 0, fodder: false, x: 0, y: 0 };
+    return { body, outline, shadow, clip: { frames: [[Texture.EMPTY]], fps: 1, loop: false, anchorX: 0.5, anchorY: 0.8, draw: 0.5 }, row: 0, time: 0, fodder: false, draw: 1, x: 0, y: 0 };
   }
 
   private paintGhost(ghost: Ghost, draw: number): void {
@@ -864,18 +896,19 @@ export class WorldView {
     ghost.body.zIndex = ghost.y;
     ghost.outline.zIndex = ghost.y - 0.2;
     ghost.shadow.position.set(ghost.x, ghost.y + 4);
-    ghost.shadow.scale.set(0.6, 0.32);
+    ghost.shadow.scale.set(Math.max(0.5, draw * 0.7), Math.max(0.28, draw * 0.36));
   }
 
   private drawGhosts(step: number): void {
     for (let i = this.ghosts.length - 1; i >= 0; i--) {
       const ghost = this.ghosts[i];
       ghost.time += step > 0 ? step : 0.016;
-      const draw = ghost.clip.draw;
+      const draw = ghost.draw;
       if (ghost.fodder) {
-        const t = Math.min(1, ghost.time / 0.22);
-        this.paintGhost(ghost, draw * (1 - t));
-        ghost.body.alpha = 1 - t;
+        const t = Math.min(1, ghost.time / 0.32);
+        const pop = t < 0.22 ? 1.05 + t * 1.4 : Math.max(0, 1.35 * (1 - t));
+        this.paintGhost(ghost, draw * pop);
+        ghost.body.alpha = 1 - t * 0.85;
         if (t >= 1) {
           this.ghosts.splice(i, 1);
           this.retireGhost(ghost);
@@ -1067,7 +1100,31 @@ export class WorldView {
     }
   }
 
+  private showCallout(text: string): void {
+    this.callout.text = text;
+    this.callout.visible = true;
+    this.callout.alpha = 1;
+    this.callout.scale.set(1.12);
+    this.calloutLife = 1.2;
+  }
+
+  private drawCallout(dt: number): void {
+    if (this.calloutLife <= 0) return;
+    this.calloutLife -= dt;
+    const t = Math.max(0, this.calloutLife / 1.2);
+    this.callout.alpha = Math.min(1, t * 2.2);
+    this.callout.scale.set(1 + (1 - t) * 0.08);
+    if (this.calloutLife <= 0) this.callout.visible = false;
+  }
+
   private floatText(x: number, y: number, text: string, fill: number, size: number): void {
+    const near = this.floats.find((f) => f.t.visible && f.t.text === text && Math.hypot(f.t.x - x, f.t.y - y) < 140);
+    if (near) {
+      near.life = 0.9;
+      near.t.position.set(x, y);
+      near.t.alpha = 1;
+      return;
+    }
     const floater = this.floatPool.pop() ?? this.makeFloat();
     floater.t.text = text;
     floater.t.style.fontSize = size;
