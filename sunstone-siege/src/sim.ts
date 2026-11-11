@@ -2,10 +2,10 @@
  * Combat simulation. No rendering and no storage, so a valley can be played
  * forward in a test without a browser.
  */
-import { BALANCE, towerCost, towerRange } from "./balance";
+import { BALANCE, towerCost, towerRange, type RelicDef } from "./balance";
 import { poseAt } from "./geom";
 import { mapDef, SUN, type MapDef } from "./maps";
-import type { EnemyKind, Phase, TowerKind, Vec } from "./types";
+import type { EnemyKind, Phase, RelicId, TowerKind, Vec } from "./types";
 
 export interface Enemy {
   id: number;
@@ -28,6 +28,12 @@ export interface Enemy {
   slowUntil: number;
   stunUntil: number;
   slam: number;
+  /** Countdown until the next obsidian shell. Boss only. */
+  aegis: number;
+  aegisUntil: number;
+  /** Countdown until the next rally roar. Boss only. */
+  rally: number;
+  rushUntil: number;
   flash: number;
   alive: boolean;
 }
@@ -61,7 +67,7 @@ export interface Shot {
   alive: boolean;
 }
 
-export type FxKind = "impact" | "death" | "jade" | "drum" | "chain" | "crack" | "flare" | "slam" | "boss" | "place";
+export type FxKind = "impact" | "death" | "jade" | "drum" | "chain" | "crack" | "flare" | "slam" | "boss" | "place" | "streak" | "relic" | "aegis" | "rally";
 
 export interface Fx {
   kind: FxKind;
@@ -100,6 +106,20 @@ export class Siege {
   earlyGranted = false;
   flare = 0;
   flareLock = 0;
+  pendingOffer: RelicId[] | null = null;
+  offerLeft = 0;
+  readonly relics: RelicId[] = [];
+  private dartMul = 1;
+  private lensDpsMul = 1;
+  private lensRampMul = 1;
+  private drumStunMul = 1;
+  private spireJumpAdd = 0;
+  private spireDmgMul = 1;
+  private jadeMul = 1;
+  private flareMul = 1;
+  private rangeMul = 1;
+  private combo = 0;
+  private comboUntil = 0;
   readonly enemies: Enemy[] = [];
   readonly towers: Tower[] = [];
   readonly shots: Shot[] = [];
@@ -134,6 +154,11 @@ export class Siege {
   /** 1-based wave the HUD should name. */
   get waveShown(): number {
     return Math.min(this.waveCount, this.wave + 1);
+  }
+
+  /** Relic range multiplier. The placement ring uses the same figure. */
+  get rangeScale(): number {
+    return this.rangeMul;
   }
 
   private nextId(): number {
@@ -195,7 +220,7 @@ export class Siege {
   }
 
   callWave(): boolean {
-    if (this.phase !== "build") return false;
+    if (this.phase !== "build" || this.pendingOffer) return false;
     if (this.buildLeft > 0.25 && !this.earlyGranted) {
       this.jade += BALANCE.earlyCall;
       this.earlyGranted = true;
@@ -213,8 +238,19 @@ export class Siege {
     this.fx.push({ kind: "flare", x: SUN.x, y: SUN.y });
     for (const e of this.enemies) {
       if (!e.alive) continue;
-      this.hurt(e, e.boss ? BALANCE.flare.bossDamage : BALANCE.flare.damage, true);
+      const raw = (e.boss ? BALANCE.flare.bossDamage : BALANCE.flare.damage) * this.flareMul;
+      this.hurt(e, raw, true);
     }
+    return true;
+  }
+
+  chooseRelic(id: RelicId): boolean {
+    if (!this.pendingOffer?.includes(id)) return false;
+    this.applyRelic(id);
+    this.relics.push(id);
+    this.pendingOffer = null;
+    const spec = BALANCE.relics[id];
+    this.fx.push({ kind: "relic", x: SUN.x, y: SUN.y - 90, text: spec.name });
     return true;
   }
 
@@ -250,8 +286,14 @@ export class Siege {
     for (const e of this.enemies) if (e.flash > 0) e.flash = Math.max(0, e.flash - dt);
 
     if (this.phase === "build") {
-      this.buildLeft -= dt;
-      if (this.buildLeft <= 0) this.startWave();
+      if (this.pendingOffer) {
+        this.offerLeft -= dt;
+        if (this.offerLeft <= 0) this.chooseRelic(this.pendingOffer[0]);
+      }
+      if (!this.pendingOffer) {
+        this.buildLeft -= dt;
+        if (this.buildLeft <= 0) this.startWave();
+      }
     }
 
     if (this.phase === "wave") this.spawn();
@@ -261,14 +303,16 @@ export class Siege {
     this.compact();
     if (this.phase === "wave" && this.q >= this.queue.length && !this.enemies.some((e) => e.alive)) {
       const spec = BALANCE.worlds[this.world].waves[this.wave];
-      this.jade += spec.bonus;
-      this.fx.push({ kind: "jade", x: SUN.x, y: SUN.y - 140, text: `+${spec.bonus}` });
+      const bonus = Math.round(spec.bonus * this.jadeMul);
+      this.jade += bonus;
+      this.fx.push({ kind: "jade", x: SUN.x, y: SUN.y - 140, text: `+${bonus}` });
       this.wave += 1;
       if (this.wave >= this.waveCount) this.phase = "victory";
       else {
         this.phase = "build";
         this.buildLeft = BALANCE.prewave;
         this.earlyGranted = false;
+        this.rollOffer();
       }
     }
   }
@@ -322,6 +366,10 @@ export class Siege {
     e.slowUntil = 0;
     e.stunUntil = 0;
     e.slam = BALANCE.boss.slamEvery * 0.65;
+    e.aegis = BALANCE.boss.aegisEvery;
+    e.aegisUntil = 0;
+    e.rally = BALANCE.boss.rallyEvery * 0.72;
+    e.rushUntil = 0;
     e.flash = 0;
     e.alive = true;
     const pose = poseAt(e.flying ? this.map.flights[path] : this.map.routes[path], dist);
@@ -337,7 +385,7 @@ export class Siege {
     return {
       id: 0, kind: "runner", path: 0, dist: 0, x: 0, y: 0, angle: 0, hp: 1, maxHp: 1,
       armor: 0, speed: 0, reward: 0, leak: 1, charge: 0, flying: false, boss: false,
-      age: 0, slowUntil: 0, stunUntil: 0, slam: 0, flash: 0, alive: false,
+      age: 0, slowUntil: 0, stunUntil: 0, slam: 0, aegis: 0, aegisUntil: 0, rally: 0, rushUntil: 0, flash: 0, alive: false,
     };
   }
 
@@ -349,6 +397,7 @@ export class Siege {
       let mul = 1;
       if (e.stunUntil > this.time) mul = 0;
       else if (e.slowUntil > this.time) mul = BALANCE.slowMul;
+      if (mul > 0 && e.rushUntil > this.time) mul *= BALANCE.boss.rallySpeed;
       e.dist += e.speed * mul * dt;
       const route = e.flying ? this.map.flights[e.path] : this.map.routes[e.path];
       if (e.dist >= route.len) {
@@ -377,6 +426,23 @@ export class Siege {
             }
           }
         }
+        e.aegis -= dt;
+        if (e.aegis <= 0) {
+          e.aegis = BALANCE.boss.aegisEvery;
+          e.aegisUntil = this.time + BALANCE.boss.aegisDur;
+          this.fx.push({ kind: "aegis", x: e.x, y: e.y });
+        }
+        e.rally -= dt;
+        if (e.rally <= 0) {
+          e.rally = BALANCE.boss.rallyEvery;
+          this.fx.push({ kind: "rally", x: e.x, y: e.y, n: BALANCE.boss.rallyRadius });
+          for (const other of this.enemies) {
+            if (!other.alive || other.id === e.id) continue;
+            if (Math.hypot(other.x - e.x, other.y - e.y) <= BALANCE.boss.rallyRadius) {
+              other.rushUntil = Math.max(other.rushUntil, this.time + BALANCE.boss.rallyDur);
+            }
+          }
+        }
       }
     }
     return false;
@@ -398,7 +464,7 @@ export class Siege {
   }
 
   private acquire(tower: Tower, keep: number): Enemy | null {
-    const range = towerRange(tower.kind, tower.tier);
+    const range = towerRange(tower.kind, tower.tier) * this.rangeMul;
     const rangeSq = range * range;
     if (keep) {
       const held = this.enemies.find((e) => e.id === keep && e.alive && !stealthed(e.kind, e.age));
@@ -429,7 +495,8 @@ export class Siege {
     const target = this.acquire(tower, 0);
     if (!target) return;
     const tier = BALANCE.dart[tower.tier];
-    tower.cooldown += tier.interval;
+    const slowed = target.slowUntil > this.time;
+    tower.cooldown += tier.interval * (slowed ? BALANCE.synergy.slowDart : 1);
     tower.angle = Math.atan2(target.y - tower.y, target.x - tower.x);
     tower.targetId = target.id;
     const shot = this.shots[this.shotCursor];
@@ -442,7 +509,7 @@ export class Siege {
     shot.tx = target.x;
     shot.ty = target.y;
     shot.targetId = target.id;
-    shot.damage = tier.damage;
+    shot.damage = tier.damage * this.dartMul;
     shot.speed = tier.shotSpeed;
     shot.alive = true;
   }
@@ -459,9 +526,11 @@ export class Siege {
       tower.ramp = 0;
     }
     const tier = BALANCE.lens[tower.tier];
-    tower.ramp = Math.min(tier.rampMax, tower.ramp + tier.ramp * dt);
+    tower.ramp = Math.min(tier.rampMax, tower.ramp + tier.ramp * this.lensRampMul * dt);
     tower.angle = Math.atan2(target.y - tower.y, target.x - tower.x);
-    const dps = Math.max(BALANCE.minDps, tier.dps + tower.ramp - target.armor);
+    let dps = tier.dps * this.lensDpsMul + tower.ramp;
+    if (target.stunUntil > this.time) dps *= BALANCE.synergy.stunnedLens;
+    dps = Math.max(BALANCE.minDps, dps - target.armor);
     tower.cooldown -= dt;
     if (tower.cooldown <= 0) {
       target.flash = 0.07;
@@ -472,7 +541,8 @@ export class Siege {
 
   private drum(tower: Tower): void {
     const tier = BALANCE.drum[tower.tier];
-    const r2 = tier.radius * tier.radius;
+    const radius = tier.radius * this.rangeMul;
+    const r2 = radius * radius;
     let hit = false;
     for (const e of this.enemies) {
       if (!e.alive) continue;
@@ -482,13 +552,13 @@ export class Siege {
       hit = true;
       this.hurt(e, tier.damage, true);
       if (!e.alive) continue;
-      const stun = e.boss ? tier.stun * 0.35 : tier.stun;
+      const stun = (e.boss ? tier.stun * 0.35 : tier.stun) * this.drumStunMul;
       e.stunUntil = Math.max(e.stunUntil, this.time + stun);
       e.slowUntil = Math.max(e.slowUntil, this.time + tier.slow);
     }
     if (!hit) return;
     tower.cooldown += tier.interval;
-    this.fx.push({ kind: "drum", x: tower.x, y: tower.y, n: tier.radius });
+    this.fx.push({ kind: "drum", x: tower.x, y: tower.y, n: radius });
   }
 
   private spire(tower: Tower): void {
@@ -501,7 +571,8 @@ export class Siege {
     const used = new Set<number>([first.id]);
     let prev = first;
     const chainSq = tier.chain * tier.chain;
-    for (let j = 1; j < tier.jumps; j++) {
+    const jumps = tier.jumps + this.spireJumpAdd;
+    for (let j = 1; j < jumps; j++) {
       let best: Enemy | null = null;
       let bestD = chainSq;
       for (const e of this.enemies) {
@@ -521,7 +592,9 @@ export class Siege {
     }
     const pts: Vec[] = [{ x: tower.x, y: tower.y - 16 }];
     chain.forEach((e, i) => {
-      this.hurt(e, tier.damage * Math.pow(tier.falloff, i), true);
+      let damage = tier.damage * this.spireDmgMul * Math.pow(tier.falloff, i);
+      if (e.stunUntil > this.time) damage *= BALANCE.synergy.stunnedSpire;
+      this.hurt(e, damage, true);
       pts.push({ x: e.x, y: e.y });
     });
     this.fx.push({ kind: "chain", x: tower.x, y: tower.y, pts });
@@ -559,18 +632,58 @@ export class Siege {
   /** `mitigate` subtracts armor. Beams pass false because they already did. */
   private hurt(e: Enemy, raw: number, mitigate: boolean): void {
     if (!e.alive || raw <= 0) return;
-    const dealt = mitigate ? Math.max(BALANCE.minHit, raw - e.armor) : raw;
+    let dealt = mitigate ? Math.max(BALANCE.minHit, raw - e.armor) : raw;
+    if (e.boss && e.aegisUntil > this.time) dealt *= BALANCE.boss.aegisMul;
     e.hp -= dealt;
     if (mitigate) e.flash = 0.1;
     if (e.hp > 0) return;
     e.alive = false;
-    this.jade += e.reward;
+    const reward = Math.max(1, Math.round(e.reward * this.jadeMul));
+    this.jade += reward;
     if (this.time >= this.flareLock) this.flare = Math.min(BALANCE.flare.need, this.flare + e.charge);
     this.fx.push({ kind: "death", x: e.x, y: e.y, enemy: e.kind });
-    this.fx.push({ kind: "jade", x: e.x, y: e.y - 16, text: `+${e.reward}` });
+    this.fx.push({ kind: "jade", x: e.x, y: e.y - 16, text: `+${reward}` });
+    this.noteStreak(e);
     if (e.kind === "golem") {
       for (let i = 0; i < BALANCE.golemShards; i++) this.birth("shard", e.path, Math.min(e.dist + 6, this.routeLen(e) - 4));
     }
+  }
+
+  private noteStreak(e: Enemy): void {
+    if (this.time <= this.comboUntil) this.combo += 1;
+    else this.combo = 1;
+    this.comboUntil = this.time + BALANCE.combo.window;
+    if (this.combo < BALANCE.combo.start) return;
+    const bonus = BALANCE.combo.jade * (this.combo - BALANCE.combo.start + 1);
+    this.jade += bonus;
+    this.fx.push({ kind: "streak", x: e.x, y: e.y - 34, text: `${this.combo} streak`, n: this.combo });
+  }
+
+  private rollOffer(): void {
+    const ids = Object.keys(BALANCE.relics) as RelicId[];
+    const fresh = ids.filter((id) => !this.relics.includes(id));
+    const pool = fresh.length >= 3 ? [...fresh] : [...ids];
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const swap = pool[i];
+      pool[i] = pool[j];
+      pool[j] = swap;
+    }
+    this.pendingOffer = pool.slice(0, 3);
+    this.offerLeft = BALANCE.offerSeconds;
+  }
+
+  private applyRelic(id: RelicId): void {
+    const spec = BALANCE.relics[id] as RelicDef;
+    if (spec.dart) this.dartMul *= spec.dart;
+    if (spec.lens) this.lensDpsMul *= spec.lens;
+    if (spec.ramp) this.lensRampMul *= spec.ramp;
+    if (spec.stun) this.drumStunMul *= spec.stun;
+    if (spec.jumps) this.spireJumpAdd += spec.jumps;
+    if (spec.jade) this.jadeMul *= spec.jade;
+    if (spec.flare) this.flareMul *= spec.flare;
+    if (spec.range) this.rangeMul *= spec.range;
+    if (spec.heal) this.integrity = Math.min(BALANCE.integrity, this.integrity + spec.heal);
   }
 
   private routeLen(e: Enemy): number {

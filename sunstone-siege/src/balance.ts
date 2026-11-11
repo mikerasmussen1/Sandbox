@@ -6,7 +6,7 @@
  * the reference clip. The clip shows a map, walking units and a beam; it does
  * not show a HUD, a currency, or any number. Tune the game here and nowhere else.
  */
-import type { EnemyKind, SpawnGroup, TowerKind, WaveDef } from "./types";
+import type { EnemyKind, RelicId, SpawnGroup, TowerKind, WaveDef } from "./types";
 
 export interface DartTier {
   cost: number;
@@ -77,7 +77,7 @@ export const BALANCE = {
   /** Seconds of free building before a wave walks in on its own. */
   prewave: 9,
   /** Jade granted for calling a wave before the timer finishes. */
-  earlyCall: 18,
+  earlyCall: 22,
   /** Movement multiplier while a drum's slow lasts. */
   slowMul: 0.48,
   /** A hit never drops below this after armor, so a shielded unit still chips. */
@@ -92,6 +92,30 @@ export const BALANCE = {
     /** Seconds after a flare during which charge does not accept and the button stays dark. */
     lock: 2.4,
   },
+  /**
+   * Tower synergies. Invented. A Quake Drum's stun is the setup; the Sun Lens
+   * is the payoff. Slowed raiders also eat darts faster, and stunned raiders
+   * take a heavier serpent arc.
+   */
+  synergy: {
+    stunnedLens: 1.75,
+    slowDart: 0.7,
+    stunnedSpire: 1.3,
+  },
+  /** Kills inside this window add a streak. Invented. */
+  combo: { window: 2.35, start: 3, jade: 2 },
+  /** Seconds to pick a relic before the first offer is taken for you. Invented. */
+  offerSeconds: 9,
+  relics: {
+    keen: { name: "Keen Barbs", blurb: "Dart Totems deal heavier hits.", dart: 1.22 },
+    kindling: { name: "Kindling Glass", blurb: "Sun Lenses burn hotter and ramp faster.", lens: 1.16, ramp: 1.45 },
+    war: { name: "War Cadence", blurb: "Quake Drums hold a stun longer.", stun: 1.4 },
+    leap: { name: "Living Jade", blurb: "Serpent Spires jump to one more raider.", jumps: 1 },
+    rite: { name: "Jade Rite", blurb: "Kills and cleared waves pay more Jade.", jade: 1.25 },
+    ward: { name: "Sun Ward", blurb: "The Sunstone knits four cracks shut.", heal: 4 },
+    heart: { name: "Flare Heart", blurb: "Solar Flare scorches hotter.", flare: 1.3 },
+    focus: { name: "Long Sight", blurb: "Every totem reaches a little farther.", range: 1.12 },
+  } satisfies Record<RelicId, RelicDef>,
   dart: [
     { cost: 50, damage: 24, range: 186, interval: 0.3, shotSpeed: 720 },
     { cost: 70, damage: 40, range: 210, interval: 0.24, shotSpeed: 800 },
@@ -119,10 +143,10 @@ export const BALANCE = {
     spire: "Serpent Spire",
   } as const satisfies Record<TowerKind, string>,
   towerBlurb: {
-    dart: "Fast carved darts. Strikes one raider at a time.",
-    lens: "A sunlight beam that burns hotter while it holds the same target.",
-    drum: "A shock ring. Damages, slows, and briefly stops a crowd.",
-    spire: "Jade arcs that leap from raider to raider.",
+    dart: "Fast carved darts. They loose quicker into a slowed raider.",
+    lens: "Sunlight that burns hotter on one target. A stunned raider takes much more.",
+    drum: "A shock ring. It hurts, slows, and stuns. Stunned raiders feed a Sun Lens.",
+    spire: "Jade arcs that leap across a crowd. A stunned target takes the heavier arc.",
   } as const satisfies Record<TowerKind, string>,
   enemies: {
     runner: { name: "Runner", hp: 30, speed: 104, armor: 0, reward: 7, leak: 1, charge: 9, flying: false },
@@ -131,10 +155,23 @@ export const BALANCE = {
     golem: { name: "Stone Golem", hp: 260, speed: 34, armor: 4, reward: 22, leak: 3, charge: 18, flying: false },
     shard: { name: "Golem Shard", hp: 48, speed: 70, armor: 0, reward: 5, leak: 1, charge: 6, flying: false },
     glider: { name: "Glider", hp: 60, speed: 90, armor: 0, reward: 11, leak: 1, charge: 10, flying: true },
-    boss: { name: "Obsidian Colossus", hp: 960, speed: 28, armor: 8, reward: 100, leak: 8, charge: 40, flying: false },
+    boss: { name: "Obsidian Colossus", hp: 1500, speed: 26, armor: 8, reward: 100, leak: 8, charge: 40, flying: false },
   } as const satisfies Record<EnemyKind, EnemyStat>,
   jaguar: { cycle: 4.6, dur: 1.45 },
-  boss: { slamEvery: 4.4, slamRadius: 176, slamStun: 1.2 },
+  boss: {
+    slamEvery: 4.4,
+    slamRadius: 176,
+    slamStun: 1.2,
+    /** Obsidian shell. Invented. Damage taken is multiplied while it holds. */
+    aegisEvery: 7.4,
+    aegisDur: 1.65,
+    aegisMul: 0.5,
+    /** Nearby raiders hurry while the roar lasts. Invented. */
+    rallyEvery: 8.2,
+    rallyRadius: 220,
+    rallySpeed: 1.5,
+    rallyDur: 1.7,
+  },
   golemShards: 2,
   worlds: [
     {
@@ -143,7 +180,7 @@ export const BALANCE = {
       hp: 1,
       speed: 1,
       waves: [
-        { bonus: 28, groups: [group("runner", 8, 0.68, 0)] },
+        { bonus: 28, groups: [group("runner", 7, 0.84, 0)] },
         { bonus: 34, groups: [group("runner", 6, 0.58, 0), group("runner", 6, 0.58, 2, 1.1)] },
         { bonus: 40, groups: [group("shield", 5, 0.95, 1), group("jaguar", 4, 0.8, 3, 0.4), group("runner", 6, 0.5, 0, 2)] },
         { bonus: 48, groups: [group("glider", 5, 0.72, 2), group("shield", 4, 1, 3, 0.5), group("golem", 2, 2.4, 0, 1.2)] },
@@ -152,12 +189,12 @@ export const BALANCE = {
     },
     {
       name: "River Ruins",
-      jade: 270,
-      hp: 1.1,
-      speed: 1.03,
+      jade: 300,
+      hp: 1.32,
+      speed: 1.04,
       waves: [
-        { bonus: 32, groups: [group("runner", 8, 0.55, 0), group("runner", 6, 0.55, 1, 0.8)] },
-        { bonus: 38, groups: [group("shield", 6, 0.85, 0), group("runner", 6, 0.48, 2, 1)] },
+        { bonus: 32, groups: [group("runner", 6, 0.62, 0), group("runner", 5, 0.62, 1, 1)] },
+        { bonus: 38, groups: [group("shield", 4, 0.95, 0), group("runner", 5, 0.55, 2, 1.2)] },
         { bonus: 44, groups: [group("jaguar", 5, 0.7, 1), group("glider", 5, 0.65, 0, 0.6)] },
         { bonus: 50, groups: [group("golem", 3, 2.1, 2), group("shield", 5, 0.9, 1, 0.8)] },
         { bonus: 56, groups: [group("glider", 7, 0.55, 0), group("jaguar", 5, 0.7, 1, 0.4), group("shield", 4, 0.85, 2, 1.2)] },
@@ -167,20 +204,34 @@ export const BALANCE = {
     {
       name: "Night Crater",
       jade: 320,
-      hp: 1.24,
-      speed: 1.06,
+      hp: 1.85,
+      speed: 1.1,
       waves: [
         { bonus: 36, groups: [group("runner", 10, 0.48, 0)] },
         { bonus: 42, groups: [group("runner", 8, 0.45, 0), group("runner", 8, 0.45, 1, 0.6)] },
         { bonus: 48, groups: [group("shield", 6, 0.75, 2), group("jaguar", 6, 0.62, 0, 0.4)] },
         { bonus: 54, groups: [group("glider", 6, 0.5, 1), group("golem", 3, 1.8, 0, 0.8)] },
-        { bonus: 60, groups: [group("shield", 7, 0.7, 2), group("glider", 6, 0.5, 1, 0.3), group("jaguar", 5, 0.6, 0, 1)] },
-        { bonus: 66, groups: [group("golem", 3, 1.7, 0), group("golem", 3, 1.7, 2, 0.5), group("runner", 8, 0.4, 1, 1)] },
-        { bonus: 90, groups: [group("shield", 6, 0.65, 0), group("boss", 1, 0.2, 1, 0.4), group("glider", 6, 0.48, 2, 0.8), group("jaguar", 5, 0.55, 0, 1.2)] },
+        { bonus: 60, groups: [group("shield", 8, 0.62, 2), group("glider", 7, 0.42, 1, 0.3), group("jaguar", 6, 0.5, 0, 0.8)] },
+        { bonus: 66, groups: [group("golem", 4, 1.5, 0), group("golem", 3, 1.5, 2, 0.4), group("runner", 10, 0.32, 1, 0.6)] },
+        { bonus: 90, groups: [group("shield", 7, 0.55, 0), group("boss", 1, 0.2, 1, 0.3), group("glider", 8, 0.4, 2, 0.5), group("jaguar", 6, 0.48, 0, 0.8)] },
       ],
     },
   ] as const satisfies readonly WorldBalance[],
 } as const;
+
+export interface RelicDef {
+  name: string;
+  blurb: string;
+  dart?: number;
+  lens?: number;
+  ramp?: number;
+  stun?: number;
+  jumps?: number;
+  jade?: number;
+  heal?: number;
+  flare?: number;
+  range?: number;
+}
 
 export type BalanceWorld = (typeof BALANCE.worlds)[number];
 

@@ -47,7 +47,11 @@ export class WorldView {
   private readonly sun = new Container();
   private readonly glow: Sprite;
   private readonly ring: Sprite;
+  private readonly mid: Sprite;
+  private readonly inner: Sprite;
   private readonly disk: Sprite;
+  rangeScale = 1;
+  private held = false;
   private readonly cracks = new Graphics();
   private readonly flashRect = new Graphics();
   private readonly towerSpr = new Map<number, Sprite>();
@@ -84,18 +88,23 @@ export class WorldView {
     this.glow.blendMode = "add";
     this.ring = new Sprite(art.frame("sun-ring"));
     this.ring.anchor.set(0.5);
+    this.mid = new Sprite(art.frame("sun-mid"));
+    this.mid.anchor.set(0.5);
+    this.inner = new Sprite(art.frame("sun-inner"));
+    this.inner.anchor.set(0.5);
     this.disk = new Sprite(art.frame("sun-disk"));
     this.disk.anchor.set(0.5);
-    this.disk.scale.set(0.72);
-    this.sun.addChild(this.glow, this.ring, this.disk, this.cracks);
+    this.disk.scale.set(0.62);
+    this.sun.addChild(this.glow, this.ring, this.mid, this.inner, this.disk, this.cracks);
     this.additive.blendMode = "add";
     this.enemies.sortableChildren = true;
     this.towers.sortableChildren = true;
     this.world.addChild(this.sun, this.bars, this.additive, this.bitsLayer, this.floatLayer, this.menu);
     this.canopy = new TilingSprite({ texture: art.canopy, width: 10, height: 10 });
-    this.canopy.alpha = 0.5;
+    this.canopy.visible = false;
     this.canopy.eventMode = "none";
     this.vignette = new Sprite(art.vignette);
+    this.vignette.visible = false;
     this.vignette.eventMode = "none";
     this.grade.eventMode = "none";
     this.flashRect.eventMode = "none";
@@ -131,8 +140,7 @@ export class WorldView {
     this.vignette.width = w;
     this.vignette.height = h;
     this.grade.clear();
-    if (this.biome === "ruins") this.grade.rect(0, 0, w, h).fill({ color: 0xffc080, alpha: 0.08 });
-    if (this.biome === "crater") this.grade.rect(0, 0, w, h).fill({ color: 0x140820, alpha: 0.2 });
+    this.vignette.alpha = 0.55;
     this.flashRect.clear();
     this.flashRect.rect(0, 0, w, h).fill({ color: 0xffe0a0 });
   }
@@ -196,9 +204,10 @@ export class WorldView {
     this.range.visible = false;
   }
 
-  update(dt: number, sim: Siege): void {
-    const step = dt > 0 ? dt : 0;
-    this.time += step > 0 ? step : 0.016;
+  update(dt: number, sim: Siege, hold = false): void {
+    this.held = hold;
+    const step = hold ? 0 : dt > 0 ? dt : 0;
+    this.time += hold ? 0 : step > 0 ? step : 0.016;
     this.syncTowers(sim);
     this.syncEnemies(sim);
     this.syncShots(sim);
@@ -206,9 +215,11 @@ export class WorldView {
     this.drawSun(step, sim);
     this.drawFx(step);
     this.drawBits(step);
-    this.drawFloats(step > 0 ? step : 0.016);
-    this.flash = Math.max(0, this.flash - (step > 0 ? step : 0.016) * (this.reduced ? 2.4 : 1.3));
+    this.drawFloats(step);
+    const fade = hold ? 0 : step > 0 ? step : 0.016;
+    this.flash = Math.max(0, this.flash - fade * (this.reduced ? 2.4 : 1.3));
     this.flashRect.alpha = this.flash;
+    this.flashRect.visible = this.flash > 0.02;
     if (this.reduced) {
       this.trauma = 0;
       this.shakeX = 0;
@@ -218,18 +229,33 @@ export class WorldView {
       this.shakeX = Math.sin(this.time * 46) * this.trauma * 18;
       this.shakeY = Math.cos(this.time * 37) * this.trauma * 12;
     }
-    const pulse = this.reduced ? 0.75 : 0.55 + Math.sin(this.time * 3) * 0.22;
+    const pulse = this.reduced ? 0.8 : 0.55 + Math.sin(this.time * 3) * 0.22;
+    const fresh = sim.towers.length === 0 && sim.wave === 0 && sim.phase === "build";
     this.padSpr.forEach((s, i) => {
       s.visible = !sim.towers.some((t) => t.pad === i);
-      s.alpha = pulse;
+      s.alpha = fresh ? 1 : pulse;
+      s.scale.set(fresh ? 1.12 + Math.sin(this.time * 5 + i) * 0.06 : 1);
     });
   }
 
   apply(fx: readonly Fx[]): void {
     for (const event of fx) {
-      if (event.kind === "impact") this.burst(event.x, event.y, 0xfff0c2, 5, 90);
-      else if (event.kind === "death") this.burst(event.x, event.y, event.enemy === "boss" ? 0xffb03a : 0xff6a4a, event.enemy === "boss" ? 16 : 8, 140);
-      else if (event.kind === "jade" && event.text) this.floatText(event.x, event.y, event.text, 0xc8ffd8);
+      if (event.kind === "impact") this.burst(event.x, event.y, 0xfff0c2, 6, 110);
+      else if (event.kind === "death") {
+        const boss = event.enemy === "boss";
+        this.burst(event.x, event.y, boss ? 0xffb03a : 0xff6a4a, boss ? 22 : 10, boss ? 220 : 160);
+        this.bump(boss ? 0.7 : event.enemy === "golem" ? 0.28 : 0.08);
+      } else if (event.kind === "jade" && event.text) {
+        this.floatText(event.x, event.y, event.text, 0xc8ffd8, 16);
+        this.burst(event.x, event.y, 0x7dffc4, 5, 80);
+      } else if (event.kind === "streak" && event.text) {
+        this.floatText(event.x, event.y, event.text, 0xffe08a, 22);
+        this.bump((event.n ?? 0) >= 6 ? 0.2 : 0.08);
+      } else if (event.kind === "relic" && event.text) this.floatText(event.x, event.y, event.text, 0xfff1c8, 26);
+      else if (event.kind === "aegis") {
+        this.rings.push({ x: event.x, y: event.y, radius: 86, life: 0.4, max: 0.4, color: 0x6a5a78 });
+        this.bump(0.16);
+      } else if (event.kind === "rally" && event.n) this.rings.push({ x: event.x, y: event.y, radius: event.n, life: 0.45, max: 0.45, color: 0xff7a3a });
       else if (event.kind === "drum" && event.n) this.rings.push({ x: event.x, y: event.y, radius: event.n, life: 0.42, max: 0.42, color: 0x9dffd8 });
       else if (event.kind === "slam" && event.n) {
         this.rings.push({ x: event.x, y: event.y, radius: event.n, life: 0.36, max: 0.36, color: 0xff7a4a });
@@ -244,6 +270,11 @@ export class WorldView {
         this.bump(0.75);
         this.burst(SUN.x, SUN.y, 0xffe6b0, this.reduced ? 6 : 26, 280);
       } else if (event.kind === "place") this.burst(event.x, event.y, 0xf0d7a2, 6, 70);
+      else if (event.kind === "boss") {
+        this.rings.push({ x: event.x, y: event.y, radius: 280, life: 0.7, max: 0.7, color: 0xffb03a });
+        this.bump(0.55);
+        this.flash = Math.max(this.flash, this.reduced ? 0.12 : 0.35);
+      }
     }
   }
 
@@ -269,7 +300,7 @@ export class WorldView {
       button.eventMode = "static";
       button.cursor = "pointer";
       button.on("pointerover", () => {
-        this.showRange(this.menu.position.x, this.menu.position.y, towerRange(kind, 0), RANGE_COLOR[kind]);
+        this.showRange(this.menu.position.x, this.menu.position.y, towerRange(kind, 0) * this.rangeScale, RANGE_COLOR[kind]);
       });
       button.on("pointertap", (e) => {
         e.stopPropagation();
@@ -288,14 +319,17 @@ export class WorldView {
       let spr = this.towerSpr.get(tower.id);
       if (!spr) {
         spr = this.takeSprite();
-        spr.anchor.set(0.5, 0.62);
+        spr.anchor.set(0.5, 0.84);
         this.towers.addChild(spr);
         this.towerSpr.set(tower.id, spr);
       }
       spr.texture = this.art.frame(`tower-${tower.kind}-${tower.tier}`);
       spr.position.set(tower.x, tower.y);
-      const idle = tower.kind === "drum" || tower.kind === "spire";
-      spr.rotation = idle ? Math.sin(this.time * 1.5 + tower.id) * 0.05 : tower.angle + Math.PI / 2;
+      spr.rotation = Math.sin(this.time * 1.6 + tower.id) * 0.03;
+      const interval = tower.kind === "dart" ? BALANCE.dart[tower.tier].interval : tower.kind === "drum" ? BALANCE.drum[tower.tier].interval : tower.kind === "spire" ? BALANCE.spire[tower.tier].interval : 0;
+      const kick = interval > 0 && tower.cooldown > interval * 0.82;
+      const beam = tower.kind === "lens" && tower.targetId ? 1 + Math.sin(this.time * 30) * 0.05 : 1;
+      spr.scale.set((kick ? 0.9 : 1) * beam);
       spr.zIndex = tower.y;
       spr.tint = tower.stunnedUntil > sim.time ? 0x8aa0b0 : 0xffffff;
     }
@@ -325,16 +359,19 @@ export class WorldView {
       const bob = e.flying ? Math.sin(this.time * 7 + e.id) * 7 : 0;
       const side = e.kind === "shard" ? ((e.id % 2) * 2 - 1) * 10 : 0;
       spr.position.set(e.x + Math.cos(e.angle + Math.PI / 2) * side, e.y + bob);
-      spr.rotation = e.angle;
+      spr.rotation = e.kind === "shard" ? this.time * 3 + e.id : e.kind === "glider" ? e.angle * 0.4 : Math.sin(e.angle) * 0.15;
       spr.zIndex = e.y;
-      spr.scale.set(e.kind === "boss" ? 1.15 : e.kind === "golem" ? 1.05 : 1);
-      spr.alpha = stealthed(e.kind, e.age) ? 0.22 : 1;
-      spr.tint = e.flash > 0 ? 0xffe4dc : 0xffffff;
+      let sc = e.kind === "boss" ? 1.28 : e.kind === "golem" ? 1.2 : 1.12;
+      if (e.kind === "boss") sc *= Math.min(1, 0.25 + e.age * 1.8);
+      if (e.flash > 0) sc *= 1.14;
+      spr.scale.set(sc);
+      spr.alpha = stealthed(e.kind, e.age) ? 0.18 : e.boss && e.aegisUntil > sim.time ? 0.72 : 1;
+      spr.tint = e.flash > 0 ? 0xffffff : e.boss && e.aegisUntil > sim.time ? 0x9a90a8 : 0xffffff;
     }
     for (const [id, spr] of this.enemySpr) {
       if (seen.has(id)) continue;
       this.enemySpr.delete(id);
-      this.ghosts.push({ s: spr, life: 0.32 });
+      this.ghosts.push({ s: spr, life: 0.45 });
     }
   }
 
@@ -372,14 +409,18 @@ export class WorldView {
 
   private drawSun(dt: number, sim: Siege): void {
     const charge = sim.flare / BALANCE.flare.need;
-    const spin = (this.reduced ? 0.06 : 0.3) * (1 + charge);
+    const spin = (this.reduced ? 0.05 : 0.28) * (1 + charge * 1.4);
     if (dt > 0) {
       this.ring.rotation += dt * spin;
-      this.disk.rotation -= dt * spin * 0.55;
+      this.mid.rotation -= dt * spin * 0.7;
+      this.inner.rotation += dt * spin * 1.25;
+      this.disk.rotation -= dt * spin * 0.35;
     }
-    const pulse = this.reduced ? 0 : Math.sin(this.time * (2 + charge * 5)) * 0.045;
-    this.glow.alpha = 0.2 + charge * 0.8;
-    this.glow.scale.set(1.2 + charge * 1.05 + pulse);
+    const pulse = this.reduced ? 0 : Math.sin(this.time * (2 + charge * 5)) * 0.04;
+    this.glow.alpha = 0.25 + charge * 0.85;
+    this.glow.scale.set(1.35 + charge * 1.35 + pulse);
+    this.ring.scale.set(0.78 + charge * 0.08);
+    this.disk.scale.set(0.62 + charge * 0.12 + pulse);
     this.disk.tint = charge > 0.98 ? 0xfff6d0 : 0xffd18a;
     this.additive.clear();
     const cracks = Math.ceil((1 - sim.integrity / BALANCE.integrity) * 7);
@@ -398,13 +439,18 @@ export class WorldView {
       const wobble = this.reduced ? 0 : Math.sin(this.time * 22 + tower.id) * 2.5;
       const x2 = target.x + Math.cos(target.angle + Math.PI / 2) * wobble;
       const y2 = target.y + Math.sin(target.angle + Math.PI / 2) * wobble;
-      this.additive.moveTo(tower.x, tower.y - 22).lineTo(x2, y2).stroke({ width: 11, color: 0xffb050, alpha: 0.35 });
-      this.additive.moveTo(tower.x, tower.y - 22).lineTo(x2, y2).stroke({ width: 3, color: 0xfff6d2, alpha: 0.95 });
+      this.additive.moveTo(tower.x, tower.y - 58).lineTo(x2, y2).stroke({ width: 11, color: 0xffb050, alpha: 0.35 });
+      this.additive.moveTo(tower.x, tower.y - 58).lineTo(x2, y2).stroke({ width: 3, color: 0xfff6d2, alpha: 0.95 });
     }
   }
 
+  private animStep(dt: number): number {
+    if (this.held) return 0;
+    return dt > 0 ? dt : 0.016;
+  }
+
   private drawFx(dt: number): void {
-    const step = dt > 0 ? dt : 0.016;
+    const step = this.animStep(dt);
     for (let i = this.rings.length - 1; i >= 0; i--) {
       const ring = this.rings[i];
       ring.life -= step;
@@ -431,7 +477,10 @@ export class WorldView {
     for (let i = this.ghosts.length - 1; i >= 0; i--) {
       const g = this.ghosts[i];
       g.life -= step;
-      g.s.alpha = Math.max(0, g.life / 0.32);
+      const k = Math.max(0, g.life / 0.45);
+      g.s.alpha = k;
+      g.s.scale.set(1 + (1 - k) * 0.55);
+      if (!this.reduced) g.s.rotation += step * 2.4;
       if (g.life <= 0) {
         g.s.removeFromParent();
         g.s.scale.set(1);
@@ -446,7 +495,7 @@ export class WorldView {
       const leaf = this.biome !== "crater" ? Math.random() > 0.35 : Math.random() > 0.7;
       this.bit(Math.random() * MAP_W, Math.random() * MAP_H, leaf ? 0x6aaa58 : 0xd6ffb0, (Math.random() - 0.5) * 16, 12 + Math.random() * 18, 4 + Math.random() * 3, 0, leaf ? "leaf" : "mote");
     }
-    const step = dt > 0 ? dt : 0.016;
+    const step = this.animStep(dt);
     for (let i = this.bits.length - 1; i >= 0; i--) {
       const b = this.bits[i];
       b.life -= step;
@@ -467,7 +516,8 @@ export class WorldView {
     }
   }
 
-  private drawFloats(step: number): void {
+  private drawFloats(dt: number): void {
+    const step = this.animStep(dt);
     for (let i = this.floats.length - 1; i >= 0; i--) {
       const f = this.floats[i];
       f.life -= step;
@@ -515,10 +565,11 @@ export class WorldView {
     this.bits.push(row);
   }
 
-  private floatText(x: number, y: number, text: string, color: number): void {
+  private floatText(x: number, y: number, text: string, color: number, size = 16): void {
     const pooled = this.floatPool.pop();
-    const t = pooled?.t ?? new Text({ text, style: { fontFamily: SANS, fontSize: 16, fill: color, fontWeight: "bold" } });
+    const t = pooled?.t ?? new Text({ text, style: { fontFamily: SANS, fontSize: size, fill: color, fontWeight: "bold" } });
     t.text = text;
+    t.style.fontSize = size;
     t.style.fill = color;
     t.anchor.set(0.5);
     t.position.set(x, y);

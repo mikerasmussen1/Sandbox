@@ -5,6 +5,7 @@
 import { BALANCE, starsFor, towerCost } from "../src/balance";
 import { SUN } from "../src/maps";
 import { Siege, stealthed } from "../src/sim";
+import type { RelicId } from "../src/types";
 
 function fail(msg: string): never {
   throw new Error(msg);
@@ -94,6 +95,11 @@ function bot(world: number): void {
   const dt = 1 / 20;
   let t = 0;
   while (sim.phase !== "victory" && sim.phase !== "defeat" && t < 420) {
+    if (sim.pendingOffer?.length) {
+      const order: RelicId[] = ["kindling", "keen", "focus", "heart", "leap", "war", "rite", "ward"];
+      const pick = order.find((id) => sim.pendingOffer?.includes(id)) ?? sim.pendingOffer[0];
+      sim.chooseRelic(pick);
+    }
     spend(sim);
     if (sim.phase === "build") sim.callWave();
     sim.tick(dt);

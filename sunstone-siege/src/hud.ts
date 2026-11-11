@@ -6,7 +6,7 @@ import { Container, Graphics, Rectangle, Sprite, Text } from "pixi.js";
 import type { ArtSet } from "./art";
 import { BALANCE, worldCount } from "./balance";
 import { isUnlocked, type SaveData } from "./save";
-import type { Phase } from "./types";
+import type { Phase, RelicId } from "./types";
 
 const SERIF = '"Noto Serif", Palatino, Georgia, serif';
 const SANS = 'Inter, "Segoe UI", system-ui, sans-serif';
@@ -21,7 +21,9 @@ export interface HudState {
   flare: number;
   flareReady: boolean;
   buildLeft: number;
-  showHint: boolean;
+  hint: string;
+  offer: { id: RelicId; name: string; blurb: string }[] | null;
+  offerLeft: number;
 }
 
 export interface TowerCard {
@@ -54,6 +56,7 @@ export interface HudHooks {
   sell: () => void;
   replay: () => void;
   next: () => void;
+  pickRelic: (id: RelicId) => void;
 }
 
 export class Hud {
@@ -76,6 +79,11 @@ export class Hud {
   private readonly flareButton: Container;
   private readonly flareRing: Graphics;
   private readonly hint: Text;
+  private readonly offerLayer = new Container();
+  private readonly offerNames: Text[] = [];
+  private readonly offerBlurbs: Text[] = [];
+  private readonly offerClock: Text;
+  private offerIds: RelicId[] = [];
   private readonly banner: Text;
   private readonly card = new Container();
   private readonly cardName: Text;
@@ -118,6 +126,8 @@ export class Hud {
     this.callText = label("Call wave", 16, 0x1a1208);
     this.hint = label("", 16, 0xf6e7c1);
     this.hint.anchor.set(0.5);
+    this.offerClock = label("", 16, 0xf6e7c1);
+    this.offerClock.anchor.set(0.5);
     this.banner = label("", 28, 0xfff1c8);
     this.banner.anchor.set(0.5);
     this.flareRing = new Graphics();
@@ -143,6 +153,7 @@ export class Hud {
     this.reducedText = label(this.reducedLine(), 16, 0xf6e7c1);
     this.buildSettings();
     this.nextButton = this.button(label("Next valley", 16, 0x1a1208), 170, 46, 0xe6b15a, () => hooks.next());
+    this.buildOffer();
     this.buildEnd(art);
     this.refreshLevels(save);
     this.show("title");
@@ -218,12 +229,14 @@ export class Hud {
     this.waveText.text = `Wave ${state.wave}/${state.waves}`;
     this.speedText.text = state.speed === 2 ? "2x" : "1x";
     const building = state.phase === "build";
-    this.callButton.visible = building;
+    this.callButton.visible = building && !state.offer;
     if (building) {
       const secs = Math.max(0, Math.ceil(state.buildLeft));
       this.callText.text = state.buildLeft > 0.3 ? `Call wave  ${secs}s  +${BALANCE.earlyCall}` : "Wave incoming";
     }
-    this.hint.visible = state.showHint && building;
+    this.hint.text = state.hint;
+    this.hint.visible = state.hint.length > 0 && !state.offer;
+    this.syncOffer(state);
     const charge = state.flare / BALANCE.flare.need;
     this.flareRing.clear();
     this.flareRing.circle(0, 0, 32).stroke({ width: 3, color: 0x3a3024, alpha: 0.9 });
@@ -297,7 +310,14 @@ export class Hud {
     dim.eventMode = "none";
     const title = new Text({
       text: "SUNSTONE SIEGE",
-      style: { fontFamily: SERIF, fontSize: 64, fill: 0xfff1c8, fontWeight: "bold", align: "center" },
+      style: {
+        fontFamily: SERIF,
+        fontSize: 64,
+        fill: 0xfff1c8,
+        fontWeight: "bold",
+        align: "center",
+        dropShadow: { alpha: 0.7, angle: Math.PI / 2, blur: 6, color: 0x140c06, distance: 3 },
+      },
     });
     title.anchor.set(0.5);
     title.position.set(0, -120);
@@ -307,12 +327,17 @@ export class Hud {
     play.position.set(0, 70);
     const settings = this.button(label("Settings", 18, 0xf6e7c1), 180, 46, 0x2a2118, () => this.hooks.openSettings());
     settings.position.set(0, 140);
+    const ring = new Sprite(art.frame("sun-ring"));
+    ring.anchor.set(0.5);
+    ring.scale.set(0.42);
+    ring.position.set(0, -230);
+    ring.eventMode = "none";
     const mark = new Sprite(art.frame("sun-disk"));
     mark.anchor.set(0.5);
-    mark.scale.set(0.55);
+    mark.scale.set(0.42);
     mark.position.set(0, -230);
     mark.eventMode = "none";
-    this.title.addChild(dim, mark, title, sub, play, settings);
+    this.title.addChild(dim, ring, mark, title, sub, play, settings);
     this.hits.push(play, settings);
   }
 
@@ -402,7 +427,7 @@ export class Hud {
     this.speedButton = speed;
     this.pauseButton = pause;
     this.gearButton = gear;
-    this.play.addChild(bar, this.integrityText, this.integrityFill, jadeIcon, this.jadeText, this.waveText, speed, pause, gear, this.callButton, this.flareButton, this.hint, this.banner, this.card);
+    this.play.addChild(bar, this.integrityText, this.integrityFill, jadeIcon, this.jadeText, this.waveText, speed, pause, gear, this.callButton, this.flareButton, this.hint, this.banner, this.card, this.offerLayer);
     this.hits.push(speed, pause, gear, this.callButton, this.flareButton, this.card, bar);
     this.banner.visible = false;
   }
@@ -431,6 +456,61 @@ export class Hud {
     this.hint.position.set(w / 2, 78);
     this.banner.position.set(w / 2, 120);
     this.card.position.set(16, h - 148);
+    this.offerLayer.position.set(w / 2, h / 2 + 10);
+  }
+
+  private buildOffer(): void {
+    const dim = new Graphics().rect(-4000, -3000, 8000, 6000).fill({ color: 0x070c08, alpha: 0.55 });
+    dim.eventMode = "static";
+    const heading = new Text({
+      text: "Choose a gift",
+      style: { fontFamily: SERIF, fontSize: 32, fill: 0xfff1c8, fontWeight: "bold", align: "center" },
+    });
+    heading.anchor.set(0.5);
+    heading.position.set(0, -150);
+    heading.eventMode = "none";
+    this.offerClock.position.set(0, -112);
+    this.offerLayer.addChild(dim, heading, this.offerClock);
+    this.hits.push(dim);
+    for (let i = 0; i < 3; i++) {
+      const card = new Container();
+      card.position.set((i - 1) * 250, 10);
+      const plate = new Graphics().roundRect(-110, -70, 220, 150, 14).fill({ color: 0x1c1610, alpha: 0.96 }).stroke({ width: 2, color: 0xe6c27a });
+      const name = label("Gift", 16, 0xfff1c8);
+      name.anchor.set(0.5, 0);
+      name.position.set(0, -52);
+      const blurb = new Text({
+        text: "",
+        style: { fontFamily: SANS, fontSize: 13, fill: 0xd9cbb0, align: "center", wordWrap: true, wordWrapWidth: 190 },
+      });
+      blurb.anchor.set(0.5, 0);
+      blurb.position.set(0, -22);
+      card.addChild(plate, name, blurb);
+      card.eventMode = "static";
+      card.cursor = "pointer";
+      card.on("pointertap", (e) => {
+        e.stopPropagation();
+        const id = this.offerIds[i];
+        if (id) this.hooks.pickRelic(id);
+      });
+      this.offerLayer.addChild(card);
+      this.offerNames.push(name);
+      this.offerBlurbs.push(blurb);
+      this.hits.push(card);
+    }
+    this.offerLayer.visible = false;
+  }
+
+  private syncOffer(state: HudState): void {
+    const open = !!state.offer && state.offer.length === 3 && state.phase === "build";
+    this.offerLayer.visible = open;
+    if (!open || !state.offer) return;
+    this.offerIds = state.offer.map((r) => r.id);
+    this.offerClock.text = `The wave waits. ${Math.max(1, Math.ceil(state.offerLeft))}s`;
+    state.offer.forEach((relic, i) => {
+      this.offerNames[i].text = relic.name;
+      this.offerBlurbs[i].text = relic.blurb;
+    });
   }
 
   private buildPause(): void {
@@ -494,7 +574,10 @@ export class Hud {
 
   private button(text: Text, w: number, h: number, fill: number, onClick: () => void): Container {
     const c = new Container();
-    const g = new Graphics().roundRect(-w / 2, -h / 2, w, h, 12).fill({ color: fill }).stroke({ width: 2, color: 0xf0d7a2, alpha: 0.9 });
+    const g = new Graphics();
+    g.roundRect(-w / 2, -h / 2, w, h, 12).fill({ color: fill });
+    g.roundRect(-w / 2 + 3, -h / 2 + 3, w - 6, h * 0.42, 8).fill({ color: 0xffffff, alpha: 0.1 });
+    g.roundRect(-w / 2, -h / 2, w, h, 12).stroke({ width: 2, color: 0xf0d7a2, alpha: 0.95 });
     text.anchor.set(0.5);
     c.addChild(g, text);
     c.eventMode = "static";

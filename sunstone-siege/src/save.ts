@@ -7,6 +7,8 @@ export interface SaveData {
   music: number;
   sfx: number;
   reduced: boolean;
+  /** How far the first-valley hints have progressed. */
+  taught: number;
 }
 
 export const DEFAULT_SAVE: SaveData = {
@@ -14,6 +16,7 @@ export const DEFAULT_SAVE: SaveData = {
   music: 0.55,
   sfx: 0.8,
   reduced: false,
+  taught: 0,
 };
 
 function storage(): Storage | null {
@@ -52,11 +55,16 @@ export function loadSave(): SaveData {
       const n = parsed.stars?.[i] ?? 0;
       return n === 1 || n === 2 || n === 3 ? n : 0;
     }) as [number, number, number];
+    const taughtRaw = (parsed as { taught?: number }).taught;
+    const taught = taughtRaw === 0 || taughtRaw === 1 || taughtRaw === 2 || taughtRaw === 3 || taughtRaw === 4
+      ? taughtRaw
+      : stars.some((n) => n > 0) ? 4 : 0;
     return {
       stars,
       music: clamp01(parsed.music ?? base.music),
       sfx: clamp01(parsed.sfx ?? base.sfx),
       reduced: typeof parsed.reduced === "boolean" ? parsed.reduced : base.reduced,
+      taught,
     };
   } catch {
     return base;

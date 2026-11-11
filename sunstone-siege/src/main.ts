@@ -3,11 +3,11 @@
  * to the view. Combat numbers stay in balance.ts.
  */
 import { Application, Rectangle } from "pixi.js";
-import { buildArt, paintMapTexture } from "./art";
+import { buildArt, paintMapTexture, paintMenuScene } from "./art";
 import { AudioBus } from "./audio";
 import { BALANCE, starsFor, towerCost, towerRange, worldCount } from "./balance";
 import { Hud, type TowerCard } from "./hud";
-import { MAP_H, MAP_W, MAPS } from "./maps";
+import { MAP_H, MAP_W } from "./maps";
 import { isUnlocked, loadSave, recordStars, writeSave, type SaveData } from "./save";
 import { Siege, type Fx, type Tower } from "./sim";
 import type { TowerKind } from "./types";
@@ -119,6 +119,7 @@ async function boot(): Promise<void> {
     reduced: (v) => { save = { ...save, reduced: v }; writeSave(save); view.setReduced(v); },
     upgrade: () => {
       if (!sim || !sim.upgrade(selected)) audio.play("deny");
+      else teach(4);
     },
     sell: () => {
       if (!sim) return;
@@ -130,10 +131,17 @@ async function boot(): Promise<void> {
     },
     replay: () => { click(); begin(world); },
     next: () => { click(); begin(Math.min(worldCount() - 1, world + 1)); },
+    pickRelic: (id) => {
+      if (!sim || !sim.chooseRelic(id)) audio.play("deny");
+      else {
+        audio.play("relic");
+        teach(4);
+      }
+    },
   }, save);
 
   app.stage.addChild(view.world, view.overlay, hud.root);
-  hud.setBackdrop(paintMapTexture(MAPS[0], 0.5));
+  hud.setBackdrop(paintMenuScene());
   setMode("title");
   layout();
 
@@ -144,16 +152,27 @@ async function boot(): Promise<void> {
   }
   let fpsFrames = 0;
   let fpsStamp = performance.now();
+  let hitStop = 0;
 
   app.ticker.add((ticker) => {
     const dt = Math.min(0.05, ticker.deltaMS / 1000);
+    const freeze = hitStop > 0;
+    if (freeze) hitStop = Math.max(0, hitStop - dt);
     const running = mode === "play" && sim !== null && !paused && !settingsOpen && !finished;
-    if (sim && running) sim.tick(dt * speed);
+    if (sim && running && !freeze) sim.tick(dt * speed);
     if (sim && mode === "play") {
       const fx = sim.fx.splice(0, sim.fx.length);
       view.apply(fx);
       voice(fx);
-      view.update(running ? dt : 0, sim);
+      noteHits(fx);
+      if (!save.reduced) {
+        for (const event of fx) {
+          if (event.kind === "death" && (event.enemy === "boss" || event.enemy === "golem")) {
+            hitStop = Math.max(hitStop, event.enemy === "boss" ? 0.1 : 0.055);
+          }
+        }
+      }
+      view.update(running && !freeze ? dt : 0, sim, freeze);
       view.menuScale(zoom);
       if (view.menuPad >= 0) view.refreshMenu(sim.jade);
       present(sim);
@@ -429,14 +448,16 @@ async function boot(): Promise<void> {
       audio.play("deny");
       return;
     }
+    teach(1);
     view.closeMenu();
     selected = sim.towers[sim.towers.length - 1]?.id ?? 0;
   }
 
   function present(live: Siege): void {
     const tower = live.towers.find((t) => t.id === selected);
+    view.rangeScale = live.rangeScale;
     if (view.menuPad < 0) {
-      if (tower) view.showRange(tower.x, tower.y, towerRange(tower.kind, tower.tier), RANGE_COLOR[tower.kind]);
+      if (tower) view.showRange(tower.x, tower.y, towerRange(tower.kind, tower.tier) * live.rangeScale, RANGE_COLOR[tower.kind]);
       else view.hideRange();
     }
     hud.setCard(tower ? describe(tower, live.jade) : null);
@@ -450,8 +471,24 @@ async function boot(): Promise<void> {
       flare: live.flare,
       flareReady: live.flare >= BALANCE.flare.need && live.time >= live.flareLock,
       buildLeft: live.buildLeft,
-      showHint: live.towers.length === 0,
+      hint: hintFor(save, live),
+      offer: live.pendingOffer?.map((id) => ({ id, name: BALANCE.relics[id].name, blurb: BALANCE.relics[id].blurb })) ?? null,
+      offerLeft: live.offerLeft,
     });
+  }
+
+  function teach(step: number): void {
+    if (world !== 0 || save.taught >= step) return;
+    save = { ...save, taught: step };
+    writeSave(save);
+  }
+
+  function noteHits(fx: Fx[]): void {
+    if (world !== 0) return;
+    for (const event of fx) {
+      if (event.kind === "death" && save.taught < 3) teach(3);
+      if (event.kind === "place" && save.taught < 1) teach(1);
+    }
   }
 
   function voice(fx: Fx[]): void {
@@ -464,9 +501,13 @@ async function boot(): Promise<void> {
       else if (event.kind === "place") audio.play("place");
       else if (event.kind === "flare") audio.play("flare");
       else if (event.kind === "boss") {
-        audio.play("horn");
+        audio.play("roar");
         if (event.text) hud.announce(event.text);
-      } else if (event.kind === "impact") audio.play("dart");
+      } else if (event.kind === "aegis") audio.play("roar");
+      else if (event.kind === "rally") audio.play("horn");
+      else if (event.kind === "streak") audio.play("streak");
+      else if (event.kind === "relic") audio.play("relic");
+      else if (event.kind === "impact") audio.play("dart");
     }
     if (sim?.towers.some((t) => t.kind === "lens" && t.targetId)) {
       beamAcc += 0.016;
@@ -482,6 +523,7 @@ async function boot(): Promise<void> {
       seenWave = live.wave;
       audio.play("horn");
       hud.announce(`Wave ${live.wave + 1}`);
+      teach(2);
     }
     if (finished) return;
     if (live.phase === "victory") {
@@ -490,6 +532,7 @@ async function boot(): Promise<void> {
       save = recordStars(save, world, stars);
       hud.refreshLevels(save);
       audio.play("victory");
+      teach(4);
       hud.showEnd("victory", stars, live.integrity, BALANCE.worlds[world].name, world < worldCount() - 1);
     } else if (live.phase === "defeat") {
       finished = true;
@@ -497,6 +540,22 @@ async function boot(): Promise<void> {
       hud.showEnd("defeat", 0, 0, BALANCE.worlds[world].name, false);
     }
   }
+}
+
+function hintFor(save: SaveData, live: Siege): string {
+  if (live.pendingOffer) return "";
+  if (live.world === 1 && live.wave === 0 && live.phase === "build") return "Three gates feed this crater. Cover each trail.";
+  if (live.world === 2 && live.wave === 0 && live.phase === "build") return "Night Crater is the hard valley. Upgrade before the colossus.";
+  if (live.world !== 0 || save.taught >= 4) return "";
+  if (live.towers.length === 0 && live.phase === "build" && !live.pendingOffer) {
+    return "Tap a glowing pad, then choose the Dart Totem.";
+  }
+  if (save.taught <= 1 && live.phase === "build" && !live.pendingOffer) {
+    return `Call the wave early for +${BALANCE.earlyCall} Jade, or wait out the timer.`;
+  }
+  if (save.taught <= 2 && live.phase === "wave") return "Totems fire on their own. Drag to look around the valley.";
+  if (save.taught <= 3 && !live.pendingOffer) return "Tap your totem to upgrade it. A drum's stun makes a Sun Lens hit harder.";
+  return "";
 }
 
 function describe(tower: Tower, jade: number): TowerCard {

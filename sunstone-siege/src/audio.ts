@@ -22,11 +22,14 @@ export type SfxName =
   | "flare"
   | "jade"
   | "victory"
-  | "defeat";
+  | "defeat"
+  | "relic"
+  | "streak"
+  | "roar";
 
 const NAMES: SfxName[] = [
   "click", "deny", "place", "sell", "dart", "beam", "drum", "chain",
-  "death", "horn", "crack", "flare", "jade", "victory", "defeat",
+  "death", "horn", "crack", "flare", "jade", "victory", "defeat", "relic", "streak", "roar",
 ];
 
 function wavUrl(samples: Float32Array): string {
@@ -106,17 +109,20 @@ function synthSfx(): { url: string; sprite: Record<SfxName, [number, number]> } 
     { name: "deny", dur: 0.12, draw: (b, t) => tone(b, t, 180, 0.11, 0.3, 0) },
     { name: "place", dur: 0.16, draw: (b, t) => { noise(b, t, 0.08, 0.45, 28); tone(b, t, 220, 0.14, 0.28, 0.4); } },
     { name: "sell", dur: 0.14, draw: (b, t) => { tone(b, t, 520, 0.08, 0.22, 0.3); tone(b, t + 0.05, 390, 0.08, 0.18, 0); } },
-    { name: "dart", dur: 0.07, draw: (b, t) => { noise(b, t, 0.04, 0.35, 60); tone(b, t, 980, 0.05, 0.16, 0.5); } },
-    { name: "beam", dur: 0.1, draw: (b, t) => tone(b, t, 640, 0.09, 0.16, 0.8) },
-    { name: "drum", dur: 0.24, draw: (b, t) => { kick(b, t, 0.7); noise(b, t, 0.16, 0.35, 12); } },
-    { name: "chain", dur: 0.18, draw: (b, t) => { tone(b, t, 880, 0.06, 0.2, 0.4); tone(b, t + 0.05, 1180, 0.06, 0.16, 0.3); tone(b, t + 0.1, 1460, 0.06, 0.12, 0.2); } },
-    { name: "death", dur: 0.16, draw: (b, t) => { noise(b, t, 0.12, 0.4, 16); tone(b, t, 240, 0.12, 0.2, 0); } },
-    { name: "horn", dur: 0.42, draw: (b, t) => { tone(b, t, 392, 0.38, 0.28, 0.15); tone(b, t, 588, 0.38, 0.16, 0); } },
-    { name: "crack", dur: 0.3, draw: (b, t) => { noise(b, t, 0.22, 0.55, 8); tone(b, t, 90, 0.28, 0.4, 0); } },
-    { name: "flare", dur: 0.5, draw: (b, t) => { noise(b, t, 0.35, 0.4, 6); tone(b, t, 523, 0.4, 0.22, 0.4); tone(b, t, 784, 0.4, 0.16, 0.2); tone(b, t + 0.08, 1046, 0.3, 0.12, 0); } },
-    { name: "jade", dur: 0.12, draw: (b, t) => { tone(b, t, 880, 0.08, 0.18, 0.2); tone(b, t + 0.04, 1320, 0.07, 0.12, 0); } },
-    { name: "victory", dur: 0.7, draw: (b, t) => { [523, 659, 784, 1046].forEach((f, i) => tone(b, t + i * 0.12, f, 0.22, 0.24, 0.25)); } },
-    { name: "defeat", dur: 0.6, draw: (b, t) => { [392, 349, 311, 262].forEach((f, i) => tone(b, t + i * 0.12, f, 0.2, 0.24, 0.1)); } },
+    { name: "dart", dur: 0.08, draw: (b, t) => { noise(b, t, 0.03, 0.5, 70); tone(b, t, 1240, 0.045, 0.2, 0.6); tone(b, t, 620, 0.06, 0.1, 0); } },
+    { name: "beam", dur: 0.12, draw: (b, t) => { tone(b, t, 520, 0.11, 0.14, 0.9); tone(b, t, 780, 0.1, 0.1, 0.4); } },
+    { name: "drum", dur: 0.28, draw: (b, t) => { kick(b, t, 0.85); noise(b, t, 0.18, 0.42, 10); tone(b, t, 90, 0.2, 0.3, 0); } },
+    { name: "chain", dur: 0.2, draw: (b, t) => { tone(b, t, 740, 0.05, 0.22, 0.5); tone(b, t + 0.045, 1040, 0.05, 0.18, 0.4); tone(b, t + 0.09, 1480, 0.06, 0.14, 0.2); } },
+    { name: "death", dur: 0.2, draw: (b, t) => { noise(b, t, 0.14, 0.5, 14); tone(b, t, 180, 0.16, 0.28, 0); tone(b, t + 0.04, 90, 0.14, 0.2, 0); } },
+    { name: "horn", dur: 0.46, draw: (b, t) => { tone(b, t, 330, 0.42, 0.3, 0.2); tone(b, t, 494, 0.42, 0.18, 0); tone(b, t + 0.08, 660, 0.3, 0.1, 0); } },
+    { name: "crack", dur: 0.34, draw: (b, t) => { noise(b, t, 0.24, 0.62, 7); tone(b, t, 70, 0.3, 0.48, 0); kick(b, t, 0.4); } },
+    { name: "flare", dur: 0.55, draw: (b, t) => { noise(b, t, 0.4, 0.48, 5); tone(b, t, 392, 0.45, 0.2, 0.3); tone(b, t, 587, 0.4, 0.16, 0.2); tone(b, t + 0.06, 880, 0.32, 0.14, 0); } },
+    { name: "jade", dur: 0.14, draw: (b, t) => { tone(b, t, 784, 0.07, 0.16, 0.3); tone(b, t + 0.035, 1175, 0.08, 0.16, 0.1); tone(b, t + 0.07, 1568, 0.06, 0.08, 0); } },
+    { name: "victory", dur: 0.8, draw: (b, t) => { [392, 523, 659, 784, 1046].forEach((f, i) => tone(b, t + i * 0.12, f, 0.24, 0.26, 0.3)); } },
+    { name: "defeat", dur: 0.7, draw: (b, t) => { [392, 349, 311, 247].forEach((f, i) => { tone(b, t + i * 0.14, f, 0.24, 0.26, 0.12); noise(b, t + i * 0.14, 0.08, 0.08, 8); }); } },
+    { name: "relic", dur: 0.36, draw: (b, t) => { [523, 659, 784].forEach((f, i) => tone(b, t + i * 0.07, f, 0.16, 0.2, 0.35)); } },
+    { name: "streak", dur: 0.22, draw: (b, t) => { tone(b, t, 660, 0.08, 0.2, 0.4); tone(b, t + 0.06, 880, 0.1, 0.18, 0.3); tone(b, t + 0.12, 1320, 0.08, 0.12, 0); } },
+    { name: "roar", dur: 0.48, draw: (b, t) => { noise(b, t, 0.32, 0.4, 6); tone(b, t, 80, 0.4, 0.4, 0.2); tone(b, t, 140, 0.28, 0.18, 0); } },
   ];
   let total = 0;
   for (const p of plan) total += p.dur + gap;
