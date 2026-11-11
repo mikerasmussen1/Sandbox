@@ -193,8 +193,110 @@ function rules(): void {
   console.log("rules ok");
 }
 
+/** No totems. Perfect taps still lose every valley, and a plaza tap saves a leaker. */
+function guardian(): void {
+  const fodder = new Siege(0);
+  const runner = fodder.forceEnemy("runner", 0, 30);
+  runner.x = 80;
+  runner.y = 80;
+  runner.dist = 30;
+  if (fodder.strikeAt(runner.x + 140, runner.y) !== "hit") fail("tap should snap to a nearby runner");
+  if (fodder.strikeAt(runner.x, runner.y) !== "cool") fail("second tap should be on cooldown");
+  tickUntil(fodder, 0.5);
+  if (runner.alive) fail("a runner should die to one throw");
+  if (fodder.guardianKills < 1) fail("guardian kill not counted");
+  const runnerJade = BALANCE.worlds[0].jade + BALANCE.enemies.runner.reward;
+  if (fodder.jade < runnerJade) fail(`runner jade ${fodder.jade} expected at least ${runnerJade}`);
+
+  const scratch = new Siege(0);
+  const golem = scratch.forceEnemy("golem", 0, 40);
+  golem.x = 90;
+  golem.y = 90;
+  golem.dist = 40;
+  if (scratch.strikeAt(golem.x + 220, golem.y) !== "miss") fail("a far tap should not strike");
+  const golemHp = golem.hp;
+  if (scratch.strikeAt(golem.x, golem.y) !== "hit") fail("golem tap");
+  tickUntil(scratch, 0.5);
+  const golemDealt = golemHp - golem.hp;
+  if (!golem.alive || golemDealt <= 0 || golemDealt > golem.maxHp * 0.2) {
+    fail(`golem took ${golemDealt.toFixed(1)} of ${golem.maxHp}`);
+  }
+  const colossus = scratch.forceEnemy("boss", 0, 50);
+  colossus.x = 70;
+  colossus.y = 120;
+  colossus.dist = 50;
+  tickUntil(scratch, 0.9);
+  const bossHp = colossus.hp;
+  if (scratch.strikeAt(colossus.x, colossus.y) !== "hit") fail("boss tap");
+  tickUntil(scratch, 0.5);
+  const chipped = bossHp - colossus.hp;
+  if (!colossus.alive || chipped > colossus.maxHp * 0.08) fail(`boss chipped ${chipped.toFixed(1)}`);
+
+  const pack = new Siege(0);
+  const bug = pack.forceEnemy("skitter", 0, 20);
+  bug.x = 60;
+  bug.y = 60;
+  bug.dist = 20;
+  pack.strikeAt(bug.x, bug.y);
+  tickUntil(pack, 0.45);
+  if (!bug.alive) fail("one throw should not kill a skitter");
+  tickUntil(pack, 0.5);
+  if (pack.strikeAt(bug.x, bug.y) !== "hit") fail("second skitter throw");
+  tickUntil(pack, 0.5);
+  if (bug.alive) fail(`skitter should die on the second hit, hp ${bug.hp}`);
+
+  const save = new Siege(0);
+  const leaker = save.forceEnemy("skitter", 0, save.map.routes[0].len - 12);
+  const jade = save.jade;
+  const integrity = save.integrity;
+  if (save.strikeAt(leaker.x, leaker.y) !== "hit") fail("leaker tap");
+  tickUntil(save, 0.7);
+  if (leaker.alive) fail("a plaza skitter should fall to one throw");
+  if (save.guardianSaves < 1) fail("save not counted");
+  if (save.integrity !== integrity) fail("a saved leaker still cracked the sunstone");
+  if (save.jade < jade + BALANCE.enemies.skitter.reward) fail(`saved jade ${save.jade}`);
+
+  for (const world of [0, 1, 2]) {
+    const idle = play(world, false);
+    const tap = play(world, true);
+    if (tap.phase !== "defeat") fail(`world ${world} tap-spam should lose, got ${tap.phase} kills ${tap.kills}`);
+    if (idle.phase !== "defeat") fail(`world ${world} idle should lose, got ${idle.phase}`);
+    if (tap.kills < 3) fail(`world ${world} taps killed only ${tap.kills}`);
+    console.log(`guardian world ${world}: idle ${idle.t.toFixed(1)}s, tap ${tap.t.toFixed(1)}s, kills ${tap.kills}, saves ${tap.saves}`);
+  }
+  console.log("guardian ok");
+}
+
+function play(world: number, tap: boolean): { phase: string; kills: number; saves: number; t: number } {
+  const sim = new Siege(world);
+  const dt = 0.1;
+  let t = 0;
+  while (sim.phase !== "victory" && sim.phase !== "defeat" && t < 360) {
+    if (sim.pendingOffer?.length) sim.chooseRelic(sim.pendingOffer[0]);
+    if (sim.phase === "build") sim.callWave();
+    if (tap && sim.phase === "wave") {
+      let best: { x: number; y: number } | null = null;
+      let bestD = Infinity;
+      for (const e of sim.enemies) {
+        if (!e.alive) continue;
+        const d = Math.hypot(e.x - sim.map.sun.x, e.y - sim.map.sun.y);
+        if (d < bestD) {
+          bestD = d;
+          best = e;
+        }
+      }
+      if (best) sim.strikeAt(best.x, best.y);
+    }
+    sim.tick(dt);
+    sim.fx.length = 0;
+    t += dt;
+  }
+  return { phase: sim.phase, kills: sim.guardianKills, saves: sim.guardianSaves, t };
+}
+
 afk();
 rules();
+guardian();
 bot(0);
 bot(1);
 bot(2);

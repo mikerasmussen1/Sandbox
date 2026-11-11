@@ -98,6 +98,26 @@ export const BALANCE = {
     lock: 2.4,
   },
   /**
+   * The player's own throw. Invented, tune in play. One target, and slow
+   * enough that a horde walks through it. A jungle Skitter (60) takes two
+   * hits; a Runner (30) takes one. The plaza bonus one-shots that Skitter
+   * and still barely chips a Shield or the Colossus.
+   */
+  guardian: {
+    cooldown: 0.85,
+    damage: 34,
+    saved: 64,
+    /** World pixels. A phone tap can miss the sprite and still connect. */
+    tap: 160,
+    /** Distance to the Sunstone that counts as a leaker you can still save. */
+    savedRadius: 320,
+    /** Remaining path, in world pixels, that also counts as slipped through. */
+    savedRemain: 240,
+    flight: 0.34,
+    /** How long the throw pose plays. */
+    cast: 0.48,
+  },
+  /**
    * Tower synergies. Invented. A Quake Drum's stun is the setup; the Sun Lens
    * is the payoff. Slowed raiders also eat darts faster, and stunned raiders
    * take a heavier serpent arc.

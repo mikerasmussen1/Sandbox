@@ -172,6 +172,13 @@ export class WorldView {
   private plaza = 160;
   private sunAt = { x: 960, y: 540 };
   private beamCursor = 0;
+  private hero: Container | null = null;
+  private heroBody: Sprite | null = null;
+  private heroLine: Sprite | null = null;
+  private heroRing: Graphics | null = null;
+  private heroTime = 0;
+  private readonly spearBolts: Sprite[] = [];
+  private spearUsed = 0;
 
   constructor(art: ArtSet) {
     this.art = art;
@@ -456,6 +463,8 @@ export class WorldView {
     this.drawSelection(sim);
     this.drawBars(sim);
     this.drawSun(step, sim);
+    this.drawHero(sim, step);
+    this.drawSpears(sim);
     this.drawGhosts(step);
     this.drawBits(step);
     this.drawRings(step);
@@ -480,7 +489,12 @@ export class WorldView {
 
   apply(fx: readonly Fx[]): void {
     for (const event of fx) {
-      if (event.kind === "impact") this.burst(event.x, event.y, 0xfff0c2, 5);
+      if (event.kind === "impact") {
+        const saved = event.n === 1;
+        this.burst(event.x, event.y, saved ? 0xffe08a : 0xfff0c2, saved ? 10 : 6);
+        if (event.text) this.floatText(event.x, event.y - 40, event.text, 0xfff6df, 26);
+        if (saved) this.floatText(event.x, event.y - 86, "SAVED!", 0xffe08a, 36);
+      }
       else if (event.kind === "death") this.onDeath(event);
       else if (event.kind === "jade" && event.n) this.onJade(event.x, event.y, event.n);
       else if (event.kind === "multi" && event.text) {
@@ -927,6 +941,102 @@ export class WorldView {
       }
       this.cracks.stroke({ width: 3, color: 0x2a140c, alpha: 0.8 });
     }
+  }
+
+  private drawHero(sim: Siege, step: number): void {
+    if (!this.hero || !this.heroBody || !this.heroLine || !this.heroRing) {
+      this.hero = new Container();
+      this.hero.eventMode = "none";
+      this.heroBody = new Sprite(Texture.EMPTY);
+      this.heroLine = new Sprite(Texture.EMPTY);
+      this.heroBody.anchor.set(0.5, 0.9);
+      this.heroLine.anchor.set(0.5, 0.9);
+      this.heroLine.tint = 0x14080c;
+      this.heroBody.eventMode = "none";
+      this.heroLine.eventMode = "none";
+      this.heroRing = new Graphics();
+      this.heroRing.eventMode = "none";
+      this.hero.addChild(this.heroRing, this.heroLine, this.heroBody);
+      this.actors.addChild(this.hero);
+    }
+    const at = sim.heroAt();
+    this.hero.position.set(at.x, at.y);
+    this.hero.zIndex = at.y + 8;
+    const throwing = sim.guardianCast > 0;
+    const clip = this.art.clip("guardian", throwing ? "attack" : "idle");
+    if (clip) {
+      const row = facingRow(sim.guardianAim, clip.frames.length);
+      const frames = clip.frames[Math.min(row, clip.frames.length - 1)] ?? [];
+      if (frames.length > 0) {
+        let index = 0;
+        if (throwing) {
+          const span = Math.max(0.05, BALANCE.guardian.cast);
+          const u = 1 - sim.guardianCast / span;
+          index = Math.min(frames.length - 1, Math.max(0, Math.floor(u * frames.length)));
+        } else {
+          this.heroTime += step > 0 ? step : 0.016;
+          index = Math.floor(this.heroTime * clip.fps) % frames.length;
+        }
+        const tex = frames[index];
+        this.heroBody.texture = tex;
+        this.heroLine.texture = tex;
+        this.heroBody.scale.set(0.92);
+        this.heroLine.scale.set(0.97);
+        this.heroLine.position.set(1, 3);
+      }
+    }
+    const ready = sim.guardianReady;
+    this.heroRing.clear();
+    this.heroRing.circle(0, 6, 50).stroke({ width: 5, color: 0x140e0a, alpha: 0.45 });
+    this.heroRing.arc(0, 6, 50, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * ready).stroke({
+      width: 6,
+      color: ready >= 0.999 ? 0xffe08a : 0xffb03a,
+      alpha: 0.95,
+    });
+  }
+
+  private drawSpears(sim: Siege): void {
+    this.spearUsed = 0;
+    const tex = this.art.frame("fx-spear");
+    const liftMax = this.reduced ? -18 : -150;
+    const samples = 6;
+    for (const spear of sim.spears) {
+      const now = Math.min(1, spear.age / Math.max(0.05, spear.flight));
+      if (now < 0.04) continue;
+      for (let i = 0; i < samples; i++) {
+        const t = now * ((i + 1) / samples);
+        const bolt = this.takeBolt(tex);
+        const lift = Math.sin(t * Math.PI) * liftMax;
+        const x = spear.sx + (spear.tx - spear.sx) * t;
+        const y = spear.sy + (spear.ty - spear.sy) * t + lift;
+        const prev = Math.max(0, t - 0.06);
+        const px = spear.sx + (spear.tx - spear.sx) * prev;
+        const py = spear.sy + (spear.ty - spear.sy) * prev + Math.sin(prev * Math.PI) * liftMax;
+        const head = i === samples - 1;
+        bolt.position.set(x, y);
+        bolt.rotation = Math.atan2(y - py, x - px);
+        bolt.scale.set(head ? 1.65 : 0.45 + i * 0.14);
+        bolt.alpha = head ? 1 : 0.28 + i * 0.08;
+        bolt.blendMode = head ? "normal" : "add";
+        bolt.tint = head ? 0xfff6df : 0xffc14a;
+      }
+    }
+    for (let i = this.spearUsed; i < this.spearBolts.length; i++) this.spearBolts[i].visible = false;
+  }
+
+  private takeBolt(tex: Texture): Sprite {
+    let bolt = this.spearBolts[this.spearUsed];
+    if (!bolt) {
+      bolt = new Sprite(tex);
+      bolt.anchor.set(0.2, 0.5);
+      bolt.eventMode = "none";
+      this.fxLayer.addChild(bolt);
+      this.spearBolts.push(bolt);
+    }
+    bolt.texture = tex;
+    bolt.visible = true;
+    this.spearUsed += 1;
+    return bolt;
   }
 
   private drawBeams(sim: Siege): void {

@@ -22,6 +22,8 @@ export interface HudState {
   speed: number;
   flare: number;
   flareReady: boolean;
+  /** 1 when the Guardian can throw, 0 just after a throw. */
+  guardian: number;
   buildLeft: number;
   hint: string;
   offer: { id: RelicId; name: string; blurb: string }[] | null;
@@ -101,6 +103,9 @@ export class Hud {
   private readonly flareReady: Sprite;
   private readonly flareCool: Sprite;
   private readonly flareRing: Graphics;
+  private guardianButton!: Container;
+  private guardianRing!: Graphics;
+  private guardianFace!: Sprite;
   private readonly hint: Text;
   private readonly offerLayer = new Container();
   private readonly offerNames: Text[] = [];
@@ -348,6 +353,16 @@ export class Hud {
     this.flareReady.visible = state.flareReady;
     this.flareCool.visible = !state.flareReady;
     this.flareButton.scale.set(state.flareReady ? 1.04 : 1);
+    if (this.guardianRing) {
+      const ready = Math.max(0, Math.min(1, state.guardian));
+      this.guardianRing.clear();
+      this.guardianRing.circle(0, 0, 36).stroke({ width: 4, color: 0x3a3024, alpha: 0.9 });
+      this.guardianRing.arc(0, 0, 36, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * ready).stroke({
+        width: 5,
+        color: ready >= 0.999 ? 0xffe08a : 0xffb03a,
+      });
+      this.guardianButton.alpha = ready >= 0.999 ? 1 : 0.92;
+    }
   }
 
   setCard(card: TowerCard | null): void {
@@ -554,6 +569,28 @@ export class Hud {
       e.stopPropagation();
       this.hooks.flare();
     });
+    this.guardianButton = new Container();
+    this.guardianRing = new Graphics();
+    this.guardianRing.eventMode = "none";
+    const guardianPlate = new Graphics();
+    guardianPlate.circle(0, 0, 32).fill({ color: 0x1a120c });
+    guardianPlate.circle(0, 0, 28).fill({ color: 0x4a3018 });
+    guardianPlate.eventMode = "none";
+    const idle = art.clip("guardian", "idle");
+    this.guardianFace = new Sprite(idle?.frames[0]?.[0] ?? Texture.EMPTY);
+    this.guardianFace.anchor.set(0.5, 0.38);
+    this.guardianFace.scale.set(0.34);
+    this.guardianFace.eventMode = "none";
+    const guardianMask = new Graphics().circle(0, 0, 26).fill({ color: 0xffffff });
+    guardianMask.eventMode = "none";
+    this.guardianFace.mask = guardianMask;
+    const guardianLabel = label("You", 13, 0xfff6df);
+    guardianLabel.anchor.set(0.5);
+    guardianLabel.position.set(0, 48);
+    guardianLabel.eventMode = "none";
+    this.guardianButton.addChild(guardianPlate, guardianMask, this.guardianFace, this.guardianRing, guardianLabel);
+    this.guardianButton.eventMode = "static";
+    this.guardianButton.on("pointertap", (e) => e.stopPropagation());
     this.hint.text = "Tap a stone pad beside a trail.";
     this.cardName.position.set(96, 28);
     this.cardChip.position.set(96, 64);
@@ -596,8 +633,8 @@ export class Hud {
     this.laneTip.visible = false;
     this.laneTip.eventMode = "static";
     this.laneLayer.eventMode = "passive";
-    this.play.addChild(bar, this.integrityText, this.integrityFill, this.waveText, this.streakText, this.bossText, speed, pause, gear, this.vault, this.purseText, this.laneLayer, this.laneTip, this.callButton, this.flareButton, this.hint, this.banner, this.card, this.offerLayer);
-    this.hits.push(speed, pause, gear, this.callButton, this.flareButton, this.card, bar, this.vault, this.laneTip);
+    this.play.addChild(bar, this.integrityText, this.integrityFill, this.waveText, this.streakText, this.bossText, speed, pause, gear, this.vault, this.purseText, this.laneLayer, this.laneTip, this.callButton, this.guardianButton, this.flareButton, this.hint, this.banner, this.card, this.offerLayer);
+    this.hits.push(speed, pause, gear, this.callButton, this.guardianButton, this.flareButton, this.card, bar, this.vault, this.laneTip);
     this.banner.visible = false;
   }
 
@@ -635,10 +672,14 @@ export class Hud {
       speed.position.set(w - 326, 28);
     }
     this.flareButton.position.set(w - 64, h - 64);
+    this.guardianButton.position.set(w < 760 ? w - 64 : w - 156, w < 760 ? h - 168 : h - 64);
     this.callButton.position.set(narrow ? Math.max(150, w / 2 - 70) : w / 2, h - 48);
     const belowVault = this.vault.y + this.vaultH;
     this.hint.style.wordWrap = true;
     this.hint.style.wordWrapWidth = Math.max(160, w - 28);
+    this.banner.style.wordWrap = true;
+    this.banner.style.wordWrapWidth = Math.max(200, w - 48);
+    this.banner.style.align = "center";
     this.hint.position.set(w / 2, belowVault + (narrow ? 22 : 28));
     this.banner.position.set(w / 2, belowVault + (narrow ? 58 : 64));
     const cardScale = Math.min(1, (w - 8) / 600, Math.max(0.62, (h * 0.5) / 400));
