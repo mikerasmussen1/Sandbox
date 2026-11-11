@@ -3,7 +3,7 @@
  * to the view. Combat numbers stay in balance.ts.
  */
 import { Application, Rectangle } from "pixi.js";
-import { buildArt, paintMapTexture, paintMenuScene } from "./art";
+import { loadArt } from "./art";
 import { AudioBus } from "./audio";
 import { BALANCE, starsFor, towerCost, towerRange, worldCount } from "./balance";
 import { Hud, type TowerCard } from "./hud";
@@ -32,7 +32,14 @@ async function boot(): Promise<void> {
   host.appendChild(app.canvas);
   app.stage.eventMode = "static";
 
-  const art = buildArt();
+  const bootBar = document.getElementById("boot-bar");
+  const bootLabel = document.getElementById("boot-label");
+  const art = await loadArt((progress) => {
+    const pct = `${Math.round(progress * 100)}%`;
+    if (bootBar) bootBar.style.width = pct;
+    if (bootLabel) bootLabel.textContent = `Loading the valley… ${pct}`;
+  });
+  document.getElementById("boot")?.remove();
   const view = new WorldView(art);
   const audio = new AudioBus();
   audio.setMusic(save.music);
@@ -141,7 +148,7 @@ async function boot(): Promise<void> {
   }, save);
 
   app.stage.addChild(view.world, view.overlay, hud.root);
-  hud.setBackdrop(paintMenuScene());
+  hud.setBackdrop(art.title);
   setMode("title");
   layout();
 
@@ -321,6 +328,8 @@ async function boot(): Promise<void> {
   function setMode(next: "title" | "levels" | "play"): void {
     mode = next;
     hud.show(next);
+    if (next === "title") hud.setBackdrop(art.title);
+    else if (next === "levels") hud.setBackdrop(art.valley);
     const playing = next === "play";
     view.world.visible = playing;
     view.overlay.visible = playing;
@@ -343,7 +352,7 @@ async function boot(): Promise<void> {
     seenWave = -1;
     view.closeMenu();
     view.hideRange();
-    view.setMap(paintMapTexture(sim.map), sim.map.biome, sim.pads);
+    view.setMap(art.map(sim.map.biome), sim.map.biome, sim.pads);
     view.setReduced(save.reduced);
     hud.showSettings(false);
     hud.showPause(false);

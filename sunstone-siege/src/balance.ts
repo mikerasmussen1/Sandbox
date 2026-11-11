@@ -194,7 +194,7 @@ export const BALANCE = {
       speed: 1.04,
       waves: [
         { bonus: 32, groups: [group("runner", 6, 0.62, 0), group("runner", 5, 0.62, 1, 1)] },
-        { bonus: 38, groups: [group("shield", 4, 0.95, 0), group("runner", 5, 0.55, 2, 1.2)] },
+        { bonus: 38, groups: [group("shield", 4, 0.95, 0), group("runner", 5, 0.55, 3, 1.2)] },
         { bonus: 44, groups: [group("jaguar", 5, 0.7, 1), group("glider", 5, 0.65, 0, 0.6)] },
         { bonus: 50, groups: [group("golem", 3, 2.1, 2), group("shield", 5, 0.9, 1, 0.8)] },
         { bonus: 56, groups: [group("glider", 7, 0.55, 0), group("jaguar", 5, 0.7, 1, 0.4), group("shield", 4, 0.85, 2, 1.2)] },
@@ -210,7 +210,7 @@ export const BALANCE = {
         { bonus: 36, groups: [group("runner", 10, 0.48, 0)] },
         { bonus: 42, groups: [group("runner", 8, 0.45, 0), group("runner", 8, 0.45, 1, 0.6)] },
         { bonus: 48, groups: [group("shield", 6, 0.75, 2), group("jaguar", 6, 0.62, 0, 0.4)] },
-        { bonus: 54, groups: [group("glider", 6, 0.5, 1), group("golem", 3, 1.8, 0, 0.8)] },
+        { bonus: 54, groups: [group("glider", 6, 0.5, 1), group("golem", 3, 1.8, 3, 0.8)] },
         { bonus: 60, groups: [group("shield", 8, 0.62, 2), group("glider", 7, 0.42, 1, 0.3), group("jaguar", 6, 0.5, 0, 0.8)] },
         { bonus: 66, groups: [group("golem", 4, 1.5, 0), group("golem", 3, 1.5, 2, 0.4), group("runner", 10, 0.32, 1, 0.6)] },
         { bonus: 90, groups: [group("shield", 7, 0.55, 0), group("boss", 1, 0.2, 1, 0.3), group("glider", 8, 0.4, 2, 0.5), group("jaguar", 6, 0.48, 0, 0.8)] },

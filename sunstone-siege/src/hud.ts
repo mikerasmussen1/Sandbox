@@ -2,14 +2,15 @@
  * Title, valley select, the battle bar, and the end screens.
  * Jade shown here is the demo token from the simulation. It is not a balance.
  */
-import { Container, Graphics, Rectangle, Sprite, Text } from "pixi.js";
+import { Container, Graphics, NineSliceSprite, Rectangle, Sprite, Text, type Texture } from "pixi.js";
 import type { ArtSet } from "./art";
 import { BALANCE, worldCount } from "./balance";
 import { isUnlocked, type SaveData } from "./save";
 import type { Phase, RelicId } from "./types";
 
-const SERIF = '"Noto Serif", Palatino, Georgia, serif';
-const SANS = 'Inter, "Segoe UI", system-ui, sans-serif';
+const SERIF = 'Palatino, "Palatino Linotype", Georgia, "Times New Roman", serif';
+const SANS = 'Palatino, "Palatino Linotype", Georgia, serif';
+const INK = 0x2a1608;
 
 export interface HudState {
   integrity: number;
@@ -77,6 +78,8 @@ export class Hud {
   private readonly callText: Text;
   private readonly callButton: Container;
   private readonly flareButton: Container;
+  private readonly flareReady: Sprite;
+  private readonly flareCool: Sprite;
   private readonly flareRing: Graphics;
   private readonly hint: Text;
   private readonly offerLayer = new Container();
@@ -94,11 +97,11 @@ export class Hud {
   private readonly sellText: Text;
   private readonly endTitle: Text;
   private readonly endBody: Text;
-  private readonly endStars: Sprite[] = [];
+  private readonly endStars: Text[] = [];
   private readonly nextButton: Container;
   private readonly levelCards: Container[] = [];
-  private readonly levelStarSets: Sprite[][] = [];
-  private readonly levelLocks: Sprite[] = [];
+  private readonly levelStarSets: Text[][] = [];
+  private readonly levelLocks: Text[] = [];
   private readonly musicSlider: Slider;
   private readonly sfxSlider: Slider;
   private readonly reducedText: Text;
@@ -113,7 +116,7 @@ export class Hud {
   private w = 800;
   private h = 450;
 
-  constructor(art: ArtSet, private readonly hooks: HudHooks, save: SaveData) {
+  constructor(private readonly art: ArtSet, private readonly hooks: HudHooks, save: SaveData) {
     this.backdrop = new Sprite();
     this.backdrop.eventMode = "none";
     this.root.addChild(this.backdrop, this.title, this.levels, this.play, this.pauseLayer, this.endLayer, this.settingsLayer);
@@ -130,6 +133,8 @@ export class Hud {
     this.offerClock.anchor.set(0.5);
     this.banner = label("", 28, 0xfff1c8);
     this.banner.anchor.set(0.5);
+    this.flareReady = new Sprite(art.frame("flare"));
+    this.flareCool = new Sprite(art.frame("flare-off"));
     this.flareRing = new Graphics();
     this.cardName = label("", 18, 0xf6e7c1);
     this.cardBody = label("", 13, 0xd9cbb0);
@@ -143,7 +148,7 @@ export class Hud {
 
     this.buildTitle(art);
     this.buildLevels(art);
-    this.callButton = this.button(this.callText, 210, 46, 0xe6b15a, () => hooks.call());
+    this.callButton = this.button(this.callText, 250, 52, () => hooks.call());
     this.flareButton = new Container();
     this.buildPlay(art);
     this.buildPause();
@@ -152,9 +157,9 @@ export class Hud {
     this.reduced = save.reduced;
     this.reducedText = label(this.reducedLine(), 16, 0xf6e7c1);
     this.buildSettings();
-    this.nextButton = this.button(label("Next valley", 16, 0x1a1208), 170, 46, 0xe6b15a, () => hooks.next());
+    this.nextButton = this.button(label("Next valley", 16, INK), 190, 50, () => hooks.next());
     this.buildOffer();
-    this.buildEnd(art);
+    this.buildEnd();
     this.refreshLevels(save);
     this.show("title");
   }
@@ -237,14 +242,16 @@ export class Hud {
     this.hint.text = state.hint;
     this.hint.visible = state.hint.length > 0 && !state.offer;
     this.syncOffer(state);
+    if (state.offer) this.card.visible = false;
     const charge = state.flare / BALANCE.flare.need;
     this.flareRing.clear();
     this.flareRing.circle(0, 0, 32).stroke({ width: 3, color: 0x3a3024, alpha: 0.9 });
     if (charge > 0) {
       this.flareRing.arc(0, 0, 32, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * charge).stroke({ width: 4, color: state.flareReady ? 0xfff1c2 : 0xffb03a });
     }
-    this.flareButton.alpha = state.flareReady ? 1 : 0.72;
-    this.flareButton.scale.set(state.flareReady ? 1.06 : 1);
+    this.flareReady.visible = state.flareReady;
+    this.flareCool.visible = !state.flareReady;
+    this.flareButton.scale.set(state.flareReady ? 1.04 : 1);
   }
 
   setCard(card: TowerCard | null): void {
@@ -305,75 +312,50 @@ export class Hud {
     this.nextButton.visible = kind === "victory" && hasNext;
   }
 
-  private buildTitle(art: ArtSet): void {
-    const dim = new Graphics().rect(-800, -500, 1600, 1000).fill({ color: 0x070c08, alpha: 0.45 });
-    dim.eventMode = "none";
-    const title = new Text({
-      text: "SUNSTONE SIEGE",
-      style: {
-        fontFamily: SERIF,
-        fontSize: 64,
-        fill: 0xfff1c8,
-        fontWeight: "bold",
-        align: "center",
-        dropShadow: { alpha: 0.7, angle: Math.PI / 2, blur: 6, color: 0x140c06, distance: 3 },
-      },
-    });
-    title.anchor.set(0.5);
-    title.position.set(0, -120);
-    const sub = wrap("Hold the crater. Carve totems along the trails. Jade is a demo token and has no cash value.", 520, 18, 0xf6e7c1);
-    sub.position.set(0, -40);
-    const play = this.button(label("Play", 22, 0x1a1208), 220, 56, 0xe6b15a, () => this.hooks.play());
-    play.position.set(0, 70);
-    const settings = this.button(label("Settings", 18, 0xf6e7c1), 180, 46, 0x2a2118, () => this.hooks.openSettings());
-    settings.position.set(0, 140);
-    const ring = new Sprite(art.frame("sun-ring"));
-    ring.anchor.set(0.5);
-    ring.scale.set(0.42);
-    ring.position.set(0, -230);
-    ring.eventMode = "none";
-    const mark = new Sprite(art.frame("sun-disk"));
-    mark.anchor.set(0.5);
-    mark.scale.set(0.42);
-    mark.position.set(0, -230);
-    mark.eventMode = "none";
-    this.title.addChild(dim, ring, mark, title, sub, play, settings);
+  private buildTitle(_art: ArtSet): void {
+    const sub = wrap("Hold the crater. Jade is a demo token and has no cash value.", 460, 18, 0xfff6df);
+    sub.position.set(0, 168);
+    const play = this.button(label("Play", 22, INK), 240, 58, () => this.hooks.play());
+    play.position.set(0, 230);
+    const settings = this.button(label("Settings", 18, INK), 200, 50, () => this.hooks.openSettings());
+    settings.position.set(0, 300);
+    this.title.addChild(sub, play, settings);
     this.hits.push(play, settings);
   }
 
-  private buildLevels(art: ArtSet): void {
-    const heading = new Text({ text: "Choose a valley", style: { fontFamily: SERIF, fontSize: 36, fill: 0xfff1c8, fontWeight: "bold" } });
+  private buildLevels(_art: ArtSet): void {
+    const heading = new Text({ text: "Choose a valley", style: { fontFamily: SERIF, fontSize: 40, fill: 0xfff6df, fontWeight: "bold", dropShadow: { alpha: 0.9, angle: Math.PI / 2, blur: 6, color: 0x140c06, distance: 2 } } });
     heading.anchor.set(0.5);
     heading.position.set(0, -210);
-    const back = this.button(label("Back", 16, 0xf6e7c1), 120, 40, 0x2a2118, () => this.hooks.backTitle());
+    const back = this.button(label("Back", 16, INK), 150, 46, () => this.hooks.backTitle());
     back.position.set(0, 230);
     this.levels.addChild(heading, back);
     this.hits.push(back);
     for (let i = 0; i < worldCount(); i++) {
       const card = new Container();
       card.position.set((i - 1) * 300, 10);
-      const plate = new Graphics().roundRect(-130, -150, 260, 300, 16).fill({ color: 0x1c1610 }).stroke({ width: 2, color: 0xe6c27a });
+      const plate = this.panel(280, 320);
+      plate.position.set(0, 0);
       const name = new Text({ text: BALANCE.worlds[i].name, style: { fontFamily: SERIF, fontSize: 22, fill: 0xfff1c8, fontWeight: "bold", wordWrap: true, wordWrapWidth: 220, align: "center" } });
       name.anchor.set(0.5, 0);
       name.position.set(0, -110);
       const waves = label(`${BALANCE.worlds[i].waves.length} waves`, 15, 0xd9cbb0);
       waves.anchor.set(0.5);
       waves.position.set(0, -40);
-      const stars: Sprite[] = [];
+      const stars: Text[] = [];
       for (let s = 0; s < 3; s++) {
-        const star = new Sprite(art.frame("star"));
+        const star = label("★", 28, 0xffe08a);
         star.anchor.set(0.5);
-        star.position.set(-36 + s * 36, 10);
-        star.scale.set(1.1);
+        star.position.set(-40 + s * 40, 16);
         star.eventMode = "none";
         stars.push(star);
       }
-      const lock = new Sprite(art.frame("lock"));
+      const lock = label("Locked", 16, 0xfff1c8);
       lock.anchor.set(0.5);
       lock.position.set(0, 78);
       lock.eventMode = "none";
       card.addChild(plate, name, waves, ...stars, lock);
-      card.hitArea = new Rectangle(-130, -150, 260, 300);
+      card.hitArea = new Rectangle(-140, -160, 280, 320);
       card.eventMode = "static";
       card.cursor = "pointer";
       card.on("pointertap", (e) => {
@@ -393,17 +375,22 @@ export class Hud {
     bar.eventMode = "none";
     const jadeIcon = new Sprite(art.frame("jade"));
     jadeIcon.anchor.set(0.5);
-    jadeIcon.scale.set(0.7);
+    jadeIcon.scale.set(0.38);
     jadeIcon.eventMode = "none";
-    const speed = this.button(this.speedText, 64, 36, 0xe6b15a, () => this.hooks.speed());
-    const pause = this.button(label("Pause", 15, 0xf6e7c1), 84, 36, 0x2a2118, () => this.hooks.pause());
-    const gear = this.button(label("Settings", 14, 0xf6e7c1), 96, 36, 0x2a2118, () => this.hooks.openSettings());
-    const plate = new Graphics().circle(0, 0, 36).fill({ color: 0x3a2410 }).stroke({ width: 2, color: 0xffe0a0 });
-    const flareLabel = label("Flare", 13, 0xfff1c8);
+    const speed = this.button(this.speedText, 86, 42, () => this.hooks.speed());
+    const pause = this.button(label("Pause", 15, INK), 118, 42, () => this.hooks.pause());
+    const gear = this.button(label("Settings", 14, INK), 132, 42, () => this.hooks.openSettings());
+    this.flareReady.anchor.set(0.5);
+    this.flareCool.anchor.set(0.5);
+    this.flareReady.scale.set(0.46);
+    this.flareCool.scale.set(0.46);
+    this.flareReady.eventMode = "none";
+    this.flareCool.eventMode = "none";
+    const flareLabel = label("Flare", 13, 0xfff6df);
     flareLabel.anchor.set(0.5);
-    flareLabel.position.set(0, 2);
+    flareLabel.position.set(0, 46);
     this.flareRing.eventMode = "none";
-    this.flareButton.addChild(plate, this.flareRing, flareLabel);
+    this.flareButton.addChild(this.flareCool, this.flareReady, this.flareRing, flareLabel);
     this.flareButton.eventMode = "static";
     this.flareButton.cursor = "pointer";
     this.flareButton.on("pointertap", (e) => {
@@ -411,14 +398,17 @@ export class Hud {
       this.hooks.flare();
     });
     this.hint.text = "Tap a stone pad beside a trail.";
-    this.cardName.position.set(16, 12);
-    this.cardBody.position.set(16, 40);
-    this.cardLine.position.set(16, 64);
-    this.upgradeButton = this.button(this.upgradeText, 150, 36, 0xe6b15a, () => this.hooks.upgrade());
-    this.upgradeButton.position.set(92, 100);
-    const sell = this.button(this.sellText, 140, 36, 0x2a2118, () => this.hooks.sell());
-    sell.position.set(250, 100);
-    const cardBg = new Graphics().roundRect(0, 0, 400, 128, 14).fill({ color: 0x1c1610, alpha: 0.92 }).stroke({ width: 2, color: 0xe6c27a });
+    this.cardName.position.set(96, 78);
+    this.cardBody.style.wordWrap = true;
+    this.cardBody.style.wordWrapWidth = 360;
+    this.cardBody.position.set(96, 108);
+    this.cardLine.position.set(96, 156);
+    this.upgradeButton = this.button(this.upgradeText, 170, 44, () => this.hooks.upgrade());
+    this.upgradeButton.position.set(180, 206);
+    const sell = this.button(this.sellText, 150, 44, () => this.hooks.sell());
+    sell.position.set(370, 206);
+    const cardBg = this.panel(560, 270);
+    cardBg.position.set(280, 135);
     cardBg.eventMode = "none";
     this.card.addChild(cardBg, this.cardName, this.cardBody, this.cardLine, this.upgradeButton, sell);
     this.card.visible = false;
@@ -448,14 +438,14 @@ export class Hud {
     this.jadeText.position.set(232, 16);
     this.waveText.anchor.set(0.5, 0);
     this.waveText.position.set(w / 2, 16);
-    gear.position.set(w - 64, 28);
-    pause.position.set(w - 160, 28);
-    speed.position.set(w - 244, 28);
+    gear.position.set(w - 78, 28);
+    pause.position.set(w - 214, 28);
+    speed.position.set(w - 326, 28);
     this.flareButton.position.set(w - 64, h - 64);
     this.callButton.position.set(w / 2, h - 48);
     this.hint.position.set(w / 2, 78);
     this.banner.position.set(w / 2, 120);
-    this.card.position.set(16, h - 148);
+    this.card.position.set(12, h - 286);
     this.offerLayer.position.set(w / 2, h / 2 + 10);
   }
 
@@ -467,24 +457,32 @@ export class Hud {
       style: { fontFamily: SERIF, fontSize: 32, fill: 0xfff1c8, fontWeight: "bold", align: "center" },
     });
     heading.anchor.set(0.5);
-    heading.position.set(0, -150);
+    heading.position.set(0, -188);
     heading.eventMode = "none";
-    this.offerClock.position.set(0, -112);
+    this.offerClock.position.set(0, -148);
     this.offerLayer.addChild(dim, heading, this.offerClock);
     this.hits.push(dim);
     for (let i = 0; i < 3; i++) {
       const card = new Container();
-      card.position.set((i - 1) * 250, 10);
-      const plate = new Graphics().roundRect(-110, -70, 220, 150, 14).fill({ color: 0x1c1610, alpha: 0.96 }).stroke({ width: 2, color: 0xe6c27a });
-      const name = label("Gift", 16, 0xfff1c8);
+      card.position.set((i - 1) * 330, 24);
+      const plate = this.panel(300, 230);
+      const name = label("Gift", 18, 0xfff1c8);
       name.anchor.set(0.5, 0);
-      name.position.set(0, -52);
+      name.position.set(0, -28);
       const blurb = new Text({
         text: "",
-        style: { fontFamily: SANS, fontSize: 13, fill: 0xd9cbb0, align: "center", wordWrap: true, wordWrapWidth: 190 },
+        style: {
+          fontFamily: SANS,
+          fontSize: 15,
+          fill: 0xf6e7c1,
+          align: "center",
+          wordWrap: true,
+          wordWrapWidth: 210,
+          dropShadow: { alpha: 0.8, angle: Math.PI / 2, blur: 3, color: 0x140c06, distance: 1 },
+        },
       });
       blurb.anchor.set(0.5, 0);
-      blurb.position.set(0, -22);
+      blurb.position.set(0, 4);
       card.addChild(plate, name, blurb);
       card.eventMode = "static";
       card.cursor = "pointer";
@@ -515,71 +513,110 @@ export class Hud {
 
   private buildPause(): void {
     const dim = fullDim();
+    const plate = this.panel(340, 420);
     const title = new Text({ text: "Paused", style: { fontFamily: SERIF, fontSize: 40, fill: 0xfff1c8, fontWeight: "bold" } });
     title.anchor.set(0.5);
     title.position.set(0, -120);
-    const resume = this.button(label("Resume", 18, 0x1a1208), 220, 50, 0xe6b15a, () => this.hooks.resume());
+    const resume = this.button(label("Resume", 18, INK), 240, 54, () => this.hooks.resume());
     resume.position.set(0, -30);
-    const restart = this.button(label("Restart valley", 16, 0xf6e7c1), 220, 46, 0x2a2118, () => this.hooks.restart());
+    const restart = this.button(label("Restart valley", 16, INK), 240, 50, () => this.hooks.restart());
     restart.position.set(0, 36);
-    const settings = this.button(label("Settings", 16, 0xf6e7c1), 220, 46, 0x2a2118, () => this.hooks.openSettings());
+    const settings = this.button(label("Settings", 16, INK), 240, 50, () => this.hooks.openSettings());
     settings.position.set(0, 96);
-    const quit = this.button(label("Valley select", 16, 0xf6e7c1), 220, 46, 0x2a2118, () => this.hooks.quit());
+    const quit = this.button(label("Valley select", 16, INK), 240, 50, () => this.hooks.quit());
     quit.position.set(0, 156);
-    this.pauseLayer.addChild(dim, title, resume, restart, settings, quit);
+    this.pauseLayer.addChild(dim, plate, title, resume, restart, settings, quit);
     this.hits.push(dim, resume, restart, settings, quit);
     this.pauseLayer.visible = false;
   }
 
   private buildSettings(): void {
     const dim = fullDim();
+    const plate = this.panel(380, 420);
     const title = new Text({ text: "Settings", style: { fontFamily: SERIF, fontSize: 36, fill: 0xfff1c8, fontWeight: "bold" } });
     title.anchor.set(0.5);
     title.position.set(0, -160);
     this.musicSlider.root.position.set(-110, -70);
     this.sfxSlider.root.position.set(-110, -10);
-    const toggle = this.button(this.reducedText, 260, 46, 0x2a2118, () => {
+    const toggle = this.button(this.reducedText, 280, 50, () => {
       this.reduced = !this.reduced;
       this.reducedText.text = this.reducedLine();
       this.hooks.reduced(this.reduced);
     });
     toggle.position.set(0, 70);
-    const close = this.button(label("Close", 16, 0x1a1208), 160, 44, 0xe6b15a, () => this.hooks.closeSettings());
+    const close = this.button(label("Close", 16, INK), 180, 48, () => this.hooks.closeSettings());
     close.position.set(0, 140);
-    this.settingsLayer.addChild(dim, title, this.musicSlider.root, this.sfxSlider.root, toggle, close);
+    this.settingsLayer.addChild(dim, plate, title, this.musicSlider.root, this.sfxSlider.root, toggle, close);
     this.hits.push(dim, toggle, close, this.musicSlider.hit, this.sfxSlider.hit);
     this.settingsLayer.visible = false;
   }
 
-  private buildEnd(art: ArtSet): void {
+  private buildEnd(): void {
     const dim = fullDim();
+    const plate = this.panel(520, 420);
     for (let i = 0; i < 3; i++) {
-      const star = new Sprite(art.frame("star"));
+      const star = label("★", 36, 0xffe08a);
       star.anchor.set(0.5);
-      star.position.set(-48 + i * 48, -70);
-      star.scale.set(1.3);
+      star.position.set(-56 + i * 56, -70);
       this.endStars.push(star);
     }
     this.endTitle.position.set(0, -140);
     this.endBody.position.set(0, -10);
-    const replay = this.button(label("Play again", 16, 0x1a1208), 170, 46, 0xe6b15a, () => this.hooks.replay());
+    const replay = this.button(label("Play again", 16, INK), 190, 50, () => this.hooks.replay());
     replay.position.set(-100, 80);
     this.nextButton.position.set(100, 80);
-    const map = this.button(label("Valleys", 16, 0xf6e7c1), 140, 42, 0x2a2118, () => this.hooks.quit());
+    const map = this.button(label("Valleys", 16, INK), 170, 48, () => this.hooks.quit());
     map.position.set(0, 146);
-    this.endLayer.addChild(dim, this.endTitle, ...this.endStars, this.endBody, replay, this.nextButton, map);
+    this.endLayer.addChild(dim, plate, this.endTitle, ...this.endStars, this.endBody, replay, this.nextButton, map);
     this.hits.push(dim, replay, this.nextButton, map);
     this.endLayer.visible = false;
   }
 
-  private button(text: Text, w: number, h: number, fill: number, onClick: () => void): Container {
+  private panel(w: number, h: number): NineSliceSprite {
+    return this.stone(this.art.panel, w, h, 173, 127);
+  }
+
+  private stone(texture: Texture, w: number, h: number, insetX: number, insetY: number): NineSliceSprite {
+    const border = Math.max(14, Math.min(insetX * 0.42, w * 0.2, h * 0.42));
+    const s = border / insetX;
+    const slice = new NineSliceSprite({
+      texture,
+      leftWidth: insetX,
+      rightWidth: insetX,
+      topHeight: insetY,
+      bottomHeight: insetY,
+      width: Math.max(insetX * 2 + 8, w / s),
+      height: Math.max(insetY * 2 + 8, h / s),
+      anchor: 0.5,
+    });
+    slice.scale.set(s);
+    slice.eventMode = "none";
+    return slice;
+  }
+
+  private button(text: Text, w: number, h: number, onClick: () => void): Container {
     const c = new Container();
-    const g = new Graphics();
-    g.roundRect(-w / 2, -h / 2, w, h, 12).fill({ color: fill });
-    g.roundRect(-w / 2 + 3, -h / 2 + 3, w - 6, h * 0.42, 8).fill({ color: 0xffffff, alpha: 0.1 });
-    g.roundRect(-w / 2, -h / 2, w, h, 12).stroke({ width: 2, color: 0xf0d7a2, alpha: 0.95 });
+    const face = this.stone(this.art.button, w, h, 115, 65);
+    const pressed = this.stone(this.art.buttonDown, w, h, 115, 65);
+    pressed.visible = false;
+    text.style.fill = INK;
     text.anchor.set(0.5);
-    c.addChild(g, text);
+    c.addChild(face, pressed, text);
+    const down = () => {
+      face.visible = false;
+      pressed.visible = true;
+      pressed.y = 2;
+      text.y = 2;
+    };
+    const up = () => {
+      face.visible = true;
+      pressed.visible = false;
+      pressed.y = 0;
+      text.y = 0;
+    };
+    c.on("pointerdown", down);
+    c.on("pointerup", up);
+    c.on("pointerupoutside", up);
     c.eventMode = "static";
     c.cursor = "pointer";
     c.on("pointertap", (e) => {
@@ -637,13 +674,30 @@ class Slider {
 }
 
 function label(text: string, size: number, fill: number): Text {
-  return new Text({ text, style: { fontFamily: SANS, fontSize: size, fill, fontWeight: "bold" } });
+  return new Text({
+    text,
+    style: {
+      fontFamily: SANS,
+      fontSize: size,
+      fill,
+      fontWeight: "bold",
+      dropShadow: { alpha: 0.85, angle: Math.PI / 2, blur: 4, color: 0x140c06, distance: 1 },
+    },
+  });
 }
 
 function wrap(text: string, width: number, size: number, fill: number): Text {
   const t = new Text({
     text,
-    style: { fontFamily: SANS, fontSize: size, fill, align: "center", wordWrap: true, wordWrapWidth: width },
+    style: {
+      fontFamily: SANS,
+      fontSize: size,
+      fill,
+      align: "center",
+      wordWrap: true,
+      wordWrapWidth: width,
+      dropShadow: { alpha: 0.9, angle: Math.PI / 2, blur: 5, color: 0x140c06, distance: 1 },
+    },
   });
   t.anchor.set(0.5);
   return t;

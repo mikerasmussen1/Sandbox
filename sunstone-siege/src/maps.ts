@@ -1,157 +1,313 @@
 /**
- * Valley geometry. Paths branch and merge visually by sharing prefixes, then
- * each route ends on the rim of the central crater. Pad stones sit beside the
- * trails. Nothing in this file is a combat number.
+ * Valley geometry traced from the painted maps. Each route follows a dirt
+ * trail to the crater, then finishes at the Sunstone rim. Pads sit on the
+ * bank beside the trail. Combat numbers stay in balance.ts.
  */
 import type { Biome, Vec } from "./types";
-import { beside, flightOf, routeOf, type Route } from "./geom";
+import { flightOf, routeOf, type Route } from "./geom";
 
-export const MAP_W = 2000;
-export const MAP_H = 1200;
-export const SUN: Vec = { x: 1000, y: 600 };
-const RIM = 92;
+export const MAP_W = 1920;
+export const MAP_H = 1080;
+export const SUN: Vec = { x: 960, y: 540 };
 
 export interface MapDef {
   biome: Biome;
-  /** Seed for the painted canopy, so a valley looks the same every visit. */
-  seed: number;
   routes: Route[];
   flights: Route[];
   pads: Vec[];
-  /** Optional river centerline, painted under the trails. */
-  river?: Vec[];
-  /** Short stone bridges where a trail crosses the river, in world pixels. */
-  bridges?: Vec[];
 }
 
-function rimEnd(pts: Vec[]): Vec[] {
-  const prev = pts[pts.length - 1];
-  const vx = SUN.x - prev.x;
-  const vy = SUN.y - prev.y;
-  const d = Math.hypot(vx, vy) || 1;
-  return [...pts, { x: SUN.x - (vx / d) * RIM, y: SUN.y - (vy / d) * RIM }];
-}
-
-function padsFor(routes: Route[]): Vec[] {
-  const pads: Vec[] = [];
-  const fracs = [0.18, 0.36, 0.54, 0.7, 0.84];
-  routes.forEach((route, ri) => {
-    fracs.forEach((f, i) => {
-      const side = (i % 2 === 0 ? 1 : -1) * (74 + (ri % 2) * 10);
-      const p = beside(route, route.len * f, side);
-      if (p.x < 48 || p.y < 48 || p.x > MAP_W - 48 || p.y > MAP_H - 48) return;
-      if (Math.hypot(p.x - SUN.x, p.y - SUN.y) < 150) return;
-      if (pads.some((q) => Math.hypot(q.x - p.x, q.y - p.y) < 70)) return;
-      pads.push(p);
-    });
-  });
-  return pads;
-}
-
-function make(biome: Biome, seed: number, raw: Vec[][], extra?: Pick<MapDef, "river" | "bridges">): MapDef {
-  const routes = raw.map((pts) => routeOf(rimEnd(pts)));
-  const flights = routes.map((r) => flightOf(r, SUN));
-  return { biome, seed, routes, flights, pads: padsFor(routes), ...extra };
-}
-
-/** West trail forks north and south of the crater. North and east trails join the rim. */
-const valley = make("valley", 11, [
-  [
-    { x: 36, y: 470 },
-    { x: 230, y: 420 },
-    { x: 470, y: 490 },
-    { x: 700, y: 430 },
-    { x: 860, y: 500 },
-  ],
-  [
-    { x: 36, y: 470 },
-    { x: 230, y: 420 },
-    { x: 470, y: 490 },
-    { x: 540, y: 680 },
-    { x: 760, y: 760 },
-    { x: 920, y: 690 },
-  ],
-  [
-    { x: 1180, y: 28 },
-    { x: 1320, y: 190 },
-    { x: 1160, y: 340 },
-    { x: 1040, y: 450 },
-  ],
-  [
-    { x: 1964, y: 840 },
-    { x: 1680, y: 880 },
-    { x: 1460, y: 740 },
-    { x: 1260, y: 790 },
-    { x: 1120, y: 690 },
-  ],
-]);
-
-const ruins = make(
-  "ruins",
-  29,
-  [
+const valley: MapDef = {
+  biome: "valley",
+  routes: [
     [
-      { x: 28, y: 220 },
-      { x: 250, y: 250 },
-      { x: 420, y: 400 },
-      { x: 360, y: 560 },
-      { x: 560, y: 660 },
-      { x: 800, y: 600 },
+      { x: 82, y: 502 },
+      { x: 118, y: 506 },
+      { x: 154, y: 490 },
+      { x: 190, y: 482 },
+      { x: 226, y: 470 },
+      { x: 262, y: 458 },
+      { x: 298, y: 442 },
+      { x: 334, y: 434 },
+      { x: 370, y: 434 },
+      { x: 406, y: 434 },
+      { x: 442, y: 434 },
+      { x: 474, y: 454 },
+      { x: 502, y: 482 },
+      { x: 530, y: 506 },
+      { x: 558, y: 530 },
+      { x: 594, y: 538 },
+      { x: 630, y: 542 },
+      { x: 666, y: 542 },
+      { x: 702, y: 538 },
+      { x: 722, y: 546 },
+      { x: 824, y: 543 },
     ],
     [
-      { x: 1972, y: 250 },
-      { x: 1720, y: 210 },
-      { x: 1540, y: 390 },
-      { x: 1640, y: 560 },
-      { x: 1420, y: 660 },
-      { x: 1200, y: 600 },
+      { x: 982, y: 74 },
+      { x: 990, y: 110 },
+      { x: 990, y: 146 },
+      { x: 982, y: 182 },
+      { x: 982, y: 218 },
+      { x: 982, y: 254 },
+      { x: 986, y: 290 },
+      { x: 990, y: 302 },
+      { x: 977, y: 405 },
     ],
     [
-      { x: 1000, y: 1168 },
-      { x: 820, y: 1000 },
-      { x: 1160, y: 900 },
-      { x: 880, y: 780 },
-      { x: 1120, y: 700 },
+      { x: 1846, y: 634 },
+      { x: 1818, y: 658 },
+      { x: 1782, y: 670 },
+      { x: 1746, y: 670 },
+      { x: 1710, y: 670 },
+      { x: 1674, y: 670 },
+      { x: 1638, y: 670 },
+      { x: 1602, y: 670 },
+      { x: 1566, y: 670 },
+      { x: 1530, y: 666 },
+      { x: 1502, y: 638 },
+      { x: 1474, y: 610 },
+      { x: 1442, y: 590 },
+      { x: 1406, y: 570 },
+      { x: 1370, y: 562 },
+      { x: 1334, y: 562 },
+      { x: 1298, y: 562 },
+      { x: 1262, y: 562 },
+      { x: 1226, y: 542 },
+      { x: 1202, y: 530 },
+      { x: 1096, y: 534 },
     ],
+    [
+      { x: 978, y: 1038 },
+      { x: 982, y: 1002 },
+      { x: 974, y: 966 },
+      { x: 974, y: 930 },
+      { x: 974, y: 894 },
+      { x: 974, y: 858 },
+      { x: 974, y: 822 },
+      { x: 974, y: 786 },
+      { x: 974, y: 782 },
+      { x: 968, y: 676 },
+    ],
+  ].map((pts) => routeOf(pts)),
+  flights: [] as Route[],
+  pads: [
+    { x: 245, y: 552 },
+    { x: 371, y: 350 },
+    { x: 438, y: 537 },
+    { x: 629, y: 457 },
+    { x: 906, y: 133 },
+    { x: 1066, y: 199 },
+    { x: 899, y: 269 },
+    { x: 1071, y: 329 },
+    { x: 1712, y: 586 },
+    { x: 1542, y: 752 },
+    { x: 1477, y: 513 },
+    { x: 1297, y: 646 },
+    { x: 1058, y: 955 },
+    { x: 890, y: 901 },
+    { x: 1058, y: 836 },
+    { x: 889, y: 775 },
   ],
-  {
-    river: [
-      { x: 980, y: -20 },
-      { x: 1040, y: 180 },
-      { x: 920, y: 360 },
-      { x: 1080, y: 540 },
-      { x: 940, y: 760 },
-      { x: 1060, y: 980 },
-      { x: 980, y: 1220 },
-    ],
-    bridges: [
-      { x: 1000, y: 250 },
-      { x: 990, y: 600 },
-      { x: 1000, y: 900 },
-    ],
-  },
-);
+};
+valley.flights = valley.routes.map((r) => flightOf(r, SUN));
 
-const crater = make("crater", 47, [
-  [
-    { x: 24, y: 600 },
-    { x: 280, y: 500 },
-    { x: 520, y: 660 },
-    { x: 760, y: 540 },
+const ruins: MapDef = {
+  biome: "ruins",
+  routes: [
+    [
+      { x: 98, y: 178 },
+      { x: 134, y: 190 },
+      { x: 162, y: 218 },
+      { x: 194, y: 198 },
+      { x: 230, y: 214 },
+      { x: 266, y: 214 },
+      { x: 298, y: 190 },
+      { x: 334, y: 194 },
+      { x: 370, y: 202 },
+      { x: 402, y: 226 },
+      { x: 438, y: 242 },
+      { x: 474, y: 250 },
+      { x: 506, y: 270 },
+      { x: 542, y: 282 },
+      { x: 574, y: 302 },
+      { x: 602, y: 330 },
+      { x: 634, y: 354 },
+      { x: 662, y: 382 },
+      { x: 694, y: 402 },
+      { x: 722, y: 430 },
+      { x: 738, y: 434 },
+      { x: 837, y: 481 },
+    ],
+    [
+      { x: 1806, y: 486 },
+      { x: 1770, y: 470 },
+      { x: 1738, y: 446 },
+      { x: 1702, y: 438 },
+      { x: 1666, y: 434 },
+      { x: 1630, y: 438 },
+      { x: 1594, y: 438 },
+      { x: 1558, y: 438 },
+      { x: 1522, y: 450 },
+      { x: 1486, y: 450 },
+      { x: 1450, y: 450 },
+      { x: 1414, y: 450 },
+      { x: 1378, y: 450 },
+      { x: 1342, y: 450 },
+      { x: 1306, y: 454 },
+      { x: 1270, y: 462 },
+      { x: 1234, y: 470 },
+      { x: 1202, y: 470 },
+      { x: 1091, y: 502 },
+    ],
+    [
+      { x: 700, y: 8 },
+      { x: 730, y: 60 },
+      { x: 780, y: 120 },
+      { x: 760, y: 180 },
+      { x: 800, y: 240 },
+      { x: 880, y: 300 },
+      { x: 940, y: 360 },
+      { x: 945, y: 405 },
+    ],
+    [
+      { x: 970, y: 1030 },
+      { x: 970, y: 994 },
+      { x: 970, y: 958 },
+      { x: 970, y: 922 },
+      { x: 970, y: 886 },
+      { x: 970, y: 850 },
+      { x: 970, y: 814 },
+      { x: 970, y: 790 },
+      { x: 966, y: 740 },
+      { x: 964, y: 676 },
+    ],
+  ].map((pts) => routeOf(pts)),
+  flights: [] as Route[],
+  pads: [
+    { x: 195, y: 291 },
+    { x: 438, y: 148 },
+    { x: 500, y: 357 },
+    { x: 708, y: 309 },
+    { x: 1695, y: 353 },
+    { x: 1566, y: 524 },
+    { x: 1408, y: 366 },
+    { x: 1295, y: 543 },
+    { x: 685, y: 137 },
+    { x: 843, y: 197 },
+    { x: 930, y: 232 },
+    { x: 1054, y: 966 },
+    { x: 886, y: 895 },
+    { x: 1054, y: 832 },
+    { x: 885, y: 775 },
   ],
-  [
-    { x: 1000, y: 20 },
-    { x: 840, y: 200 },
-    { x: 1160, y: 300 },
-    { x: 1000, y: 440 },
+};
+ruins.flights = ruins.routes.map((r) => flightOf(r, SUN));
+
+const crater: MapDef = {
+  biome: "crater",
+  routes: [
+    [
+      { x: 102, y: 486 },
+      { x: 130, y: 462 },
+      { x: 166, y: 454 },
+      { x: 202, y: 454 },
+      { x: 238, y: 454 },
+      { x: 274, y: 458 },
+      { x: 302, y: 486 },
+      { x: 338, y: 486 },
+      { x: 374, y: 486 },
+      { x: 410, y: 498 },
+      { x: 446, y: 502 },
+      { x: 482, y: 506 },
+      { x: 518, y: 506 },
+      { x: 554, y: 518 },
+      { x: 582, y: 546 },
+      { x: 614, y: 566 },
+      { x: 650, y: 562 },
+      { x: 686, y: 554 },
+      { x: 718, y: 578 },
+      { x: 722, y: 582 },
+      { x: 826, y: 564 },
+    ],
+    [
+      { x: 1370, y: 66 },
+      { x: 1386, y: 102 },
+      { x: 1386, y: 138 },
+      { x: 1374, y: 174 },
+      { x: 1374, y: 210 },
+      { x: 1382, y: 246 },
+      { x: 1378, y: 282 },
+      { x: 1354, y: 314 },
+      { x: 1326, y: 342 },
+      { x: 1298, y: 370 },
+      { x: 1262, y: 382 },
+      { x: 1226, y: 390 },
+      { x: 1198, y: 414 },
+      { x: 1182, y: 446 },
+      { x: 1085, y: 487 },
+    ],
+    [
+      { x: 1810, y: 550 },
+      { x: 1774, y: 554 },
+      { x: 1738, y: 554 },
+      { x: 1702, y: 554 },
+      { x: 1666, y: 554 },
+      { x: 1630, y: 558 },
+      { x: 1594, y: 566 },
+      { x: 1558, y: 562 },
+      { x: 1522, y: 562 },
+      { x: 1486, y: 562 },
+      { x: 1450, y: 562 },
+      { x: 1414, y: 550 },
+      { x: 1386, y: 522 },
+      { x: 1362, y: 494 },
+      { x: 1342, y: 462 },
+      { x: 1322, y: 430 },
+      { x: 1294, y: 402 },
+      { x: 1262, y: 382 },
+      { x: 1226, y: 390 },
+      { x: 1198, y: 414 },
+      { x: 1182, y: 446 },
+      { x: 1085, y: 487 },
+    ],
+    [
+      { x: 1330, y: 1030 },
+      { x: 1334, y: 994 },
+      { x: 1322, y: 958 },
+      { x: 1334, y: 922 },
+      { x: 1350, y: 886 },
+      { x: 1358, y: 850 },
+      { x: 1334, y: 822 },
+      { x: 1306, y: 794 },
+      { x: 1278, y: 766 },
+      { x: 1250, y: 738 },
+      { x: 1226, y: 710 },
+      { x: 1198, y: 682 },
+      { x: 1166, y: 674 },
+      { x: 1074, y: 614 },
+    ],
+  ].map((pts) => routeOf(pts)),
+  flights: [] as Route[],
+  pads: [
+    { x: 233, y: 538 },
+    { x: 350, y: 567 },
+    { x: 515, y: 590 },
+    { x: 626, y: 480 },
+    { x: 1456, y: 195 },
+    { x: 1443, y: 335 },
+    { x: 1245, y: 304 },
+    { x: 1154, y: 341 },
+    { x: 1649, y: 471 },
+    { x: 1428, y: 442 },
+    { x: 1221, y: 456 },
+    { x: 1251, y: 906 },
+    { x: 1405, y: 776 },
+    { x: 1330, y: 699 },
+    { x: 1260, y: 625 },
   ],
-  [
-    { x: 1976, y: 700 },
-    { x: 1620, y: 540 },
-    { x: 1380, y: 780 },
-    { x: 1180, y: 640 },
-  ],
-]);
+};
+crater.flights = crater.routes.map((r) => flightOf(r, SUN));
 
 export const MAPS: readonly MapDef[] = [valley, ruins, crater];
 
