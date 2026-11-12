@@ -7,7 +7,7 @@ import type { ArtSet, Clip } from "./art";
 import { BALANCE, TOWER_HUE, TOWER_ICON, sharedScales, towerCost, towerFacts, towerRange, towerReadout } from "./balance";
 import { poseAt } from "./geom";
 import type { MapDef } from "./maps";
-import type { Enemy, Fx, Siege, Shot } from "./sim";
+import { PAY_FLIGHT, type Enemy, type Fx, type Siege, type Shot } from "./sim";
 import { TOWER_KINDS, type EnemyKind, type TowerKind, type Vec } from "./types";
 
 const SANS = 'Palatino, "Palatino Linotype", Georgia, serif';
@@ -187,10 +187,20 @@ export class WorldView {
   private readonly labels = new Container();
   private readonly stationLabels: Text[] = [];
   private readonly stationCosts: Text[] = [];
-  private readonly coinSprites: Sprite[] = [];
   private readonly shotBolts: Sprite[] = [];
   private shotUsed = 0;
   private readonly dropSprites: Sprite[] = [];
+  private readonly mark = new Graphics();
+  private markLife = 0;
+  private markX = 0;
+  private markY = 0;
+  private readonly carrySprites: Sprite[] = [];
+  private carryBadge: Text | null = null;
+  private carryCount = -1;
+  private readonly carryBorn: number[] = [];
+  private readonly payGems: { s: Sprite; x: number; y: number; tx: number; ty: number; life: number }[] = [];
+  private readonly payPool: Sprite[] = [];
+  private needAt = 0;
 
   constructor(art: ArtSet) {
     this.art = art;
@@ -219,7 +229,8 @@ export class WorldView {
     this.tag.anchor.set(0.5, 1);
     this.tag.eventMode = "none";
     this.labels.eventMode = "none";
-    this.world.addChild(this.ground, this.mapSprite, this.pads, this.shadowLayer, this.range, this.actors, this.link, this.bars, this.fxLayer, this.labels, this.tag, this.menu);
+    this.mark.eventMode = "none";
+    this.world.addChild(this.ground, this.mapSprite, this.pads, this.shadowLayer, this.range, this.actors, this.link, this.bars, this.mark, this.fxLayer, this.labels, this.tag, this.menu);
     this.actors.addChild(this.sun);
     this.flashRect.eventMode = "none";
     this.flashRect.blendMode = "add";
@@ -460,6 +471,14 @@ export class WorldView {
     this.range.visible = true;
   }
 
+  /** A ring where the player tapped. It pulses, then stays until he arrives. */
+  showGoal(x: number, y: number): void {
+    this.markX = x;
+    this.markY = y;
+    this.markLife = 0.85;
+    this.mark.visible = true;
+  }
+
   hideRange(): void {
     this.range.visible = false;
     this.range.clear();
@@ -485,6 +504,8 @@ export class WorldView {
     this.drawBars(sim);
     this.drawSun(step, sim);
     this.drawHero(sim, step);
+    this.drawCarry(sim, step);
+    this.drawMark(step, sim);
     this.drawSpears(sim);
     this.drawGhosts(step);
     this.drawBits(step);
@@ -519,6 +540,7 @@ export class WorldView {
         if (event.text) this.floatText(event.x, event.y - 40, event.text, 0xfff6df, 26);
         if (saved) this.floatText(event.x, event.y - 86, "SAVED!", 0xffe08a, 36);
       } else if (event.kind === "collect" && event.n) this.onCollect?.(event.n);
+      else if (event.kind === "pay") this.launchPay(event.x, event.y, event.tx ?? event.x, event.ty ?? event.y);
       else if (event.kind === "num" && event.text) this.popNumber(event.x, event.y, event.text);
       else if (event.kind === "rubble") {
         this.burst(event.x, event.y, 0xffffff, 6);
@@ -914,14 +936,18 @@ export class WorldView {
       const hot = i === near;
       if (station.kind === "wall") this.drawWall(sim, station.index - sim.pads.length, station.tier, station.alive, station.hp, station.maxHp);
       else this.dashSquare(station.x, station.y, hot ? 92 : 84, color);
-      if (sim.funding === i) {
-        const cost = sim.stationCost(station);
-        const u = cost > 0 ? station.paid / cost : 1;
+      const next = station.tier < 3 ? sim.stationCost(station) : 0;
+      const remain = next > 0 ? Math.max(0, Math.ceil(next - station.paid)) : 0;
+      const broke = sim.funding === i && sim.jade < 1 && remain > 0;
+      if (sim.funding === i && next > 0) {
+        const u = Math.max(0, Math.min(1, station.paid / next));
         this.pads.circle(station.x, station.y, 46).stroke({ width: 8, color: 0x3a2414, alpha: 0.55 });
         this.pads.arc(station.x, station.y, 46, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * u).stroke({ width: 8, color: 0xffe08a, alpha: 1 });
-        this.streamCoins(hero.x, hero.y - 30, station.x, station.y);
       }
-      const next = station.tier < 3 ? sim.stationCost(station) : 0;
+      if (broke && this.time - this.needAt > 1.05) {
+        this.needAt = this.time;
+        this.floatText(station.x, station.y - 78, "need more", 0xffd0a0, 18);
+      }
       const glyph = station.kind === "wall" ? "▮" : station.kind === "barracks" ? "⚑" : TOWER_ICON[station.kind];
       const icon = this.stationLabel(i);
       icon.text = glyph;
@@ -932,14 +958,15 @@ export class WorldView {
       icon.position.set(station.x, station.y);
       icon.zIndex = station.y + 4;
       const cost = this.stationCostLabel(i);
-      cost.text = next > 0 ? String(next) : "MAX";
+      cost.text = next > 0 ? String(remain) : "MAX";
       cost.style.fontSize = 28;
-      cost.style.fill = 0xfff6df;
+      cost.style.fill = broke ? 0xffb089 : 0xfff6df;
       cost.visible = true;
+      const shake = broke && !this.reduced ? Math.sin(this.time * 48) * 3.5 : 0;
       const pillW = Math.max(72, cost.text.length * 18 + 28);
       const pillY = station.kind === "wall" ? station.y + 18 : station.y + 50;
-      this.pads.roundRect(station.x - pillW / 2, pillY, pillW, 36, 18).fill({ color: 0x140e0a, alpha: 0.94 });
-      cost.position.set(station.x, pillY + 3);
+      this.pads.roundRect(station.x - pillW / 2 + shake, pillY, pillW, 36, 18).fill({ color: 0x140e0a, alpha: 0.94 });
+      cost.position.set(station.x + shake, pillY + 3);
       cost.zIndex = station.y + 5;
       if (hot && station.kind !== "wall" && station.kind !== "barracks" && station.tier < 3) {
         const radius = towerRange(station.kind, station.tier) * sim.rangeScale;
@@ -948,7 +975,6 @@ export class WorldView {
     });
     for (let i = sim.stations.length; i < this.stationLabels.length; i++) this.stationLabels[i].visible = false;
     for (let i = sim.stations.length; i < this.stationCosts.length; i++) this.stationCosts[i].visible = false;
-    if (sim.funding < 0) for (const coin of this.coinSprites) coin.visible = false;
   }
 
   private stationLabel(i: number): Text {
@@ -1027,22 +1053,133 @@ export class WorldView {
     }
   }
 
-  private streamCoins(x0: number, y0: number, x1: number, y1: number): void {
-    const n = 6;
-    for (let i = 0; i < n; i++) {
-      let coin = this.coinSprites[i];
-      if (!coin) {
-        coin = new Sprite(this.art.frame("jade"));
-        coin.anchor.set(0.5);
-        coin.eventMode = "none";
-        this.fxLayer.addChild(coin);
-        this.coinSprites.push(coin);
+  /** Ring pulse at the tap, held until the hero arrives. */
+  private drawMark(step: number, sim: Siege): void {
+    const goal = sim.goalAt;
+    const dt = step > 0 ? step : 0;
+    if (this.markLife > 0) this.markLife = Math.max(0, this.markLife - dt);
+    this.mark.clear();
+    if (!goal && this.markLife <= 0) {
+      this.mark.visible = false;
+      return;
+    }
+    this.mark.visible = true;
+    const x = goal?.x ?? this.markX;
+    const y = goal?.y ?? this.markY;
+    if (goal) {
+      this.mark.circle(x, y, 18).stroke({ width: 4, color: 0xffe08a, alpha: 0.95 });
+      this.mark.circle(x, y, 5).fill({ color: 0xfff6df, alpha: 0.95 });
+    }
+    if (this.markLife > 0 && !this.reduced) {
+      const u = 1 - this.markLife / 0.85;
+      this.mark.circle(x, y, 12 + u * 46).stroke({ width: 4, color: 0xfff1b0, alpha: (1 - u) * 0.95 });
+    }
+  }
+
+  private launchPay(x: number, y: number, tx: number, ty: number): void {
+    const s = this.payPool.pop() ?? this.makePaySprite();
+    s.visible = true;
+    s.alpha = 1;
+    s.scale.set(0.36);
+    s.position.set(x, y);
+    this.fxLayer.addChild(s);
+    this.payGems.push({ s, x, y, tx, ty, life: 0 });
+  }
+
+  private makePaySprite(): Sprite {
+    const s = new Sprite(this.art.frame("jade"));
+    s.anchor.set(0.5);
+    s.eventMode = "none";
+    return s;
+  }
+
+  /** Jade the hero is carrying, stacked above his head, then flung at a pad. */
+  private drawCarry(sim: Siege, step: number): void {
+    const cap = 24;
+    const gap = 6;
+    const total = Math.max(0, Math.floor(sim.jade + 1e-3));
+    const shown = Math.min(cap, total);
+    if (this.carryCount < 0) {
+      this.carryCount = total;
+      for (let i = 0; i < shown; i++) this.carryBorn.push(this.time - 1);
+    } else if (total > this.carryCount) {
+      const add = total - this.carryCount;
+      this.carryCount = total;
+      for (let i = 0; i < add; i++) {
+        if (this.carryBorn.length < cap) this.carryBorn.push(this.time);
+        else this.carryBorn[cap - 1] = this.time;
       }
-      const t = ((this.time * 1.4 + i / n) % 1);
-      coin.visible = true;
-      coin.position.set(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t - Math.sin(t * Math.PI) * 28);
-      coin.scale.set(0.34);
-      coin.alpha = 0.4 + t * 0.6;
+    } else if (total < this.carryCount) {
+      this.carryCount = total;
+      while (this.carryBorn.length > shown) this.carryBorn.pop();
+    }
+    const hero = sim.heroAt();
+    const moving = sim.heroMoving;
+    while (this.carrySprites.length < shown) {
+      const s = new Sprite(this.art.frame("jade"));
+      s.anchor.set(0.5, 0.65);
+      s.eventMode = "none";
+      this.actors.addChild(s);
+      this.carrySprites.push(s);
+    }
+    for (let i = 0; i < this.carrySprites.length; i++) {
+      const s = this.carrySprites[i];
+      if (i >= shown) {
+        s.visible = false;
+        continue;
+      }
+      s.visible = true;
+      const age = this.time - (this.carryBorn[i] ?? this.time - 1);
+      const bounce = age >= 0 && age < 0.18 ? Math.sin((age / 0.18) * Math.PI) * 8 : 0;
+      const pop = age >= 0 && age < 0.16 ? 0.72 + Math.sin((age / 0.16) * Math.PI) * 0.5 : 1;
+      const sway = Math.sin(this.time * (moving ? 7.2 : 2.2) + i * 0.4) * (moving ? 3.4 : 1.1) * (i / Math.max(1, shown - 1));
+      s.position.set(hero.x + sway, hero.y - 42 - i * gap - bounce);
+      s.zIndex = hero.y + 14 + i;
+      s.scale.set(0.2 * pop);
+      s.rotation = sway * 0.03;
+    }
+    if (total > cap) {
+      if (!this.carryBadge) {
+        this.carryBadge = new Text({
+          text: "",
+          style: {
+            fontFamily: SANS,
+            fontSize: 16,
+            fill: 0xf4ffe8,
+            fontWeight: "bold",
+            stroke: { color: 0x14301c, width: 4 },
+          },
+        });
+        this.carryBadge.anchor.set(0, 1);
+        this.carryBadge.eventMode = "none";
+        this.actors.addChild(this.carryBadge);
+      }
+      const top = Math.max(0, shown - 1);
+      const sway = Math.sin(this.time * (moving ? 7.2 : 2.2) + top * 0.4) * (moving ? 3.4 : 1.1);
+      this.carryBadge.visible = true;
+      this.carryBadge.text = `x${total}`;
+      this.carryBadge.position.set(hero.x + sway + 12, hero.y - 46 - top * gap);
+      this.carryBadge.zIndex = hero.y + 48;
+    } else if (this.carryBadge) this.carryBadge.visible = false;
+    const dt = step > 0 ? step : 0.016;
+    for (let i = this.payGems.length - 1; i >= 0; i--) {
+      const gem = this.payGems[i];
+      gem.life += dt;
+      const t = Math.min(1, gem.life / PAY_FLIGHT);
+      const e = t * t * (3 - 2 * t);
+      const swing = Math.sin(t * Math.PI);
+      gem.s.position.set(
+        gem.x + (gem.tx - gem.x) * e + swing * 72,
+        gem.y + (gem.ty - gem.y) * e - swing * 36,
+      );
+      gem.s.scale.set(0.36 * (1 - t * 0.15));
+      gem.s.alpha = 1;
+      gem.s.zIndex = gem.ty + 6;
+      if (t >= 1) {
+        gem.s.visible = false;
+        this.payPool.push(gem.s);
+        this.payGems.splice(i, 1);
+      }
     }
   }
 

@@ -292,6 +292,8 @@ async function boot(): Promise<void> {
   let pinch = 0;
   let hover = { x: 0, y: 0 };
   let hold: { x: number; y: number } | null = null;
+  let press: { id: number; x: number; y: number; moved: boolean } | null = null;
+  let lastTick = 0;
 
   const point = (e: PointerEvent): { x: number; y: number } => {
     const rect = app.canvas.getBoundingClientRect();
@@ -308,14 +310,12 @@ async function boot(): Promise<void> {
     if (pointers.size >= 2) {
       pinch = span();
       dragId = -1;
+      press = null;
+      stickOn = false;
       return;
     }
     dragId = e.pointerId;
-    stickOn = true;
-    originX = p.x;
-    originY = p.y;
-    knobX = p.x;
-    knobY = p.y;
+    press = { id: e.pointerId, x: p.x, y: p.y, moved: false };
   });
 
   window.addEventListener("pointermove", (e) => {
@@ -332,6 +332,16 @@ async function boot(): Promise<void> {
       pinch = next;
       return;
     }
+    if (press && e.pointerId === press.id && Math.hypot(p.x - press.x, p.y - press.y) > 16) {
+      press.moved = true;
+      if (!stickOn) {
+        stickOn = true;
+        originX = press.x;
+        originY = press.y;
+        knobX = press.x;
+        knobY = press.y;
+      }
+    }
     if (e.pointerId !== dragId || !stickOn) return;
     const dx = p.x - originX;
     const dy = p.y - originY;
@@ -342,18 +352,23 @@ async function boot(): Promise<void> {
   });
 
   window.addEventListener("pointerup", (e) => {
+    const at = pointers.get(e.pointerId) ?? point(e);
+    const tapped = press && e.pointerId === press.id && !press.moved && !stickOn;
     pointers.delete(e.pointerId);
     if (pointers.size < 2) pinch = 0;
     if (e.pointerId !== dragId) return;
     dragId = -1;
     stickOn = false;
+    press = null;
     hud.setStick(false, 0, 0, 0, 0);
+    if (tapped) walkTo(at.x, at.y);
   });
   window.addEventListener("pointercancel", (e) => {
     pointers.delete(e.pointerId);
     if (e.pointerId === dragId) {
       dragId = -1;
       stickOn = false;
+      press = null;
       hud.setStick(false, 0, 0, 0, 0);
     }
     pinch = 0;
@@ -491,6 +506,23 @@ async function boot(): Promise<void> {
     camX = w / 2 - sun.x * zoom;
     camY = h / 2 - sun.y * zoom;
     clamp();
+  }
+
+  function walkTo(sx: number, sy: number): void {
+    if (!sim || mode !== "play" || paused || settingsOpen || finished) return;
+    const x = (sx - camX) / zoom;
+    const y = (sy - camY) / zoom;
+    let dest = { x, y };
+    let best = 58;
+    for (const station of sim.stations) {
+      const d = Math.hypot(station.x - x, station.y - y);
+      if (d < best) {
+        best = d;
+        dest = { x: station.x, y: station.y };
+      }
+    }
+    sim.setGoal(dest.x, dest.y);
+    view.showGoal(dest.x, dest.y);
   }
 
   function steerFromInput(): void {
@@ -685,6 +717,13 @@ async function boot(): Promise<void> {
       else if (event.kind === "rally") audio.play("horn");
       else if (event.kind === "streak") audio.play("streak");
       else if (event.kind === "relic") audio.play("relic");
+      else if (event.kind === "tick") {
+        const now = performance.now();
+        if (now - lastTick > 48) {
+          lastTick = now;
+          audio.play("click");
+        }
+      }
       else if (event.kind === "impact" && event.color === TOWER_HUE.dart && event.n !== 2) audio.play("dart");
     }
     if (sim?.towers.some((t) => t.kind === "lens" && t.targetId)) {
@@ -701,7 +740,7 @@ async function boot(): Promise<void> {
       seenWave = live.wave;
       audio.play("horn");
       const firstStrike = live.world === 0 && live.wave === 0 && save.taught < 3;
-      hud.announce(firstStrike ? "Drag to move. Stand on a station to fund a tower." : `Wave ${live.wave + 1}`);
+      hud.announce(firstStrike ? "Tap to move. Stand on a station to fund a tower." : `Wave ${live.wave + 1}`);
       teach(2);
     }
     if (finished) return;
@@ -726,9 +765,9 @@ function hintFor(save: SaveData, live: Siege): string {
   if (live.world === 1 && live.wave === 0 && live.phase === "build") return "Three trails feed this crater. Cover each one.";
   if (live.world === 2 && live.wave === 0 && live.phase === "build") return "Night Crater is the hard valley. Upgrade before the colossus.";
   if (live.world !== 0) return "";
-  if (live.phase === "wave" && live.wave === 0) return "Walk the rail. Stand on a station to fund the next tower.";
+  if (live.phase === "wave" && live.wave === 0) return "Tap to move. Stand on a station to fund the next tower.";
   if (!live.stations.some((s) => s.tier > 0) && live.phase === "build") {
-    return "Drag to move. Stand on a dashed station. The nearest Dart is 50 Jade.";
+    return "Tap to move. Stand on a dashed station. The nearest Dart is 50 Jade.";
   }
   if (save.taught < 3 && live.phase === "wave") return "Walk over the Jade gems before they fade.";
   if (save.taught <= 1 && live.phase === "build") return `Call early +${BALANCE.earlyCall} Jade, or wait out the timer.`;
@@ -740,7 +779,7 @@ function hintFor(save: SaveData, live: Siege): string {
 function lesson(live: Siege): string {
   if (live.world !== 0 || live.time > 20) return "";
   const funded = live.stations.some((s) => s.tier > 0);
-  if (live.time < 7 && !live.heroMoved) return "Drag anywhere to move\nWASD or arrows";
+  if (live.time < 7 && !live.heroMoved) return "Tap to move";
   if (live.time < 14 && !live.heroCollected) return "Walk over the gems";
   if (!funded) return "Stand on a station to fund it";
   return "";
