@@ -403,6 +403,44 @@ export class Hud {
     return { x: p.x, y: p.y };
   }
 
+  private teachText: Text | null = null;
+  private stickGfx: Graphics | null = null;
+
+  setTeach(text: string): void {
+    if (!this.teachText) {
+      this.teachText = new Text({
+        text: "",
+        style: {
+          fontFamily: SANS,
+          fontSize: 40,
+          fill: 0xfff6df,
+          fontWeight: "bold",
+          align: "center",
+          stroke: { color: 0x140e0a, width: 6 },
+        },
+      });
+      this.teachText.anchor.set(0.5, 0);
+      this.teachText.eventMode = "none";
+      this.play.addChild(this.teachText);
+    }
+    this.teachText.text = text;
+    this.teachText.visible = text.length > 0;
+    this.teachText.position.set(this.w / 2, Math.max(150, this.h * 0.18));
+  }
+
+  setStick(on: boolean, ox: number, oy: number, x: number, y: number): void {
+    if (!this.stickGfx) {
+      this.stickGfx = new Graphics();
+      this.stickGfx.eventMode = "none";
+      this.play.addChild(this.stickGfx);
+    }
+    this.stickGfx.clear();
+    this.stickGfx.visible = on;
+    if (!on) return;
+    this.stickGfx.circle(ox, oy, 56).stroke({ width: 5, color: 0xfff1c8, alpha: 0.4 });
+    this.stickGfx.circle(x, y, 24).fill({ color: 0xffe08a, alpha: 0.9 });
+  }
+
   /** Jade arrived in the vault. The number rolls up from here. */
   collect(n: number): void {
     if (n <= 0) return;

@@ -2,10 +2,39 @@
  * Combat simulation. No rendering and no storage, so a valley can be played
  * forward in a test without a browser.
  */
-import { BALANCE, towerCost, towerRange, type RelicDef } from "./balance";
+import { BALANCE, TOWER_HUE, towerCost, towerRange, type RelicDef } from "./balance";
 import { poseAt, type Route } from "./geom";
-import { mapDef, type MapDef } from "./maps";
+import { MAP_H, MAP_W, mapDef, type MapDef } from "./maps";
 import type { EnemyKind, Phase, RelicId, TowerKind, Vec } from "./types";
+
+export type StationKind = TowerKind | "wall" | "barracks";
+
+export interface Station {
+  index: number;
+  x: number;
+  y: number;
+  kind: StationKind;
+  path: number;
+  /** Distance along the route. Walls block here. Tower pads only use it for layout. */
+  dist: number;
+  paid: number;
+  /** 0 is an empty pad. 1, 2 and 3 are built tiers. */
+  tier: number;
+  hp: number;
+  maxHp: number;
+  alive: boolean;
+}
+
+export interface Drop {
+  id: number;
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  value: number;
+  life: number;
+  alive: boolean;
+}
 
 export interface LanePlan {
   path: number;
@@ -62,6 +91,21 @@ export interface Enemy {
   hop: number;
   /** Seconds left on a boss roar pose. */
   emote: number;
+  /** Shots left in the boulder a Golem is pushing. Zero means the rock is gone. */
+  boulder: number;
+}
+
+export interface Ally {
+  id: number;
+  path: number;
+  dist: number;
+  x: number;
+  y: number;
+  angle: number;
+  hp: number;
+  maxHp: number;
+  cool: number;
+  alive: boolean;
 }
 
 export interface Tower {
@@ -94,6 +138,19 @@ export interface Shot {
   speed: number;
   alive: boolean;
   towerId: number;
+  /** Who painted this bolt, so the trail can wear that family's color. */
+  family: TowerKind | "hero";
+  tier: number;
+}
+
+export interface Puddle {
+  x: number;
+  y: number;
+  radius: number;
+  life: number;
+  max: number;
+  /** Drum decals are the splash that already landed. Venom keeps slowing. */
+  kind: "drum" | "spire";
 }
 
 /** A sun spear the Guardian has already thrown. One target, then it is gone. */
@@ -111,7 +168,7 @@ export interface Spear {
   alive: boolean;
 }
 
-export type FxKind = "impact" | "death" | "jade" | "drum" | "chain" | "crack" | "flare" | "slam" | "boss" | "place" | "streak" | "relic" | "aegis" | "rally" | "banner" | "multi" | "callout";
+export type FxKind = "impact" | "death" | "jade" | "drum" | "chain" | "crack" | "flare" | "slam" | "boss" | "place" | "streak" | "relic" | "aegis" | "rally" | "banner" | "multi" | "callout" | "collect" | "num" | "rubble";
 
 export interface Fx {
   kind: FxKind;
@@ -121,6 +178,8 @@ export interface Fx {
   text?: string;
   pts?: Vec[];
   enemy?: EnemyKind;
+  /** Impact burst color. Hits also flash the raider white. */
+  color?: number;
 }
 
 interface QueuedSpawn {
@@ -167,15 +226,31 @@ export class Siege {
   earlyGranted = false;
   flare = 0;
   flareLock = 0;
-  /** Facing of the plaza Guardian. Angle 0 is east, and y grows downward. */
+  /** Facing of the Guardian. Angle 0 is east, and y grows downward. */
   guardianAim = Math.PI / 2;
-  /** Seconds left on the throw pose. */
+  /** Seconds left on the attack pose. */
   guardianCast = 0;
   guardianKills = 0;
-  /** Saved strikes that actually stopped a leaker. */
+  /** Kept so older checks still compile. The walking hero does not score saves. */
   guardianSaves = 0;
   readonly spears: Spear[] = [];
-  private guardianNext = 0;
+  heroX = 0;
+  heroY = 0;
+  heroMoving = false;
+  /** True once the hero has actually walked. The opening prompt watches this. */
+  heroMoved = false;
+  /** True once a ground gem has reached the hero. */
+  heroCollected = false;
+  /** Station index currently being funded, or -1. */
+  funding = -1;
+  readonly stations: Station[] = [];
+  readonly drops: Drop[] = [];
+  readonly puddles: Puddle[] = [];
+  readonly allies: Ally[] = [];
+  private steerX = 0;
+  private steerY = 0;
+  private heroCool = 0;
+  private readonly dropFree: Drop[] = [];
   pendingOffer: RelicId[] | null = null;
   offerLeft = 0;
   readonly relics: RelicId[] = [];
@@ -208,9 +283,14 @@ export class Siege {
     this.world = world;
     this.map = mapDef(world);
     this.jade = BALANCE.worlds[world].jade;
+    this.heroX = this.map.sun.x;
+    this.heroY = Math.min(MAP_H - 36, this.map.sun.y + this.map.plaza * 0.72);
+    this.stations.push(...this.buildStations());
+    this.seedLesson();
     for (let i = 0; i < SHOTS; i++) {
       this.shots.push({
         id: 0, x: 0, y: 0, px: 0, py: 0, tx: 0, ty: 0, targetId: 0, damage: 0, speed: 0, alive: false, towerId: 0,
+        family: "hero", tier: 0,
       });
     }
   }
@@ -271,6 +351,8 @@ export class Siege {
       angle: Math.atan2(this.map.sun.y - at.y, this.map.sun.x - at.x),
       dealt: 0,
     });
+    const station = this.stations.find((s) => s.kind !== "wall" && s.index === pad);
+    if (station) station.tier = Math.max(station.tier, 1);
     this.fx.push({ kind: "place", x: at.x, y: at.y });
     return true;
   }
@@ -297,6 +379,11 @@ export class Siege {
     const refund = Math.floor(tower.spent * BALANCE.sellRefund);
     this.jade += refund;
     this.occupied.delete(tower.pad);
+    const station = this.stations.find((s) => s.kind !== "wall" && s.index === tower.pad);
+    if (station) {
+      station.tier = 0;
+      station.paid = 0;
+    }
     this.towers.splice(i, 1);
     this.fx.push({ kind: "jade", x: tower.x, y: tower.y, text: `+${refund}`, n: refund });
     return refund;
@@ -328,59 +415,48 @@ export class Siege {
     return true;
   }
 
-  /** Where the Guardian stands, on the near rim of the plaza. */
+  /** Where the Guardian is standing right now. */
   heroAt(): { x: number; y: number } {
-    return { x: this.map.sun.x, y: this.map.sun.y + this.map.plaza * 0.55 };
+    return { x: this.heroX, y: this.heroY };
   }
 
-  /** 1 when a throw is ready, 0 the instant one leaves the hand. */
+  /** The gun is always ready. The portrait no longer gates a manual throw. */
   get guardianReady(): number {
-    const left = this.guardianNext - this.time;
-    if (left <= 0) return 1;
-    return 1 - Math.min(1, left / BALANCE.guardian.cooldown);
+    return 1;
+  }
+
+  /** Stick or keyboard, each axis about -1 to 1. The hero walks this way until the next call. */
+  setSteer(x: number, y: number): void {
+    this.steerX = x;
+    this.steerY = y;
+  }
+
+  /** Price of the next tier on this station, or 0 when it is finished. */
+  stationCost(station: Station): number {
+    if (station.tier >= 3) return 0;
+    if (station.kind === "wall") return BALANCE.wall.cost[station.tier];
+    if (station.kind === "barracks") {
+      if (station.tier === 0) return BALANCE.barracks.squad;
+      if (station.tier === 1) return BALANCE.barracks.tower;
+      return 0;
+    }
+    return towerCost(station.kind, station.tier);
   }
 
   /**
-   * Throw at the nearest raider inside the tap radius.
-   * "miss" means the tap was not an attack and the caller may select a totem.
-   * "cool" still consumes the tap so a fat-finger does not open a build pad.
+   * Pay a station off in one step. The headless bot uses this for the Jade
+   * it would have poured in while standing on the pad during a build.
    */
-  strikeAt(x: number, y: number): "hit" | "cool" | "miss" {
-    if (this.phase === "victory" || this.phase === "defeat") return "miss";
-    let best: Enemy | null = null;
-    let bestD: number = BALANCE.guardian.tap;
-    for (const e of this.enemies) {
-      if (!e.alive || stealthed(e.kind, e.age)) continue;
-      const d = Math.hypot(e.x - x, e.y - y);
-      if (d < bestD) {
-        bestD = d;
-        best = e;
-      }
-    }
-    if (!best) return "miss";
-    if (this.time < this.guardianNext) return "cool";
-    const from = this.heroAt();
-    const saved = this.slipped(best);
-    const aimX = best.x;
-    const aimY = best.y - 18;
-    this.guardianAim = Math.atan2(aimY - from.y, aimX - from.x);
-    this.guardianCast = BALANCE.guardian.cast;
-    this.guardianNext = this.time + BALANCE.guardian.cooldown;
-    const dist = Math.hypot(aimX - from.x, aimY - (from.y - 64));
-    this.spears.push({
-      sx: from.x + Math.cos(this.guardianAim) * 28,
-      sy: from.y - 64 + Math.sin(this.guardianAim) * 18,
-      tx: aimX,
-      ty: aimY,
-      age: 0,
-      flight: Math.max(0.3, Math.min(BALANCE.guardian.flight, dist / 900)),
-      targetId: best.id,
-      raw: saved ? BALANCE.guardian.saved : BALANCE.guardian.damage,
-      saved,
-      struck: false,
-      alive: true,
-    });
-    return "hit";
+  fundNow(index: number): boolean {
+    const station = this.stations[index];
+    if (!station || station.tier >= 3) return false;
+    if (this.phase === "victory" || this.phase === "defeat") return false;
+    const left = this.stationCost(station) - station.paid;
+    if (left <= 0 || this.jade < left) return false;
+    this.jade -= left;
+    station.paid = 0;
+    this.finishStation(station, left);
+    return true;
   }
 
   chooseRelic(id: RelicId): boolean {
@@ -436,7 +512,7 @@ export class Siege {
       }
     }
 
-    this.guardianCast = Math.max(0, this.guardianCast - dt);
+    this.heroAct(dt);
     if (this.phase === "wave") this.spawn();
     if (this.move(dt)) {
       this.spearAct(dt);
@@ -444,6 +520,8 @@ export class Siege {
     }
     this.towersAct(dt);
     this.shotsAct(dt);
+    this.allyAct(dt);
+    this.puddleAct(dt);
     this.spearAct(dt);
     this.compact();
     if (this.phase === "wave" && this.q >= this.queue.length && !this.enemies.some((e) => e.alive)) {
@@ -478,10 +556,11 @@ export class Siege {
         // Packs of four, then a gap, so the crowd reads as clumps instead of a line.
         // Big packs still arrive together, or each tower along the trail
         // picks them off one at a time and the wave stops being a fight.
-        const wall = g.count >= 28;
-        const step = wall ? 0.07 : 0.14;
-        const clump = wall ? 6 : 4;
-        const breathe = wall ? 0.22 : 0.55;
+        // A long pack is one red snake. Short packs stay in clumps.
+        const line = g.count >= 20;
+        const step = 0.14;
+        const clump = line ? 10000 : 4;
+        const breathe = line ? 0 : 0.55;
         for (let i = 0; i < g.count; i++) {
           queue.push({ t: at, kind: g.kind, path: g.path });
           at += step;
@@ -551,6 +630,7 @@ export class Siege {
     e.knockY = 0;
     e.hop = 0;
     e.emote = 0;
+    e.boulder = kind === "golem" ? BALANCE.boulder.hp : 0;
     const pose = poseAt(e.flying ? this.map.flights[path] : this.map.routes[path], dist);
     e.x = pose.x;
     e.y = pose.y;
@@ -565,7 +645,7 @@ export class Siege {
       id: 0, kind: "runner", path: 0, dist: 0, x: 0, y: 0, angle: 0, hp: 1, maxHp: 1,
       armor: 0, speed: 0, reward: 0, leak: 1, charge: 0, flying: false, boss: false,
       age: 0, slowUntil: 0, stunUntil: 0, slam: 0, aegis: 0, aegisUntil: 0, rally: 0, rushUntil: 0, flash: 0, alive: false,
-      lane: 0, striking: false, strikeLeft: 0, guard: 0, react: "", reactLeft: 0, knockX: 0, knockY: 0, hop: 0, emote: 0,
+      lane: 0, striking: false, strikeLeft: 0, guard: 0, react: "", reactLeft: 0, knockX: 0, knockY: 0, hop: 0, emote: 0, boulder: 0,
     };
   }
 
@@ -588,6 +668,9 @@ export class Siege {
       e.knockX *= knock;
       e.knockY *= knock;
       const route = e.flying ? this.map.flights[e.path] : this.map.routes[e.path];
+      const blocked = this.pressWall(e, dt);
+      if (blocked) e.striking = true;
+      else if (e.dist < route.len) e.striking = false;
       if (!e.striking) e.dist += e.speed * mul * dt;
       if (e.dist >= route.len) {
         e.dist = route.len;
@@ -710,6 +793,8 @@ export class Siege {
     shot.damage = tier.damage * this.dartMul;
     shot.speed = tier.shotSpeed;
     shot.towerId = tower.id;
+    shot.family = "dart";
+    shot.tier = tower.tier;
     shot.alive = true;
   }
 
@@ -734,6 +819,7 @@ export class Siege {
     if (tower.cooldown <= 0) {
       target.flash = 0.07;
       tower.cooldown = 0.22;
+      this.fx.push({ kind: "impact", x: target.x, y: target.y, color: TOWER_HUE.lens });
     }
     this.hurt(target, dps * dt, false, tower);
   }
@@ -751,6 +837,7 @@ export class Siege {
       if (dx * dx + dy * dy > r2) continue;
       hit = true;
       if (this.hurt(e, tier.damage, true, tower, tower.x, tower.y)) killed += 1;
+      this.fx.push({ kind: "impact", x: e.x, y: e.y, color: TOWER_HUE.drum });
       if (!e.alive) continue;
       const stun = (e.boss ? tier.stun * 0.35 : tier.stun) * this.drumStunMul;
       e.stunUntil = Math.max(e.stunUntil, this.time + stun);
@@ -764,21 +851,46 @@ export class Siege {
     if (!hit) return;
     tower.cooldown += tier.interval;
     this.fx.push({ kind: "drum", x: tower.x, y: tower.y, n: radius });
+    this.spill(tower.x, tower.y, radius, tier.slow, "drum");
     this.noteMulti(tower.x, tower.y, killed);
   }
 
+  /** Venom spit. The bolt carries the chain; the puddle is what it leaves behind. */
   private spire(tower: Tower): void {
     const first = this.acquire(tower, 0);
     if (!first) return;
     const tier = BALANCE.spire[tower.tier];
     tower.cooldown += tier.interval;
     tower.angle = Math.atan2(first.y - tower.y, first.x - tower.x);
-    const chain: Enemy[] = [first];
-    const used = new Set<number>([first.id]);
+    tower.targetId = first.id;
+    const shot = this.shots[this.shotCursor];
+    this.shotCursor = (this.shotCursor + 1) % this.shots.length;
+    shot.id = this.nextId();
+    shot.x = tower.x;
+    shot.y = tower.y - 16;
+    shot.px = shot.x;
+    shot.py = shot.y;
+    shot.tx = first.x;
+    shot.ty = first.y;
+    shot.targetId = first.id;
+    shot.damage = 0;
+    shot.speed = 760;
+    shot.towerId = tower.id;
+    shot.family = "spire";
+    shot.tier = tower.tier;
+    shot.alive = true;
+  }
+
+  /** Chain damage, unchanged numbers, then a slowing puddle at the landing. */
+  private venom(tower: Tower, first: Enemy, x: number, y: number): void {
+    const tier = BALANCE.spire[tower.tier];
+    const chain: Enemy[] = [];
+    if (first.alive) chain.push(first);
+    const used = new Set<number>(chain.map((e) => e.id));
     let prev = first;
     const chainSq = tier.chain * tier.chain;
     const jumps = tier.jumps + this.spireJumpAdd;
-    for (let j = 1; j < jumps; j++) {
+    for (let j = chain.length; j < jumps; j++) {
       let best: Enemy | null = null;
       let bestD = chainSq;
       for (const e of this.enemies) {
@@ -796,26 +908,57 @@ export class Siege {
       chain.push(best);
       prev = best;
     }
-    const pts: Vec[] = [{ x: tower.x, y: tower.y - 16 }];
+    const pts: Vec[] = [{ x, y }];
     let killed = 0;
-    let fromX = tower.x;
-    let fromY = tower.y;
+    let fromX = x;
+    let fromY = y;
     chain.forEach((e, i) => {
       let damage = tier.damage * this.spireDmgMul * Math.pow(tier.falloff, i);
       if (e.stunUntil > this.time) damage *= BALANCE.synergy.stunnedSpire;
       if (this.hurt(e, damage, true, tower, fromX, fromY)) killed += 1;
+      this.fx.push({ kind: "impact", x: e.x, y: e.y, color: TOWER_HUE.spire });
       if (e.alive) e.hop = 0.16;
       fromX = e.x;
       fromY = e.y;
       pts.push({ x: e.x, y: e.y });
     });
-    this.fx.push({ kind: "chain", x: tower.x, y: tower.y, pts });
-    this.noteMulti(tower.x, tower.y, killed);
+    if (pts.length > 1) this.fx.push({ kind: "chain", x, y, pts, color: TOWER_HUE.spire });
+    this.spill(first.alive ? first.x : x, first.alive ? first.y : y, BALANCE.venom.radius[tower.tier] ?? 96, BALANCE.venom.life, "spire");
+    this.noteMulti(x, y, killed);
   }
 
-  private slipped(e: Enemy): boolean {
-    if (Math.hypot(e.x - this.map.sun.x, e.y - this.map.sun.y) <= BALANCE.guardian.savedRadius) return true;
-    return this.routeLen(e) - e.dist <= BALANCE.guardian.savedRemain;
+  private spill(x: number, y: number, radius: number, life: number, kind: Puddle["kind"]): void {
+    let slot = this.puddles.find((p) => p.life <= 0);
+    if (!slot) {
+      if (this.puddles.length >= 24) slot = this.puddles[0];
+      else {
+        slot = { x, y, radius, life, max: life, kind };
+        this.puddles.push(slot);
+        return;
+      }
+    }
+    slot.x = x;
+    slot.y = y;
+    slot.radius = radius;
+    slot.life = life;
+    slot.max = life;
+    slot.kind = kind;
+  }
+
+  private puddleAct(dt: number): void {
+    for (const puddle of this.puddles) {
+      if (puddle.life <= 0) continue;
+      puddle.life -= dt;
+      if (puddle.kind !== "spire") continue;
+      const r2 = puddle.radius * puddle.radius;
+      for (const e of this.enemies) {
+        if (!e.alive) continue;
+        const dx = e.x - puddle.x;
+        const dy = e.y - puddle.y;
+        if (dx * dx + dy * dy > r2) continue;
+        e.slowUntil = Math.max(e.slowUntil, this.time + 0.2);
+      }
+    }
   }
 
   private spearAct(dt: number): void {
@@ -874,10 +1017,16 @@ export class Siege {
         shot.alive = false;
         shot.x = shot.tx;
         shot.y = shot.ty;
-        if (target) {
+        if (shot.family === "spire") {
           const owner = this.towers.find((t) => t.id === shot.towerId);
-          this.hurt(target, shot.damage, true, owner, shot.px, shot.py);
-          this.fx.push({ kind: "impact", x: target.x, y: target.y });
+          if (owner && target) this.venom(owner, target, shot.x, shot.y);
+          else this.spill(shot.x, shot.y, BALANCE.venom.radius[shot.tier] ?? 56, BALANCE.venom.life, "spire");
+        } else if (target) {
+          const owner = shot.towerId > 0 ? this.towers.find((t) => t.id === shot.towerId) : undefined;
+          const killed = this.hurt(target, shot.damage, true, owner, shot.px, shot.py);
+          if (killed && shot.towerId < 0) this.guardianKills += 1;
+          const color = shot.family === "hero" ? 0xffe08a : TOWER_HUE[shot.family];
+          this.fx.push({ kind: "impact", x: target.x, y: target.y, color, n: shot.family === "hero" ? 2 : 0 });
         }
       } else {
         shot.x += (dx / dist) * step;
@@ -889,12 +1038,24 @@ export class Siege {
   /** `mitigate` subtracts armor. Beams pass false because they already did. Returns true when the hit kills. */
   private hurt(e: Enemy, raw: number, mitigate: boolean, tower?: Tower, fromX?: number, fromY?: number): boolean {
     if (!e.alive || raw <= 0) return false;
+    if (e.boulder > 0) {
+      const chip = Math.min(e.boulder, Math.max(BALANCE.minHit, raw));
+      e.boulder -= chip;
+      e.flash = 0.12;
+      this.fx.push({ kind: "num", x: e.x + 18, y: e.y - 36, text: String(Math.round(chip)) });
+      if (e.boulder <= 0) {
+        e.boulder = 0;
+        this.fx.push({ kind: "rubble", x: e.x + 22, y: e.y - 8 });
+      }
+      return false;
+    }
     let dealt = mitigate ? Math.max(BALANCE.minHit, raw - e.armor) : raw;
     if (e.boss && e.aegisUntil > this.time) dealt *= BALANCE.boss.aegisMul;
     const applied = Math.min(e.hp, dealt);
     e.hp -= applied;
     if (tower) tower.dealt += applied;
     e.flash = e.kind === "skitter" || e.kind === "runner" ? 0.16 : 0.12;
+    this.fx.push({ kind: "num", x: e.x, y: e.y - 30, text: String(Math.max(1, Math.round(applied))) });
     if (mitigate && (e.kind === "shield" || e.kind === "boss") && fromX !== undefined && fromY !== undefined) {
       const fx = Math.cos(e.angle);
       const fy = Math.sin(e.angle);
@@ -914,11 +1075,9 @@ export class Siege {
     if (e.hp > 0) return false;
     e.alive = false;
     const reward = Math.max(1, Math.round(e.reward * this.jadeMul));
-    this.jade += reward;
-    this.purse.kills += reward;
+    this.dropGem(e.x, e.y, reward);
     if (this.time >= this.flareLock) this.flare = Math.min(BALANCE.flare.need, this.flare + e.charge);
     this.fx.push({ kind: "death", x: e.x, y: e.y, enemy: e.kind, n: e.angle });
-    this.fx.push({ kind: "jade", x: e.x, y: e.y - 16, text: `+${reward}`, n: reward });
     this.noteStreak(e);
     if (e.kind === "golem") {
       for (let i = 0; i < BALANCE.golemShards; i++) this.birth("shard", e.path, Math.min(e.dist + 6, this.routeLen(e) - 4));
@@ -1084,7 +1243,7 @@ export class Siege {
       }
     }
     for (const e of alive) {
-      const cap = e.boss ? 34 : e.flying ? 26 : 72;
+      const cap = e.boss ? 34 : e.flying ? 26 : e.kind === "skitter" ? 32 : 72;
       e.lane = Math.max(-cap, Math.min(cap, e.lane));
     }
   }
@@ -1101,6 +1260,378 @@ export class Siege {
 
   private routeLen(e: Enemy): number {
     return (e.flying ? this.map.flights[e.path] : this.map.routes[e.path]).len;
+  }
+
+  /** Walk, collect, fund, and shoot. Enemies never chase the hero. */
+  private heroAct(dt: number): void {
+    this.guardianCast = Math.max(0, this.guardianCast - dt);
+    const len = Math.hypot(this.steerX, this.steerY);
+    if (len > 0.12) {
+      const nx = this.steerX / len;
+      const ny = this.steerY / len;
+      const step = BALANCE.hero.speed * Math.min(1, len) * dt;
+      this.heroX = Math.max(28, Math.min(MAP_W - 28, this.heroX + nx * step));
+      this.heroY = Math.max(28, Math.min(MAP_H - 28, this.heroY + ny * step));
+      this.guardianAim = Math.atan2(ny, nx);
+      this.heroMoving = true;
+      if (step > 0.4) this.heroMoved = true;
+    } else {
+      this.heroMoving = false;
+    }
+    this.gemAct(dt);
+    this.fundAct(dt);
+    this.heroFire(dt);
+  }
+
+  private heroFire(dt: number): void {
+    this.heroCool -= dt;
+    let best: Enemy | null = null;
+    let bestD: number = BALANCE.hero.range;
+    for (const e of this.enemies) {
+      if (!e.alive || stealthed(e.kind, e.age)) continue;
+      const d = Math.hypot(e.x - this.heroX, e.y - this.heroY);
+      if (d < bestD) {
+        bestD = d;
+        best = e;
+      }
+    }
+    if (!best || this.heroCool > 0) return;
+    this.heroCool = BALANCE.hero.interval;
+    this.guardianAim = Math.atan2(best.y - this.heroY, best.x - this.heroX);
+    this.guardianCast = BALANCE.hero.cast;
+    const shot = this.shots[this.shotCursor];
+    this.shotCursor = (this.shotCursor + 1) % this.shots.length;
+    shot.id = this.nextId();
+    shot.x = this.heroX + Math.cos(this.guardianAim) * 26;
+    shot.y = this.heroY - 48 + Math.sin(this.guardianAim) * 16;
+    shot.px = shot.x;
+    shot.py = shot.y;
+    shot.tx = best.x;
+    shot.ty = best.y;
+    shot.targetId = best.id;
+    shot.damage = BALANCE.hero.damage;
+    shot.speed = 920;
+    shot.towerId = -1;
+    shot.family = "hero";
+    shot.tier = 0;
+    shot.alive = true;
+  }
+
+  private gemAct(dt: number): void {
+    const magnet = BALANCE.gem.magnet;
+    for (const gem of this.drops) {
+      if (!gem.alive) continue;
+      gem.life -= dt;
+      if (gem.life <= 0) {
+        gem.alive = false;
+        this.dropFree.push(gem);
+        continue;
+      }
+      gem.vx *= Math.exp(-3.2 * dt);
+      gem.vy *= Math.exp(-3.2 * dt);
+      gem.x += gem.vx * dt;
+      gem.y += gem.vy * dt;
+      const dx = this.heroX - gem.x;
+      const dy = this.heroY - gem.y;
+      const dist = Math.hypot(dx, dy);
+      if (dist >= magnet) continue;
+      const step = BALANCE.gem.fly * dt;
+      if (dist <= step + 24) {
+        gem.alive = false;
+        this.dropFree.push(gem);
+        this.jade += gem.value;
+        this.purse.kills += gem.value;
+        this.heroCollected = true;
+        this.fx.push({ kind: "collect", x: this.heroX, y: this.heroY - 20, n: gem.value });
+      } else {
+        gem.x += (dx / dist) * step;
+        gem.y += (dy / dist) * step;
+        gem.vx = 0;
+        gem.vy = 0;
+      }
+    }
+  }
+
+  private dropGem(x: number, y: number, value: number): void {
+    let alive = 0;
+    for (const gem of this.drops) if (gem.alive) alive += 1;
+    if (alive > 220) {
+      this.jade += value;
+      this.purse.kills += value;
+      this.heroCollected = true;
+      return;
+    }
+    const gem = this.dropFree.pop() ?? this.blankDrop();
+    if (!this.drops.includes(gem)) this.drops.push(gem);
+    const angle = Math.random() * Math.PI * 2;
+    const speed = 50 + Math.random() * 80;
+    gem.id = this.nextId();
+    gem.x = x;
+    gem.y = y;
+    gem.vx = Math.cos(angle) * speed;
+    gem.vy = Math.sin(angle) * speed - 30;
+    gem.value = value;
+    gem.life = BALANCE.gem.life;
+    gem.alive = true;
+  }
+
+  private blankDrop(): Drop {
+    return { id: 0, x: 0, y: 0, vx: 0, vy: 0, value: 0, life: 0, alive: false };
+  }
+
+  private fundAct(dt: number): void {
+    let best = -1;
+    let bestD: number = BALANCE.fund.radius;
+    for (let i = 0; i < this.stations.length; i++) {
+      const station = this.stations[i];
+      if (station.tier >= 3) continue;
+      if (this.stationCost(station) - station.paid <= 0) continue;
+      const d = Math.hypot(station.x - this.heroX, station.y - this.heroY);
+      if (d < bestD) {
+        bestD = d;
+        best = i;
+      }
+    }
+    const standing = Math.hypot(this.steerX, this.steerY) <= 0.35;
+    this.funding = standing ? best : -1;
+    if (!standing || best < 0 || this.jade <= 0) return;
+    const station = this.stations[best];
+    const left = this.stationCost(station) - station.paid;
+    const pay = Math.min(this.jade, left, BALANCE.fund.rate * dt);
+    if (pay <= 0) return;
+    this.jade -= pay;
+    station.paid += pay;
+    if (station.paid >= this.stationCost(station) - 0.001) {
+      const spent = station.paid;
+      station.paid = 0;
+      this.finishStation(station, spent);
+    }
+  }
+
+  private finishStation(station: Station, spent: number): void {
+    station.tier += 1;
+    station.paid = 0;
+    if (station.kind === "wall") {
+      station.maxHp = BALANCE.wall.hp[station.tier - 1];
+      station.hp = station.maxHp;
+      station.alive = true;
+      this.fx.push({ kind: "place", x: station.x, y: station.y });
+      return;
+    }
+    if (station.kind === "barracks" && station.tier === 1) {
+      this.muster(station);
+      this.fx.push({ kind: "place", x: station.x, y: station.y });
+      return;
+    }
+    if (station.kind === "barracks") {
+      station.kind = "dart";
+      station.tier = 1;
+    }
+    const kind: TowerKind = station.kind;
+    const existing = this.towers.find((t) => t.pad === station.index);
+    if (!existing) {
+      this.occupied.add(station.index);
+      this.towers.push({
+        id: this.nextId(),
+        kind,
+        tier: 0,
+        pad: station.index,
+        x: station.x,
+        y: station.y,
+        spent,
+        cooldown: 0.12,
+        stunnedUntil: 0,
+        targetId: 0,
+        ramp: 0,
+        angle: Math.atan2(this.map.sun.y - station.y, this.map.sun.x - station.x),
+        dealt: 0,
+      });
+    } else {
+      existing.tier = Math.min(2, existing.tier + 1);
+      existing.spent += spent;
+      existing.cooldown = Math.max(existing.cooldown, 0.12);
+    }
+    this.fx.push({ kind: "place", x: station.x, y: station.y });
+  }
+
+  /** Blue soldiers march toward the entrance and hold the first raider they meet. */
+  private muster(station: Station): void {
+    const spec = BALANCE.barracks;
+    for (let i = 0; i < spec.count; i++) {
+      let ally = this.allies.find((a) => !a.alive);
+      if (!ally) {
+        if (this.allies.length >= 48) return;
+        ally = { id: 0, path: 0, dist: 0, x: 0, y: 0, angle: 0, hp: 0, maxHp: 0, cool: 0, alive: false };
+        this.allies.push(ally);
+      }
+      ally.id = this.nextId();
+      ally.path = station.path;
+      ally.dist = Math.max(8, station.dist - i * 26);
+      ally.hp = spec.hp;
+      ally.maxHp = spec.hp;
+      ally.cool = i * 0.08;
+      ally.alive = true;
+      const pose = poseAt(this.map.routes[station.path], ally.dist);
+      ally.x = pose.x;
+      ally.y = pose.y;
+      ally.angle = pose.angle + Math.PI;
+    }
+  }
+
+  private allyAct(dt: number): void {
+    const spec = BALANCE.barracks;
+    for (const ally of this.allies) {
+      if (!ally.alive) continue;
+      ally.cool -= dt;
+      let foe: Enemy | null = null;
+      let gap = 52;
+      for (const e of this.enemies) {
+        if (!e.alive || e.flying || e.path !== ally.path) continue;
+        const d = ally.dist - e.dist;
+        if (d < -8 || d > gap) continue;
+        gap = d;
+        foe = e;
+      }
+      if (foe) {
+        if (ally.cool <= 0) {
+          ally.cool = spec.interval;
+          this.hurt(foe, spec.damage, true, undefined, ally.x, ally.y);
+        }
+        ally.hp -= (foe.boss ? 22 : foe.kind === "golem" ? 12 : 7) * dt;
+        if (ally.hp <= 0) {
+          ally.alive = false;
+          this.fx.push({ kind: "rubble", x: ally.x, y: ally.y });
+        }
+      } else {
+        ally.dist = Math.max(0, ally.dist - spec.speed * dt);
+      }
+      const pose = poseAt(this.map.routes[ally.path], ally.dist);
+      ally.x = pose.x;
+      ally.y = pose.y;
+      ally.angle = pose.angle + Math.PI;
+    }
+  }
+
+  /** Ground raiders chew a barricade instead of walking through it. */
+  private pressWall(e: Enemy, dt: number): boolean {
+    if (e.flying) return false;
+    let wall: Station | null = null;
+    let gap = 40;
+    for (const station of this.stations) {
+      if (station.kind !== "wall" || !station.alive || station.path !== e.path) continue;
+      const ahead = station.dist - e.dist;
+      if (ahead < -10 || ahead > gap) continue;
+      gap = ahead;
+      wall = station;
+    }
+    if (!wall) return false;
+    const stop = wall.dist - 26;
+    if (e.dist > stop) e.dist = stop;
+    const bite = (e.boss ? 26 : e.kind === "golem" ? 14 : e.kind === "shield" ? 9 : 6.5) * dt;
+    wall.hp -= bite;
+    if (wall.hp <= 0) {
+      wall.hp = 0;
+      wall.alive = false;
+      this.fx.push({ kind: "rubble", x: wall.x, y: wall.y });
+    }
+    return true;
+  }
+
+  private buildStations(): Station[] {
+    const stations: Station[] = this.map.pads.map((pad, index) => {
+      const near = this.nearestProgress(pad.x, pad.y);
+      let kind: StationKind = "dart";
+      if (near.frac < 0.34) kind = index % 3 === 2 ? "drum" : "dart";
+      else if (near.frac < 0.64) kind = index % 2 === 0 ? "lens" : "drum";
+      else kind = index % 2 === 0 ? "spire" : "lens";
+      return {
+        index, x: pad.x, y: pad.y, kind, path: near.path, dist: near.dist,
+        paid: 0, tier: 0, hp: 0, maxHp: 0, alive: false,
+      };
+    });
+    let closest = 0;
+    let best = Infinity;
+    stations.forEach((station, i) => {
+      const d = Math.hypot(station.x - this.heroX, station.y - this.heroY);
+      if (d < best) {
+        best = d;
+        closest = i;
+      }
+    });
+    if (stations[closest]) stations[closest].kind = "dart";
+    for (let path = 0; path < this.map.routes.length; path++) {
+      const onPath = stations.filter((s) => s.path === path);
+      if (onPath.some((s) => s.kind === "dart")) continue;
+      const entrance = onPath.slice().sort((a, b) => a.dist - b.dist)[0];
+      if (entrance) entrance.kind = "dart";
+    }
+    const musterRoute = this.map.routes[0];
+    const musterDist = musterRoute.len * 0.62;
+    const musterAt = poseAt(musterRoute, musterDist);
+    stations.push({
+      index: this.map.pads.length + this.map.routes.length,
+      x: musterAt.x + Math.cos(musterAt.angle + Math.PI / 2) * 78,
+      y: musterAt.y + Math.sin(musterAt.angle + Math.PI / 2) * 78,
+      kind: "barracks",
+      path: 0,
+      dist: musterDist,
+      paid: 0,
+      tier: 0,
+      hp: 0,
+      maxHp: 0,
+      alive: false,
+    });
+    this.map.routes.forEach((route, path) => {
+      const dist = route.len * 0.46;
+      const at = poseAt(route, dist);
+      stations.push({
+        index: this.map.pads.length + path,
+        x: at.x,
+        y: at.y,
+        kind: "wall",
+        path,
+        dist,
+        paid: 0,
+        tier: 0,
+        hp: 0,
+        maxHp: 0,
+        alive: false,
+      });
+    });
+    return stations;
+  }
+
+  private nearestProgress(x: number, y: number): { path: number; frac: number; dist: number } {
+    let best = { path: 0, frac: 0, dist: 0, d: Infinity };
+    this.map.routes.forEach((route, path) => {
+      let walked = 0;
+      for (let i = 1; i < route.pts.length; i++) {
+        const a = route.pts[i - 1];
+        const b = route.pts[i];
+        const sl = Math.hypot(b.x - a.x, b.y - a.y) || 1;
+        const t = Math.max(0, Math.min(1, ((x - a.x) * (b.x - a.x) + (y - a.y) * (b.y - a.y)) / (sl * sl)));
+        const px = a.x + (b.x - a.x) * t;
+        const py = a.y + (b.y - a.y) * t;
+        const d = Math.hypot(x - px, y - py);
+        if (d < best.d) best = { path, frac: route.len > 0 ? (walked + sl * t) / route.len : 0, dist: walked + sl * t, d };
+        walked += sl;
+      }
+    });
+    return best;
+  }
+
+  private seedLesson(): void {
+    if (this.world !== 0) return;
+    for (let i = 0; i < 5; i++) {
+      const gem = this.blankDrop();
+      gem.id = this.nextId();
+      gem.x = this.heroX + 240 + i * 22;
+      gem.y = this.heroY - 320;
+      gem.value = 6;
+      gem.life = 40;
+      gem.alive = true;
+      this.drops.push(gem);
+    }
   }
 
   private compact(): void {

@@ -5,8 +5,9 @@
 import { Container, Graphics, Sprite, Text, Texture } from "pixi.js";
 import type { ArtSet, Clip } from "./art";
 import { BALANCE, TOWER_HUE, TOWER_ICON, sharedScales, towerCost, towerFacts, towerRange, towerReadout } from "./balance";
+import { poseAt } from "./geom";
 import type { MapDef } from "./maps";
-import type { Enemy, Fx, Siege } from "./sim";
+import type { Enemy, Fx, Siege, Shot } from "./sim";
 import { TOWER_KINDS, type EnemyKind, type TowerKind, type Vec } from "./types";
 
 const SANS = 'Palatino, "Palatino Linotype", Georgia, serif';
@@ -20,8 +21,8 @@ const PLAY: Record<string, number> = {
 
 const ELITE: ReadonlySet<EnemyKind> = new Set(["shield", "golem", "boss"]);
 /** Sheets are authored at 2× and were drawn at half size. Use the full frame. */
-const ENEMY_DRAW = 2;
-const TOWER_DRAW = 1.35;
+const ENEMY_DRAW = 1.05;
+const TOWER_DRAW = 1.15;
 /** Screen-pixel radius of the build cards. The menu is scaled by 1/zoom so this stays constant. */
 const MENU_REACH = 220;
 /** Clear the Jade vault and the top bar, and the Flare button along the bottom. */
@@ -135,6 +136,7 @@ export class WorldView {
   private readonly tag: Text;
   private readonly towers = new Map<number, Actor>();
   private readonly enemies = new Map<number, Actor>();
+  private readonly allies = new Map<number, Actor>();
   private readonly beams: Sprite[] = [];
   private readonly ghosts: Ghost[] = [];
   private readonly ghostPool: Ghost[] = [];
@@ -179,6 +181,12 @@ export class WorldView {
   private heroTime = 0;
   private readonly spearBolts: Sprite[] = [];
   private spearUsed = 0;
+  private readonly labels = new Container();
+  private readonly stationLabels: Text[] = [];
+  private readonly coinSprites: Sprite[] = [];
+  private readonly shotBolts: Sprite[] = [];
+  private shotUsed = 0;
+  private readonly dropSprites: Sprite[] = [];
 
   constructor(art: ArtSet) {
     this.art = art;
@@ -204,7 +212,8 @@ export class WorldView {
     });
     this.tag.anchor.set(0.5, 1);
     this.tag.eventMode = "none";
-    this.world.addChild(this.mapSprite, this.pads, this.shadowLayer, this.range, this.actors, this.link, this.bars, this.fxLayer, this.tag, this.menu);
+    this.labels.eventMode = "none";
+    this.world.addChild(this.mapSprite, this.pads, this.shadowLayer, this.range, this.actors, this.link, this.bars, this.fxLayer, this.labels, this.tag, this.menu);
     this.actors.addChild(this.sun);
     this.flashRect.eventMode = "none";
     this.flashRect.blendMode = "add";
@@ -459,7 +468,10 @@ export class WorldView {
     }
     this.syncTowers(sim, step);
     this.syncEnemies(sim, step);
+    this.syncAllies(sim, step);
     this.drawPads(sim);
+    this.drawDrops(sim);
+    this.drawShots(sim);
     this.drawSelection(sim);
     this.drawBars(sim);
     this.drawSun(step, sim);
@@ -491,9 +503,17 @@ export class WorldView {
     for (const event of fx) {
       if (event.kind === "impact") {
         const saved = event.n === 1;
-        this.burst(event.x, event.y, saved ? 0xffe08a : 0xfff0c2, saved ? 10 : 6);
+        const color = event.color ?? (saved ? 0xffe08a : 0xfff0c2);
+        this.burst(event.x, event.y, 0xffffff, saved ? 6 : 4);
+        this.burst(event.x, event.y, color, saved ? 10 : 7);
+        this.ringFx(event.x, event.y, saved ? 70 : 36, color);
         if (event.text) this.floatText(event.x, event.y - 40, event.text, 0xfff6df, 26);
         if (saved) this.floatText(event.x, event.y - 86, "SAVED!", 0xffe08a, 36);
+      } else if (event.kind === "collect" && event.n) this.onCollect?.(event.n);
+      else if (event.kind === "num" && event.text) this.popNumber(event.x, event.y, event.text);
+      else if (event.kind === "rubble") {
+        this.burst(event.x, event.y, 0xffffff, 6);
+        this.burst(event.x, event.y, 0xb08968, 8);
       }
       else if (event.kind === "death") this.onDeath(event);
       else if (event.kind === "jade" && event.n) this.onJade(event.x, event.y, event.n);
@@ -509,7 +529,7 @@ export class WorldView {
         this.bump(0.45);
       } else if (event.kind === "aegis") this.ringFx(event.x, event.y, 90, 0xc8c0e8);
       else if (event.kind === "rally" && event.n) this.ringFx(event.x, event.y, event.n, 0xff7a3a);
-      else if (event.kind === "chain" && event.pts) this.drawChain(event.pts);
+      else if (event.kind === "chain" && event.pts) this.drawChain(event.pts, event.color ?? 0x2ee0d0);
       else if (event.kind === "crack") this.bump(0.12 + Math.min(0.3, event.n ?? 1) * 0.15);
       else if (event.kind === "flare") {
         this.ringFx(this.sunAt.x, this.sunAt.y, 640, 0xffe0a0);
@@ -732,16 +752,20 @@ export class WorldView {
         actor.time = 0;
       }
       const shown = actor.clip === "idle" ? idle : current;
-      const draw = shown.draw * TOWER_DRAW * (tower.stunnedUntil > sim.time ? 0.98 : 1);
+      const draw = shown.draw * TOWER_DRAW * (1 + tower.tier * 0.2) * (tower.stunnedUntil > sim.time ? 0.98 : 1);
       this.paint(actor, shown, 0, actor.clip, draw);
-      actor.body.position.set(tower.x, tower.y);
-      actor.outline.position.set(tower.x, tower.y + 2);
+      const kick = actor.clip === "attack" ? Math.sin(Math.min(1, actor.time / 0.16) * Math.PI) * (8 + tower.tier * 4) : 0;
+      actor.body.position.set(tower.x - Math.cos(tower.angle) * kick, tower.y - Math.sin(tower.angle) * kick);
+      actor.outline.position.set(actor.body.x, actor.body.y + 2);
       actor.body.zIndex = tower.y;
       actor.outline.zIndex = tower.y - 0.2;
       actor.body.tint = tower.stunnedUntil > sim.time ? 0xb7c4d4 : 0xffffff;
       actor.shadow.position.set(tower.x, tower.y + 6);
       actor.shadow.scale.set(1.45, 0.78);
-      if (actor.clip === "attack" && actor.time < 0.09) this.burst(tower.x, tower.y - 70, TOWER_HUE[tower.kind], 3);
+      if (actor.clip === "attack" && actor.time < 0.09) {
+        this.burst(tower.x, tower.y - 70, TOWER_HUE[tower.kind], 3);
+        if (tower.tier >= 1) this.burst(tower.x + 18, tower.y - 86, TOWER_HUE[tower.kind], 3);
+      }
     }
     for (const [id, actor] of this.towers) {
       if (seen.has(id)) continue;
@@ -787,8 +811,9 @@ export class WorldView {
       actor.outline.position.set(e.x, e.y - lift - hop + 2);
       actor.body.zIndex = e.y;
       actor.outline.zIndex = e.y - 0.2;
-      actor.body.tint = e.flash > 0 ? 0xfff3c4 : 0xffffff;
-      actor.outline.tint = e.flash > 0 ? 0xffe08a : 0x14080c;
+      actor.body.blendMode = e.flash > 0 ? "add" : "normal";
+      actor.body.tint = e.flash > 0 ? 0xffffff : 0xff5a62;
+      actor.outline.tint = e.flash > 0 ? 0xffffff : 0x14080c;
       actor.body.alpha = stealthedFade(e);
       actor.outline.alpha = e.flash > 0 ? 1 : e.kind === "skitter" ? 0.7 : 0.9;
       actor.shadow.position.set(e.x, e.y + (e.flying ? 14 : 6));
@@ -815,29 +840,245 @@ export class WorldView {
     return locomote(e.kind);
   }
 
-  private drawPads(sim: Siege): void {
-    this.pads.clear();
-    const pulse = this.reduced ? 0.85 : 0.55 + Math.sin(this.time * 3) * 0.25;
-    const fresh = sim.towers.length === 0 && sim.wave === 0 && sim.phase === "build";
-    sim.pads.forEach((pad, i) => {
-      if (sim.towers.some((t) => t.pad === i)) return;
-      const hot = fresh && i === this.firstWest(sim);
-      this.pads.circle(pad.x, pad.y, hot ? 34 : 28).fill({ color: 0xfff1c8, alpha: hot ? 0.28 : 0.12 });
-      this.pads.circle(pad.x, pad.y, hot ? 34 : 28).stroke({ width: hot ? 5 : 3, color: hot ? 0xffe08a : 0xf0d7a2, alpha: hot ? 1 : pulse });
-    });
+  private syncAllies(sim: Siege, step: number): void {
+    const seen = new Set<number>();
+    const clip = this.art.clip("enemy_runner", "walk");
+    if (!clip) return;
+    for (const ally of sim.allies) {
+      if (!ally.alive) continue;
+      seen.add(ally.id);
+      let actor = this.allies.get(ally.id);
+      if (!actor) {
+        actor = this.actor(clip);
+        actor.clip = "walk";
+        this.allies.set(ally.id, actor);
+      }
+      actor.time += step > 0 ? step : 0;
+      const row = facingRow(ally.angle, clip.frames.length);
+      this.paint(actor, clip, row, "walk", clip.draw * 0.95);
+      actor.body.position.set(ally.x, ally.y);
+      actor.outline.position.set(ally.x, ally.y + 2);
+      actor.body.zIndex = ally.y;
+      actor.outline.zIndex = ally.y - 0.2;
+      actor.body.tint = 0x8ec4ff;
+      actor.outline.tint = 0x14203a;
+      actor.shadow.position.set(ally.x, ally.y + 6);
+      actor.shadow.scale.set(0.7, 0.4);
+    }
+    for (const [id, actor] of this.allies) {
+      if (seen.has(id)) continue;
+      this.allies.delete(id);
+      this.freeActor(actor);
+    }
   }
 
-  private firstWest(sim: Siege): number {
-    let best = 0;
-    let score = -1;
-    sim.pads.forEach((pad, i) => {
-      const along = pad.x < this.sunAt.x ? this.sunAt.x - pad.x : 0;
-      if (along > score) {
-        score = along;
-        best = i;
+  private drawPads(sim: Siege): void {
+    this.pads.clear();
+    for (const e of sim.enemies) {
+      if (!e.alive || e.boulder <= 0) continue;
+      const reach = 34 + e.boulder * 0.12;
+      const x = e.x + Math.cos(e.angle) * 28;
+      const y = e.y + Math.sin(e.angle) * 28;
+      this.pads.ellipse(x, y, reach, reach * 0.72).fill({ color: 0xd8c4a4, alpha: 0.95 });
+      this.pads.ellipse(x, y, reach, reach * 0.72).stroke({ width: 4, color: 0x6b5344, alpha: 1 });
+    }
+    for (const puddle of sim.puddles) {
+      if (puddle.life <= 0) continue;
+      const fade = Math.max(0, puddle.life / puddle.max);
+      const color = puddle.kind === "drum" ? TOWER_HUE.drum : TOWER_HUE.spire;
+      this.pads.circle(puddle.x, puddle.y, puddle.radius).fill({ color, alpha: 0.22 * fade });
+      this.pads.circle(puddle.x, puddle.y, puddle.radius).stroke({ width: 4, color, alpha: 0.85 * fade });
+    }
+    const hero = sim.heroAt();
+    let near = -1;
+    let nearD: number = BALANCE.fund.preview;
+    sim.stations.forEach((station, i) => {
+      const d = Math.hypot(station.x - hero.x, station.y - hero.y);
+      if (d < nearD && station.tier < 3) {
+        nearD = d;
+        near = i;
       }
     });
-    return best;
+    sim.stations.forEach((station, i) => {
+      const built = station.tier > 0;
+      const color = station.kind === "wall" ? 0xc46a3a : station.kind === "barracks" ? 0x3d7dff : TOWER_HUE[station.kind];
+      const hot = i === near;
+      if (station.kind === "wall") this.drawWall(sim, station.index - sim.pads.length, station.tier, station.alive, station.hp, station.maxHp);
+      else this.dashSquare(station.x, station.y, hot ? 78 : 68, color, built ? 0.55 : 1);
+      if (sim.funding === i) {
+        const cost = sim.stationCost(station);
+        const u = cost > 0 ? station.paid / cost : 1;
+        this.pads.circle(station.x, station.y, 46).stroke({ width: 8, color: 0x3a2414, alpha: 0.55 });
+        this.pads.arc(station.x, station.y, 46, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * u).stroke({ width: 8, color: 0xffe08a, alpha: 1 });
+        this.streamCoins(hero.x, hero.y - 30, station.x, station.y);
+      }
+      const label = this.stationLabel(i);
+      const next = station.tier < 3 ? sim.stationCost(station) : 0;
+      const name = station.kind === "wall" ? "Wall" : station.kind === "barracks" ? (station.tier === 0 ? "Squad" : "Tower") : TOWER_ICON[station.kind];
+      label.text = next > 0 ? `${name}  ${next}` : "MAX";
+      label.style.fill = color;
+      label.visible = true;
+      label.position.set(station.x, station.y + (built && station.kind !== "wall" ? 28 : 40));
+      label.zIndex = station.y + 4;
+      if (hot && station.kind !== "wall" && station.kind !== "barracks" && station.tier < 3) {
+        const radius = towerRange(station.kind, station.tier) * sim.rangeScale;
+        this.pads.circle(station.x, station.y, radius).stroke({ width: 2, color, alpha: 0.45 });
+        const read = towerReadout(station.kind, Math.min(2, station.tier));
+        label.text = `${name}  ${next}\n${read.stat}`;
+      }
+    });
+    for (let i = sim.stations.length; i < this.stationLabels.length; i++) this.stationLabels[i].visible = false;
+    if (sim.funding < 0) for (const coin of this.coinSprites) coin.visible = false;
+  }
+
+  private stationLabel(i: number): Text {
+    let label = this.stationLabels[i];
+    if (!label) {
+      label = new Text({
+        text: "",
+        style: { fontFamily: SANS, fontSize: 22, fill: 0xfff6df, fontWeight: "bold", align: "center", stroke: { color: 0x140e0a, width: 4 } },
+      });
+      label.anchor.set(0.5, 0);
+      label.eventMode = "none";
+      this.labels.addChild(label);
+      this.stationLabels[i] = label;
+    }
+    return label;
+  }
+
+  private dashSquare(x: number, y: number, size: number, color: number, alpha: number): void {
+    const h = size / 2;
+    const corners: [number, number][] = [[-h, -h], [h, -h], [h, h], [-h, h]];
+    this.pads.rect(x - h, y - h, size, size).fill({ color, alpha: 0.1 * alpha });
+    for (let i = 0; i < 4; i++) {
+      const a = corners[i];
+      const b = corners[(i + 1) % 4];
+      this.pads.moveTo(x + a[0], y + a[1]);
+      this.pads.lineTo(x + a[0] * 0.2 + b[0] * 0.8, y + a[1] * 0.2 + b[1] * 0.8);
+    }
+    this.pads.stroke({ width: 4, color, alpha });
+  }
+
+  private drawWall(sim: Siege, path: number, tier: number, alive: boolean, hp: number, maxHp: number): void {
+    const route = sim.map.routes[path];
+    if (!route) return;
+    const pose = poseAt(route, route.len * 0.46);
+    const across = pose.angle + Math.PI / 2;
+    const span = 36 + Math.max(0, tier) * 16;
+    const dx = Math.cos(across) * span;
+    const dy = Math.sin(across) * span;
+    const color = alive ? 0xd07a45 : 0x6a5348;
+    this.pads.moveTo(pose.x - dx, pose.y - dy).lineTo(pose.x + dx, pose.y + dy).stroke({
+      width: alive ? 16 + tier * 4 : 8,
+      color,
+      alpha: alive ? 0.95 : 0.55,
+      cap: "round",
+    });
+    if (alive && maxHp > 0) {
+      const u = Math.max(0, hp / maxHp);
+      this.pads.moveTo(pose.x - dx * u, pose.y - dy * u).lineTo(pose.x + dx * u, pose.y + dy * u).stroke({
+        width: 6,
+        color: 0xffe08a,
+        alpha: 0.9,
+        cap: "round",
+      });
+    }
+  }
+
+  private streamCoins(x0: number, y0: number, x1: number, y1: number): void {
+    const n = 6;
+    for (let i = 0; i < n; i++) {
+      let coin = this.coinSprites[i];
+      if (!coin) {
+        coin = new Sprite(this.art.frame("jade"));
+        coin.anchor.set(0.5);
+        coin.eventMode = "none";
+        this.fxLayer.addChild(coin);
+        this.coinSprites.push(coin);
+      }
+      const t = ((this.time * 1.4 + i / n) % 1);
+      coin.visible = true;
+      coin.position.set(x0 + (x1 - x0) * t, y0 + (y1 - y0) * t - Math.sin(t * Math.PI) * 28);
+      coin.scale.set(0.34);
+      coin.alpha = 0.4 + t * 0.6;
+    }
+  }
+
+  private drawDrops(sim: Siege): void {
+    let n = 0;
+    for (const gem of sim.drops) {
+      if (!gem.alive) continue;
+      let sprite = this.dropSprites[n];
+      if (!sprite) {
+        sprite = new Sprite(this.art.frame("jade"));
+        sprite.anchor.set(0.5);
+        sprite.eventMode = "none";
+        this.fxLayer.addChild(sprite);
+        this.dropSprites.push(sprite);
+      }
+      sprite.visible = true;
+      sprite.position.set(gem.x, gem.y);
+      const bob = Math.sin(this.time * 6 + gem.id) * 3;
+      sprite.y = gem.y + bob;
+      sprite.scale.set(0.46);
+      sprite.alpha = gem.life < 1.6 ? 0.35 + Math.sin(this.time * 14) * 0.35 : 1;
+      n += 1;
+    }
+    for (let i = n; i < this.dropSprites.length; i++) this.dropSprites[i].visible = false;
+  }
+
+  private drawShots(sim: Siege): void {
+    this.shotUsed = 0;
+    for (const shot of sim.shots) {
+      if (!shot.alive) continue;
+      const color = shot.family === "hero" ? 0xffe08a : TOWER_HUE[shot.family];
+      const fans = shot.family === "dart" ? shot.tier + 1 : 1;
+      const dx = shot.x - shot.px;
+      const dy = shot.y - shot.py;
+      const len = Math.hypot(dx, dy) || 1;
+      const nx = -dy / len;
+      const ny = dx / len;
+      for (let k = 0; k < fans; k++) {
+        const off = (k - (fans - 1) / 2) * (12 + shot.tier * 3);
+        this.paintBolt(shot, color, nx * off, ny * off, k === Math.floor((fans - 1) / 2));
+      }
+    }
+    for (let i = this.shotUsed; i < this.shotBolts.length; i++) this.shotBolts[i].visible = false;
+  }
+
+  private paintBolt(shot: Shot, color: number, ox: number, oy: number, head: boolean): void {
+    const tex = shot.family === "spire" ? "fx-orb" : shot.family === "hero" ? "fx-spear" : "fx-dart";
+    const bolt = this.takeShot(this.art.frame(tex));
+    bolt.position.set(shot.x + ox, shot.y + oy);
+    bolt.rotation = Math.atan2(shot.y - shot.py, shot.x - shot.px);
+    const fat = shot.family === "spire" ? 0.7 + shot.tier * 0.22 : 0.85 + shot.tier * 0.12;
+    bolt.scale.set(head ? fat : fat * 0.72);
+    bolt.tint = color;
+    bolt.alpha = head ? 1 : 0.55;
+    bolt.blendMode = "add";
+    const trail = this.takeShot(this.art.frame("fx-dart"));
+    const span = 18 + shot.tier * 10;
+    trail.position.set(shot.x + ox - ((shot.x - shot.px) / (Math.hypot(shot.x - shot.px, shot.y - shot.py) || 1)) * span, shot.y + oy);
+    trail.rotation = bolt.rotation;
+    trail.scale.set(0.35 + shot.tier * 0.08, 1.4 + shot.tier * 0.45);
+    trail.tint = color;
+    trail.alpha = 0.75;
+    trail.blendMode = "add";
+  }
+
+  private takeShot(tex: Texture): Sprite {
+    let bolt = this.shotBolts[this.shotUsed];
+    if (!bolt) {
+      bolt = new Sprite(tex);
+      bolt.anchor.set(0.15, 0.5);
+      bolt.eventMode = "none";
+      this.fxLayer.addChild(bolt);
+      this.shotBolts.push(bolt);
+    }
+    bolt.texture = tex;
+    bolt.visible = true;
+    this.shotUsed += 1;
+    return bolt;
   }
 
   private drawSelection(sim: Siege): void {
@@ -963,14 +1204,15 @@ export class WorldView {
     this.hero.position.set(at.x, at.y);
     this.hero.zIndex = at.y + 8;
     const throwing = sim.guardianCast > 0;
-    const clip = this.art.clip("guardian", throwing ? "attack" : "idle");
+    const clipName = throwing ? "attack" : sim.heroMoving ? "walk" : "idle";
+    const clip = this.art.clip("guardian", clipName) ?? this.art.clip("guardian", "idle");
     if (clip) {
       const row = facingRow(sim.guardianAim, clip.frames.length);
       const frames = clip.frames[Math.min(row, clip.frames.length - 1)] ?? [];
       if (frames.length > 0) {
         let index = 0;
         if (throwing) {
-          const span = Math.max(0.05, BALANCE.guardian.cast);
+          const span = Math.max(0.05, BALANCE.hero.cast);
           const u = 1 - sim.guardianCast / span;
           index = Math.min(frames.length - 1, Math.max(0, Math.floor(u * frames.length)));
         } else {
@@ -980,19 +1222,14 @@ export class WorldView {
         const tex = frames[index];
         this.heroBody.texture = tex;
         this.heroLine.texture = tex;
-        this.heroBody.scale.set(0.92);
-        this.heroLine.scale.set(0.97);
+        this.heroBody.scale.set(1.22);
+        this.heroLine.scale.set(1.28);
         this.heroLine.position.set(1, 3);
       }
     }
-    const ready = sim.guardianReady;
     this.heroRing.clear();
-    this.heroRing.circle(0, 6, 50).stroke({ width: 5, color: 0x140e0a, alpha: 0.45 });
-    this.heroRing.arc(0, 6, 50, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * ready).stroke({
-      width: 6,
-      color: ready >= 0.999 ? 0xffe08a : 0xffb03a,
-      alpha: 0.95,
-    });
+    this.heroRing.circle(0, 8, BALANCE.hero.range).stroke({ width: 3, color: 0xffe08a, alpha: 0.28 });
+    this.heroRing.circle(0, 6, 22).fill({ color: 0xffe08a, alpha: 0.18 });
   }
 
   private drawSpears(sim: Siege): void {
@@ -1061,41 +1298,20 @@ export class WorldView {
       beam.visible = true;
       beam.position.set(x, y);
       beam.rotation = Math.atan2(dy, dx);
+      const tier = BALANCE.lens[tower.tier];
+      const ramp = tier.rampMax > 0 ? tower.ramp / tier.rampMax : 0;
       beam.width = Math.hypot(dx, dy);
-      beam.height = 18;
+      beam.height = 8 + tower.tier * 7 + ramp * 22;
       beam.tint = 0xffd27a;
-      beam.alpha = 0.85;
+      beam.alpha = 0.45 + ramp * 0.55;
       this.beamCursor += 1;
     }
     for (let i = this.beamCursor; i < this.beams.length; i++) this.beams[i].visible = false;
   }
 
   private onDeath(event: Fx): void {
-    const kind = event.enemy ?? "runner";
-    const fodder = kind === "skitter" || kind === "shard";
-    const asset = enemyAsset(kind);
-    const clip = this.art.clip(asset, "death");
-    if (!clip) {
-      this.burst(event.x, event.y, 0xff5a4a, fodder ? 8 : 6);
-      return;
-    }
-    const row = facingRow(event.n ?? 0, clip.frames.length);
-    const ghost = this.ghostPool.pop() ?? this.makeGhost();
-    ghost.clip = clip;
-    ghost.row = row;
-    ghost.time = 0;
-    ghost.fodder = fodder;
-    ghost.x = event.x;
-    ghost.y = event.y;
-    ghost.body.visible = true;
-    ghost.outline.visible = !fodder;
-    ghost.shadow.visible = true;
-    ghost.draw = bodyScale(kind, clip.draw);
-    this.paintGhost(ghost, ghost.draw);
-    this.ghosts.push(ghost);
-    this.burst(event.x, event.y - 18, 0xfff3d2, fodder ? 12 : 7);
-    this.burst(event.x, event.y, fodder ? 0xff5a3a : 0xffb070, fodder ? 8 : 5);
-    this.ringFx(event.x, event.y, fodder ? 70 : 110, 0xffc48a);
+    this.burst(event.x, event.y, 0xffffff, 8);
+    this.burst(event.x, event.y - 6, 0xffe08a, 5);
   }
 
   private spawnGhost(actor: Actor, name: string, fodder: boolean): void {
@@ -1106,16 +1322,6 @@ export class WorldView {
     if (!fodder && name === "sell") {
       this.burst(actor.body.x, actor.body.y, 0xf0d7a2, 5);
     }
-  }
-
-  private makeGhost(): Ghost {
-    const body = this.takeSprite(Texture.EMPTY);
-    const outline = this.takeSprite(Texture.EMPTY);
-    outline.tint = 0x14080c;
-    const shadow = this.shadowSprite();
-    this.actors.addChild(outline, body);
-    this.shadowLayer.addChild(shadow);
-    return { body, outline, shadow, clip: { frames: [[Texture.EMPTY]], fps: 1, loop: false, anchorX: 0.5, anchorY: 0.8, draw: 0.5 }, row: 0, time: 0, fodder: false, draw: 1, x: 0, y: 0 };
   }
 
   private paintGhost(ghost: Ghost, draw: number): void {
@@ -1330,17 +1536,18 @@ export class WorldView {
     }
   }
 
-  private drawChain(pts: Vec[]): void {
+  private drawChain(pts: Vec[], color: number): void {
     for (let i = 1; i < pts.length; i++) {
       const a = pts[i - 1];
       const b = pts[i];
       const bolt = new Sprite(this.art.frame("fx-lightning"));
       bolt.anchor.set(0, 0.5);
       bolt.blendMode = "add";
+      bolt.tint = color;
       bolt.position.set(a.x, a.y);
       bolt.rotation = Math.atan2(b.y - a.y, b.x - a.x);
       bolt.width = Math.hypot(b.x - a.x, b.y - a.y);
-      bolt.height = 36;
+      bolt.height = 28;
       bolt.eventMode = "none";
       this.fxLayer.addChild(bolt);
       this.rings.push({ s: bolt, life: 0.2, max: 0.2, grow: 0 });
@@ -1362,6 +1569,28 @@ export class WorldView {
     this.callout.alpha = Math.min(1, t * 2.2);
     this.callout.scale.set(1 + (1 - t) * 0.08);
     if (this.calloutLife <= 0) this.callout.visible = false;
+  }
+
+  /** A small white number that hops off a hit. Each hit keeps its own so a pack stays readable. */
+  private popNumber(x: number, y: number, text: string): void {
+    if (this.floats.length > 72) {
+      const oldest = this.floats.shift();
+      if (oldest) {
+        oldest.t.visible = false;
+        oldest.life = 0;
+        this.floatPool.push(oldest);
+      }
+    }
+    const floater = this.floatPool.pop() ?? this.makeFloat();
+    floater.t.text = text;
+    floater.t.style.fontSize = 15;
+    floater.t.style.fill = 0xffffff;
+    floater.t.position.set(x + ((this.floats.length % 5) - 2) * 4, y);
+    floater.t.alpha = 1;
+    floater.t.visible = true;
+    floater.life = 0.55;
+    floater.vy = -92;
+    this.floats.push(floater);
   }
 
   private floatText(x: number, y: number, text: string, fill: number, size: number): void {

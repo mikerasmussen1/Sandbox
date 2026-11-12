@@ -98,25 +98,63 @@ export const BALANCE = {
     lock: 2.4,
   },
   /**
-   * The player's own throw. Invented, tune in play. One target, and slow
-   * enough that a horde walks through it. A jungle Skitter (60) takes two
-   * hits; a Runner (30) takes one. The plaza bonus one-shots that Skitter
-   * and still barely chips a Shield or the Colossus.
+   * The Sunstone Guardian walks the valley and fires on his own.
+   * Damage is high enough to pick off a Runner and to chip a crowd, and
+   * far too low to hold a lane. A jungle Skitter is 60, so this gun needs
+   * several shots, and a snake of them walks through him.
    */
-  guardian: {
-    cooldown: 0.85,
-    damage: 34,
-    saved: 64,
-    /** World pixels. A phone tap can miss the sprite and still connect. */
-    tap: 160,
-    /** Distance to the Sunstone that counts as a leaker you can still save. */
-    savedRadius: 320,
-    /** Remaining path, in world pixels, that also counts as slipped through. */
-    savedRemain: 240,
-    flight: 0.34,
-    /** How long the throw pose plays. */
-    cast: 0.48,
+  hero: {
+    /** 2× a Skitter, the top of the 1.5–2× band the march should read at. */
+    speed: 216,
+    range: 214,
+    damage: 11,
+    interval: 0.15,
+    /** How long the attack pose holds after a shot. */
+    cast: 0.2,
   },
+  /** Standing on a station pours Jade into it until the price is met. */
+  fund: {
+    radius: 48,
+    /** Jade per second while the hero stands on the pad. */
+    rate: 62,
+    /** How close the hero must be before the pad previews its range. */
+    preview: 150,
+  },
+  /** Kill gems sit on the ground until the hero walks into the magnet. */
+  gem: {
+    magnet: 280,
+    life: 14,
+    fly: 760,
+  },
+  /** A barricade pad. Ground raiders stop and chew on it. */
+  wall: {
+    cost: [45, 70, 110] as const,
+    hp: [380, 640, 980] as const,
+  },
+  /**
+   * Venom left where a serpent spit lands. Damage, range, and fire interval
+   * stay on the spire tiers. This only slows raiders standing in the puddle,
+   * using the same slow as a drum.
+   */
+  venom: {
+    radius: [56, 74, 96] as const,
+    life: 1.45,
+  },
+  /**
+   * A barracks pad. The first payment marches a blue squad down the trail.
+   * The next payment raises a Dart on the same pad. Costs are our own curve.
+   */
+  barracks: {
+    squad: 55,
+    tower: 120,
+    count: 4,
+    hp: 54,
+    damage: 10,
+    interval: 0.48,
+    speed: 96,
+  },
+  /** A Golem's boulder soaks shots until it shatters. The Golem underneath is unchanged. */
+  boulder: { hp: 36 },
   /**
    * Tower synergies. Invented. A Quake Drum's stun is the setup; the Sun Lens
    * is the payoff. Slowed raiders also eat darts faster, and stunned raiders
@@ -154,17 +192,17 @@ export const BALANCE = {
   lens: [
     { cost: 100, dps: 54, ramp: 20, rampMax: 80, range: 190 },
     { cost: 130, dps: 78, ramp: 28, rampMax: 120, range: 216 },
-    { cost: 180, dps: 110, ramp: 36, rampMax: 170, range: 248 },
+    { cost: 210, dps: 110, ramp: 36, rampMax: 170, range: 248 },
   ] as const satisfies readonly LensTier[],
   drum: [
     { cost: 85, damage: 16, radius: 132, stun: 0.45, slow: 1.4, interval: 1.35 },
     { cost: 120, damage: 26, radius: 156, stun: 0.58, slow: 1.6, interval: 1.15 },
-    { cost: 165, damage: 40, radius: 184, stun: 0.72, slow: 1.85, interval: 0.98 },
+    { cost: 190, damage: 40, radius: 184, stun: 0.72, slow: 1.85, interval: 0.98 },
   ] as const satisfies readonly DrumTier[],
   spire: [
     { cost: 130, damage: 18, jumps: 3, falloff: 0.72, range: 160, chain: 136, interval: 0.92 },
     { cost: 165, damage: 32, jumps: 4, falloff: 0.76, range: 188, chain: 152, interval: 0.76 },
-    { cost: 230, damage: 50, jumps: 5, falloff: 0.8, range: 220, chain: 170, interval: 0.64 },
+    { cost: 260, damage: 50, jumps: 5, falloff: 0.8, range: 220, chain: 170, interval: 0.64 },
   ] as const satisfies readonly SpireTier[],
   towerName: {
     dart: "Dart Totem",
