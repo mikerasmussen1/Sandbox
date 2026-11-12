@@ -60,12 +60,12 @@ export function beside(route: Route, dist: number, side: number): Vec {
  * Gliders ignore path bends. They leave the gate, cut one corner toward the
  * crater, and arrive at the same rim point as the ground route.
  */
-export function flightOf(ground: Route, center: Vec): Route {
-  const a = ground.pts[0];
-  const b = ground.pts[ground.pts.length - 1];
-  const mid = {
-    x: (a.x + b.x) * 0.42 + center.x * 0.16,
-    y: (a.y + b.y) * 0.42 + center.y * 0.16,
-  };
-  return routeOf([a, mid, b]);
+export function flightOf(ground: Route, _center: Vec): Route {
+  // A shortcut to the yard, then the same road the ground units walk.
+  // Gliders still pass the towers. The chord keeps the flight shorter.
+  const samples = [0, 0.28, 0.4, 0.72, 1].map((frac) => {
+    const p = poseAt(ground, ground.len * frac);
+    return { x: p.x, y: p.y };
+  });
+  return routeOf(samples);
 }

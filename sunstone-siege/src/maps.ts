@@ -8,7 +8,7 @@ import { LEVELS } from "./levels";
 
 export const MAP_W = 960;
 export const MAP_H = 1800;
-export const SUN: Vec = { x: 480, y: 1520 };
+export const SUN: Vec = { x: 480, y: 1040 };
 /** The stored plaza is already the rim. */
 export const SUN_SCALE = 1;
 

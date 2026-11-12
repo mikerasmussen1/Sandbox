@@ -13,13 +13,13 @@ from PIL import Image, ImageDraw, ImageFilter
 ROOT = Path(__file__).resolve().parents[1]
 ART = ROOT / "public" / "art"
 W, H = 960, 1800
-SUN = (480, 1520)
+SUN = (480, 1040)
 RIM = 46
 
 THEMES = [
     # top, cliff, path, accent
-    ((92, 176, 72), (78, 92, 58), (214, 186, 120), (40, 120, 48)),
-    ((196, 154, 78), (140, 86, 48), (232, 206, 150), (90, 140, 50)),
+    ((96, 196, 78), (86, 98, 70), (228, 196, 132), (46, 140, 52)),
+    ((214, 170, 96), (150, 92, 58), (236, 210, 150), (90, 150, 56)),
     ((78, 168, 96), (64, 96, 70), (186, 214, 170), (40, 110, 130)),
     ((176, 132, 70), (120, 72, 46), (228, 196, 140), (160, 70, 40)),
     ((70, 158, 86), (52, 90, 58), (200, 176, 110), (30, 100, 60)),
@@ -34,61 +34,68 @@ def clamp(v: float, a: float, b: float) -> float:
 
 
 def poly(x0: float, wobble: float, phase: float) -> list[tuple[float, float]]:
+    """A long road from the top edge that folds back into the central base."""
     pts: list[tuple[float, float]] = []
-    y = 36.0
-    while y < SUN[1] - 200:
-        x = x0 + math.sin(y * 0.0075 + phase) * wobble
-        pts.append((clamp(x, 90, W - 90), y))
-        y += 190
-    pts.append((clamp(SUN[0] + (x0 - SUN[0]) * 0.35, 120, W - 120), SUN[1] - 150))
-    pts.append((float(SUN[0]), float(SUN[1] - RIM)))
+    y = 48.0
+    while y < 1680:
+        x = x0 + math.sin(y * 0.008 + phase) * wobble
+        pts.append((clamp(x, 80, W - 80), y))
+        y += 180
+    pts.append((clamp(x0 * 0.4 + SUN[0] * 0.6, 120, W - 120), 1720))
+    pts.append((SUN[0] + (x0 - SUN[0]) * 0.22, SUN[1] + 240))
+    pts.append((float(SUN[0]), float(SUN[1])))
     return pts
 
 
-def pads_for(routes: list[list[tuple[float, float]]], n: int) -> list[tuple[float, float]]:
-    samples: list[tuple[float, float, float, float]] = []
-    for route in routes:
-        for i in range(len(route) - 1):
+def point_at(route: list[tuple[float, float]], frac: float) -> tuple[float, float, float]:
+    segs = [math.hypot(route[i + 1][0] - route[i][0], route[i + 1][1] - route[i][1]) or 1 for i in range(len(route) - 1)]
+    total = sum(segs) or 1
+    want = total * frac
+    walked = 0.0
+    for i, seg in enumerate(segs):
+        if walked + seg >= want or i == len(segs) - 1:
+            t = min(1, (want - walked) / seg)
             ax, ay = route[i]
             bx, by = route[i + 1]
-            seg = math.hypot(bx - ax, by - ay) or 1
-            steps = max(1, int(seg / 150))
-            for s in range(steps):
-                t = (s + 0.5) / steps
-                x = ax + (bx - ax) * t
-                y = ay + (by - ay) * t
-                if math.hypot(x - SUN[0], y - SUN[1]) < 150:
-                    continue
-                ang = math.atan2(by - ay, bx - ax)
-                samples.append((x, y, ang, y))
-    samples.sort(key=lambda p: p[3])
-    if not samples:
-        return []
+            return (ax + (bx - ax) * t, ay + (by - ay) * t, math.atan2(by - ay, bx - ax))
+        walked += seg
+    return (route[-1][0], route[-1][1], 0)
+
+
+def pads_for(routes: list[list[tuple[float, float]]], n: int) -> list[tuple[float, float]]:
+    """A yard ringing the base, where every road and flight path comes in.
+
+    The pads share one short kill window. A slow single-target shot wastes
+    itself on the lead body. A shower lands on that same crowd.
+    """
+    per = max(2, math.ceil(n / len(routes)))
     picked: list[tuple[float, float]] = []
-    step = max(1, len(samples) // n)
-    side = 1
-    for i in range(0, len(samples), step):
-        x, y, ang, _ = samples[i]
-        ox = math.cos(ang + math.pi / 2) * 108 * side
-        oy = math.sin(ang + math.pi / 2) * 108 * side
-        px = clamp(x + ox, 70, W - 70)
-        py = clamp(y + oy, 70, H - 80)
-        if all(math.hypot(px - qx, py - qy) > 86 for qx, qy in picked):
-            picked.append((px, py))
-        side *= -1
-        if len(picked) >= n:
-            break
+    for route in routes:
+        x, y, ang = point_at(route, 0.36)
+        ux, uy = math.cos(ang), math.sin(ang)
+        px, py = -uy, ux
+        for i in range(per):
+            side = -1 if i % 2 == 0 else 1
+            along = (i // 2 - 0.5) * 54
+            ox = x + ux * along + px * 92 * side
+            oy = y + uy * along + py * 92 * side
+            ox = clamp(ox, 70, W - 70)
+            oy = clamp(oy, 70, H - 80)
+            if all(math.hypot(ox - qx, oy - qy) > 72 for qx, qy in picked):
+                picked.append((ox, oy))
+            if len(picked) >= n:
+                return picked
     return picked
 
 
 def layouts() -> list[dict]:
     specs = [
-        ("valley", [poly(480, 70, 0.4)], 150, 8),
-        ("valley", [poly(480, 150, 1.1)], 190, 8),
+        ("valley", [poly(300, 70, 0.4), poly(680, 60, 2.1)], 140, 8),
+        ("valley", [poly(260, 110, 1.1), poly(710, 90, 2.5)], 160, 8),
         ("ruins", [poly(300, 60, 0.2), poly(660, 60, 2.1)], 130, 10),
         ("ruins", [poly(280, 90, 0.6), poly(700, 80, 2.4)], 150, 10),
         ("valley", [poly(250, 50, 1.4), poly(710, 50, 2.8)], 140, 10),
-        ("crater", [poly(480, 170, 0.9)], 210, 8),
+        ("crater", [poly(250, 130, 0.9), poly(720, 110, 2.3)], 180, 8),
         ("ruins", [poly(220, 40, 0.3), poly(480, 36, 1.7), poly(740, 40, 2.6)], 120, 12),
         ("crater", [poly(320, 80, 0.5), poly(640, 80, 2.2)], 150, 10),
     ]
@@ -96,7 +103,7 @@ def layouts() -> list[dict]:
     for biome, routes, width, count in specs:
         spots = pads_for(routes, count)
         while len(spots) < 8:
-            spots.append((120 + 80 * len(spots), 400 + 40 * len(spots)))
+            spots.append((SUN[0] - 180 + 50 * (len(spots) % 4), SUN[1] + 80 + 36 * (len(spots) % 3)))
         out.append({"biome": biome, "width": width, "routes": routes, "pads": spots})
     return out
 
@@ -146,43 +153,31 @@ def sample(routes: list[list[tuple[float, float]]]) -> list[tuple[float, float]]
 
 
 def paint(level: dict, theme: tuple, index: int) -> None:
-    top, cliff, path, accent = theme
-    yy, xx = np.mgrid[0 : H // 4, 0 : W // 4].astype(np.float32)
-    edge = np.minimum(np.minimum(xx, W // 4 - 1 - xx), np.minimum(yy, H // 4 - 1 - yy))
-    # Warp the rim so the cliff is a canyon wall, not a picture frame.
-    warp = 8 * np.sin(yy * 0.09 + index) + 6 * np.sin(xx * 0.13 + index * 0.7)
-    edge = edge + warp
-    height = np.clip(edge / 14, 0, 1)
-    height = np.where(edge > 28, 0.82, height)
-    hills = (
-        np.sin(xx * 0.22 + index * 1.3) * np.cos(yy * 0.08) * 0.16
-        + np.sin((xx * 0.7 + yy) * 0.05 + index) * 0.1
-        + np.sin(yy * 0.19) * 0.05
-    )
-    height = np.clip(height + hills, 0, 1.2)
-    road = sample(level["routes"])
-    width = level["width"] / 4
-    for px, py in road[::2]:
-        d = np.hypot(xx - px / 4, yy - py / 4)
-        groove = np.clip(d / width, 0, 1)
-        height = np.minimum(height, 0.48 + groove * 0.55)
-    gy, gx = np.gradient(height)
-    light = np.clip(0.62 + (-gx * 0.9 - gy * 1.15) * 1.4, 0.38, 1.18)
-    rgb = np.zeros((H // 4, W // 4, 3), np.float32)
+    top, cliff, path_c, accent = theme
+    # Blocky grass so the ground reads as a lit board, not a blur.
+    rgb = np.zeros((H // 6, W // 6, 3), np.float32)
     for c in range(3):
-        high = top[c] / 255
-        low = cliff[c] / 255
-        road_c = path[c] / 255
-        base = low + (high - low) * np.clip(height, 0, 1)
-        # path is the mid band of height
-        on_road = np.clip(1 - np.abs(height - 0.55) * 3.2, 0, 1)
-        base = base * (1 - on_road * 0.85) + road_c * on_road * 0.85
-        rgb[:, :, c] = np.clip(base * light, 0, 1)
-    # ambient occlusion where the road meets the grass
-    ao = np.clip(1 - np.abs(height - 0.62) * 6, 0, 1) * 0.28
-    rgb *= 1 - ao[..., None]
-    img = Image.fromarray((rgb * 255).astype(np.uint8), "RGB").resize((W, H), Image.BICUBIC)
-    draw = ImageDraw.Draw(img, "RGBA")
+        rgb[:, :, c] = top[c] / 255
+    img = Image.fromarray((rgb * 255).astype(np.uint8), "RGB").resize((W, H), Image.NEAREST).convert("RGBA")
+    draw = ImageDraw.Draw(img)
+    face = cliff
+    lip = tuple(min(255, c + 55) for c in top)
+    road = sample(level["routes"])
+    width = int(level["width"])
+    shadow = tuple(max(0, c - 55) for c in path_c)
+    stripe = tuple(min(255, c + 32) for c in path_c)
+    def stamp(pts: list[tuple[float, float]], rad: float, fill: tuple, squash: float = 0.78) -> None:
+        for x, y in pts[::2]:
+            draw.ellipse((x - rad, y - rad * squash, x + rad, y + rad * squash), fill=fill)
+    # A cliff runs down the left of the road so a close camera still sees thickness.
+    depth = 150 if index in (1, 3, 5, 7) else 96
+    if road:
+        wall = [(x - depth * 0.55, y + 18) for x, y in road]
+        stamp(wall, depth * 0.62, face + (255,), 0.9)
+        draw.line([(x - width * 0.5, y + 2) for x, y in road], fill=lip + (255,), width=9)
+        stamp([(x + 6, y + 8) for x, y in road], width * 0.34 + 6, shadow + (180,))
+        stamp(road, width * 0.32, path_c + (255,))
+        draw.line(road, fill=stripe + (255,), width=max(8, width // 12))
     rng = np.random.default_rng(100 + index)
     # rounded rocks and props sitting on the high ground
     for _ in range(46):
@@ -194,10 +189,10 @@ def paint(level: dict, theme: tuple, index: int) -> None:
             continue
         kind = int(rng.integers(0, 5))
         if kind <= 1:
-            rad = int(rng.integers(22, 48))
-            draw.ellipse((x - rad, y - rad * 0.45, x + rad, y + rad * 0.35), fill=(40, 30, 20, 70))
-            draw.ellipse((x - rad, y - rad, x + rad, y + rad * 0.8), fill=cliff)
-            draw.ellipse((x - rad * 0.7, y - rad * 0.85, x + rad * 0.15, y - rad * 0.15), fill=tuple(min(255, c + 40) for c in cliff))
+            rad = int(rng.integers(18, 36))
+            draw.ellipse((x - rad, y + 4, x + rad, y + rad * 0.7), fill=(30, 24, 16, 90))
+            draw.polygon([(x, y - rad * 1.5), (x - rad * 0.7, y + 4), (x + rad * 0.7, y + 4)], fill=accent + (255,))
+            draw.polygon([(x - 4, y - rad), (x - rad * 0.45, y + 2), (x + 2, y + 2)], fill=tuple(min(255, c + 40) for c in accent) + (255,))
         elif kind == 2 and index % 3 != 1:
             # hut
             draw.ellipse((x - 22, y + 8, x + 22, y + 18), fill=(40, 30, 20, 80))
@@ -221,8 +216,25 @@ def paint(level: dict, theme: tuple, index: int) -> None:
     draw.ellipse((sx - RIM, sy - RIM * 0.72, sx + RIM, sy + RIM * 0.62), fill=(214, 168, 78, 255))
     draw.ellipse((sx - RIM + 8, sy - RIM * 0.55, sx + RIM - 10, sy + RIM * 0.2), fill=(255, 214, 120, 255))
     draw.ellipse((sx - 10, sy - 8, sx + 8, sy + 6), fill=(255, 244, 200, 255))
-    img = img.filter(ImageFilter.SMOOTH)
-    img.save(ART / f"map-l{index}.webp", "WEBP", quality=76, method=4)
+    # A fence around the base, with a gap wherever a road comes in.
+    for i in range(22):
+        ang = i / 22 * math.pi * 2
+        fx = sx + math.cos(ang) * 168
+        fy = sy + math.sin(ang) * 120
+        if any(math.hypot(fx - px, fy - py) < level["width"] * 0.55 for px, py in road[::4]):
+            continue
+        draw.rectangle((fx - 4, fy - 16, fx + 4, fy + 10), fill=(92, 58, 32, 255))
+        draw.rectangle((fx - 14, fy - 8, fx + 14, fy - 3), fill=(122, 78, 42, 255))
+    arr = np.asarray(img).astype(np.float32)
+    rgb_arr = arr[..., :3]
+    yy, xx = np.mgrid[0:H, 0:W]
+    light = 0.86 + 0.16 * (1 - yy / H) + 0.08 * (1 - xx / W)
+    glow = np.exp(-(((xx - sx) ** 2) + ((yy - sy) ** 2)) / (2 * 260 ** 2))
+    light = np.clip(light + glow * 0.22, 0.75, 1.28)
+    rgb_arr *= light[..., None]
+    rgb_arr[..., 0] = np.clip(rgb_arr[..., 0] * 1.03, 0, 255)
+    img = Image.fromarray(np.clip(rgb_arr, 0, 255).astype(np.uint8), "RGB")
+    img.save(ART / f"map-l{index}.webp", "WEBP", quality=80, method=4)
 
 
 def step_walk() -> None:
@@ -277,7 +289,6 @@ def main() -> None:
     for i, level in enumerate(levels):
         paint(level, THEMES[i], i)
         print("painted", i, "pads", len(level["pads"]), "routes", len(level["routes"]))
-    step_walk()
     touch_icon()
     print("done")
 

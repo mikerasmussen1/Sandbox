@@ -1,7 +1,9 @@
 /** Shared literals for Sunstone Siege. Combat numbers live in balance.ts. */
 
 export type TowerKind = "dart" | "lens" | "drum" | "spire";
-export type EnemyKind = "skitter" | "runner" | "shield" | "jaguar" | "golem" | "shard" | "glider" | "roller" | "boss";
+/** A tier-2 branch. `none` is the family's tier-1 base tower. */
+export type Spec = "none" | "volley" | "rain" | "ballista" | "catapult" | "snare" | "beam" | "spears" | "knights";
+export type EnemyKind = "skitter" | "runner" | "shield" | "jaguar" | "golem" | "shard" | "glider" | "roller" | "boss" | "giant" | "sapper";
 export type Biome = "valley" | "ruins" | "crater";
 export type Phase = "build" | "wave" | "victory" | "defeat";
 export type RelicId = "keen" | "kindling" | "war" | "leap" | "rite" | "ward" | "heart" | "focus";

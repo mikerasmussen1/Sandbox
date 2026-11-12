@@ -5,7 +5,7 @@
 import { BALANCE, starsFor, towerCost, worldCount } from "../src/balance";
 import { SUN } from "../src/maps";
 import { Siege, stealthed, type Station } from "../src/sim";
-import type { RelicId, TowerKind } from "../src/types";
+import type { RelicId, Spec, TowerKind } from "../src/types";
 
 function fail(msg: string): never {
   throw new Error(msg);
@@ -61,21 +61,28 @@ function cover(sim: Siege): boolean {
 
 function spend(sim: Siege): void {
   if (cover(sim)) return;
+  if (buy(sim, (s) => s.kind === "dart" && s.tier === 1)) return;
   if (buy(sim, (s) => s.kind === "lens" && s.tier === 0)) return;
+  if (buy(sim, (s) => s.kind === "lens" && s.tier === 1)) return;
   if (buy(sim, (s) => s.kind === "dart" && s.tier === 0)) return;
   if (buy(sim, (s) => s.kind === "drum" && s.tier === 0)) return;
   if (buy(sim, (s) => s.kind === "barracks" && s.tier === 0)) return;
-  if (buy(sim, (s) => s.kind === "lens" && s.tier === 1)) return;
-  if (buy(sim, (s) => s.kind === "dart" && s.tier === 1)) return;
-  if (buy(sim, (s) => s.kind === "wall" && s.tier === 0)) return;
+  if (buy(sim, (s) => s.kind === "barracks" && s.tier === 1)) return;
   if (buy(sim, (s) => s.kind === "drum" && s.tier === 1)) return;
-  buy(sim, (s) => (s.kind === "dart" || s.kind === "lens" || s.kind === "drum") && s.tier > 0 && s.tier < 3);
+  if (buy(sim, (s) => s.kind === "wall" && s.tier === 0)) return;
+  if (buy(sim, (s) => s.kind === "base" && s.tier < 3)) return;
+  buy(sim, (s) => (s.kind === "dart" || s.kind === "lens" || s.kind === "drum" || s.kind === "wall") && s.tier > 0 && s.tier < 3);
 }
 
-/** Funds a single role and nothing else, so a countered level can show the gap. */
-function spendOnly(sim: Siege, kind: TowerKind | "barracks"): void {
+/** Funds one family and takes one branch, so a countered valley can show the gap. */
+function spendFamily(sim: Siege, kind: TowerKind | "barracks", spec: Spec): void {
+  sim.preferSpec = spec;
   if (buy(sim, (s) => s.kind === kind && s.tier === 0)) return;
   buy(sim, (s) => s.kind === kind && s.tier > 0 && s.tier < 3);
+}
+
+function spendWalls(sim: Siege): void {
+  buy(sim, (s) => s.kind === "wall" && (s.tier < 3 || !s.alive));
 }
 
 function chase(sim: Siege): void {
@@ -316,22 +323,22 @@ function play(world: number, style: "idle" | "kite"): { phase: string; kills: nu
   return { phase: sim.phase, kills: sim.guardianKills, t };
 }
 
-function mono(world: number, kind: TowerKind | "barracks"): { phase: string; integrity: number; t: number } {
+function familyRun(world: number, label: string, spend: (sim: Siege) => void): { phase: string; integrity: number; t: number } {
   const sim = new Siege(world);
   const dt = 1 / 20;
   let t = 0;
   while (sim.phase !== "victory" && sim.phase !== "defeat" && t < 180) {
     if (sim.pendingOffer?.length) sim.chooseRelic(sim.pendingOffer[0]);
     if (sim.phase === "build") {
-      spendOnly(sim, kind);
+      spend(sim);
       sim.callWave();
-    } else spendOnly(sim, kind);
+    } else spend(sim);
     sim.tick(dt);
     sim.fx.length = 0;
     t += dt;
   }
   const phase = sim.phase === "victory" ? "victory" : "defeat";
-  console.log(`mono ${kind} world ${world}: ${phase} integrity ${sim.integrity.toFixed(1)} in ${t.toFixed(1)}s`);
+  console.log(`${label} world ${world}: ${phase} integrity ${sim.integrity.toFixed(1)} in ${t.toFixed(1)}s`);
   return { phase, integrity: sim.integrity, t };
 }
 
@@ -339,15 +346,24 @@ afk();
 rules();
 heroLoop();
 for (let world = 0; world < worldCount(); world++) bot(world);
-const heavySwarm = mono(0, "lens");
-const arrowBrute = mono(3, "dart");
-const arrowBoulder = mono(5, "dart");
-const troopsBoulder = mono(5, "barracks");
-const heavyRunners = mono(1, "lens");
-if (heavySwarm.phase === "victory") fail("heavy-only should lose the swarm valley");
-if (arrowBrute.phase === "victory") fail("arrow-only should lose the brute valley");
-if (arrowBoulder.phase === "victory") fail("arrow-only should lose the boulder valley");
-if (troopsBoulder.phase === "victory") fail("barracks-only should lose the boulder valley");
-if (heavyRunners.phase === "victory") fail("heavy-only should lose the runner ridge");
-console.log("counters: mixed wins every valley; one-role funding loses the valley that answers it");
+const families: { label: string; spend: (sim: Siege) => void }[] = [
+  { label: "archer", spend: (sim) => spendFamily(sim, "dart", "rain") },
+  { label: "siege", spend: (sim) => spendFamily(sim, "lens", "ballista") },
+  { label: "mystic", spend: (sim) => spendFamily(sim, "drum", "snare") },
+  { label: "barracks", spend: (sim) => spendFamily(sim, "barracks", "spears") },
+  { label: "wall", spend: (sim) => spendWalls(sim) },
+];
+const report = new Map<string, { phase: string }>();
+for (const family of families) {
+  for (let world = 0; world < worldCount(); world++) {
+    report.set(`${family.label}:${world}`, familyRun(world, family.label, family.spend));
+  }
+}
+const lost = (label: string, world: number) => report.get(`${label}:${world}`)?.phase === "defeat";
+if (!lost("siege", 0) || !lost("siege", 1)) fail("siege-only should lose the swarm valley and the runner ridge");
+if (!lost("archer", 3) || !lost("archer", 5)) fail("archer-only should lose the brute valley and the boulder valley");
+if (!lost("barracks", 4)) fail("barracks-only should lose the flyer valley");
+if (!lost("mystic", 0)) fail("mystic-only should lose the swarm valley");
+if (!lost("wall", 0) || !lost("wall", 5)) fail("wall-only should lose");
+console.log("counters: mixed wins every valley; a single family loses the valley that answers it; walls alone lose");
 console.log("sim-check ok");

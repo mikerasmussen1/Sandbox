@@ -41,6 +41,12 @@ async function boot(): Promise<void> {
   });
   document.getElementById("boot")?.remove();
   const view = new WorldView(art);
+  view.setChoose((index, kind) => {
+    if (sim) sim.chooseStation(index, kind);
+  });
+  view.setBranch((index, spec) => {
+    if (sim) sim.chooseSpec(index, spec);
+  });
   const audio = new AudioBus();
   audio.setMusic(save.music);
   audio.setSfx(save.sfx);
@@ -202,8 +208,8 @@ async function boot(): Promise<void> {
         leaker,
         hero: sim.heroAt(),
         funding: sim.funding,
-        stations: sim.stations.map((s) => ({ i: s.index, kind: s.kind, tier: s.tier, x: s.x, y: s.y, paid: s.paid, alive: s.alive, hp: s.hp, path: s.path, dist: s.dist })),
-        towersAt: sim.towers.map((t) => ({ kind: t.kind, tier: t.tier, x: t.x, y: t.y, cool: t.cooldown })),
+        stations: sim.stations.map((s) => ({ i: s.index, kind: s.kind, tier: s.tier, spec: s.spec, x: s.x, y: s.y, paid: s.paid, alive: s.alive, hp: s.hp, hurt: s.hurt, path: s.path, dist: s.dist })),
+        towersAt: sim.towers.map((t) => ({ kind: t.kind, tier: t.tier, spec: t.spec, x: t.x, y: t.y, cool: t.cooldown })),
       };
     };
     const act = window as unknown as {
@@ -213,8 +219,18 @@ async function boot(): Promise<void> {
       __steer?: (x: number, y: number) => void;
       __hero?: (x: number, y: number) => void;
       __skip?: () => void;
+      __choose?: (index: number, kind: string) => boolean;
     };
-    act.__fund = (index) => (sim ? sim.fundNow(index) : false);
+    act.__choose = (index: number, kind: string) => {
+      if (!sim) return false;
+      const at = sim.stations.findIndex((s) => s.index === index);
+      return at >= 0 ? sim.chooseStation(at, kind as never) : false;
+    };
+    act.__fund = (index) => {
+      if (!sim) return false;
+      const at = sim.stations.findIndex((s) => s.index === index);
+      return at >= 0 ? sim.fundNow(at) : false;
+    };
     act.__purse = (n) => { if (sim) sim.jade += n; };
     act.__spawn = (kind, path, dist) => {
       if (!sim) return { x: 0, y: 0 };
@@ -228,6 +244,7 @@ async function boot(): Promise<void> {
   let fpsFrames = 0;
   let fpsStamp = performance.now();
   let hitStop = 0;
+  let baseWarned = false;
 
   app.ticker.add((ticker) => {
     const dt = Math.min(0.05, ticker.deltaMS / 1000);
@@ -253,9 +270,8 @@ async function boot(): Promise<void> {
           }
           if (event.kind === "multi") {
             const n = event.n ?? 3;
-            hitStop = Math.max(hitStop, n >= 10 ? 0.08 : 0.045);
+            if (n >= 8) hitStop = Math.max(hitStop, 0.04);
           }
-          if (event.kind === "volley") hitStop = Math.max(hitStop, 0.035);
           if (event.kind === "intro" && event.text && event.enemy) {
             hud.showIntro(event.text, BALANCE.enemies[event.enemy].weak);
           }
@@ -370,10 +386,7 @@ async function boot(): Promise<void> {
   window.addEventListener("touchstart", () => audio.unlock(), { passive: true });
 
   app.canvas.addEventListener("wheel", (e) => {
-    if (mode !== "play") return;
     e.preventDefault();
-    const rect = app.canvas.getBoundingClientRect();
-    zoomAt(e.clientX - rect.left, e.clientY - rect.top, Math.exp(-e.deltaY * 0.0011));
   }, { passive: false });
 
   window.addEventListener("keydown", (e) => {
@@ -490,9 +503,8 @@ async function boot(): Promise<void> {
   function zoomLimits(w: number, h: number): { min: number; max: number; start: number } {
     const fitted = Math.min(w / MAP_W, h / MAP_H);
     const tall = h > w * 1.05;
-    const max = Math.min(1.85, Math.max(fitted * 2.8, tall ? w / 420 : fitted + 0.35));
-    const start = Math.min(max, tall ? w / 460 : fitted * 1.2);
-    return { min: fitted, max, start: Math.max(fitted, start) };
+    const start = tall ? w / 230 : Math.max(fitted * 1.45, w / 520);
+    return { min: start, max: start, start: Math.max(fitted, start) };
   }
 
   function fit(): void {
@@ -503,9 +515,8 @@ async function boot(): Promise<void> {
     zoomMax = limits.max;
     zoom = limits.start;
     const focus = sim?.heroAt() ?? sim?.map.sun ?? { x: MAP_W / 2, y: MAP_H / 2 };
-    const anchorY = h > w ? h * 0.68 : h / 2;
     camX = w / 2 - focus.x * zoom;
-    camY = anchorY - focus.y * zoom;
+    camY = h / 2 - focus.y * zoom;
     clamp();
   }
 
@@ -562,22 +573,9 @@ async function boot(): Promise<void> {
     const w = app.screen.width;
     const h = app.screen.height;
     const hero = sim.heroAt();
-    let x = hero.x;
-    let y = hero.y;
-    let best = 240;
-    for (const e of sim.enemies) {
-      if (!e.alive) continue;
-      const d = Math.hypot(e.x - hero.x, e.y - hero.y);
-      if (d < best) {
-        best = d;
-        x = hero.x * 0.75 + e.x * 0.25;
-        y = hero.y * 0.75 + e.y * 0.25;
-      }
-    }
-    const anchorY = h > w ? h * 0.66 : h / 2;
-    const tx = w / 2 - x * zoom;
-    const ty = anchorY - y * zoom;
-    const k = 1 - Math.exp(-dt * 2.4);
+    const tx = w / 2 - hero.x * zoom;
+    const ty = h / 2 - hero.y * zoom;
+    const k = 1 - Math.exp(-dt * 14);
     camX += (tx - camX) * k;
     camY += (ty - camY) * k;
     clamp();
@@ -590,15 +588,6 @@ async function boot(): Promise<void> {
     const minY = h - MAP_H * zoom;
     camX = minX >= 0 ? minX / 2 : Math.max(minX, Math.min(0, camX));
     camY = minY >= 0 ? minY / 2 : Math.max(minY, Math.min(0, camY));
-  }
-
-  function zoomAt(sx: number, sy: number, factor: number): void {
-    const beforeX = (sx - camX) / zoom;
-    const beforeY = (sy - camY) / zoom;
-    zoom = Math.max(zoomMin, Math.min(zoomMax, zoom * factor));
-    camX = sx - beforeX * zoom;
-    camY = sy - beforeY * zoom;
-    clamp();
   }
 
   function aimPlacement(): void {
@@ -649,8 +638,15 @@ async function boot(): Promise<void> {
       live.stations.map((s) => ({ x: s.x, y: s.y })),
     );
     const boss = live.enemies.find((e) => e.alive && e.boss);
+    const baseRatio = live.integrity / Math.max(1, live.integrityMax);
+    if (live.phase === "wave" && baseRatio < 0.3 && baseRatio > 0 && !baseWarned) {
+      baseWarned = true;
+      audio.play("warn");
+    }
+    if (baseRatio > 0.42) baseWarned = false;
     hud.sync({
       integrity: live.integrity,
+      integrityMax: live.integrityMax,
       jade: live.jade,
       wave: live.waveShown,
       waves: live.waveCount,
@@ -692,9 +688,11 @@ async function boot(): Promise<void> {
     for (const event of fx) {
       if (event.kind === "death") {
         deaths += 1;
-        if (deaths <= 8) audio.play("death");
+        if (deaths <= 3) audio.play("death");
       } else if (event.kind === "banner" && event.text) hud.announce(event.text);
-      else if (event.kind === "multi") audio.play(event.n && event.n >= 5 ? "streak" : "drum");
+      else if (event.kind === "volley") audio.play("shower");
+      else if (event.kind === "splinter") audio.play("crunch");
+      else if (event.kind === "multi") audio.play(event.n && event.n >= 8 ? "streak" : "drum");
       else if (event.kind === "callout") audio.play("streak");
       else if (event.kind === "crack") audio.play("crack");
       else if (event.kind === "drum" || event.kind === "slam") audio.play("drum");
@@ -759,7 +757,7 @@ function hintFor(save: SaveData, live: Siege): string {
   if (live.world !== 0) return "";
   if (live.phase === "wave" && live.wave === 0) return "Tap to move. Stand on a station to fund the next tower.";
   if (!live.stations.some((s) => s.tier > 0) && live.phase === "build") {
-    return "Tap to move. Fund an Arrow Shower. It wipes the swarm.";
+    return "Fund an Arrow Shower.";
   }
   if (save.taught < 3 && live.phase === "wave") return "Walk over the Jade gems before they fade.";
   if (save.taught <= 1 && live.phase === "build") return `Call early +${BALANCE.earlyCall} Jade, or wait out the timer.`;

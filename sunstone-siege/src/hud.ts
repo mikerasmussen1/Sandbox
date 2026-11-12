@@ -4,7 +4,7 @@
  */
 import { Container, Graphics, NineSliceSprite, Rectangle, Sprite, Text, Texture } from "pixi.js";
 import type { ArtSet } from "./art";
-import { BALANCE, worldCount } from "./balance";
+import { BALANCE, TECH, worldCount } from "./balance";
 import { isUnlocked, type SaveData } from "./save";
 import type { LanePlan } from "./sim";
 import type { EnemyKind, Phase, RelicId, TowerKind } from "./types";
@@ -15,6 +15,7 @@ const INK = 0x2a1608;
 
 export interface HudState {
   integrity: number;
+  integrityMax?: number;
   jade: number;
   wave: number;
   waves: number;
@@ -91,6 +92,12 @@ export class Hud {
   private readonly pauseLayer = new Container();
   private readonly settingsLayer = new Container();
   private readonly endLayer = new Container();
+  private readonly treeLayer = new Container();
+  private hpTarget: number = BALANCE.integrity;
+  private hpCap: number = BALANCE.integrity;
+  private hpShown: number = BALANCE.integrity;
+  private hpLag: number = BALANCE.integrity;
+  private hpW = 220;
   private readonly backdrop: Sprite;
   private readonly integrityText: Text;
   private readonly integrityFill: Graphics;
@@ -194,7 +201,7 @@ export class Hud {
   constructor(private readonly art: ArtSet, private readonly hooks: HudHooks, save: SaveData) {
     this.backdrop = new Sprite();
     this.backdrop.eventMode = "none";
-    this.root.addChild(this.backdrop, this.title, this.levels, this.play, this.pauseLayer, this.endLayer, this.settingsLayer);
+    this.root.addChild(this.backdrop, this.title, this.levels, this.play, this.pauseLayer, this.endLayer, this.settingsLayer, this.treeLayer);
 
     this.integrityText = label("Sunstone 0", 16, 0xf6e7c1);
     this.integrityFill = new Graphics();
@@ -240,6 +247,7 @@ export class Hud {
     this.flareButton = new Container();
     this.buildPlay(art);
     this.buildPause();
+    this.buildTree();
     this.musicSlider = new Slider("Music", save.music, hooks.music);
     this.sfxSlider = new Slider("Effects", save.sfx, hooks.sfx);
     this.reduced = save.reduced;
@@ -295,10 +303,15 @@ export class Hud {
     this.levels.scale.set(Math.min(1, (w - 12) / gridW, (h - 16) / gridH));
     const heading = this.levels.children[0] as Container | undefined;
     const back = this.levels.children[1] as Container | undefined;
+    const treeBtn = this.levels.children[2] as Container | undefined;
+    const foot = ((rows - 1) / 2) * gapY + 118;
     if (heading) heading.position.y = -((rows - 1) / 2) * gapY - 108;
-    if (back) back.position.y = ((rows - 1) / 2) * gapY + 108;
+    if (back) back.position.set(-90, foot);
+    if (treeBtn) treeBtn.position.set(90, foot);
     this.placePlay(w, h);
     this.pauseLayer.position.set(w / 2, h / 2);
+    this.treeLayer.position.set(w / 2, h / 2);
+    this.treeLayer.scale.set(Math.min(1, (w - 12) / 372, (h - 16) / 700));
     this.settingsLayer.position.set(w / 2, h / 2);
     this.endLayer.position.set(w / 2, h / 2);
     this.fitModal(this.pauseLayer, w, h);
@@ -328,11 +341,10 @@ export class Hud {
   }
 
   sync(state: HudState): void {
-    this.integrityText.text = `Sunstone ${Math.ceil(state.integrity)}`;
-    const k = Math.max(0, Math.min(1, state.integrity / BALANCE.integrity));
-    this.integrityFill.clear();
-    this.integrityFill.roundRect(0, 0, 148, 8, 4).fill({ color: 0x1a120c });
-    this.integrityFill.roundRect(0, 0, 148 * k, 8, 4).fill({ color: k > 0.45 ? 0xf0c14a : 0xff5a3c });
+    this.hpTarget = state.integrity;
+    this.hpCap = Math.max(1, state.integrityMax ?? BALANCE.integrity);
+    this.integrityText.text = `Base ${Math.ceil(state.integrity)}`;
+    this.drawHp();
     this.jadeGoalN = state.jade;
     if (!this.jadePrimed) {
       this.shownJade = state.jade;
@@ -514,6 +526,9 @@ export class Hud {
 
   tick(dt: number): void {
     this.laneTime += dt;
+    this.hpShown += (this.hpTarget - this.hpShown) * Math.min(1, dt * 8);
+    this.hpLag += (this.hpShown - this.hpLag) * Math.min(1, dt * 2.2);
+    this.drawHp();
     this.drawVault(dt);
     this.drawLanes(dt);
     if (this.introLife > 0) {
@@ -575,9 +590,11 @@ export class Hud {
     heading.anchor.set(0.5);
     heading.position.set(0, -210);
     const back = this.button(label("Back", 16, INK), 150, 46, () => this.hooks.backTitle());
-    back.position.set(0, 230);
-    this.levels.addChild(heading, back);
-    this.hits.push(back);
+    back.position.set(-90, 300);
+    const tree = this.button(label("Tech tree", 16, INK), 170, 46, () => this.toggleTree());
+    tree.position.set(90, 300);
+    this.levels.addChild(heading, back, tree);
+    this.hits.push(back, tree);
     for (let i = 0; i < worldCount(); i++) {
       const card = new Container();
       const plate = this.panel(168, 150);
@@ -741,45 +758,49 @@ export class Hud {
     if (!bar || !jadeIcon || !speed || !pause || !gear) return;
     const top = this.safeTop;
     const bottom = this.safeBottom;
-    const barH = w < 760 ? 112 : 56;
+    const narrow = w < 760;
+    const barH = narrow ? 48 : 56;
     bar.clear();
     bar.position.set(0, top);
     bar.rect(0, 0, w, barH).fill({ color: 0x140e0a, alpha: 0.84 });
     bar.hitArea = new Rectangle(0, 0, w, barH);
-    this.integrityText.position.set(16, top + 8);
-    this.integrityFill.position.set(16, top + 34);
-    const narrow = w < 760;
-    this.vaultW = narrow ? Math.max(220, w - 16) : 360;
-    this.vaultH = narrow ? 72 : 88;
-    this.vault.position.set(narrow ? 8 : (w - this.vaultW) / 2, top + barH + 6);
+    this.integrityText.position.set(12, top + 4);
+    this.hpW = Math.max(120, w - 24);
+    this.integrityFill.position.set(12, top + barH + 4);
+    this.vaultW = narrow ? Math.max(200, w - 16) : 360;
+    this.vaultH = narrow ? 44 : 88;
+    this.vault.position.set(narrow ? 8 : (w - this.vaultW) / 2, top + barH + 28);
     this.layoutVault(narrow);
     this.waveText.anchor.set(narrow ? 1 : 0.5, 0);
-    this.waveText.position.set(narrow ? w - 12 : w / 2, top + 8);
+    this.waveText.position.set(narrow ? w - 16 : w / 2, narrow ? this.vault.y + 6 : top + 8);
     this.streakText.anchor.set(narrow ? 1 : 0, 0);
-    this.streakText.position.set(narrow ? w - 12 : w / 2 + 90, top + (narrow ? 30 : 16));
+    this.streakText.position.set(narrow ? w - 16 : w / 2 + 90, narrow ? this.vault.y + 26 : top + 16);
+    speed.scale.set(narrow ? 0.58 : 1);
+    pause.scale.set(narrow ? 0.58 : 1);
+    gear.scale.set(narrow ? 0.58 : 1);
     if (narrow) {
-      const gap = 8;
-      const right = w - 10;
-      gear.position.set(right - 66, top + 84);
-      pause.position.set(right - 132 - gap - 59, top + 84);
-      speed.position.set(right - 132 - gap - 118 - gap - 43, top + 84);
+      gear.position.set(w - 46, top + 24);
+      pause.position.set(w - 118, top + 24);
+      speed.position.set(w - 178, top + 24);
     } else {
       gear.position.set(w - 78, top + 28);
       pause.position.set(w - 214, top + 28);
       speed.position.set(w - 326, top + 28);
     }
-    this.flareButton.position.set(w - 64, h - 64 - bottom);
-    this.guardianButton.position.set(w < 760 ? w - 64 : w - 156, (w < 760 ? h - 168 : h - 64) - bottom);
-    this.callButton.scale.set(1);
-    this.callButton.position.set(narrow ? Math.max(150, w / 2 - 70) : w / 2, h - 48 - bottom);
+    this.flareButton.scale.set(narrow ? 0.72 : 1);
+    this.guardianButton.scale.set(narrow ? 0.62 : 1);
+    this.flareButton.position.set(w - (narrow ? 46 : 64), h - (narrow ? 52 : 64) - bottom);
+    this.guardianButton.position.set(narrow ? 46 : w - 156, (narrow ? h - 52 : h - 64) - bottom);
+    this.callButton.scale.set(narrow ? 0.62 : 1);
+    this.callButton.position.set(w / 2, h - (narrow ? 36 : 48) - bottom);
     const belowVault = this.vault.y + this.vaultH;
     this.hint.style.wordWrap = true;
     this.hint.style.wordWrapWidth = Math.max(160, w - 28);
     this.banner.style.wordWrap = true;
     this.banner.style.wordWrapWidth = Math.max(200, w - 48);
     this.banner.style.align = "center";
-    this.hint.position.set(w / 2, belowVault + (narrow ? 22 : 28));
-    this.banner.position.set(w / 2, belowVault + (narrow ? 58 : 64));
+    this.hint.position.set(w / 2, narrow ? h - 78 - bottom : belowVault + 28);
+    this.banner.position.set(w / 2, narrow ? belowVault + 8 : belowVault + 64);
     const cardScale = Math.min(1, (w - 8) / 600, Math.max(0.62, (h * 0.5) / 400));
     this.card.scale.set(cardScale);
     this.card.position.set(8, h - 400 * cardScale - 8 - bottom);
@@ -852,22 +873,81 @@ export class Hud {
     });
   }
 
+  toggleTree(): void {
+    this.treeLayer.visible = !this.treeLayer.visible;
+  }
+
+  private drawHp(): void {
+    const cap = Math.max(1, this.hpCap);
+    const shown = Math.max(0, Math.min(1, this.hpShown / cap));
+    const lag = Math.max(shown, Math.min(1, this.hpLag / cap));
+    const low = shown < 0.3 && this.hpTarget > 0;
+    const pulse = low ? 0.55 + Math.abs(Math.sin(this.laneTime * 7)) * 0.45 : 1;
+    const w = this.hpW;
+    this.integrityFill.clear();
+    this.integrityFill.roundRect(0, 0, w, 16, 6).fill({ color: 0x1a120c, alpha: 0.92 });
+    this.integrityFill.roundRect(2, 2, (w - 4) * lag, 12, 5).fill({ color: 0x8e1c14, alpha: 0.85 });
+    this.integrityFill.roundRect(2, 2, (w - 4) * shown, 12, 5).fill({ color: low ? 0xff3b30 : 0xf0c14a, alpha: pulse });
+    this.integrityText.style.fill = low ? 0xffb0a4 : 0xfff6df;
+  }
+
+  private buildTree(): void {
+    const dim = fullDim();
+    dim.on("pointertap", (e) => {
+      e.stopPropagation();
+      this.treeLayer.visible = false;
+    });
+    const plate = this.panel(360, 680);
+    const title = new Text({ text: "Tech tree", style: { fontFamily: SERIF, fontSize: 28, fill: 0xfff1c8, fontWeight: "bold" } });
+    title.anchor.set(0.5);
+    title.position.set(0, -314);
+    const close = this.button(label("Close", 16, INK), 140, 40, () => {
+      this.treeLayer.visible = false;
+    });
+    close.position.set(0, 308);
+    this.treeLayer.addChild(dim, plate, title, close);
+    this.hits.push(dim, close);
+    TECH.forEach((node, i) => {
+      const open = node.unlock === 0 ? "open" : (BALANCE.worlds[node.unlock]?.name ?? `valley ${node.unlock + 1}`);
+      const y = -292 + i * 36;
+      const title = new Text({
+        text: `${node.icon}  ${node.name}    ${node.cost}    ${open}`,
+        style: { fontFamily: SANS, fontSize: 13, fill: node.unlock === 0 ? 0xfff6df : 0xe7d7bc, fontWeight: "bold" },
+      });
+      title.anchor.set(0, 0);
+      title.position.set(-160, y);
+      title.eventMode = "none";
+      const detail = `Strong: ${node.strong}.  Weak: ${node.weak}.`;
+      const line = new Text({
+        text: detail.length > 54 ? `${detail.slice(0, 52)}…` : detail,
+        style: { fontFamily: SANS, fontSize: 11, fill: 0xcbbfa8 },
+      });
+      line.anchor.set(0, 0);
+      line.position.set(-148, y + 16);
+      line.eventMode = "none";
+      this.treeLayer.addChild(title, line);
+    });
+    this.treeLayer.visible = false;
+  }
+
   private buildPause(): void {
     const dim = fullDim();
-    const plate = this.panel(340, 420);
+    const plate = this.panel(340, 500);
     const title = new Text({ text: "Paused", style: { fontFamily: SERIF, fontSize: 40, fill: 0xfff1c8, fontWeight: "bold" } });
     title.anchor.set(0.5);
-    title.position.set(0, -120);
-    const resume = this.button(label("Resume", 18, INK), 240, 54, () => this.hooks.resume());
-    resume.position.set(0, -30);
-    const restart = this.button(label("Restart valley", 16, INK), 240, 50, () => this.hooks.restart());
-    restart.position.set(0, 36);
-    const settings = this.button(label("Settings", 16, INK), 240, 50, () => this.hooks.openSettings());
-    settings.position.set(0, 96);
-    const quit = this.button(label("Valley select", 16, INK), 240, 50, () => this.hooks.quit());
-    quit.position.set(0, 156);
-    this.pauseLayer.addChild(dim, plate, title, resume, restart, settings, quit);
-    this.hits.push(dim, resume, restart, settings, quit);
+    title.position.set(0, -180);
+    const resume = this.button(label("Resume", 18, INK), 240, 50, () => this.hooks.resume());
+    resume.position.set(0, -100);
+    const restart = this.button(label("Restart valley", 16, INK), 240, 48, () => this.hooks.restart());
+    restart.position.set(0, -40);
+    const tree = this.button(label("Tech tree", 16, INK), 240, 48, () => this.toggleTree());
+    tree.position.set(0, 20);
+    const settings = this.button(label("Settings", 16, INK), 240, 48, () => this.hooks.openSettings());
+    settings.position.set(0, 80);
+    const quit = this.button(label("Valley select", 16, INK), 240, 48, () => this.hooks.quit());
+    quit.position.set(0, 140);
+    this.pauseLayer.addChild(dim, plate, title, resume, restart, tree, settings, quit);
+    this.hits.push(dim, resume, restart, tree, settings, quit);
     this.pauseLayer.visible = false;
   }
 
@@ -975,14 +1055,17 @@ export class Hud {
     this.vaultPlate.clear();
     this.vaultPlate.roundRect(0, 0, w, h, 20).fill({ color: 0x102018, alpha: 0.94 });
     this.vaultPlate.roundRect(0, 0, w, h, 20).stroke({ width: 5, color: 0x3d8f62 });
-    const icon = narrow ? 46 : 64;
+    const squat = h < 56;
+    const icon = squat ? 26 : narrow ? 46 : 64;
     this.iconBase = icon / Math.max(1, this.jadeIcon.texture.width);
     this.jadeIcon.scale.set(this.iconBase);
     this.jadeIcon.position.set(14 + icon / 2, h * 0.42);
-    this.jadeText.style.fontSize = narrow ? 36 : 50;
-    this.jadeText.position.set(14 + icon + 10, narrow ? 4 : 2);
+    this.jadeText.style.fontSize = squat ? 24 : narrow ? 36 : 50;
+    this.jadeText.position.set(14 + icon + 8, squat ? 2 : narrow ? 4 : 2);
     this.vaultPlus.position.set(14 + icon + 10, h * 0.42 + (narrow ? 18 : 22));
     this.vaultGoal.position.set(Math.min(w - 150, 14 + icon + 108), h - 22);
+    this.vaultGoal.alpha = squat ? 0 : 1;
+    this.vaultTower.alpha = squat ? 0 : 1;
     this.vaultTower.position.set(w - 28, h - 10);
     this.vaultTip.position.set(w / 2, h + 6);
     this.vaultTip.style.wordWrapWidth = Math.min(360, Math.max(180, w - 8));
