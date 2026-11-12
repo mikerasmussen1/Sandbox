@@ -1,58 +1,78 @@
-const I = {
+const v = {
   cabinetL: "assets/art/raster/cabinet-landscape.webp",
   cabinetP: "assets/art/raster/cabinet-portrait.webp",
   logo: "assets/art/raster/logo.webp",
-  wheel: "assets/art/raster/wheel.webp",
   pointer: "assets/art/raster/wheel-pointer.webp",
-  coin: "assets/art/raster/coin.webp",
-  spin: "assets/art/raster/btn-spin.webp",
-  plus: "assets/art/raster/btn-plus.webp",
-  minus: "assets/art/raster/btn-minus.webp",
-  turbo: "assets/art/raster/btn-turbo.webp",
-  auto: "assets/art/raster/btn-auto.webp",
-  sound: "assets/art/raster/btn-sound.webp",
-  music: "assets/art/raster/btn-music.webp",
-  gear: "assets/art/raster/btn-gear.webp",
+  reelCell: "assets/art/raster/reel-cell.webp",
+  spin: "assets/art/raster/spin-idle.webp",
+  spinPressed: "assets/art/raster/spin-pressed.webp",
+  spinDisabled: "assets/art/raster/spin-disabled.webp",
+  plus: "assets/art/raster/btn-plus-normal.webp",
+  plusPressed: "assets/art/raster/btn-plus-pressed.webp",
+  minus: "assets/art/raster/btn-minus-normal.webp",
+  minusPressed: "assets/art/raster/btn-minus-pressed.webp",
+  turbo: "assets/art/raster/btn-turbo-normal.webp",
+  turboPressed: "assets/art/raster/btn-turbo-pressed.webp",
+  auto: "assets/art/raster/btn-auto-normal.webp",
+  autoPressed: "assets/art/raster/btn-auto-pressed.webp",
+  sound: "assets/art/raster/btn-sound-normal.webp",
+  soundPressed: "assets/art/raster/btn-sound-pressed.webp",
+  music: "assets/art/raster/btn-music-normal.webp",
+  musicPressed: "assets/art/raster/btn-music-pressed.webp",
+  gear: "assets/art/raster/btn-gear-normal.webp",
+  gearPressed: "assets/art/raster/btn-gear-pressed.webp",
   skip: "assets/art/raster/btn-skip.webp",
-  stop: "assets/art/raster/btn-stop.webp",
-  help: "assets/art/raster/btn-help.webp",
+  stop: "assets/art/raster/btn-stop-normal.webp",
+  stopPressed: "assets/art/raster/btn-stop-pressed.webp",
+  help: "assets/art/raster/btn-help-normal.webp",
+  helpPressed: "assets/art/raster/btn-help-pressed.webp",
   star: "assets/art/raster/btn-star.webp",
   plaque: "assets/art/raster/plaque.webp",
   wheelFace: "assets/art/raster/wheel-face.webp",
+  coinSheet: "assets/art/raster/coin-sheet-12x128.webp",
+  bulbOn: "assets/art/raster/bulb-on.webp",
+  bulbOff: "assets/art/raster/bulb-off.webp",
+  glowEmerald: "assets/art/raster/glow-emerald-128.webp",
+  spark: "assets/art/raster/spark-star4-128.webp",
+  sparkSmall: "assets/art/raster/spark-star4-64.webp",
+  streak: "assets/art/raster/spark-streak-256x32.webp",
+  splashL: "assets/art/splash/splash-landscape.webp",
+  splashP: "assets/art/splash/splash-portrait.webp",
   plates: {
-    2: "assets/art/raster/plate-big.webp",
-    3: "assets/art/raster/plate-mega.webp",
-    4: "assets/art/raster/plate-epic.webp"
+    big: "assets/art/raster/win-big.webp",
+    mega: "assets/art/raster/win-mega.webp",
+    super: "assets/art/raster/win-super.webp",
+    epic: "assets/art/raster/win-epic.webp"
   },
-  symbols: {
-    blank: "assets/art/raster/sym-blank.webp",
-    0: "assets/art/raster/sym-0.webp",
-    1: "assets/art/raster/sym-1.webp",
-    5: "assets/art/raster/sym-5.webp",
-    10: "assets/art/raster/sym-10.webp",
-    "00": "assets/art/raster/sym-00.webp",
-    x1: "assets/art/raster/sym-1x.webp",
-    x2: "assets/art/raster/sym-2x.webp",
-    x5: "assets/art/raster/sym-5x.webp",
-    x10: "assets/art/raster/sym-10x.webp",
-    replace: "assets/art/raster/sym-replace.webp",
-    bank: "assets/art/raster/sym-bank.webp",
-    wheel: "assets/art/raster/sym-wheel.webp"
+  numerals: {
+    0: "assets/art/raster/numeral-0.webp",
+    1: "assets/art/raster/numeral-1.webp",
+    5: "assets/art/raster/numeral-5.webp",
+    "00": "assets/art/raster/numeral-00.webp"
+  },
+  modifiers: {
+    x1: "assets/art/raster/mod-1x.webp",
+    x2: "assets/art/raster/mod-2x.webp",
+    x5: "assets/art/raster/mod-5x.webp",
+    x10: "assets/art/raster/mod-10x.webp",
+    replace: "assets/art/raster/mod-replace.webp",
+    bank: "assets/art/raster/mod-bank-add.webp",
+    wheel: "assets/art/raster/mod-wheel.webp"
   }
 };
-function D(s) {
+function R(s) {
   const e = globalThis.__auricAsset;
   return typeof e == "function" ? e(s) : new URL(s, window.location.href).href;
 }
-function it() {
+function ft() {
   try {
     return new URLSearchParams(location.search).has("fx");
   } catch {
     return !1;
   }
 }
-function ot(s, e = "#2fd0ff") {
-  if (!it() || document.getElementById("fx-panel")) return;
+function pt(s, e = "#2fd0ff") {
+  if (!ft() || document.getElementById("fx-panel")) return;
   const t = document.createElement("style");
   t.textContent = `
 #fx-panel { position: fixed; left: 10px; top: 10px; z-index: 2147483000; font: 600 13px/1.3 system-ui, -apple-system, sans-serif; }
@@ -75,80 +95,81 @@ function ot(s, e = "#2fd0ff") {
   let h = !1;
   i.onclick = () => {
     if (!h) {
-      const d = at(s);
-      if (h = d.length > 0, a.textContent = "", !h) {
-        const c = document.createElement("div");
-        c.style.cssText = "max-width:220px;white-space:normal;padding:4px 6px;color:#9fb0cc;font-weight:500", c.textContent = "The game has not finished starting. Some games need a lobby (open with ?brand=). Reopen this panel once it has.", a.appendChild(c);
+      const c = mt(s);
+      if (h = c.length > 0, a.textContent = "", !h) {
+        const d = document.createElement("div");
+        d.style.cssText = "max-width:220px;white-space:normal;padding:4px 6px;color:#9fb0cc;font-weight:500", d.textContent = "The game has not finished starting. Some games need a lobby (open with ?brand=). Reopen this panel once it has.", a.appendChild(d);
       }
-      for (const c of d) {
-        const f = document.createElement("button");
-        f.type = "button", f.textContent = c.label, f.onclick = () => {
+      for (const d of c) {
+        const p = document.createElement("button");
+        p.type = "button", p.textContent = d.label, p.onclick = () => {
           try {
-            Promise.resolve(c.run()).catch((w) => console.error("[fx]", c.label, w));
-          } catch (w) {
-            console.error("[fx]", c.label, w);
+            Promise.resolve(d.run()).catch((b) => console.error("[fx]", d.label, b));
+          } catch (b) {
+            console.error("[fx]", d.label, b);
           }
-        }, a.appendChild(f);
+        }, a.appendChild(p);
       }
     }
     a.classList.toggle("open");
   };
 }
-function at(s) {
+function mt(s) {
   try {
     return s();
   } catch (e) {
     return console.error("[fx] building the case list failed", e), [];
   }
 }
-const pe = {
-  reelStops: [650, 800, 950],
-  assemble: 250,
-  inhale: 150,
-  modifier: 300,
+const Se = {
+  reelStops: [480, 630, 780],
+  assemble: 220,
+  inhale: 120,
+  modifier: 280,
   feature: { replace: 900, bank: 1800, wheel: 2400, none: 0 },
-  count: [0, 400, 750, 1100, 1500],
+  count: [0, 1700, 3300, 4500, 6e3],
   resolve: 350,
   collection: 400,
   cap: 9e3,
-  turboScale: 0.4,
+  turboScale: 0.6,
+  superScale: 0.35,
   reduced: 150,
   fadeMs: 80,
   cycleFloorMs: 3e3,
   holdMs: 600
-}, ce = 2e3 / 2400, We = 2, lt = pe.holdMs, dt = pe.cycleFloorMs, ct = [10, 25, 50];
-function Ae(s) {
-  return ct.includes(s);
+}, ye = 2e3 / 2400, Je = 2, _t = Se.holdMs, gt = Se.cycleFloorMs, bt = [10, 25, 50];
+function Be(s) {
+  return bt.includes(s);
 }
-function Ge() {
+function ze() {
   return { phase: "idle", downAt: 0 };
 }
-function ut(s) {
+function wt(s) {
   return { phase: "pressing", downAt: s };
 }
-function ht(s, e) {
-  return s.phase === "pressing" && e - s.downAt >= lt ? { ...s, phase: "armed" } : s;
+function yt(s, e) {
+  return s.phase === "pressing" && e - s.downAt >= _t ? { ...s, phase: "armed" } : s;
 }
-function se(s) {
+function fe(s) {
   return s.phase === "idle" ? s : { ...s, phase: "cancelled" };
 }
-function ft(s, e) {
-  const t = Ge();
+function vt(s, e) {
+  const t = ze();
   return s.phase === "idle" || s.phase === "cancelled" || !e ? { hold: t, action: "none" } : s.phase === "armed" ? { hold: t, action: "autoplay" } : { hold: t, action: "spin" };
 }
-function pt(s, e) {
+function kt(s, e) {
   return s !== null ? s : "spin";
 }
-function mt(s, e) {
-  return Math.max(e, s + dt);
+function At(s, e) {
+  return Math.max(e, s + gt);
 }
-function _t(s, e) {
+function St(s, e) {
   return s ? s.modifier === "replace" || s.modifier === "bank" || s.modifier === "wheel" ? s.modifier : s.collectionFlourish ? "collection" : e.remaining <= 0 ? "count" : null : null;
 }
-var Z = typeof globalThis < "u" ? globalThis : typeof window < "u" ? window : typeof global < "u" ? global : typeof self < "u" ? self : {}, _e = {};
-var Ne;
-function gt() {
-  return Ne || (Ne = 1, (function(s) {
+var ae = typeof globalThis < "u" ? globalThis : typeof window < "u" ? window : typeof global < "u" ? global : typeof self < "u" ? self : {}, Te = {};
+var Ve;
+function xt() {
+  return Ve || (Ve = 1, (function(s) {
     (function() {
       var e = function() {
         this.init();
@@ -169,15 +190,15 @@ function gt() {
          */
         volume: function(n) {
           var o = this || t;
-          if (n = parseFloat(n), o.ctx || w(), typeof n < "u" && n >= 0 && n <= 1) {
+          if (n = parseFloat(n), o.ctx || b(), typeof n < "u" && n >= 0 && n <= 1) {
             if (o._volume = n, o._muted)
               return o;
             o.usingWebAudio && o.masterGain.gain.setValueAtTime(n, t.ctx.currentTime);
             for (var l = 0; l < o._howls.length; l++)
               if (!o._howls[l]._webAudio)
-                for (var u = o._howls[l]._getSoundIds(), _ = 0; _ < u.length; _++) {
-                  var m = o._howls[l]._soundById(u[_]);
-                  m && m._node && (m._node.volume = m._volume * n);
+                for (var u = o._howls[l]._getSoundIds(), f = 0; f < u.length; f++) {
+                  var _ = o._howls[l]._soundById(u[f]);
+                  _ && _._node && (_._node.volume = _._volume * n);
                 }
             return o;
           }
@@ -189,12 +210,12 @@ function gt() {
          */
         mute: function(n) {
           var o = this || t;
-          o.ctx || w(), o._muted = n, o.usingWebAudio && o.masterGain.gain.setValueAtTime(n ? 0 : o._volume, t.ctx.currentTime);
+          o.ctx || b(), o._muted = n, o.usingWebAudio && o.masterGain.gain.setValueAtTime(n ? 0 : o._volume, t.ctx.currentTime);
           for (var l = 0; l < o._howls.length; l++)
             if (!o._howls[l]._webAudio)
-              for (var u = o._howls[l]._getSoundIds(), _ = 0; _ < u.length; _++) {
-                var m = o._howls[l]._soundById(u[_]);
-                m && m._node && (m._node.muted = n ? !0 : m._muted);
+              for (var u = o._howls[l]._getSoundIds(), f = 0; f < u.length; f++) {
+                var _ = o._howls[l]._soundById(u[f]);
+                _ && _._node && (_._node.muted = n ? !0 : _._muted);
               }
           return o;
         },
@@ -213,7 +234,7 @@ function gt() {
         unload: function() {
           for (var n = this || t, o = n._howls.length - 1; o >= 0; o--)
             n._howls[o].unload();
-          return n.usingWebAudio && n.ctx && typeof n.ctx.close < "u" && (n.ctx.close(), n.ctx = null, w()), n;
+          return n.usingWebAudio && n.ctx && typeof n.ctx.close < "u" && (n.ctx.close(), n.ctx = null, b()), n;
         },
         /**
          * Check for codec support of specific extension.
@@ -259,9 +280,9 @@ function gt() {
           }
           if (!o || typeof o.canPlayType != "function")
             return n;
-          var l = o.canPlayType("audio/mpeg;").replace(/^no$/, ""), u = n._navigator ? n._navigator.userAgent : "", _ = u.match(/OPR\/(\d+)/g), m = _ && parseInt(_[0].split("/")[1], 10) < 33, p = u.indexOf("Safari") !== -1 && u.indexOf("Chrome") === -1, y = u.match(/Version\/(.*?) /), v = p && y && parseInt(y[1], 10) < 15;
+          var l = o.canPlayType("audio/mpeg;").replace(/^no$/, ""), u = n._navigator ? n._navigator.userAgent : "", f = u.match(/OPR\/(\d+)/g), _ = f && parseInt(f[0].split("/")[1], 10) < 33, m = u.indexOf("Safari") !== -1 && u.indexOf("Chrome") === -1, y = u.match(/Version\/(.*?) /), k = m && y && parseInt(y[1], 10) < 15;
           return n._codecs = {
-            mp3: !!(!m && (l || o.canPlayType("audio/mp3;").replace(/^no$/, ""))),
+            mp3: !!(!_ && (l || o.canPlayType("audio/mp3;").replace(/^no$/, ""))),
             mpeg: !!l,
             opus: !!o.canPlayType('audio/ogg; codecs="opus"').replace(/^no$/, ""),
             ogg: !!o.canPlayType('audio/ogg; codecs="vorbis"').replace(/^no$/, ""),
@@ -272,8 +293,8 @@ function gt() {
             m4a: !!(o.canPlayType("audio/x-m4a;") || o.canPlayType("audio/m4a;") || o.canPlayType("audio/aac;")).replace(/^no$/, ""),
             m4b: !!(o.canPlayType("audio/x-m4b;") || o.canPlayType("audio/m4b;") || o.canPlayType("audio/aac;")).replace(/^no$/, ""),
             mp4: !!(o.canPlayType("audio/x-mp4;") || o.canPlayType("audio/mp4;") || o.canPlayType("audio/aac;")).replace(/^no$/, ""),
-            weba: !!(!v && o.canPlayType('audio/webm; codecs="vorbis"').replace(/^no$/, "")),
-            webm: !!(!v && o.canPlayType('audio/webm; codecs="vorbis"').replace(/^no$/, "")),
+            weba: !!(!k && o.canPlayType('audio/webm; codecs="vorbis"').replace(/^no$/, "")),
+            webm: !!(!k && o.canPlayType('audio/webm; codecs="vorbis"').replace(/^no$/, "")),
             dolby: !!o.canPlayType('audio/mp4; codecs="ec-3"').replace(/^no$/, ""),
             flac: !!(o.canPlayType("audio/x-flac;") || o.canPlayType("audio/flac;")).replace(/^no$/, "")
           }, n;
@@ -297,18 +318,18 @@ function gt() {
                   n.noAudio = !0;
                   break;
                 }
-              for (var _ = 0; _ < n._howls.length; _++)
-                if (!n._howls[_]._webAudio)
-                  for (var m = n._howls[_]._getSoundIds(), p = 0; p < m.length; p++) {
-                    var y = n._howls[_]._soundById(m[p]);
+              for (var f = 0; f < n._howls.length; f++)
+                if (!n._howls[f]._webAudio)
+                  for (var _ = n._howls[f]._getSoundIds(), m = 0; m < _.length; m++) {
+                    var y = n._howls[f]._soundById(_[m]);
                     y && y._node && !y._node._unlocked && (y._node._unlocked = !0, y._node.load());
                   }
               n._autoResume();
-              var v = n.ctx.createBufferSource();
-              v.buffer = n._scratchBuffer, v.connect(n.ctx.destination), typeof v.start > "u" ? v.noteOn(0) : v.start(0), typeof n.ctx.resume == "function" && n.ctx.resume(), v.onended = function() {
-                v.disconnect(0), n._audioUnlocked = !0, document.removeEventListener("touchstart", o, !0), document.removeEventListener("touchend", o, !0), document.removeEventListener("click", o, !0), document.removeEventListener("keydown", o, !0);
-                for (var k = 0; k < n._howls.length; k++)
-                  n._howls[k]._emit("unlock");
+              var k = n.ctx.createBufferSource();
+              k.buffer = n._scratchBuffer, k.connect(n.ctx.destination), typeof k.start > "u" ? k.noteOn(0) : k.start(0), typeof n.ctx.resume == "function" && n.ctx.resume(), k.onended = function() {
+                k.disconnect(0), n._audioUnlocked = !0, document.removeEventListener("touchstart", o, !0), document.removeEventListener("touchend", o, !0), document.removeEventListener("click", o, !0), document.removeEventListener("keydown", o, !0);
+                for (var A = 0; A < n._howls.length; A++)
+                  n._howls[A]._emit("unlock");
               };
             };
             return document.addEventListener("touchstart", o, !0), document.addEventListener("touchend", o, !0), document.addEventListener("click", o, !0), document.addEventListener("keydown", o, !0), n;
@@ -391,7 +412,7 @@ function gt() {
          */
         init: function(n) {
           var o = this;
-          return t.ctx || w(), o._autoplay = n.autoplay || !1, o._format = typeof n.format != "string" ? n.format : [n.format], o._html5 = n.html5 || !1, o._muted = n.mute || !1, o._loop = n.loop || !1, o._pool = n.pool || 5, o._preload = typeof n.preload == "boolean" || n.preload === "metadata" ? n.preload : !0, o._rate = n.rate || 1, o._sprite = n.sprite || {}, o._src = typeof n.src != "string" ? n.src : [n.src], o._volume = n.volume !== void 0 ? n.volume : 1, o._xhr = {
+          return t.ctx || b(), o._autoplay = n.autoplay || !1, o._format = typeof n.format != "string" ? n.format : [n.format], o._html5 = n.html5 || !1, o._muted = n.mute || !1, o._loop = n.loop || !1, o._pool = n.pool || 5, o._preload = typeof n.preload == "boolean" || n.preload === "metadata" ? n.preload : !0, o._rate = n.rate || 1, o._sprite = n.sprite || {}, o._src = typeof n.src != "string" ? n.src : [n.src], o._volume = n.volume !== void 0 ? n.volume : 1, o._xhr = {
             method: n.xhr && n.xhr.method ? n.xhr.method : "GET",
             headers: n.xhr && n.xhr.headers ? n.xhr.headers : null,
             withCredentials: n.xhr && n.xhr.withCredentials ? n.xhr.withCredentials : !1
@@ -414,15 +435,15 @@ function gt() {
           }
           typeof n._src == "string" && (n._src = [n._src]);
           for (var l = 0; l < n._src.length; l++) {
-            var u, _;
+            var u, f;
             if (n._format && n._format[l])
               u = n._format[l];
             else {
-              if (_ = n._src[l], typeof _ != "string") {
+              if (f = n._src[l], typeof f != "string") {
                 n._emit("loaderror", null, "Non-string found in selected audio sources - ignoring.");
                 continue;
               }
-              u = /^data:audio\/([^;,]+);/i.exec(_), u || (u = /\.([^.]+)$/.exec(_.split("?", 1)[0])), u && (u = u[1].toLowerCase());
+              u = /^data:audio\/([^;,]+);/i.exec(f), u || (u = /\.([^.]+)$/.exec(f.split("?", 1)[0])), u && (u = u[1].toLowerCase());
             }
             if (u || console.warn('No file extension was found. Consider using the "format" property or specify an extension.'), u && t.codecs(u)) {
               o = n._src[l];
@@ -449,17 +470,17 @@ function gt() {
             if (typeof n == "string" && l._state === "loaded" && !l._sprite[n])
               return null;
             if (typeof n > "u" && (n = "__default", !l._playLock)) {
-              for (var _ = 0, m = 0; m < l._sounds.length; m++)
-                l._sounds[m]._paused && !l._sounds[m]._ended && (_++, u = l._sounds[m]._id);
-              _ === 1 ? n = null : u = null;
+              for (var f = 0, _ = 0; _ < l._sounds.length; _++)
+                l._sounds[_]._paused && !l._sounds[_]._ended && (f++, u = l._sounds[_]._id);
+              f === 1 ? n = null : u = null;
             }
           }
-          var p = u ? l._soundById(u) : l._inactiveSound();
-          if (!p)
+          var m = u ? l._soundById(u) : l._inactiveSound();
+          if (!m)
             return null;
-          if (u && !n && (n = p._sprite || "__default"), l._state !== "loaded") {
-            p._sprite = n, p._ended = !1;
-            var y = p._id;
+          if (u && !n && (n = m._sprite || "__default"), l._state !== "loaded") {
+            m._sprite = n, m._ended = !1;
+            var y = m._id;
             return l._queue.push({
               event: "play",
               action: function() {
@@ -467,61 +488,61 @@ function gt() {
               }
             }), y;
           }
-          if (u && !p._paused)
-            return o || l._loadQueue("play"), p._id;
+          if (u && !m._paused)
+            return o || l._loadQueue("play"), m._id;
           l._webAudio && t._autoResume();
-          var v = Math.max(0, p._seek > 0 ? p._seek : l._sprite[n][0] / 1e3), k = Math.max(0, (l._sprite[n][0] + l._sprite[n][1]) / 1e3 - v), M = k * 1e3 / Math.abs(p._rate), T = l._sprite[n][0] / 1e3, P = (l._sprite[n][0] + l._sprite[n][1]) / 1e3;
-          p._sprite = n, p._ended = !1;
-          var C = function() {
-            p._paused = !1, p._seek = v, p._start = T, p._stop = P, p._loop = !!(p._loop || l._sprite[n][2]);
+          var k = Math.max(0, m._seek > 0 ? m._seek : l._sprite[n][0] / 1e3), A = Math.max(0, (l._sprite[n][0] + l._sprite[n][1]) / 1e3 - k), E = A * 1e3 / Math.abs(m._rate), B = l._sprite[n][0] / 1e3, O = (l._sprite[n][0] + l._sprite[n][1]) / 1e3;
+          m._sprite = n, m._ended = !1;
+          var q = function() {
+            m._paused = !1, m._seek = k, m._start = B, m._stop = O, m._loop = !!(m._loop || l._sprite[n][2]);
           };
-          if (v >= P) {
-            l._ended(p);
+          if (k >= O) {
+            l._ended(m);
             return;
           }
-          var g = p._node;
+          var x = m._node;
           if (l._webAudio) {
-            var A = function() {
-              l._playLock = !1, C(), l._refreshBuffer(p);
-              var E = p._muted || l._muted ? 0 : p._volume;
-              g.gain.setValueAtTime(E, t.ctx.currentTime), p._playStart = t.ctx.currentTime, typeof g.bufferSource.start > "u" ? p._loop ? g.bufferSource.noteGrainOn(0, v, 86400) : g.bufferSource.noteGrainOn(0, v, k) : p._loop ? g.bufferSource.start(0, v, 86400) : g.bufferSource.start(0, v, k), M !== 1 / 0 && (l._endTimers[p._id] = setTimeout(l._ended.bind(l, p), M)), o || setTimeout(function() {
-                l._emit("play", p._id), l._loadQueue();
+            var Z = function() {
+              l._playLock = !1, q(), l._refreshBuffer(m);
+              var C = m._muted || l._muted ? 0 : m._volume;
+              x.gain.setValueAtTime(C, t.ctx.currentTime), m._playStart = t.ctx.currentTime, typeof x.bufferSource.start > "u" ? m._loop ? x.bufferSource.noteGrainOn(0, k, 86400) : x.bufferSource.noteGrainOn(0, k, A) : m._loop ? x.bufferSource.start(0, k, 86400) : x.bufferSource.start(0, k, A), E !== 1 / 0 && (l._endTimers[m._id] = setTimeout(l._ended.bind(l, m), E)), o || setTimeout(function() {
+                l._emit("play", m._id), l._loadQueue();
               }, 0);
             };
-            t.state === "running" && t.ctx.state !== "interrupted" ? A() : (l._playLock = !0, l.once("resume", A), l._clearTimer(p._id));
+            t.state === "running" && t.ctx.state !== "interrupted" ? Z() : (l._playLock = !0, l.once("resume", Z), l._clearTimer(m._id));
           } else {
-            var S = function() {
-              g.currentTime = v, g.muted = p._muted || l._muted || t._muted || g.muted, g.volume = p._volume * t.volume(), g.playbackRate = p._rate;
+            var Y = function() {
+              x.currentTime = k, x.muted = m._muted || l._muted || t._muted || x.muted, x.volume = m._volume * t.volume(), x.playbackRate = m._rate;
               try {
-                var E = g.play();
-                if (E && typeof Promise < "u" && (E instanceof Promise || typeof E.then == "function") ? (l._playLock = !0, C(), E.then(function() {
-                  l._playLock = !1, g._unlocked = !0, o ? l._loadQueue() : l._emit("play", p._id);
+                var C = x.play();
+                if (C && typeof Promise < "u" && (C instanceof Promise || typeof C.then == "function") ? (l._playLock = !0, q(), C.then(function() {
+                  l._playLock = !1, x._unlocked = !0, o ? l._loadQueue() : l._emit("play", m._id);
                 }).catch(function() {
-                  l._playLock = !1, l._emit("playerror", p._id, "Playback was unable to start. This is most commonly an issue on mobile devices and Chrome where playback was not within a user interaction."), p._ended = !0, p._paused = !0;
-                })) : o || (l._playLock = !1, C(), l._emit("play", p._id)), g.playbackRate = p._rate, g.paused) {
-                  l._emit("playerror", p._id, "Playback was unable to start. This is most commonly an issue on mobile devices and Chrome where playback was not within a user interaction.");
+                  l._playLock = !1, l._emit("playerror", m._id, "Playback was unable to start. This is most commonly an issue on mobile devices and Chrome where playback was not within a user interaction."), m._ended = !0, m._paused = !0;
+                })) : o || (l._playLock = !1, q(), l._emit("play", m._id)), x.playbackRate = m._rate, x.paused) {
+                  l._emit("playerror", m._id, "Playback was unable to start. This is most commonly an issue on mobile devices and Chrome where playback was not within a user interaction.");
                   return;
                 }
-                n !== "__default" || p._loop ? l._endTimers[p._id] = setTimeout(l._ended.bind(l, p), M) : (l._endTimers[p._id] = function() {
-                  l._ended(p), g.removeEventListener("ended", l._endTimers[p._id], !1);
-                }, g.addEventListener("ended", l._endTimers[p._id], !1));
-              } catch (B) {
-                l._emit("playerror", p._id, B);
+                n !== "__default" || m._loop ? l._endTimers[m._id] = setTimeout(l._ended.bind(l, m), E) : (l._endTimers[m._id] = function() {
+                  l._ended(m), x.removeEventListener("ended", l._endTimers[m._id], !1);
+                }, x.addEventListener("ended", l._endTimers[m._id], !1));
+              } catch (F) {
+                l._emit("playerror", m._id, F);
               }
             };
-            g.src === "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA" && (g.src = l._src, g.load());
-            var x = window && window.ejecta || !g.readyState && t._navigator.isCocoonJS;
-            if (g.readyState >= 3 || x)
-              S();
+            x.src === "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA" && (x.src = l._src, x.load());
+            var P = window && window.ejecta || !x.readyState && t._navigator.isCocoonJS;
+            if (x.readyState >= 3 || P)
+              Y();
             else {
               l._playLock = !0, l._state = "loading";
-              var N = function() {
-                l._state = "loaded", S(), g.removeEventListener(t._canPlayEvent, N, !1);
+              var J = function() {
+                l._state = "loaded", Y(), x.removeEventListener(t._canPlayEvent, J, !1);
               };
-              g.addEventListener(t._canPlayEvent, N, !1), l._clearTimer(p._id);
+              x.addEventListener(t._canPlayEvent, J, !1), l._clearTimer(m._id);
             }
           }
-          return p._id;
+          return m._id;
         },
         /**
          * Pause playback and save current position.
@@ -539,14 +560,14 @@ function gt() {
             }), o;
           for (var l = o._getSoundIds(n), u = 0; u < l.length; u++) {
             o._clearTimer(l[u]);
-            var _ = o._soundById(l[u]);
-            if (_ && !_._paused && (_._seek = o.seek(l[u]), _._rateSeek = 0, _._paused = !0, o._stopFade(l[u]), _._node))
+            var f = o._soundById(l[u]);
+            if (f && !f._paused && (f._seek = o.seek(l[u]), f._rateSeek = 0, f._paused = !0, o._stopFade(l[u]), f._node))
               if (o._webAudio) {
-                if (!_._node.bufferSource)
+                if (!f._node.bufferSource)
                   continue;
-                typeof _._node.bufferSource.stop > "u" ? _._node.bufferSource.noteOff(0) : _._node.bufferSource.stop(0), o._cleanBuffer(_._node);
-              } else (!isNaN(_._node.duration) || _._node.duration === 1 / 0) && _._node.pause();
-            arguments[1] || o._emit("pause", _ ? _._id : null);
+                typeof f._node.bufferSource.stop > "u" ? f._node.bufferSource.noteOff(0) : f._node.bufferSource.stop(0), o._cleanBuffer(f._node);
+              } else (!isNaN(f._node.duration) || f._node.duration === 1 / 0) && f._node.pause();
+            arguments[1] || o._emit("pause", f ? f._id : null);
           }
           return o;
         },
@@ -565,10 +586,10 @@ function gt() {
                 l.stop(n);
               }
             }), l;
-          for (var u = l._getSoundIds(n), _ = 0; _ < u.length; _++) {
-            l._clearTimer(u[_]);
-            var m = l._soundById(u[_]);
-            m && (m._seek = m._start || 0, m._rateSeek = 0, m._paused = !0, m._ended = !0, l._stopFade(u[_]), m._node && (l._webAudio ? m._node.bufferSource && (typeof m._node.bufferSource.stop > "u" ? m._node.bufferSource.noteOff(0) : m._node.bufferSource.stop(0), l._cleanBuffer(m._node)) : (!isNaN(m._node.duration) || m._node.duration === 1 / 0) && (m._node.currentTime = m._start || 0, m._node.pause(), m._node.duration === 1 / 0 && l._clearSound(m._node))), o || l._emit("stop", m._id));
+          for (var u = l._getSoundIds(n), f = 0; f < u.length; f++) {
+            l._clearTimer(u[f]);
+            var _ = l._soundById(u[f]);
+            _ && (_._seek = _._start || 0, _._rateSeek = 0, _._paused = !0, _._ended = !0, l._stopFade(u[f]), _._node && (l._webAudio ? _._node.bufferSource && (typeof _._node.bufferSource.stop > "u" ? _._node.bufferSource.noteOff(0) : _._node.bufferSource.stop(0), l._cleanBuffer(_._node)) : (!isNaN(_._node.duration) || _._node.duration === 1 / 0) && (_._node.currentTime = _._start || 0, _._node.pause(), _._node.duration === 1 / 0 && l._clearSound(_._node))), o || l._emit("stop", _._id));
           }
           return l;
         },
@@ -592,9 +613,9 @@ function gt() {
               l._muted = n;
             else
               return l._muted;
-          for (var u = l._getSoundIds(o), _ = 0; _ < u.length; _++) {
-            var m = l._soundById(u[_]);
-            m && (m._muted = n, m._interval && l._stopFade(m._id), l._webAudio && m._node ? m._node.gain.setValueAtTime(n ? 0 : m._volume, t.ctx.currentTime) : m._node && (m._node.muted = t._muted ? !0 : n), l._emit("mute", m._id));
+          for (var u = l._getSoundIds(o), f = 0; f < u.length; f++) {
+            var _ = l._soundById(u[f]);
+            _ && (_._muted = n, _._interval && l._stopFade(_._id), l._webAudio && _._node ? _._node.gain.setValueAtTime(n ? 0 : _._volume, t.ctx.currentTime) : _._node && (_._node.muted = t._muted ? !0 : n), l._emit("mute", _._id));
           }
           return l;
         },
@@ -611,10 +632,10 @@ function gt() {
           if (o.length === 0)
             return n._volume;
           if (o.length === 1 || o.length === 2 && typeof o[1] > "u") {
-            var _ = n._getSoundIds(), m = _.indexOf(o[0]);
-            m >= 0 ? u = parseInt(o[0], 10) : l = parseFloat(o[0]);
+            var f = n._getSoundIds(), _ = f.indexOf(o[0]);
+            _ >= 0 ? u = parseInt(o[0], 10) : l = parseFloat(o[0]);
           } else o.length >= 2 && (l = parseFloat(o[0]), u = parseInt(o[1], 10));
-          var p;
+          var m;
           if (typeof l < "u" && l >= 0 && l <= 1) {
             if (n._state !== "loaded" || n._playLock)
               return n._queue.push({
@@ -625,9 +646,9 @@ function gt() {
               }), n;
             typeof u > "u" && (n._volume = l), u = n._getSoundIds(u);
             for (var y = 0; y < u.length; y++)
-              p = n._soundById(u[y]), p && (p._volume = l, o[2] || n._stopFade(u[y]), n._webAudio && p._node && !p._muted ? p._node.gain.setValueAtTime(l, t.ctx.currentTime) : p._node && !p._muted && (p._node.volume = l * t.volume()), n._emit("volume", p._id));
+              m = n._soundById(u[y]), m && (m._volume = l, o[2] || n._stopFade(u[y]), n._webAudio && m._node && !m._muted ? m._node.gain.setValueAtTime(l, t.ctx.currentTime) : m._node && !m._muted && (m._node.volume = l * t.volume()), n._emit("volume", m._id));
           } else
-            return p = u ? n._soundById(u) : n._sounds[0], p ? p._volume : 0;
+            return m = u ? n._soundById(u) : n._sounds[0], m ? m._volume : 0;
           return n;
         },
         /**
@@ -639,26 +660,26 @@ function gt() {
          * @return {Howl}
          */
         fade: function(n, o, l, u) {
-          var _ = this;
-          if (_._state !== "loaded" || _._playLock)
-            return _._queue.push({
+          var f = this;
+          if (f._state !== "loaded" || f._playLock)
+            return f._queue.push({
               event: "fade",
               action: function() {
-                _.fade(n, o, l, u);
+                f.fade(n, o, l, u);
               }
-            }), _;
-          n = Math.min(Math.max(0, parseFloat(n)), 1), o = Math.min(Math.max(0, parseFloat(o)), 1), l = parseFloat(l), _.volume(n, u);
-          for (var m = _._getSoundIds(u), p = 0; p < m.length; p++) {
-            var y = _._soundById(m[p]);
+            }), f;
+          n = Math.min(Math.max(0, parseFloat(n)), 1), o = Math.min(Math.max(0, parseFloat(o)), 1), l = parseFloat(l), f.volume(n, u);
+          for (var _ = f._getSoundIds(u), m = 0; m < _.length; m++) {
+            var y = f._soundById(_[m]);
             if (y) {
-              if (u || _._stopFade(m[p]), _._webAudio && !y._muted) {
-                var v = t.ctx.currentTime, k = v + l / 1e3;
-                y._volume = n, y._node.gain.setValueAtTime(n, v), y._node.gain.linearRampToValueAtTime(o, k);
+              if (u || f._stopFade(_[m]), f._webAudio && !y._muted) {
+                var k = t.ctx.currentTime, A = k + l / 1e3;
+                y._volume = n, y._node.gain.setValueAtTime(n, k), y._node.gain.linearRampToValueAtTime(o, A);
               }
-              _._startFadeInterval(y, n, o, l, m[p], typeof u > "u");
+              f._startFadeInterval(y, n, o, l, _[m], typeof u > "u");
             }
           }
-          return _;
+          return f;
         },
         /**
          * Starts the internal interval to fade a sound.
@@ -669,12 +690,12 @@ function gt() {
          * @param  {Number} id   The sound id to fade.
          * @param  {Boolean} isGroup   If true, set the volume on the group.
          */
-        _startFadeInterval: function(n, o, l, u, _, m) {
-          var p = this, y = o, v = l - o, k = Math.abs(v / 0.01), M = Math.max(4, k > 0 ? u / k : u), T = Date.now();
+        _startFadeInterval: function(n, o, l, u, f, _) {
+          var m = this, y = o, k = l - o, A = Math.abs(k / 0.01), E = Math.max(4, A > 0 ? u / A : u), B = Date.now();
           n._fadeTo = l, n._interval = setInterval(function() {
-            var P = (Date.now() - T) / u;
-            T = Date.now(), y += v * P, y = Math.round(y * 100) / 100, v < 0 ? y = Math.max(l, y) : y = Math.min(l, y), p._webAudio ? n._volume = y : p.volume(y, n._id, !0), m && (p._volume = y), (l < o && y <= l || l > o && y >= l) && (clearInterval(n._interval), n._interval = null, n._fadeTo = null, p.volume(l, n._id), p._emit("fade", n._id));
-          }, M);
+            var O = (Date.now() - B) / u;
+            B = Date.now(), y += k * O, y = Math.round(y * 100) / 100, k < 0 ? y = Math.max(l, y) : y = Math.min(l, y), m._webAudio ? n._volume = y : m.volume(y, n._id, !0), _ && (m._volume = y), (l < o && y <= l || l > o && y >= l) && (clearInterval(n._interval), n._interval = null, n._fadeTo = null, m.volume(l, n._id), m._emit("fade", n._id));
+          }, E);
         },
         /**
          * Internal method that stops the currently playing fade when
@@ -695,17 +716,17 @@ function gt() {
          * @return {Howl/Boolean} Returns self or current loop value.
          */
         loop: function() {
-          var n = this, o = arguments, l, u, _;
+          var n = this, o = arguments, l, u, f;
           if (o.length === 0)
             return n._loop;
           if (o.length === 1)
             if (typeof o[0] == "boolean")
               l = o[0], n._loop = l;
             else
-              return _ = n._soundById(parseInt(o[0], 10)), _ ? _._loop : !1;
+              return f = n._soundById(parseInt(o[0], 10)), f ? f._loop : !1;
           else o.length === 2 && (l = o[0], u = parseInt(o[1], 10));
-          for (var m = n._getSoundIds(u), p = 0; p < m.length; p++)
-            _ = n._soundById(m[p]), _ && (_._loop = l, n._webAudio && _._node && _._node.bufferSource && (_._node.bufferSource.loop = l, l && (_._node.bufferSource.loopStart = _._start || 0, _._node.bufferSource.loopEnd = _._stop, n.playing(m[p]) && (n.pause(m[p], !0), n.play(m[p], !0)))));
+          for (var _ = n._getSoundIds(u), m = 0; m < _.length; m++)
+            f = n._soundById(_[m]), f && (f._loop = l, n._webAudio && f._node && f._node.bufferSource && (f._node.bufferSource.loop = l, l && (f._node.bufferSource.loopStart = f._start || 0, f._node.bufferSource.loopEnd = f._stop, n.playing(_[m]) && (n.pause(_[m], !0), n.play(_[m], !0)))));
           return n;
         },
         /**
@@ -721,10 +742,10 @@ function gt() {
           if (o.length === 0)
             u = n._sounds[0]._id;
           else if (o.length === 1) {
-            var _ = n._getSoundIds(), m = _.indexOf(o[0]);
-            m >= 0 ? u = parseInt(o[0], 10) : l = parseFloat(o[0]);
+            var f = n._getSoundIds(), _ = f.indexOf(o[0]);
+            _ >= 0 ? u = parseInt(o[0], 10) : l = parseFloat(o[0]);
           } else o.length === 2 && (l = parseFloat(o[0]), u = parseInt(o[1], 10));
-          var p;
+          var m;
           if (typeof l == "number") {
             if (n._state !== "loaded" || n._playLock)
               return n._queue.push({
@@ -735,13 +756,13 @@ function gt() {
               }), n;
             typeof u > "u" && (n._rate = l), u = n._getSoundIds(u);
             for (var y = 0; y < u.length; y++)
-              if (p = n._soundById(u[y]), p) {
-                n.playing(u[y]) && (p._rateSeek = n.seek(u[y]), p._playStart = n._webAudio ? t.ctx.currentTime : p._playStart), p._rate = l, n._webAudio && p._node && p._node.bufferSource ? p._node.bufferSource.playbackRate.setValueAtTime(l, t.ctx.currentTime) : p._node && (p._node.playbackRate = l);
-                var v = n.seek(u[y]), k = (n._sprite[p._sprite][0] + n._sprite[p._sprite][1]) / 1e3 - v, M = k * 1e3 / Math.abs(p._rate);
-                (n._endTimers[u[y]] || !p._paused) && (n._clearTimer(u[y]), n._endTimers[u[y]] = setTimeout(n._ended.bind(n, p), M)), n._emit("rate", p._id);
+              if (m = n._soundById(u[y]), m) {
+                n.playing(u[y]) && (m._rateSeek = n.seek(u[y]), m._playStart = n._webAudio ? t.ctx.currentTime : m._playStart), m._rate = l, n._webAudio && m._node && m._node.bufferSource ? m._node.bufferSource.playbackRate.setValueAtTime(l, t.ctx.currentTime) : m._node && (m._node.playbackRate = l);
+                var k = n.seek(u[y]), A = (n._sprite[m._sprite][0] + n._sprite[m._sprite][1]) / 1e3 - k, E = A * 1e3 / Math.abs(m._rate);
+                (n._endTimers[u[y]] || !m._paused) && (n._clearTimer(u[y]), n._endTimers[u[y]] = setTimeout(n._ended.bind(n, m), E)), n._emit("rate", m._id);
               }
           } else
-            return p = n._soundById(u), p ? p._rate : n._rate;
+            return m = n._soundById(u), m ? m._rate : n._rate;
           return n;
         },
         /**
@@ -757,8 +778,8 @@ function gt() {
           if (o.length === 0)
             n._sounds.length && (u = n._sounds[0]._id);
           else if (o.length === 1) {
-            var _ = n._getSoundIds(), m = _.indexOf(o[0]);
-            m >= 0 ? u = parseInt(o[0], 10) : n._sounds.length && (u = n._sounds[0]._id, l = parseFloat(o[0]));
+            var f = n._getSoundIds(), _ = f.indexOf(o[0]);
+            _ >= 0 ? u = parseInt(o[0], 10) : n._sounds.length && (u = n._sounds[0]._id, l = parseFloat(o[0]));
           } else o.length === 2 && (l = parseFloat(o[0]), u = parseInt(o[1], 10));
           if (typeof u > "u")
             return 0;
@@ -769,26 +790,26 @@ function gt() {
                 n.seek.apply(n, o);
               }
             }), n;
-          var p = n._soundById(u);
-          if (p)
+          var m = n._soundById(u);
+          if (m)
             if (typeof l == "number" && l >= 0) {
               var y = n.playing(u);
-              y && n.pause(u, !0), p._seek = l, p._ended = !1, n._clearTimer(u), !n._webAudio && p._node && !isNaN(p._node.duration) && (p._node.currentTime = l);
-              var v = function() {
+              y && n.pause(u, !0), m._seek = l, m._ended = !1, n._clearTimer(u), !n._webAudio && m._node && !isNaN(m._node.duration) && (m._node.currentTime = l);
+              var k = function() {
                 y && n.play(u, !0), n._emit("seek", u);
               };
               if (y && !n._webAudio) {
-                var k = function() {
-                  n._playLock ? setTimeout(k, 0) : v();
+                var A = function() {
+                  n._playLock ? setTimeout(A, 0) : k();
                 };
-                setTimeout(k, 0);
+                setTimeout(A, 0);
               } else
-                v();
+                k();
             } else if (n._webAudio) {
-              var M = n.playing(u) ? t.ctx.currentTime - p._playStart : 0, T = p._rateSeek ? p._rateSeek - p._seek : 0;
-              return p._seek + (T + M * Math.abs(p._rate));
+              var E = n.playing(u) ? t.ctx.currentTime - m._playStart : 0, B = m._rateSeek ? m._rateSeek - m._seek : 0;
+              return m._seek + (B + E * Math.abs(m._rate));
             } else
-              return p._node.currentTime;
+              return m._node.currentTime;
           return n;
         },
         /**
@@ -832,13 +853,13 @@ function gt() {
             o[l]._paused || n.stop(o[l]._id), n._webAudio || (n._clearSound(o[l]._node), o[l]._node.removeEventListener("error", o[l]._errorFn, !1), o[l]._node.removeEventListener(t._canPlayEvent, o[l]._loadFn, !1), o[l]._node.removeEventListener("ended", o[l]._endFn, !1), t._releaseHtml5Audio(o[l]._node)), delete o[l]._node, n._clearTimer(o[l]._id);
           var u = t._howls.indexOf(n);
           u >= 0 && t._howls.splice(u, 1);
-          var _ = !0;
+          var f = !0;
           for (l = 0; l < t._howls.length; l++)
             if (t._howls[l]._src === n._src || n._src.indexOf(t._howls[l]._src) >= 0) {
-              _ = !1;
+              f = !1;
               break;
             }
-          return a && _ && delete a[n._src], t.noAudio = !1, n._state = "unloaded", n._sounds = [], n = null, null;
+          return a && f && delete a[n._src], t.noAudio = !1, n._state = "unloaded", n._sounds = [], n = null, null;
         },
         /**
          * Listen to a custom event.
@@ -849,8 +870,8 @@ function gt() {
          * @return {Howl}
          */
         on: function(n, o, l, u) {
-          var _ = this, m = _["_on" + n];
-          return typeof o == "function" && m.push(u ? { id: l, fn: o, once: u } : { id: l, fn: o }), _;
+          var f = this, _ = f["_on" + n];
+          return typeof o == "function" && _.push(u ? { id: l, fn: o, once: u } : { id: l, fn: o }), f;
         },
         /**
          * Remove a custom event. Call without parameters to remove all events.
@@ -860,12 +881,12 @@ function gt() {
          * @return {Howl}
          */
         off: function(n, o, l) {
-          var u = this, _ = u["_on" + n], m = 0;
+          var u = this, f = u["_on" + n], _ = 0;
           if (typeof o == "number" && (l = o, o = null), o || l)
-            for (m = 0; m < _.length; m++) {
-              var p = l === _[m].id;
-              if (o === _[m].fn && p || !o && p) {
-                _.splice(m, 1);
+            for (_ = 0; _ < f.length; _++) {
+              var m = l === f[_].id;
+              if (o === f[_].fn && m || !o && m) {
+                f.splice(_, 1);
                 break;
               }
             }
@@ -873,8 +894,8 @@ function gt() {
             u["_on" + n] = [];
           else {
             var y = Object.keys(u);
-            for (m = 0; m < y.length; m++)
-              y[m].indexOf("_on") === 0 && Array.isArray(u[y[m]]) && (u[y[m]] = []);
+            for (_ = 0; _ < y.length; _++)
+              y[_].indexOf("_on") === 0 && Array.isArray(u[y[_]]) && (u[y[_]] = []);
           }
           return u;
         },
@@ -897,10 +918,10 @@ function gt() {
          * @return {Howl}
          */
         _emit: function(n, o, l) {
-          for (var u = this, _ = u["_on" + n], m = _.length - 1; m >= 0; m--)
-            (!_[m].id || _[m].id === o || n === "load") && (setTimeout(function(p) {
-              p.call(this, o, l);
-            }.bind(u, _[m].fn), 0), _[m].once && u.off(n, _[m].fn, _[m].id));
+          for (var u = this, f = u["_on" + n], _ = f.length - 1; _ >= 0; _--)
+            (!f[_].id || f[_].id === o || n === "load") && (setTimeout(function(m) {
+              m.call(this, o, l);
+            }.bind(u, f[_].fn), 0), f[_].once && u.off(n, f[_].fn, f[_].id));
           return u._loadQueue(n), u;
         },
         /**
@@ -929,8 +950,8 @@ function gt() {
           var u = !!(n._loop || o._sprite[l][2]);
           if (o._emit("end", n._id), !o._webAudio && u && o.stop(n._id, !0).play(n._id), o._webAudio && u) {
             o._emit("play", n._id), n._seek = n._start || 0, n._rateSeek = 0, n._playStart = t.ctx.currentTime;
-            var _ = (n._stop - n._start) * 1e3 / Math.abs(n._rate);
-            o._endTimers[n._id] = setTimeout(o._ended.bind(o, n), _);
+            var f = (n._stop - n._start) * 1e3 / Math.abs(n._rate);
+            o._endTimers[n._id] = setTimeout(o._ended.bind(o, n), f);
           }
           return o._webAudio && !u && (n._paused = !0, n._ended = !0, n._seek = n._start || 0, n._rateSeek = 0, o._clearTimer(n._id), o._cleanBuffer(n._node), t._autoSuspend()), !o._webAudio && !u && o.stop(n._id, !0), o;
         },
@@ -1091,44 +1112,44 @@ function gt() {
       var a = {}, h = function(n) {
         var o = n._src;
         if (a[o]) {
-          n._duration = a[o].duration, f(n);
+          n._duration = a[o].duration, p(n);
           return;
         }
         if (/^data:[^;]+;base64,/.test(o)) {
-          for (var l = atob(o.split(",")[1]), u = new Uint8Array(l.length), _ = 0; _ < l.length; ++_)
-            u[_] = l.charCodeAt(_);
-          c(u.buffer, n);
+          for (var l = atob(o.split(",")[1]), u = new Uint8Array(l.length), f = 0; f < l.length; ++f)
+            u[f] = l.charCodeAt(f);
+          d(u.buffer, n);
         } else {
-          var m = new XMLHttpRequest();
-          m.open(n._xhr.method, o, !0), m.withCredentials = n._xhr.withCredentials, m.responseType = "arraybuffer", n._xhr.headers && Object.keys(n._xhr.headers).forEach(function(p) {
-            m.setRequestHeader(p, n._xhr.headers[p]);
-          }), m.onload = function() {
-            var p = (m.status + "")[0];
-            if (p !== "0" && p !== "2" && p !== "3") {
-              n._emit("loaderror", null, "Failed loading audio file with status: " + m.status + ".");
+          var _ = new XMLHttpRequest();
+          _.open(n._xhr.method, o, !0), _.withCredentials = n._xhr.withCredentials, _.responseType = "arraybuffer", n._xhr.headers && Object.keys(n._xhr.headers).forEach(function(m) {
+            _.setRequestHeader(m, n._xhr.headers[m]);
+          }), _.onload = function() {
+            var m = (_.status + "")[0];
+            if (m !== "0" && m !== "2" && m !== "3") {
+              n._emit("loaderror", null, "Failed loading audio file with status: " + _.status + ".");
               return;
             }
-            c(m.response, n);
-          }, m.onerror = function() {
+            d(_.response, n);
+          }, _.onerror = function() {
             n._webAudio && (n._html5 = !0, n._webAudio = !1, n._sounds = [], delete a[o], n.load());
-          }, d(m);
+          }, c(_);
         }
-      }, d = function(n) {
+      }, c = function(n) {
         try {
           n.send();
         } catch {
           n.onerror();
         }
-      }, c = function(n, o) {
+      }, d = function(n, o) {
         var l = function() {
           o._emit("loaderror", null, "Decoding audio data failed.");
-        }, u = function(_) {
-          _ && o._sounds.length > 0 ? (a[o._src] = _, f(o, _)) : l();
+        }, u = function(f) {
+          f && o._sounds.length > 0 ? (a[o._src] = f, p(o, f)) : l();
         };
         typeof Promise < "u" && t.ctx.decodeAudioData.length === 1 ? t.ctx.decodeAudioData(n).then(u).catch(l) : t.ctx.decodeAudioData(n, u, l);
-      }, f = function(n, o) {
+      }, p = function(n, o) {
         o && !n._duration && (n._duration = o.duration), Object.keys(n._sprite).length === 0 && (n._sprite = { __default: [0, n._duration * 1e3] }), n._state !== "loaded" && (n._state = "loaded", n._emit("load"), n._loadQueue());
-      }, w = function() {
+      }, b = function() {
         if (t.usingWebAudio) {
           try {
             typeof AudioContext < "u" ? t.ctx = new AudioContext() : typeof webkitAudioContext < "u" ? t.ctx = new webkitAudioContext() : t.usingWebAudio = !1;
@@ -1144,7 +1165,7 @@ function gt() {
           t.usingWebAudio && (t.masterGain = typeof t.ctx.createGain > "u" ? t.ctx.createGainNode() : t.ctx.createGain(), t.masterGain.gain.setValueAtTime(t._muted ? 0 : t._volume, t.ctx.currentTime), t.masterGain.connect(t.ctx.destination)), t._setup();
         }
       };
-      s.Howler = t, s.Howl = r, typeof Z < "u" ? (Z.HowlerGlobal = e, Z.Howler = t, Z.Howl = r, Z.Sound = i) : typeof window < "u" && (window.HowlerGlobal = e, window.Howler = t, window.Howl = r, window.Sound = i);
+      s.Howler = t, s.Howl = r, typeof ae < "u" ? (ae.HowlerGlobal = e, ae.Howler = t, ae.Howl = r, ae.Sound = i) : typeof window < "u" && (window.HowlerGlobal = e, window.Howler = t, window.Howl = r, window.Sound = i);
     })();
     (function() {
       HowlerGlobal.prototype._pos = [0, 0, 0], HowlerGlobal.prototype._orientation = [0, 0, -1, 0, 1, 0], HowlerGlobal.prototype.stereo = function(t) {
@@ -1163,16 +1184,16 @@ function gt() {
         else
           return a._pos;
         return a;
-      }, HowlerGlobal.prototype.orientation = function(t, r, i, a, h, d) {
-        var c = this;
-        if (!c.ctx || !c.ctx.listener)
-          return c;
-        var f = c._orientation;
-        if (r = typeof r != "number" ? f[1] : r, i = typeof i != "number" ? f[2] : i, a = typeof a != "number" ? f[3] : a, h = typeof h != "number" ? f[4] : h, d = typeof d != "number" ? f[5] : d, typeof t == "number")
-          c._orientation = [t, r, i, a, h, d], typeof c.ctx.listener.forwardX < "u" ? (c.ctx.listener.forwardX.setTargetAtTime(t, Howler.ctx.currentTime, 0.1), c.ctx.listener.forwardY.setTargetAtTime(r, Howler.ctx.currentTime, 0.1), c.ctx.listener.forwardZ.setTargetAtTime(i, Howler.ctx.currentTime, 0.1), c.ctx.listener.upX.setTargetAtTime(a, Howler.ctx.currentTime, 0.1), c.ctx.listener.upY.setTargetAtTime(h, Howler.ctx.currentTime, 0.1), c.ctx.listener.upZ.setTargetAtTime(d, Howler.ctx.currentTime, 0.1)) : c.ctx.listener.setOrientation(t, r, i, a, h, d);
+      }, HowlerGlobal.prototype.orientation = function(t, r, i, a, h, c) {
+        var d = this;
+        if (!d.ctx || !d.ctx.listener)
+          return d;
+        var p = d._orientation;
+        if (r = typeof r != "number" ? p[1] : r, i = typeof i != "number" ? p[2] : i, a = typeof a != "number" ? p[3] : a, h = typeof h != "number" ? p[4] : h, c = typeof c != "number" ? p[5] : c, typeof t == "number")
+          d._orientation = [t, r, i, a, h, c], typeof d.ctx.listener.forwardX < "u" ? (d.ctx.listener.forwardX.setTargetAtTime(t, Howler.ctx.currentTime, 0.1), d.ctx.listener.forwardY.setTargetAtTime(r, Howler.ctx.currentTime, 0.1), d.ctx.listener.forwardZ.setTargetAtTime(i, Howler.ctx.currentTime, 0.1), d.ctx.listener.upX.setTargetAtTime(a, Howler.ctx.currentTime, 0.1), d.ctx.listener.upY.setTargetAtTime(h, Howler.ctx.currentTime, 0.1), d.ctx.listener.upZ.setTargetAtTime(c, Howler.ctx.currentTime, 0.1)) : d.ctx.listener.setOrientation(t, r, i, a, h, c);
         else
-          return f;
-        return c;
+          return p;
+        return d;
       }, Howl.prototype.init = /* @__PURE__ */ (function(t) {
         return function(r) {
           var i = this;
@@ -1204,13 +1225,13 @@ function gt() {
             i._stereo = t, i._pos = [t, 0, 0];
           else
             return i._stereo;
-        for (var h = i._getSoundIds(r), d = 0; d < h.length; d++) {
-          var c = i._soundById(h[d]);
-          if (c)
+        for (var h = i._getSoundIds(r), c = 0; c < h.length; c++) {
+          var d = i._soundById(h[c]);
+          if (d)
             if (typeof t == "number")
-              c._stereo = t, c._pos = [t, 0, 0], c._node && (c._pannerAttr.panningModel = "equalpower", (!c._panner || !c._panner.pan) && e(c, a), a === "spatial" ? typeof c._panner.positionX < "u" ? (c._panner.positionX.setValueAtTime(t, Howler.ctx.currentTime), c._panner.positionY.setValueAtTime(0, Howler.ctx.currentTime), c._panner.positionZ.setValueAtTime(0, Howler.ctx.currentTime)) : c._panner.setPosition(t, 0, 0) : c._panner.pan.setValueAtTime(t, Howler.ctx.currentTime)), i._emit("stereo", c._id);
+              d._stereo = t, d._pos = [t, 0, 0], d._node && (d._pannerAttr.panningModel = "equalpower", (!d._panner || !d._panner.pan) && e(d, a), a === "spatial" ? typeof d._panner.positionX < "u" ? (d._panner.positionX.setValueAtTime(t, Howler.ctx.currentTime), d._panner.positionY.setValueAtTime(0, Howler.ctx.currentTime), d._panner.positionZ.setValueAtTime(0, Howler.ctx.currentTime)) : d._panner.setPosition(t, 0, 0) : d._panner.pan.setValueAtTime(t, Howler.ctx.currentTime)), i._emit("stereo", d._id);
             else
-              return c._stereo;
+              return d._stereo;
         }
         return i;
       }, Howl.prototype.pos = function(t, r, i, a) {
@@ -1229,13 +1250,13 @@ function gt() {
             h._pos = [t, r, i];
           else
             return h._pos;
-        for (var d = h._getSoundIds(a), c = 0; c < d.length; c++) {
-          var f = h._soundById(d[c]);
-          if (f)
+        for (var c = h._getSoundIds(a), d = 0; d < c.length; d++) {
+          var p = h._soundById(c[d]);
+          if (p)
             if (typeof t == "number")
-              f._pos = [t, r, i], f._node && ((!f._panner || f._panner.pan) && e(f, "spatial"), typeof f._panner.positionX < "u" ? (f._panner.positionX.setValueAtTime(t, Howler.ctx.currentTime), f._panner.positionY.setValueAtTime(r, Howler.ctx.currentTime), f._panner.positionZ.setValueAtTime(i, Howler.ctx.currentTime)) : f._panner.setPosition(t, r, i)), h._emit("pos", f._id);
+              p._pos = [t, r, i], p._node && ((!p._panner || p._panner.pan) && e(p, "spatial"), typeof p._panner.positionX < "u" ? (p._panner.positionX.setValueAtTime(t, Howler.ctx.currentTime), p._panner.positionY.setValueAtTime(r, Howler.ctx.currentTime), p._panner.positionZ.setValueAtTime(i, Howler.ctx.currentTime)) : p._panner.setPosition(t, r, i)), h._emit("pos", p._id);
             else
-              return f._pos;
+              return p._pos;
         }
         return h;
       }, Howl.prototype.orientation = function(t, r, i, a) {
@@ -1254,13 +1275,13 @@ function gt() {
             h._orientation = [t, r, i];
           else
             return h._orientation;
-        for (var d = h._getSoundIds(a), c = 0; c < d.length; c++) {
-          var f = h._soundById(d[c]);
-          if (f)
+        for (var c = h._getSoundIds(a), d = 0; d < c.length; d++) {
+          var p = h._soundById(c[d]);
+          if (p)
             if (typeof t == "number")
-              f._orientation = [t, r, i], f._node && (f._panner || (f._pos || (f._pos = h._pos || [0, 0, -0.5]), e(f, "spatial")), typeof f._panner.orientationX < "u" ? (f._panner.orientationX.setValueAtTime(t, Howler.ctx.currentTime), f._panner.orientationY.setValueAtTime(r, Howler.ctx.currentTime), f._panner.orientationZ.setValueAtTime(i, Howler.ctx.currentTime)) : f._panner.setOrientation(t, r, i)), h._emit("orientation", f._id);
+              p._orientation = [t, r, i], p._node && (p._panner || (p._pos || (p._pos = h._pos || [0, 0, -0.5]), e(p, "spatial")), typeof p._panner.orientationX < "u" ? (p._panner.orientationX.setValueAtTime(t, Howler.ctx.currentTime), p._panner.orientationY.setValueAtTime(r, Howler.ctx.currentTime), p._panner.orientationZ.setValueAtTime(i, Howler.ctx.currentTime)) : p._panner.setOrientation(t, r, i)), h._emit("orientation", p._id);
             else
-              return f._orientation;
+              return p._orientation;
         }
         return h;
       }, Howl.prototype.pannerAttr = function() {
@@ -1293,21 +1314,21 @@ function gt() {
           else
             return h = t._soundById(parseInt(r[0], 10)), h ? h._pannerAttr : t._pannerAttr;
         else r.length === 2 && (i = r[0], a = parseInt(r[1], 10));
-        for (var d = t._getSoundIds(a), c = 0; c < d.length; c++)
-          if (h = t._soundById(d[c]), h) {
-            var f = h._pannerAttr;
-            f = {
-              coneInnerAngle: typeof i.coneInnerAngle < "u" ? i.coneInnerAngle : f.coneInnerAngle,
-              coneOuterAngle: typeof i.coneOuterAngle < "u" ? i.coneOuterAngle : f.coneOuterAngle,
-              coneOuterGain: typeof i.coneOuterGain < "u" ? i.coneOuterGain : f.coneOuterGain,
-              distanceModel: typeof i.distanceModel < "u" ? i.distanceModel : f.distanceModel,
-              maxDistance: typeof i.maxDistance < "u" ? i.maxDistance : f.maxDistance,
-              refDistance: typeof i.refDistance < "u" ? i.refDistance : f.refDistance,
-              rolloffFactor: typeof i.rolloffFactor < "u" ? i.rolloffFactor : f.rolloffFactor,
-              panningModel: typeof i.panningModel < "u" ? i.panningModel : f.panningModel
+        for (var c = t._getSoundIds(a), d = 0; d < c.length; d++)
+          if (h = t._soundById(c[d]), h) {
+            var p = h._pannerAttr;
+            p = {
+              coneInnerAngle: typeof i.coneInnerAngle < "u" ? i.coneInnerAngle : p.coneInnerAngle,
+              coneOuterAngle: typeof i.coneOuterAngle < "u" ? i.coneOuterAngle : p.coneOuterAngle,
+              coneOuterGain: typeof i.coneOuterGain < "u" ? i.coneOuterGain : p.coneOuterGain,
+              distanceModel: typeof i.distanceModel < "u" ? i.distanceModel : p.distanceModel,
+              maxDistance: typeof i.maxDistance < "u" ? i.maxDistance : p.maxDistance,
+              refDistance: typeof i.refDistance < "u" ? i.refDistance : p.refDistance,
+              rolloffFactor: typeof i.rolloffFactor < "u" ? i.rolloffFactor : p.rolloffFactor,
+              panningModel: typeof i.panningModel < "u" ? i.panningModel : p.panningModel
             };
-            var w = h._panner;
-            w || (h._pos || (h._pos = t._pos || [0, 0, -0.5]), e(h, "spatial"), w = h._panner), w.coneInnerAngle = f.coneInnerAngle, w.coneOuterAngle = f.coneOuterAngle, w.coneOuterGain = f.coneOuterGain, w.distanceModel = f.distanceModel, w.maxDistance = f.maxDistance, w.refDistance = f.refDistance, w.rolloffFactor = f.rolloffFactor, w.panningModel = f.panningModel;
+            var b = h._panner;
+            b || (h._pos || (h._pos = t._pos || [0, 0, -0.5]), e(h, "spatial"), b = h._panner), b.coneInnerAngle = p.coneInnerAngle, b.coneOuterAngle = p.coneOuterAngle, b.coneOuterGain = p.coneOuterGain, b.distanceModel = p.distanceModel, b.maxDistance = p.maxDistance, b.refDistance = p.refDistance, b.rolloffFactor = p.rolloffFactor, b.panningModel = p.panningModel;
           }
         return t;
       }, Sound.prototype.init = /* @__PURE__ */ (function(t) {
@@ -1325,10 +1346,10 @@ function gt() {
         r = r || "spatial", r === "spatial" ? (t._panner = Howler.ctx.createPanner(), t._panner.coneInnerAngle = t._pannerAttr.coneInnerAngle, t._panner.coneOuterAngle = t._pannerAttr.coneOuterAngle, t._panner.coneOuterGain = t._pannerAttr.coneOuterGain, t._panner.distanceModel = t._pannerAttr.distanceModel, t._panner.maxDistance = t._pannerAttr.maxDistance, t._panner.refDistance = t._pannerAttr.refDistance, t._panner.rolloffFactor = t._pannerAttr.rolloffFactor, t._panner.panningModel = t._pannerAttr.panningModel, typeof t._panner.positionX < "u" ? (t._panner.positionX.setValueAtTime(t._pos[0], Howler.ctx.currentTime), t._panner.positionY.setValueAtTime(t._pos[1], Howler.ctx.currentTime), t._panner.positionZ.setValueAtTime(t._pos[2], Howler.ctx.currentTime)) : t._panner.setPosition(t._pos[0], t._pos[1], t._pos[2]), typeof t._panner.orientationX < "u" ? (t._panner.orientationX.setValueAtTime(t._orientation[0], Howler.ctx.currentTime), t._panner.orientationY.setValueAtTime(t._orientation[1], Howler.ctx.currentTime), t._panner.orientationZ.setValueAtTime(t._orientation[2], Howler.ctx.currentTime)) : t._panner.setOrientation(t._orientation[0], t._orientation[1], t._orientation[2])) : (t._panner = Howler.ctx.createStereoPanner(), t._panner.pan.setValueAtTime(t._stereo, Howler.ctx.currentTime)), t._panner.connect(t._node), t._paused || t._parent.pause(t._id, !0).play(t._id, !0);
       };
     })();
-  })(_e)), _e;
+  })(Te)), Te;
 }
-var Q = gt();
-const qe = [
+var ne = xt();
+const et = [
   "ambience",
   "click",
   "latch",
@@ -1346,14 +1367,14 @@ const qe = [
   "land",
   "riser",
   "coin"
-], wt = new Set(qe.filter((s) => s !== "ambience"));
-function bt(s, e, t) {
+], Mt = new Set(et.filter((s) => s !== "ambience"));
+function Tt(s, e, t) {
   return e === s && t < 1;
 }
-function yt(s, e, t) {
+function Et(s, e, t) {
   return t || !e ? 0 : s ? 0.16 : 0.38;
 }
-class vt {
+class It {
   howls = /* @__PURE__ */ new Map();
   retries = /* @__PURE__ */ new Map();
   lastRequested = null;
@@ -1372,11 +1393,11 @@ class vt {
   onDegraded;
   constructor(e = () => {
   }) {
-    this.onDegraded = e, Q.Howler.autoSuspend = !0;
+    this.onDegraded = e, ne.Howler.autoSuspend = !0;
   }
   load() {
-    for (const e of qe) {
-      const t = new Q.Howl({
+    for (const e of et) {
+      const t = new ne.Howl({
         src: [`assets/audio/${e}.ogg`, `assets/audio/${e}.mp3`],
         preload: !0,
         loop: e === "ambience",
@@ -1387,7 +1408,7 @@ class vt {
         },
         onplayerror: () => {
           const r = this.retries.get(e) ?? 0;
-          bt(e, this.lastRequested, r) && (this.retries.set(e, r + 1), t.once("unlock", () => {
+          Tt(e, this.lastRequested, r) && (this.retries.set(e, r + 1), t.once("unlock", () => {
             this.lastRequested === e && this.effects && !this.muted && t.play();
           }));
         }
@@ -1397,13 +1418,13 @@ class vt {
   }
   unlock() {
     this.unlocked = !0;
-    const e = Q.Howler.ctx;
+    const e = ne.Howler.ctx;
     e && e.state !== "running" && e.resume(), this.installBus(), this.syncAmbience();
   }
   /** Master compressor in front of the speakers, the same bus shape as a two-bus cabinet mix. */
   installBus() {
     if (this.busReady) return;
-    const e = Q.Howler.ctx, t = Q.Howler.masterGain;
+    const e = ne.Howler.ctx, t = ne.Howler.masterGain;
     if (!e || !t) return;
     const r = e.createDynamicsCompressor();
     r.threshold.value = -8, r.knee.value = 6, r.ratio.value = 8, r.attack.value = 4e-3, r.release.value = 0.18;
@@ -1414,7 +1435,7 @@ class vt {
     t.connect(r), r.connect(e.destination), this.busReady = !0;
   }
   setPrefs(e, t, r) {
-    this.muted = e, this.music = t, this.effects = r, Q.Howler.mute(e), this.syncAmbience();
+    this.muted = e, this.music = t, this.effects = r, ne.Howler.mute(e), this.syncAmbience();
   }
   setPresenting(e) {
     this.presenting = e, this.syncAmbience();
@@ -1427,7 +1448,7 @@ class vt {
     this.syncAmbience();
   }
   play(e, t = 1) {
-    if (!this.unlocked || this.muted || this.hidden || !this.effects || !wt.has(e)) return;
+    if (!this.unlocked || this.muted || this.hidden || !this.effects || !Mt.has(e)) return;
     const r = this.generation, i = this.howls.get(e);
     if (!i) return;
     this.lastRequested = e, this.installBus();
@@ -1456,7 +1477,7 @@ class vt {
   syncAmbience() {
     const e = this.howls.get("ambience");
     if (!e || !this.unlocked) return;
-    const t = yt(this.presenting, this.music, this.muted);
+    const t = Et(this.presenting, this.music, this.muted);
     if (this.hidden || t === 0) {
       this.ambGain = 0, e.pause();
       return;
@@ -1471,7 +1492,7 @@ class vt {
     this.howls.clear();
   }
 }
-const Be = "auric-dynamo.board.v1", kt = [
+const Xe = "auric-dynamo.board.v1", Lt = [
   { id: "first-win", label: "First net gain" },
   { id: "feature", label: "Feature landed" },
   { id: "wheel", label: "Wheel opened" },
@@ -1480,45 +1501,45 @@ const Be = "auric-dynamo.board.v1", kt = [
   { id: "mega", label: "Mega net" },
   { id: "epic", label: "Epic net" },
   { id: "session", label: "Session ahead" }
-], Fe = ["Spark", "Ember", "Brass", "Glow", "Dynamo", "Charge", "Crown", "Auric"];
-function z() {
+], Qe = ["Spark", "Ember", "Brass", "Glow", "Dynamo", "Charge", "Crown", "Auric"];
+function de() {
   return { handle: "Player", rows: [], seen: [], achievements: [] };
 }
-function Ve(s) {
+function tt(s) {
   const e = s.replace(/[^A-Za-z0-9 ]/g, "").trim().slice(0, 16);
   return e.length > 0 ? e : "Player";
 }
-function At(s) {
+function Pt(s) {
   return new Date(s).toISOString().slice(0, 10);
 }
-function xt(s) {
-  const e = Math.min(Fe.length, 1 + Math.floor(Math.max(0, s) / 5));
-  return { level: e, name: Fe[e - 1] ?? "Spark" };
+function Ct(s) {
+  const e = Math.min(Qe.length, 1 + Math.floor(Math.max(0, s) / 5));
+  return { level: e, name: Qe[e - 1] ?? "Spark" };
 }
-function St(s) {
-  if (!s) return z();
+function Nt(s) {
+  if (!s) return de();
   try {
     const e = JSON.parse(s);
-    return !e || !Array.isArray(e.rows) || !Array.isArray(e.seen) ? z() : {
-      handle: Ve(typeof e.handle == "string" ? e.handle : "Player"),
+    return !e || !Array.isArray(e.rows) || !Array.isArray(e.seen) ? de() : {
+      handle: tt(typeof e.handle == "string" ? e.handle : "Player"),
       rows: e.rows.filter((t) => t && typeof t.handle == "string"),
       seen: e.seen.filter((t) => typeof t == "string").slice(-80),
       achievements: Array.isArray(e.achievements) ? e.achievements.filter((t) => typeof t == "string") : []
     };
   } catch {
-    return z();
+    return de();
   }
 }
-function Mt(s) {
+function Bt(s) {
   return JSON.stringify(s);
 }
-function Tt(s, e) {
+function Ot(s, e) {
   const t = s.cost > 0 ? s.net / s.cost : 0, r = [];
   return e.wins >= 1 && r.push("first-win"), (s.modifier === "replace" || s.modifier === "bank" || s.modifier === "wheel") && r.push("feature"), s.modifier === "wheel" && r.push("wheel"), s.flourish && r.push("flourish"), t >= 5 && r.push("big"), t >= 25 && r.push("mega"), t >= 100 && r.push("epic"), e.highestSession > 0 && r.push("session"), r;
 }
-function Et(s, e) {
+function Ft(s, e) {
   if (s.seen.includes(e.id)) return s;
-  const t = At(e.at), r = s.rows.map((h) => ({ ...h }));
+  const t = Pt(e.at), r = s.rows.map((h) => ({ ...h }));
   let i = r.find((h) => h.handle === s.handle);
   i || (i = {
     handle: s.handle,
@@ -1530,7 +1551,7 @@ function Et(s, e) {
     dayPlays: 0
   }, r.push(i)), i.day !== t && (i.day = t, i.dayBest = e.net, i.dayPlays = 0), i.dayPlays += 1, e.net > i.dayBest && (i.dayBest = e.net), e.net > i.biggestWin && (i.biggestWin = e.net), e.sessionNet > i.highestSession && (i.highestSession = e.sessionNet), e.net > 0 && (i.wins += 1);
   const a = [...s.achievements];
-  for (const h of Tt(e, i))
+  for (const h of Ot(e, i))
     a.includes(h) || a.push(h);
   return {
     handle: s.handle,
@@ -1539,32 +1560,32 @@ function Et(s, e) {
     achievements: a
   };
 }
-function It(s) {
+function Ht(s) {
   return s.rows.find((e) => e.handle === s.handle) ?? null;
 }
-function Lt(s, e) {
+function Rt(s, e) {
   return [...s].sort((t, r) => r[e] - t[e] || t.handle.localeCompare(r.handle));
 }
-class W extends Error {
+class j extends Error {
   constructor(e) {
     super(e), this.name = "EconomyError";
   }
 }
-const Pt = 1, Ct = 1e5, Nt = [10, 20, 50, 100], Bt = 10, Y = 1e4, Te = {
+const Dt = 1, $t = 1e5, Wt = [10, 20, 50, 100], Gt = 10, ie = 1e4, Re = {
   blank: 0,
   0: 0,
   1: 1,
   5: 3,
   10: 12,
   "00": 40
-}, Xe = [
+}, De = [
   { token: "blank", from: 0, to: 2200, weight: 2200 },
   { token: "0", from: 2200, to: 7269, weight: 5069 },
   { token: "1", from: 7269, to: 8e3, weight: 731 },
   { token: "5", from: 8e3, to: 9200, weight: 1200 },
   { token: "10", from: 9200, to: 9700, weight: 500 },
   { token: "00", from: 9700, to: 1e4, weight: 300 }
-], Qe = [
+], $e = [
   { id: "x1", from: 0, to: 6200, weight: 6200, multiplier: 1 },
   { id: "x2", from: 6200, to: 8e3, weight: 1800, multiplier: 2 },
   { id: "x5", from: 8e3, to: 8700, weight: 700, multiplier: 5 },
@@ -1572,113 +1593,119 @@ const Pt = 1, Ct = 1e5, Nt = [10, 20, 50, 100], Bt = 10, Y = 1e4, Te = {
   { id: "replace", from: 9100, to: 9500, weight: 400, multiplier: null },
   { id: "bank", from: 9500, to: 9920, weight: 420, multiplier: null },
   { id: "wheel", from: 9920, to: 1e4, weight: 80, multiplier: null }
-], ue = [1, 2, 4, 6, 10, 16, 40, 110];
-function R(s, e) {
-  if (!Number.isSafeInteger(s)) throw new W(`unsafe ${e}`);
+], ve = [1, 2, 4, 6, 10, 16, 40, 110];
+function G(s, e) {
+  if (!Number.isSafeInteger(s)) throw new j(`unsafe ${e}`);
   return s;
 }
-function xe(s, e, t) {
-  return R(s, t), R(e, t), R(s * e, t);
+function Oe(s, e, t) {
+  return G(s, t), G(e, t), G(s * e, t);
 }
-function j(s, e, t) {
-  return R(s, t), R(e, t), R(s + e, t);
+function se(s, e, t) {
+  return G(s, t), G(e, t), G(s + e, t);
+}
+function We(s) {
+  return Wt.includes(s);
 }
 function Ee(s) {
-  return Nt.includes(s);
-}
-function ge(s) {
-  if (!Number.isInteger(s) || s < 0 || s >= Y) throw new W("token draw");
-  const e = Xe.find((t) => s >= t.from && s < t.to);
-  if (!e) throw new W("token draw");
+  if (!Number.isInteger(s) || s < 0 || s >= ie) throw new j("token draw");
+  const e = De.find((t) => s >= t.from && s < t.to);
+  if (!e) throw new j("token draw");
   return e.token;
 }
-function Ft(s) {
-  if (!Number.isInteger(s) || s < 0 || s >= Y) throw new W("modifier draw");
-  const e = Qe.find((t) => s >= t.from && s < t.to);
-  if (!e) throw new W("modifier draw");
+function qt(s) {
+  if (!Number.isInteger(s) || s < 0 || s >= ie) throw new j("modifier draw");
+  const e = $e.find((t) => s >= t.from && s < t.to);
+  if (!e) throw new j("modifier draw");
   return e.id;
 }
-function je(s) {
-  if (s.some((t) => t === "blank")) return 0;
-  const e = s.reduce((t, r) => t + Te[r], 0);
-  return R(e, "raw number");
+function N(s) {
+  return De.find((e) => e.token === s).from;
 }
-function Ot(s) {
+function re(s) {
+  return $e.find((e) => e.id === s).from;
+}
+function nt(s) {
+  if (s.some((t) => t === "blank")) return 0;
+  const e = s.reduce((t, r) => t + Re[r], 0);
+  return G(e, "raw number");
+}
+function Vt(s) {
   return s === "blank" ? "blank" : s;
 }
-function Ye(s) {
+function st(s) {
   return s === "x1" ? "1x" : s === "x2" ? "2x" : s === "x5" ? "5x" : s === "x10" ? "10x" : s === "replace" ? "Replace" : s === "bank" ? "Bank + Add" : "Wheel";
 }
-function re(s, e) {
+function pe(s, e) {
   const t = [
-    ge(s.nextInt(Y)),
-    ge(s.nextInt(Y)),
-    ge(s.nextInt(Y))
-  ], r = je(t), i = xe(r, e, "base");
+    Ee(s.nextInt(ie)),
+    Ee(s.nextInt(ie)),
+    Ee(s.nextInt(ie))
+  ], r = nt(t), i = Oe(r, e, "base");
   return { tokens: t, raw: r, base: i };
 }
-function Ue(s, e, t) {
-  if (!Ee(e)) throw new W("cost");
-  if (!Number.isSafeInteger(t) || t < 0 || t > 9) throw new W("meter");
-  const r = e / 10, i = re(s, r), a = Ft(s.nextInt(Y)), h = [];
-  let d = null, c = null, f = 0, w = null, n = 0, o = [], l = 0;
+function rt(s, e, t) {
+  if (!We(e)) throw new j("cost");
+  if (!Number.isSafeInteger(t) || t < 0 || t > 9) throw new j("meter");
+  const r = e / 10, i = pe(s, r), a = qt(s.nextInt(ie)), h = [];
+  let c = null, d = null, p = 0, b = null, n = 0, o = [], l = 0;
   if (a === "x1" || a === "x2" || a === "x5" || a === "x10")
-    d = a === "x1" ? 1 : a === "x2" ? 2 : a === "x5" ? 5 : 10, n = xe(d - 1, i.base, "modifier addition"), l = j(i.base, n, "gross"), o = [i.base, n];
+    c = a === "x1" ? 1 : a === "x2" ? 2 : a === "x5" ? 5 : 10, n = Oe(c - 1, i.base, "modifier addition"), l = se(i.base, n, "gross"), o = [i.base, n];
   else if (a === "replace") {
-    const y = re(s, r);
-    h.push(y), w = i.base, l = y.base, o = [y.base];
+    const y = pe(s, r);
+    h.push(y), b = i.base, l = y.base, o = [y.base];
   } else if (a === "bank") {
-    const y = re(s, r), v = re(s, r);
-    h.push(y, v), l = j(j(i.base, y.base, "bank"), v.base, "gross"), o = [i.base, y.base, v.base];
+    const y = pe(s, r), k = pe(s, r);
+    h.push(y, k), l = se(se(i.base, y.base, "bank"), k.base, "gross"), o = [i.base, y.base, k.base];
   } else
-    c = s.nextInt(ue.length), f = xe(e, ue[c], "wheel"), l = j(i.base, f, "gross"), o = [i.base, f];
-  if (o.reduce((y, v) => j(y, v, "contributors"), 0) !== l) throw new W("contributor sum");
-  const _ = j(l, -e, "net"), m = t + 1 >= Bt, p = m ? 0 : t + 1;
+    d = s.nextInt(ve.length), p = Oe(e, ve[d], "wheel"), l = se(i.base, p, "gross"), o = [i.base, p];
+  if (o.reduce((y, k) => se(y, k, "contributors"), 0) !== l) throw new j("contributor sum");
+  const f = se(l, -e, "net"), _ = t + 1 >= Gt, m = _ ? 0 : t + 1;
   return {
     cost: e,
     unit: r,
     initial: i,
     modifier: a,
-    multiplier: d,
+    multiplier: c,
     steps: h,
-    wheelIndex: c,
-    wheelPrize: f,
-    discarded: w,
+    wheelIndex: d,
+    wheelPrize: p,
+    discarded: b,
     modifierAdd: n,
     contributors: o,
     gross: l,
-    net: _,
+    net: f,
     collectionBefore: t,
-    collectionAfter: p,
-    collectionFlourish: m
+    collectionAfter: m,
+    collectionFlourish: _
   };
 }
-function G(s, e) {
-  if (R(s, "net"), R(e, "cost"), e <= 0) throw new W("cost");
+function Q(s, e) {
+  if (G(s, "net"), G(e, "cost"), e <= 0) throw new j("cost");
   return s <= 0 ? 0 : s < 5 * e ? 1 : s < 25 * e ? 2 : s < 100 * e ? 3 : 4;
 }
-function Ht(s, e, t) {
+function Xt(s, e, t) {
   if (s <= 0 || t === null || t <= 0) return 0;
-  const r = G(t, e), i = G(s, e);
+  const r = Q(t, e), i = Q(s, e);
   return r < i ? r : i;
 }
-function L(s) {
+function I(s) {
   const e = s < 0 ? "-" : "", t = Math.abs(s).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return e + t;
 }
-function Rt(s) {
-  return s.net > 0 ? "Net gain" : s.gross === 0 ? "No return" : s.net === 0 ? "No net change" : `Returned ${L(s.gross)}`;
+function Qt(s) {
+  return s.net > 0 ? "Net gain" : s.gross === 0 ? "No return" : s.net === 0 ? "No net change" : `Returned ${I(s.gross)}`;
 }
-function $t(s) {
-  return s.gross === 0 ? `No return. Net change -${L(s.cost)}.` : s.net === 0 ? "No net change." : s.net < 0 ? `Returned ${L(s.gross)}. Net change -${L(-s.net)}.` : `Returned ${L(s.gross)}. Net change +${L(s.net)}.`;
+function Yt(s) {
+  return s.gross === 0 ? `No return. Net change -${I(s.cost)}.` : s.net === 0 ? "No net change." : s.net < 0 ? `Returned ${I(s.gross)}. Net change -${I(-s.net)}.` : `Returned ${I(s.gross)}. Net change +${I(s.net)}.`;
 }
-function H(s) {
-  return String(je(s));
+function W(s) {
+  return String(nt(s));
 }
-function Dt() {
-  const s = Xe.map((r) => `${Ot(r.token)}: ${r.weight} out of 10000, worth ${Te[r.token]}`).join(`
-`), e = Qe.map((r) => `${Ye(r.id)}: ${r.weight} out of 10000`).join(`
-`), t = ue.map((r, i) => `Wedge ${i + 1}: cost x ${r} (1 out of 8)`).join(`
+function jt() {
+  const s = De.map((r) => `${Vt(r.token)}: ${r.weight} out of 10000, worth ${Re[r.token]}`).join(`
+`), e = $e.map((r) => `${st(r.id)}: ${r.weight} out of 10000`).join(`
+`), t = ve.map((r, i) => `Wedge ${i + 1}: cost x ${r} (1 out of 8)`).join(`
 `);
   return [
     {
@@ -1729,34 +1756,34 @@ The wedge is chosen before the wheel moves. The pointer lands on that wedge. Cha
     }
   ];
 }
-const ne = Math.PI * 2, le = 8, ee = ne / le;
-function he(s) {
-  return -((s + 0.5) * ee);
+const he = Math.PI * 2, we = 8, ce = he / we;
+function ke(s) {
+  return -((s + 0.5) * ce);
 }
-function Ze(s) {
-  let e = -s % ne;
-  return e < 0 && (e += ne), (Math.floor((e + 1e-9) / ee) % le + le) % le;
+function it(s) {
+  let e = -s % he;
+  return e < 0 && (e += he), (Math.floor((e + 1e-9) / ce) % we + we) % we;
 }
-function Wt(s) {
+function Ut(s) {
   return 1 - (1 - Math.min(1, Math.max(0, s))) ** 3;
 }
-function Gt(s, e, t = We) {
-  const r = he(s), i = r - t * ne;
-  return i + (r - i) * Wt(e);
+function Zt(s, e, t = Je) {
+  const r = ke(s), i = r - t * he;
+  return i + (r - i) * Ut(e);
 }
-function qt(s, e = We) {
-  const t = he(s), r = t - e * ne, i = t - r, a = Math.floor(-r / ee - 1e-9), h = Math.ceil(-t / ee + 1e-9), d = [];
-  for (let c = a; c >= h; c--) {
-    const f = -c * ee;
-    if (f <= r + 1e-8 || f > t + 1e-8) continue;
-    const w = (f - r) / i;
-    if (w <= 0 || w > 1) continue;
-    const n = 1 - Math.cbrt(1 - w);
-    n > 0 && n <= 1 && d.push(n);
+function Kt(s, e = Je) {
+  const t = ke(s), r = t - e * he, i = t - r, a = Math.floor(-r / ce - 1e-9), h = Math.ceil(-t / ce + 1e-9), c = [];
+  for (let d = a; d >= h; d--) {
+    const p = -d * ce;
+    if (p <= r + 1e-8 || p > t + 1e-8) continue;
+    const b = (p - r) / i;
+    if (b <= 0 || b > 1) continue;
+    const n = 1 - Math.cbrt(1 - b);
+    n > 0 && n <= 1 && c.push(n);
   }
-  return d.sort((c, f) => c - f), d;
+  return c.sort((d, p) => d - p), c;
 }
-function ie() {
+function me() {
   return {
     reading: null,
     discarded: null,
@@ -1770,10 +1797,10 @@ function ie() {
     guaranteedNet: null
   };
 }
-function Ke(s) {
+function ot(s) {
   return s === 1 ? "chord-2" : s === 2 ? "chord-3" : s === 3 ? "chord-full" : s === 4 ? "fanfare" : null;
 }
-function Vt(s, e, t) {
+function Jt(s, e, t) {
   if (t <= 0) return s;
   if (t >= 1) return e;
   const r = e - s;
@@ -1786,13 +1813,13 @@ function Vt(s, e, t) {
   const a = Math.floor(s + r * i);
   return Math.min(e, Math.max(s, a));
 }
-function Xt(s) {
+function zt(s) {
   return { ...s, bankAdds: [...s.bankAdds] };
 }
-function X(s) {
+function U(s) {
   const e = s.net, t = s.gross;
   return s.modifier === "replace" ? {
-    reading: H(s.steps[0].tokens),
+    reading: W(s.steps[0].tokens),
     discarded: s.discarded,
     base: s.steps[0].base,
     modifierAdd: null,
@@ -1803,7 +1830,7 @@ function X(s) {
     net: e,
     guaranteedNet: e
   } : s.modifier === "bank" ? {
-    reading: H(s.initial.tokens),
+    reading: W(s.initial.tokens),
     discarded: null,
     base: null,
     modifierAdd: null,
@@ -1814,7 +1841,7 @@ function X(s) {
     net: e,
     guaranteedNet: e
   } : s.modifier === "wheel" ? {
-    reading: H(s.initial.tokens),
+    reading: W(s.initial.tokens),
     discarded: null,
     base: s.initial.base,
     modifierAdd: null,
@@ -1825,7 +1852,7 @@ function X(s) {
     net: e,
     guaranteedNet: e
   } : {
-    reading: H(s.initial.tokens),
+    reading: W(s.initial.tokens),
     discarded: null,
     base: s.initial.base,
     modifierAdd: s.modifierAdd,
@@ -1837,25 +1864,25 @@ function X(s) {
     guaranteedNet: e
   };
 }
-function Qt(s, e, t) {
+function en(s, e, t) {
   for (let r = e + 1; r < s.length; r++) s[r].startMs += t;
 }
-function jt(s, e) {
+function tn(s, e) {
   let t = s.length ? s[s.length - 1].startMs + s[s.length - 1].durationMs : 0;
   if (t <= e) return !1;
   for (const r of ["inhale", "countup", "collection", "resolve"]) {
-    const i = s.findIndex((d) => d.kind === r);
+    const i = s.findIndex((c) => c.kind === r);
     if (i < 0) continue;
     const a = t - e;
     if (a <= 0) return !1;
     const h = Math.min(s[i].durationMs, a);
-    s[i].durationMs -= h, Qt(s, i, -h), t -= h;
+    s[i].durationMs -= h, en(s, i, -h), t -= h;
   }
   return t > e;
 }
-function Se(s, e, t, r = pe) {
+function Fe(s, e, t, r = Se) {
   if (e === "reduced") {
-    const p = X(s), y = s.net > 0 ? G(s.net, s.cost) : 0, v = Ke(y);
+    const k = U(s), A = s.net > 0 ? Q(s.net, s.cost) : 0, E = ot(A);
     return {
       receiptId: t,
       mode: e,
@@ -1867,115 +1894,117 @@ function Se(s, e, t, r = pe) {
           receiptId: t,
           startMs: 0,
           durationMs: r.reduced,
-          cueTier: y,
-          parts: p
+          cueTier: A,
+          parts: k
         }
       ],
-      cues: [{ at: 0, sound: v ?? "latch", presentation: !0 }]
+      cues: [{ at: 0, sound: E ?? "latch", presentation: !0 }]
     };
   }
-  const i = e === "turbo" ? r.turboScale : 1, a = (p) => Math.max(0, Math.round(p * i)), h = [];
-  let d = 0;
-  const c = (p, y, v, k) => {
-    const M = Ht(s.net, s.cost, v.guaranteedNet);
+  const i = e === "super" ? r.superScale : e === "turbo" ? r.turboScale : 1, a = (k) => Math.max(0, Math.round(k * i)), h = [];
+  let c = 0;
+  const d = (k, A, E, B) => {
+    const O = Xt(s.net, s.cost, E.guaranteedNet);
     h.push({
-      kind: p,
+      kind: k,
       receiptId: t,
-      startMs: d,
-      durationMs: y,
-      cueTier: M,
-      parts: Xt(v),
-      ...k
-    }), d += y;
-  }, f = [
+      startMs: c,
+      durationMs: A,
+      cueTier: O,
+      parts: zt(E),
+      ...B
+    }), c += A;
+  }, p = [
     a(r.reelStops[0]),
     a(r.reelStops[1]),
     a(r.reelStops[2])
   ];
-  let w = ie();
-  if (c("reels", f[2], w, { reelStops: f }), w = { ...w, reading: H(s.initial.tokens) }, c("assemble", a(r.assemble), w), c("inhale", a(r.inhale), w), s.multiplier !== null)
-    w = X(s);
+  let b = me();
+  const n = s.net > 0 && (Q(s.net, s.cost) >= 2 || s.modifier === "wheel" || s.modifier === "replace" || s.modifier === "bank");
+  if (d("reels", p[2] + a(n ? 900 : 150), b, { reelStops: p }), b = { ...b, reading: W(s.initial.tokens) }, d("assemble", a(r.assemble), b), d("inhale", a(r.inhale), b), s.multiplier !== null)
+    b = U(s);
   else if (s.modifier === "replace")
-    w = {
-      ...ie(),
-      reading: H(s.initial.tokens),
+    b = {
+      ...me(),
+      reading: W(s.initial.tokens),
       discarded: s.discarded,
       guaranteedNet: null
     };
   else if (s.modifier === "bank") {
-    const p = s.initial.base > s.cost ? s.initial.base - s.cost : null;
-    w = {
-      ...ie(),
-      reading: H(s.initial.tokens),
+    const k = s.initial.base > s.cost ? s.initial.base - s.cost : null;
+    b = {
+      ...me(),
+      reading: W(s.initial.tokens),
       bankLocked: s.initial.base,
-      guaranteedNet: p
+      guaranteedNet: k
     };
   } else {
-    const p = s.initial.base > 0 ? s.initial.base : null;
-    w = {
-      ...ie(),
-      reading: H(s.initial.tokens),
+    const k = s.initial.base > 0 ? s.initial.base : null;
+    b = {
+      ...me(),
+      reading: W(s.initial.tokens),
       base: s.initial.base,
-      guaranteedNet: p
+      guaranteedNet: k
     };
   }
-  c("modifier", a(r.modifier), w), s.modifier === "replace" && c("replace", a(r.feature.replace), X(s)), s.modifier === "bank" && c("bank", a(r.feature.bank), X(s)), s.modifier === "wheel" && c("wheel", a(r.feature.wheel), X(s));
-  const n = G(s.net, s.cost), o = a(r.count[n]);
-  o > 0 && c("countup", o, X(s)), c("resolve", a(r.resolve), X(s)), c("collection", a(r.collection), X(s));
-  const l = jt(h, r.cap), u = h.length ? h[h.length - 1].startMs + h[h.length - 1].durationMs : 0, _ = l ? r.cap : u, m = Yt(s, h);
-  return { receiptId: t, mode: e, stages: h, cues: m, totalMs: _, capped: l };
+  d("modifier", a(r.modifier), b), s.modifier === "replace" && d("replace", a(r.feature.replace), U(s)), s.modifier === "bank" && d("bank", a(r.feature.bank), U(s)), s.modifier === "wheel" && d("wheel", a(r.feature.wheel), U(s));
+  const o = Q(s.net, s.cost), l = o === 3 && s.net >= 50 * s.cost ? 5600 : r.count[o], u = a(l);
+  u > 0 && d("countup", u, U(s)), d("resolve", a(r.resolve), U(s)), d("collection", a(r.collection), U(s));
+  const f = tn(h, r.cap), _ = h.length ? h[h.length - 1].startMs + h[h.length - 1].durationMs : 0, m = f ? r.cap : _, y = nn(s, h);
+  return { receiptId: t, mode: e, stages: h, cues: y, totalMs: m, capped: f };
 }
-function Yt(s, e, t) {
+function nn(s, e, t) {
   const r = [], i = e.find((u) => u.kind === "reels");
   if (i?.reelStops) {
     r.push({ at: i.startMs, sound: "spin", presentation: !0 });
-    const u = s.net > 0 && (s.modifier === "replace" || s.modifier === "bank" || s.modifier === "wheel" || G(s.net, s.cost) >= 2), _ = i.reelStops[i.reelStops.length - 1];
-    i.reelStops.forEach((m, p) => {
-      r.push({ at: m, sound: "click", presentation: !0 }), r.push({ at: m, sound: "stop", presentation: !0 }), r.push({ at: m + 36, sound: "land", presentation: !0, rate: 1 + p * 0.18 });
-    }), u && _ !== void 0 && r.push({ at: Math.max(i.startMs, _ - 220), sound: "riser", presentation: !0 });
+    const u = s.net > 0 && (s.modifier === "replace" || s.modifier === "bank" || s.modifier === "wheel" || Q(s.net, s.cost) >= 2), f = i.reelStops[i.reelStops.length - 1];
+    i.reelStops.forEach((_, m) => {
+      r.push({ at: _, sound: "click", presentation: !0 }), r.push({ at: _, sound: "stop", presentation: !0 }), r.push({ at: _ + 36, sound: "land", presentation: !0, rate: 1 + m * 0.18 });
+    }), u && f !== void 0 && r.push({ at: Math.max(i.startMs, f - 220), sound: "riser", presentation: !0 });
   }
-  const a = (u) => e.find((_) => _.kind === u), h = a("assemble");
+  const a = (u) => e.find((f) => f.kind === u), h = a("assemble");
   h && r.push({ at: h.startMs, sound: "latch", presentation: !0 });
-  const d = a("modifier");
-  d && (r.push({ at: d.startMs, sound: "brass", presentation: !0 }), d.cueTier > 0 && r.push({ at: d.startMs, sound: "teal-lift", presentation: !0 }));
-  const c = a("replace");
-  c && r.push({ at: c.startMs, sound: "latch", presentation: !0 });
-  const f = a("bank");
-  f && (r.push({ at: f.startMs, sound: "latch", presentation: !0 }), r.push({ at: f.startMs + Math.round(f.durationMs * 0.5), sound: "latch", presentation: !0 }), r.push({ at: f.startMs + Math.round(f.durationMs * (5 / 6)), sound: "latch", presentation: !0 }));
-  const w = a("wheel");
-  if (w && s.wheelIndex !== null) {
-    r.push({ at: w.startMs, sound: "turbine", presentation: !0 });
-    const u = w.durationMs * ce;
-    for (const _ of qt(s.wheelIndex))
-      r.push({ at: w.startMs + _ * u, sound: "tick", presentation: !0 });
+  const c = a("modifier");
+  c && (r.push({ at: c.startMs, sound: "brass", presentation: !0 }), c.cueTier > 0 && r.push({ at: c.startMs, sound: "teal-lift", presentation: !0 }));
+  const d = a("replace");
+  d && r.push({ at: d.startMs, sound: "latch", presentation: !0 });
+  const p = a("bank");
+  p && (r.push({ at: p.startMs, sound: "latch", presentation: !0 }), r.push({ at: p.startMs + Math.round(p.durationMs * 0.5), sound: "latch", presentation: !0 }), r.push({ at: p.startMs + Math.round(p.durationMs * (5 / 6)), sound: "latch", presentation: !0 }));
+  const b = a("wheel");
+  if (b && s.wheelIndex !== null) {
+    r.push({ at: b.startMs, sound: "turbine", presentation: !0 });
+    const u = b.durationMs * ye;
+    for (const f of Kt(s.wheelIndex))
+      r.push({ at: b.startMs + f * u, sound: "tick", presentation: !0 });
   }
-  const n = a("countup"), o = Ke(G(s.net, s.cost));
+  const n = a("countup"), o = ot(Q(s.net, s.cost));
   if (n && o && s.net > 0) {
     r.push({ at: n.startMs, sound: o, presentation: !0 }), r.push({ at: n.startMs, sound: "coin", presentation: !0 });
     for (let u = 1; u <= 6; u += 1) {
-      const _ = u / 7, m = 1 - (1 - _) * (1 - _);
-      r.push({ at: n.startMs + Math.round(n.durationMs * m), sound: "coin", presentation: !0 });
+      const f = u / 7, _ = 1 - (1 - f) * (1 - f);
+      r.push({ at: n.startMs + Math.round(n.durationMs * _), sound: "coin", presentation: !0 });
     }
   }
   const l = a("collection");
-  return l && r.push({ at: l.startMs, sound: "collect", presentation: !0 }), r.sort((u, _) => u.at - _.at);
+  return l && r.push({ at: l.startMs, sound: "collect", presentation: !0 }), r.sort((u, f) => u.at - f.at);
 }
-const Ut = [0, 8, 14, 20, 24];
-function Zt(s) {
-  return s === 2 ? "Big" : s === 3 ? "Mega" : s >= 4 ? "Epic" : null;
+const sn = [0, 8, 14, 20, 24];
+function rn(s, e) {
+  const t = Q(s, e);
+  return t < 2 || e <= 0 ? null : t === 2 ? "big" : t >= 4 ? "epic" : s >= 50 * e ? "super" : "mega";
 }
-function $(s, e) {
+function X(s, e) {
   return e <= s.startMs ? 0 : s.durationMs <= 0 ? 1 : Math.min(1, (e - s.startMs) / s.durationMs);
 }
-function Je(s, e) {
+function at(s, e) {
   let t = null;
   for (const r of s.stages)
     r.startMs <= e && (t = r);
   return t;
 }
-function Kt(s, e, t) {
-  const r = Je(e, t);
-  return r ? r.kind === "replace" ? Jt(s, $(r, t)) : r.kind === "bank" ? zt(s, $(r, t)) : r.kind === "wheel" ? en(s, $(r, t)) : r.parts : e.stages[0]?.parts ?? {
+function on(s, e, t) {
+  const r = at(e, t);
+  return r ? r.kind === "replace" ? an(s, X(r, t)) : r.kind === "bank" ? ln(s, X(r, t)) : r.kind === "wheel" ? dn(s, X(r, t)) : r.parts : e.stages[0]?.parts ?? {
     reading: null,
     discarded: null,
     base: null,
@@ -1988,10 +2017,10 @@ function Kt(s, e, t) {
     guaranteedNet: null
   };
 }
-function Jt(s, e) {
+function an(s, e) {
   const t = e >= 0.78;
   return {
-    reading: H(t ? s.steps[0].tokens : s.initial.tokens),
+    reading: W(t ? s.steps[0].tokens : s.initial.tokens),
     discarded: s.discarded,
     base: t ? s.steps[0].base : null,
     modifierAdd: null,
@@ -2003,12 +2032,12 @@ function Jt(s, e) {
     guaranteedNet: t ? s.net : null
   };
 }
-function zt(s, e) {
+function ln(s, e) {
   const t = e >= 0.5, r = e >= 5 / 6, i = [];
   t && i.push(s.steps[0].base), r && i.push(s.steps[1].base);
-  const a = s.initial.base + i.reduce((d, c) => d + c, 0), h = a > s.cost ? a - s.cost : null;
+  const a = s.initial.base + i.reduce((c, d) => c + d, 0), h = a > s.cost ? a - s.cost : null;
   return {
-    reading: H(s.initial.tokens),
+    reading: W(s.initial.tokens),
     discarded: null,
     base: null,
     modifierAdd: null,
@@ -2020,10 +2049,10 @@ function zt(s, e) {
     guaranteedNet: r ? s.net : h
   };
 }
-function en(s, e) {
-  const t = e >= ce;
+function dn(s, e) {
+  const t = e >= ye;
   return {
-    reading: H(s.initial.tokens),
+    reading: W(s.initial.tokens),
     discarded: null,
     base: s.initial.base,
     modifierAdd: null,
@@ -2035,74 +2064,75 @@ function en(s, e) {
     guaranteedNet: t ? s.net : s.initial.base > 0 ? s.initial.base : null
   };
 }
-function tn(s, e) {
-  const t = [{ label: "Cost", amount: s.cost, text: L(s.cost), strike: !1 }];
-  if (e.discarded !== null && t.push({ label: "Discarded base", amount: e.discarded, text: L(e.discarded), strike: !0 }), e.base !== null && t.push({ label: "Base", amount: e.base, text: L(e.base), strike: !1 }), e.modifierAdd !== null && t.push({
-    label: s.multiplier ? `${Ye(s.modifier)} addition` : "Modifier addition",
+function cn(s, e) {
+  const t = [{ label: "Cost", amount: s.cost, text: I(s.cost), strike: !1 }];
+  if (e.discarded !== null && t.push({ label: "Discarded base", amount: e.discarded, text: I(e.discarded), strike: !0 }), e.base !== null && t.push({ label: "Base", amount: e.base, text: I(e.base), strike: !1 }), e.modifierAdd !== null && t.push({
+    label: s.multiplier ? `${st(s.modifier)} addition` : "Modifier addition",
     amount: e.modifierAdd,
-    text: L(e.modifierAdd),
+    text: I(e.modifierAdd),
     strike: !1
-  }), e.bankLocked !== null && t.push({ label: "Locked base", amount: e.bankLocked, text: L(e.bankLocked), strike: !1 }), e.bankAdds.forEach((r, i) => {
-    t.push({ label: `Added result ${i + 1}`, amount: r, text: L(r), strike: !1 });
-  }), e.wheel !== null && t.push({ label: "Wheel prize", amount: e.wheel, text: L(e.wheel), strike: !1 }), e.gross !== null && t.push({ label: "Gross", amount: e.gross, text: L(e.gross), strike: !1 }), e.net !== null) {
-    const r = e.net > 0 ? `+${L(e.net)}` : L(e.net);
+  }), e.bankLocked !== null && t.push({ label: "Locked base", amount: e.bankLocked, text: I(e.bankLocked), strike: !1 }), e.bankAdds.forEach((r, i) => {
+    t.push({ label: `Added result ${i + 1}`, amount: r, text: I(r), strike: !1 });
+  }), e.wheel !== null && t.push({ label: "Wheel prize", amount: e.wheel, text: I(e.wheel), strike: !1 }), e.gross !== null && t.push({ label: "Gross", amount: e.gross, text: I(e.gross), strike: !1 }), e.net !== null) {
+    const r = e.net > 0 ? `+${I(e.net)}` : I(e.net);
     t.push({ label: "Net", amount: null, text: r, strike: !1 });
   }
   return t;
 }
-function nn(s, e) {
+function un(s, e) {
   return e.error ? "error" : e.idle && !e.onboarded ? "onboarding" : e.idle ? "idle" : !s || s.kind === "reels" ? "spinning" : s.kind === "replace" ? "replace" : s.kind === "bank" ? "bank" : s.kind === "wheel" ? "wheel" : s.kind === "collection" ? "collection" : s.kind === "countup" && s.cueTier > 0 ? "celebrating" : "resolving";
 }
-function fe(s) {
-  const { outcome: e, schedule: t, balanceAfter: r } = s, i = Math.max(0, s.elapsed), a = Kt(e, t, i), h = Je(t, i), d = e.net > 0 ? G(e.net, e.cost) : 0, c = t.stages.find((E) => E.kind === "countup");
-  let f = null, w = 0;
-  a.gross !== null && d === 0 && (f = a.gross), a.gross !== null && d > 0 && (c && i < c.startMs ? f = null : c && i < c.startMs + c.durationMs ? (f = Vt(0, e.gross, $(c, i)), w = d >= 3 ? $(c, i) : 0) : a.gross !== null && (f = e.gross, w = d >= 3 ? 1 : 0)), t.mode === "reduced" && (f = e.gross, w = 0);
-  const n = f ?? 0, o = a.gross === null && t.mode !== "reduced" ? r - e.gross : r - e.gross + (d > 0 && c && i < c.startMs + c.durationMs && t.mode !== "reduced" ? n : e.gross), l = t.mode === "reduced" ? e.net > 0 ? d : 0 : a.guaranteedNet === null ? 0 : e.net > 0 ? G(Math.min(a.guaranteedNet, e.net), e.cost) : 0, u = c && i >= c.startMs && i < c.startMs + c.durationMs, _ = t.mode === "reduced" || !u || d === 0 ? 0 : Ut[d], m = t.stages.find((E) => E.kind === "modifier"), p = m && i >= m.startMs ? (m.cueTier > 0 ? 0.85 : 0.4) * Math.min(1, $(m, i) || 1) : 0;
+function Ae(s) {
+  const { outcome: e, schedule: t, balanceAfter: r } = s, i = Math.max(0, s.elapsed), a = on(e, t, i), h = at(t, i), c = e.net > 0 ? Q(e.net, e.cost) : 0, d = t.stages.find((C) => C.kind === "countup");
+  let p = null, b = 0;
+  a.gross !== null && c === 0 && (p = a.gross), a.gross !== null && c > 0 && (d && i < d.startMs ? p = null : d && i < d.startMs + d.durationMs ? (p = Jt(0, e.gross, X(d, i)), b = c >= 3 ? X(d, i) : 0) : a.gross !== null && (p = e.gross, b = c >= 3 ? 1 : 0)), t.mode === "reduced" && (p = e.gross, b = 0);
+  const n = p ?? 0, o = a.gross === null && t.mode !== "reduced" ? r - e.gross : r - e.gross + (c > 0 && d && i < d.startMs + d.durationMs && t.mode !== "reduced" ? n : e.gross), l = t.mode === "reduced" ? e.net > 0 ? c : 0 : a.guaranteedNet === null ? 0 : e.net > 0 ? Q(Math.min(a.guaranteedNet, e.net), e.cost) : 0, u = d && i >= d.startMs && i < d.startMs + d.durationMs, f = t.mode === "reduced" || !u || c === 0 ? 0 : sn[c], _ = t.stages.find((C) => C.kind === "modifier"), m = _ && i >= _.startMs ? (_.cueTier > 0 ? 0.85 : 0.4) * Math.min(1, X(_, i) || 1) : 0;
   let y = null;
   if (e.modifier === "wheel" && e.wheelIndex !== null) {
-    const E = t.stages.find((B) => B.kind === "wheel");
+    const C = t.stages.find((F) => F.kind === "wheel");
     if (t.mode === "reduced")
-      y = { rotation: he(e.wheelIndex), lit: e.wheelIndex, spinning: !1 };
-    else if (E && i >= E.startMs) {
-      const B = $(E, i), q = B < ce, V = q ? B / ce : 1, Ce = Gt(e.wheelIndex, V), rt = q ? null : e.wheelIndex;
-      !q && (Ze(Ce), e.wheelIndex), y = { rotation: Ce, lit: rt, spinning: q };
+      y = { rotation: ke(e.wheelIndex), lit: e.wheelIndex, spinning: !1 };
+    else if (C && i >= C.startMs) {
+      const F = X(C, i), V = F < ye, g = V ? F / ye : 1, S = Zt(e.wheelIndex, g), T = V ? null : e.wheelIndex;
+      !V && (it(S), e.wheelIndex), y = { rotation: S, lit: T, spinning: V };
     } else
-      y = { rotation: he(0), lit: null, spinning: !1 };
+      y = { rotation: ke(0), lit: null, spinning: !1 };
   }
-  const v = t.mode === "reduced" ? e.modifier === "replace" ? e.steps[0].tokens : e.initial.tokens : sn(e, t, i), k = rn(t, i), M = t.mode !== "reduced" && d > 0 && f !== null && c !== void 0 && i < c.startMs + c.durationMs, T = f === null || M ? "Total" : "Gross", P = a.net === null ? "Net pending" : a.net > 0 ? `Net +${L(a.net)}` : `Net ${L(a.net)}`, C = t.stages.find((E) => E.kind === "collection"), g = t.mode === "reduced" || (C ? i >= C.startMs : !1), A = g ? e.collectionFlourish ? 10 : e.collectionBefore + 1 : e.collectionBefore, S = g && e.collectionFlourish, x = s.sessionNetAfter ?? e.net, N = t.mode === "reduced" || a.net !== null;
+  const k = t.mode === "reduced" ? e.modifier === "replace" ? e.steps[0].tokens : e.initial.tokens : hn(e, t, i), A = fn(t, i), E = t.mode !== "reduced" && c > 0 && p !== null && d !== void 0 && i < d.startMs + d.durationMs, B = p === null || E ? "Total" : "Gross", O = a.net === null ? "Net pending" : a.net > 0 ? `Net +${I(a.net)}` : `Net ${I(a.net)}`, q = t.stages.find((C) => C.kind === "collection"), x = t.mode === "reduced" || (q ? i >= q.startMs : !1), Z = x ? e.collectionFlourish ? 10 : e.collectionBefore + 1 : e.collectionBefore, Y = x && e.collectionFlourish, P = s.sessionNetAfter ?? e.net, J = t.mode === "reduced" || a.net !== null;
   return {
     receiptId: t.receiptId,
-    phase: nn(h, { onboarded: s.onboarded ?? !0, error: s.error ?? !1, idle: s.idle ?? !1 }),
+    phase: un(h, { onboarded: s.onboarded ?? !0, error: s.error ?? !1, idle: s.idle ?? !1 }),
     cost: e.cost,
     balanceShown: o,
-    tokens: v,
-    spinning: k,
-    modifier: m && i >= m.startMs || t.mode === "reduced" ? e.modifier : null,
+    tokens: k,
+    spinning: A,
+    modifier: _ && i >= _.startMs || t.mode === "reduced" ? e.modifier : null,
     reading: a.reading,
     discarded: a.discarded,
-    lines: tn(e, a),
-    hero: f,
-    totalLabel: T,
-    netText: P,
+    lines: cn(e, a),
+    hero: p,
+    totalLabel: B,
+    netText: O,
     cueTier: e.net <= 0 ? 0 : l,
-    particles: _,
-    bloom: e.net <= 0 || t.mode === "reduced" ? 0 : w,
-    modifierGlow: t.mode === "reduced" ? 0 : p,
-    anticipation: t.mode !== "reduced" && e.net > 0 && (e.modifier === "replace" || e.modifier === "bank" || e.modifier === "wheel" || d >= 2) && k.some(Boolean),
+    plate: t.mode === "reduced" || e.net <= 0 ? null : rn(e.net, e.cost),
+    particles: f,
+    bloom: e.net <= 0 || t.mode === "reduced" ? 0 : b,
+    modifierGlow: t.mode === "reduced" ? 0 : m,
+    anticipation: t.mode !== "reduced" && e.net > 0 && (e.modifier === "replace" || e.modifier === "bank" || e.modifier === "wheel" || c >= 2) && A.some(Boolean),
     wheel: y,
-    meterFilled: Math.min(10, A),
-    meterFlourish: S,
+    meterFilled: Math.min(10, Z),
+    meterFlourish: Y,
     reduced: t.mode === "reduced",
-    sessionNetShown: N ? x : x - e.net
+    sessionNetShown: J ? P : P - e.net
   };
 }
-function sn(s, e, t) {
-  const i = e.stages.find((d) => d.kind === "reels")?.reelStops ?? [0, 0, 0], a = e.stages.find((d) => d.kind === "replace"), h = e.stages.find((d) => d.kind === "bank");
+function hn(s, e, t) {
+  const i = e.stages.find((c) => c.kind === "reels")?.reelStops ?? [0, 0, 0], a = e.stages.find((c) => c.kind === "replace"), h = e.stages.find((c) => c.kind === "bank");
   if (a && t >= a.startMs)
-    return $(a, t) < 0.78 ? [null, null, null] : s.steps[0].tokens;
+    return X(a, t) < 0.78 ? [null, null, null] : s.steps[0].tokens;
   if (h && t >= h.startMs) {
-    const d = $(h, t);
-    return d >= 1 / 6 && d < 0.5 || d >= 0.62 && d < 5 / 6 ? [null, null, null] : d >= 5 / 6 ? s.steps[1].tokens : d >= 0.5 ? s.steps[0].tokens : s.initial.tokens;
+    const c = X(h, t);
+    return c >= 1 / 6 && c < 0.5 || c >= 0.62 && c < 5 / 6 ? [null, null, null] : c >= 5 / 6 ? s.steps[1].tokens : c >= 0.5 ? s.steps[0].tokens : s.initial.tokens;
   }
   return [
     t >= i[0] ? s.initial.tokens[0] : null,
@@ -2110,64 +2140,64 @@ function sn(s, e, t) {
     t >= i[2] ? s.initial.tokens[2] : null
   ];
 }
-function rn(s, e) {
+function fn(s, e) {
   if (s.mode === "reduced") return [!1, !1, !1, !1];
-  const r = s.stages.find((c) => c.kind === "reels")?.reelStops ?? [0, 0, 0], i = s.stages.find((c) => c.kind === "modifier"), a = s.stages.find((c) => c.kind === "replace"), h = s.stages.find((c) => c.kind === "bank");
-  let d = !1;
-  if (a && e >= a.startMs && $(a, e) < 0.78 && (d = !0), h && e >= h.startMs) {
-    const c = $(h, e);
-    (c >= 1 / 6 && c < 0.5 || c >= 0.62 && c < 5 / 6) && (d = !0);
+  const r = s.stages.find((d) => d.kind === "reels")?.reelStops ?? [0, 0, 0], i = s.stages.find((d) => d.kind === "modifier"), a = s.stages.find((d) => d.kind === "replace"), h = s.stages.find((d) => d.kind === "bank");
+  let c = !1;
+  if (a && e >= a.startMs && X(a, e) < 0.78 && (c = !0), h && e >= h.startMs) {
+    const d = X(h, e);
+    (d >= 1 / 6 && d < 0.5 || d >= 0.62 && d < 5 / 6) && (c = !0);
   }
   return [
-    d || e < r[0],
-    d || e < r[1],
-    d || e < r[2],
+    c || e < r[0],
+    c || e < r[1],
+    c || e < r[2],
     e < (i?.startMs ?? r[2])
   ];
 }
-function ze(s) {
+function lt(s) {
   return [
-    `Cost ${L(s.cost)}.`,
-    s.discarded !== null ? `Discarded base ${L(s.discarded)} is excluded.` : "",
-    `Gross ${L(s.gross)}.`,
-    Rt(s) + ".",
-    $t(s),
+    `Cost ${I(s.cost)}.`,
+    s.discarded !== null ? `Discarded base ${I(s.discarded)} is excluded.` : "",
+    `Gross ${I(s.gross)}.`,
+    Qt(s) + ".",
+    Yt(s),
     s.collectionFlourish ? "Energy flourish, no credit reward." : ""
   ].filter(Boolean).join(" ");
 }
-class et extends Error {
+class dt extends Error {
   constructor() {
     super("economic draw aborted"), this.name = "RngAbortError";
   }
 }
-const Me = 2 ** 32;
-function tt(s) {
-  if (!Number.isInteger(s) || s < 1 || s > Me) throw new Error("invalid bound");
-  return Math.floor(Me / s) * s;
+const He = 2 ** 32;
+function ct(s) {
+  if (!Number.isInteger(s) || s < 1 || s > He) throw new Error("invalid bound");
+  return Math.floor(He / s) * s;
 }
-function on(s, e) {
-  if (!Number.isInteger(s) || s < 0 || s >= Me) throw new Error("invalid sample");
-  const t = tt(e);
+function pn(s, e) {
+  if (!Number.isInteger(s) || s < 0 || s >= He) throw new Error("invalid sample");
+  const t = ct(e);
   return s >= t ? { ok: !1 } : { ok: !0, value: s % e };
 }
-class an {
+class mn {
   constructor(e = (r) => crypto.getRandomValues(r), t = 32) {
     this.source = e, this.maxRejects = t;
   }
   source;
   maxRejects;
   nextInt(e) {
-    tt(e);
+    ct(e);
     const t = new Uint32Array(1);
     for (let r = 0; r < this.maxRejects; r++) {
       this.source(t);
-      const i = on(t[0], e);
+      const i = pn(t[0], e);
       if (i.ok) return i.value;
     }
-    throw new et();
+    throw new dt();
   }
 }
-class ln {
+class _n {
   constructor(e) {
     this.inner = e;
   }
@@ -2177,8 +2207,8 @@ class ln {
     return this.inner.nextInt(e);
   }
 }
-const me = "auric-dynamo.snapshot.v1", dn = "auric-dynamo";
-function nt() {
+const xe = "auric-dynamo.snapshot.v1", gn = "auric-dynamo";
+function ut() {
   return {
     muted: !1,
     music: !0,
@@ -2190,28 +2220,28 @@ function nt() {
     cost: 10
   };
 }
-function Ie(s, e = "durable") {
+function Ge(s, e = "durable") {
   return {
-    schemaVersion: Pt,
+    schemaVersion: Dt,
     revision: 1,
-    balance: Ct,
+    balance: $t,
     meter: 0,
     sessionNet: 0,
     activeMs: 0,
     sessionStartedAt: s,
-    prefs: nt(),
+    prefs: ut(),
     receipt: null,
     storage: e,
     economy: "local"
   };
 }
-function te(s) {
+function ue(s) {
   return typeof s == "object" && s !== null && !Array.isArray(s);
 }
-function cn(s) {
-  return te(s) ? typeof s.gross == "number" && typeof s.net == "number" && typeof s.cost == "number" && typeof s.modifier == "string" && Array.isArray(s.contributors) && Array.isArray(s.steps) && te(s.initial) : !1;
+function bn(s) {
+  return ue(s) ? typeof s.gross == "number" && typeof s.net == "number" && typeof s.cost == "number" && typeof s.modifier == "string" && Array.isArray(s.contributors) && Array.isArray(s.steps) && ue(s.initial) : !1;
 }
-function Le(s) {
+function qe(s) {
   if (s === null || s === "") return { ok: !1, reason: "empty" };
   let e;
   try {
@@ -2219,7 +2249,7 @@ function Le(s) {
   } catch {
     return { ok: !1, reason: "corrupt" };
   }
-  if (!te(e)) return { ok: !1, reason: "corrupt" };
+  if (!ue(e)) return { ok: !1, reason: "corrupt" };
   if (e.schemaVersion !== 1) return { ok: !1, reason: "version" };
   if (!Number.isSafeInteger(e.balance) || e.balance < 0) return { ok: !1, reason: "balance" };
   if (!Number.isSafeInteger(e.meter) || e.meter < 0 || e.meter > 9) return { ok: !1, reason: "meter" };
@@ -2227,7 +2257,7 @@ function Le(s) {
   if (!Number.isSafeInteger(e.revision) || e.revision < 1) return { ok: !1, reason: "revision" };
   if (typeof e.activeMs != "number" || !Number.isFinite(e.activeMs) || e.activeMs < 0) return { ok: !1, reason: "time" };
   if (typeof e.sessionStartedAt != "number" || !Number.isFinite(e.sessionStartedAt)) return { ok: !1, reason: "time" };
-  if (!te(e.prefs) || !Ee(e.prefs.cost) || !Ae(e.prefs.autoplayCount))
+  if (!ue(e.prefs) || !We(e.prefs.cost) || !Be(e.prefs.autoplayCount))
     return { ok: !1, reason: "prefs" };
   const t = e.prefs;
   if (typeof t.muted != "boolean" || typeof t.music != "boolean" || typeof t.effects != "boolean")
@@ -2236,7 +2266,7 @@ function Le(s) {
   if (!(t.reducedMotion === null || typeof t.reducedMotion == "boolean")) return { ok: !1, reason: "prefs" };
   let r = null;
   if (e.receipt !== null && e.receipt !== void 0) {
-    if (!te(e.receipt) || !cn(e.receipt.outcome)) return { ok: !1, reason: "receipt" };
+    if (!ue(e.receipt) || !bn(e.receipt.outcome)) return { ok: !1, reason: "receipt" };
     if (typeof e.receipt.id != "string" || !e.receipt.id) return { ok: !1, reason: "receipt" };
     if (e.receipt.revision !== e.revision) return { ok: !1, reason: "receipt" };
     if (e.receipt.balanceAfter !== e.balance) return { ok: !1, reason: "receipt" };
@@ -2270,16 +2300,16 @@ function Le(s) {
     }
   };
 }
-function st(s, e, t) {
-  const r = Le(s.get(me));
-  return r.ok ? { snapshot: { ...r.snapshot, storage: t }, resetReason: null } : { snapshot: Ie(e, t), resetReason: r.reason === "empty" ? null : r.reason };
+function ht(s, e, t) {
+  const r = qe(s.get(xe));
+  return r.ok ? { snapshot: { ...r.snapshot, storage: t }, resetReason: null } : { snapshot: Ge(e, t), resetReason: r.reason === "empty" ? null : r.reason };
 }
-function U(s, e) {
-  s.set(me, JSON.stringify(e));
+function oe(s, e) {
+  s.set(xe, JSON.stringify(e));
 }
-async function un(s) {
+async function wn(s) {
   return s.locker.exclusive(() => {
-    const e = s.memory ?? st(s.kv, s.now, "durable").snapshot;
+    const e = s.memory ?? ht(s.kv, s.now, "durable").snapshot;
     if (!s.settled && e.balance < s.cost)
       return { result: { kind: "insufficient", snapshot: e }, memory: s.memory, warning: null };
     let t;
@@ -2287,19 +2317,19 @@ async function un(s) {
       t = s.settled.outcome;
     else
       try {
-        t = Ue(s.rng, s.cost, e.meter);
-      } catch (c) {
-        if (c instanceof et)
+        t = rt(s.rng, s.cost, e.meter);
+      } catch (d) {
+        if (d instanceof dt)
           return { result: { kind: "rng-abort", snapshot: e }, memory: s.memory, warning: null };
-        throw c;
+        throw d;
       }
     let r;
     try {
-      if (r = s.settled ? R(s.settled.balanceAfter, "balance") : R(e.balance + t.net, "balance"), r < 0) throw new Error("negative");
+      if (r = s.settled ? G(s.settled.balanceAfter, "balance") : G(e.balance + t.net, "balance"), r < 0) throw new Error("negative");
     } catch {
       return { result: { kind: "overflow", snapshot: e }, memory: s.memory, warning: null };
     }
-    const i = e.revision + 1, a = R(e.sessionNet + t.net, "session net"), h = {
+    const i = e.revision + 1, a = G(e.sessionNet + t.net, "session net"), h = {
       id: s.newId(),
       revision: i,
       acknowledged: !1,
@@ -2307,7 +2337,7 @@ async function un(s) {
       balanceAfter: r,
       meterAfter: t.collectionAfter,
       sessionNetAfter: a
-    }, d = {
+    }, c = {
       ...e,
       revision: i,
       balance: r,
@@ -2318,22 +2348,22 @@ async function un(s) {
       economy: s.settled ? "wallet" : e.economy
     };
     if (s.memory)
-      return { result: { kind: "committed", snapshot: d, storage: "memory" }, memory: d, warning: null };
+      return { result: { kind: "committed", snapshot: c, storage: "memory" }, memory: c, warning: null };
     try {
-      return U(s.kv, d), { result: { kind: "committed", snapshot: d, storage: d.storage }, memory: null, warning: null };
+      return oe(s.kv, c), { result: { kind: "committed", snapshot: c, storage: c.storage }, memory: null, warning: null };
     } catch {
-      const c = { ...d, storage: "memory" };
+      const d = { ...c, storage: "memory" };
       return {
-        result: { kind: "committed", snapshot: c, storage: "memory" },
-        memory: c,
+        result: { kind: "committed", snapshot: d, storage: "memory" },
+        memory: d,
         warning: "This browser could not save the demo. Play continues in this tab only. A reload will not restore it."
       };
     }
   });
 }
-async function hn(s) {
+async function yn(s) {
   return s.locker.exclusive(() => {
-    const e = s.memory ?? fn(s.kv), t = e.receipt;
+    const e = s.memory ?? vn(s.kv), t = e.receipt;
     if (!t || t.id !== s.id || t.revision !== s.revision || e.revision !== s.revision)
       return { snapshot: e, memory: s.memory, applied: !1 };
     if (t.acknowledged) return { snapshot: e, memory: s.memory, applied: !1 };
@@ -2344,7 +2374,7 @@ async function hn(s) {
     };
     if (s.memory) return { snapshot: r, memory: r, applied: !0 };
     try {
-      U(s.kv, r);
+      oe(s.kv, r);
     } catch {
       const i = { ...r, storage: "memory" };
       return { snapshot: i, memory: i, applied: !0 };
@@ -2352,32 +2382,32 @@ async function hn(s) {
     return { snapshot: r, memory: null, applied: !0 };
   });
 }
-function fn(s) {
-  const e = Le(s.get(me));
-  return e.ok ? e.snapshot : Ie(Date.now(), "durable");
+function vn(s) {
+  const e = qe(s.get(xe));
+  return e.ok ? e.snapshot : Ge(Date.now(), "durable");
 }
-async function pn(s) {
+async function kn(s) {
   return s.locker.exclusive(() => {
-    const e = Le(s.kv.get(me)), t = e.ok ? { ...e.snapshot.prefs, onboarded: !0 } : nt(), r = Ie(s.now, s.storage);
+    const e = qe(s.kv.get(xe)), t = e.ok ? { ...e.snapshot.prefs, onboarded: !0 } : ut(), r = Ge(s.now, s.storage);
     r.prefs = t, r.revision = e.ok ? e.snapshot.revision + 1 : 1;
     try {
-      U(s.kv, r);
+      oe(s.kv, r);
     } catch {
       r.storage = "memory";
     }
     return r;
   });
 }
-function mn() {
+function An() {
   return { exclusive: (s) => Promise.resolve(s()) };
 }
-function _n() {
-  return new an();
+function Sn() {
+  return new mn();
 }
-class gn {
-  constructor(e, t, r, i, a, h, d) {
-    this.outcome = e, this.schedule = t, this.balanceAfter = r, this.meterAfter = i, this.sessionNetAfter = a, this.audio = h, this.hooks = d, this.finished = new Promise((c) => {
-      this.resolveDone = c;
+class xn {
+  constructor(e, t, r, i, a, h, c) {
+    this.outcome = e, this.schedule = t, this.balanceAfter = r, this.meterAfter = i, this.sessionNetAfter = a, this.audio = h, this.hooks = c, this.finished = new Promise((d) => {
+      this.resolveDone = d;
     });
   }
   outcome;
@@ -2401,7 +2431,7 @@ class gn {
     this.done || t || e <= 0 || (this.elapsed = Math.min(this.schedule.totalMs, this.elapsed + e), this.fireCues(), this.elapsed >= this.schedule.totalMs ? this.finish() : this.hooks.onFrame(this.frame()));
   }
   skip() {
-    this.done || (this.audio.cancelPending(), this.audio.fadePresentation(pe.fadeMs), this.fired = this.schedule.cues.length, this.elapsed = this.schedule.totalMs, this.finish());
+    this.done || (this.audio.cancelPending(), this.audio.fadePresentation(Se.fadeMs), this.fired = this.schedule.cues.length, this.elapsed = this.schedule.totalMs, this.finish());
   }
   emit() {
     this.fireCues(), this.elapsed >= this.schedule.totalMs ? this.finish() : this.hooks.onFrame(this.frame());
@@ -2412,7 +2442,7 @@ class gn {
       this.audio.play(e[this.fired].sound, e[this.fired].rate), this.fired += 1;
   }
   frame() {
-    return fe({
+    return Ae({
       outcome: this.outcome,
       schedule: this.schedule,
       elapsed: this.elapsed,
@@ -2424,7 +2454,7 @@ class gn {
   finish() {
     if (this.done) return;
     this.done = !0;
-    const e = fe({
+    const e = Ae({
       outcome: this.outcome,
       schedule: this.schedule,
       elapsed: Math.max(this.schedule.totalMs, 1),
@@ -2432,20 +2462,20 @@ class gn {
       meterAfter: this.meterAfter,
       sessionNetAfter: this.sessionNetAfter
     });
-    this.hooks.onFrame(e), this.summarySent || (this.summarySent = !0, this.hooks.onSummary(ze(this.outcome))), this.hooks.onDone(), this.resolveDone();
+    this.hooks.onFrame(e), this.summarySent || (this.summarySent = !0, this.hooks.onSummary(lt(this.outcome))), this.hooks.onDone(), this.resolveDone();
   }
 }
-class wn {
-  constructor(e, t, r, i, a, h, d, c, f = !1, w = () => crypto.randomUUID()) {
-    this.kv = e, this.locker = t, this.rng = r, this.audio = i, this.onFrame = a, this.onSummary = h, this.newId = w, this.osReduced = f, this.now = d;
-    const n = st(e, d, c);
+class Mn {
+  constructor(e, t, r, i, a, h, c, d, p = !1, b = () => crypto.randomUUID()) {
+    this.kv = e, this.locker = t, this.rng = r, this.audio = i, this.onFrame = a, this.onSummary = h, this.newId = b, this.osReduced = p, this.now = c;
+    const n = ht(e, c, d);
     if (this.snapshot = n.snapshot, this.resetReason = n.resetReason, this.activeMs = this.snapshot.activeMs, n.resetReason)
       try {
-        U(e, this.snapshot);
+        oe(e, this.snapshot);
       } catch {
         this.enterMemory("This browser could not save the demo. Play continues in this tab only. A reload will not restore it.");
       }
-    this.snapshot.receipt && this.restoreReceipt();
+    this.speed = this.snapshot.prefs.turbo ? 1 : 0, this.snapshot.receipt && this.restoreReceipt();
   }
   kv;
   locker;
@@ -2473,6 +2503,7 @@ class wn {
   framePhase = "idle";
   bootP = Promise.resolve();
   mode = "practice";
+  speed = 0;
   walletPlay = null;
   resetReason;
   osReduced;
@@ -2494,6 +2525,7 @@ class wn {
       autoRemaining: this.auto && !this.auto.stopped ? this.auto.remaining : null,
       autoplayCount: this.snapshot.prefs.autoplayCount,
       turbo: this.snapshot.prefs.turbo,
+      speed: this.speed,
       muted: this.snapshot.prefs.muted,
       music: this.snapshot.prefs.music,
       effects: this.snapshot.prefs.effects,
@@ -2542,7 +2574,7 @@ class wn {
     }, this.memory) this.memory = this.snapshot;
     else
       try {
-        U(this.kv, this.snapshot);
+        oe(this.kv, this.snapshot);
       } catch {
         this.enterMemory("This browser could not save the last result. Play continues in this tab only.");
       }
@@ -2575,14 +2607,18 @@ class wn {
   }
   motion() {
     const e = this.snapshot.prefs.reducedMotion;
-    return (e === null ? this.osReduced : e) ? "reduced" : this.snapshot.prefs.turbo ? "turbo" : "normal";
+    return (e === null ? this.osReduced : e) ? "reduced" : this.speed === 2 ? "super" : this.speed === 1 || this.snapshot.prefs.turbo ? "turbo" : "normal";
+  }
+  /** 0 off, 1 turbo, 2 super turbo. Super turbo lasts for this visit. */
+  setSpeed(e) {
+    this.locked || (this.speed = e, this.setTurbo(e > 0));
   }
   /** Manual play. Cancels autoplay and never spends on a rejected press. */
   spin() {
     return this.auto = null, this.beginSpin();
   }
   startAuto(e) {
-    if (!Ae(e) || this.locked || this.auto) return !1;
+    if (!Be(e) || this.locked || this.auto) return !1;
     this.auto = { remaining: e, stopped: null, nextAt: Number.POSITIVE_INFINITY };
     const t = this.beginSpin();
     return t || (this.auto = null), t;
@@ -2606,7 +2642,7 @@ class wn {
     await this.bootP, await this.runP;
   }
   setCost(e) {
-    return this.locked || !Ee(e) ? !1 : (this.snapshot = { ...this.snapshot, prefs: { ...this.snapshot.prefs, cost: e } }, this.persistPrefs(), !0);
+    return this.locked || !We(e) ? !1 : (this.snapshot = { ...this.snapshot, prefs: { ...this.snapshot.prefs, cost: e } }, this.persistPrefs(), !0);
   }
   setTurbo(e) {
     this.locked || (this.snapshot = { ...this.snapshot, prefs: { ...this.snapshot.prefs, turbo: e } }, this.persistPrefs());
@@ -2618,7 +2654,7 @@ class wn {
     this.snapshot = { ...this.snapshot, prefs: { ...this.snapshot.prefs, ...e } }, this.persistPrefs();
   }
   setAutoCount(e) {
-    return this.locked || !Ae(e) ? !1 : (this.snapshot = { ...this.snapshot, prefs: { ...this.snapshot.prefs, autoplayCount: e } }, this.persistPrefs(), !0);
+    return this.locked || !Be(e) ? !1 : (this.snapshot = { ...this.snapshot, prefs: { ...this.snapshot.prefs, autoplayCount: e } }, this.persistPrefs(), !0);
   }
   finishOnboarding() {
     this.snapshot = { ...this.snapshot, prefs: { ...this.snapshot.prefs, onboarded: !0 } }, this.persistPrefs();
@@ -2626,7 +2662,7 @@ class wn {
   async reset() {
     if (this.locked || this.mode !== "practice") return !1;
     this.auto = null;
-    const e = this.memory ? "memory" : this.snapshot.storage, t = await pn({ kv: this.kv, locker: this.locker, now: this.now, storage: e });
+    const e = this.memory ? "memory" : this.snapshot.storage, t = await kn({ kv: this.kv, locker: this.locker, now: this.now, storage: e });
     return this.snapshot = t, this.memory = t.storage === "memory" ? t : null, this.activeMs = 0, this.summary = "", this.lastOutcome = null, this.message = null, !0;
   }
   /** Inert in production builds. Development uses it for scripted screenshots. */
@@ -2646,12 +2682,12 @@ class wn {
       if (this.walletPlay)
         try {
           t = await this.walletPlay(this.snapshot.prefs.cost, this.snapshot.meter);
-        } catch (d) {
-          const c = d instanceof Error ? d.message : "";
-          /insufficient/i.test(c) ? (this.message = "Not enough for this cost.", this.auto && (this.auto.stopped = "credits")) : /rules/i.test(c) ? (this.message = "Accept the rules to continue.", this.auto && (this.auto.stopped = "error")) : (this.message = c || "The draw could not be completed. Nothing was taken. Try again.", this.auto && (this.auto.stopped = "error"));
+        } catch (c) {
+          const d = c instanceof Error ? c.message : "";
+          /insufficient/i.test(d) ? (this.message = "Not enough for this cost.", this.auto && (this.auto.stopped = "credits")) : /rules/i.test(d) ? (this.message = "Accept the rules to continue.", this.auto && (this.auto.stopped = "error")) : (this.message = d || "The draw could not be completed. Nothing was taken. Try again.", this.auto && (this.auto.stopped = "error"));
           return;
         }
-      const r = await un({
+      const r = await wn({
         kv: this.kv,
         locker: this.locker,
         rng: this.rng,
@@ -2673,9 +2709,9 @@ class wn {
         await this.ack(i.id, i.revision);
         return;
       }
-      const a = Se(i.outcome, this.motion(), i.id), h = new gn(i.outcome, a, i.balanceAfter, i.meterAfter, i.sessionNetAfter, this.audio, {
-        onFrame: (d) => this.show(d),
-        onSummary: (d) => this.postSummary(d),
+      const a = Fe(i.outcome, this.motion(), i.id), h = new xn(i.outcome, a, i.balanceAfter, i.meterAfter, i.sessionNetAfter, this.audio, {
+        onFrame: (c) => this.show(c),
+        onSummary: (c) => this.postSummary(c),
         onDone: () => {
         }
       });
@@ -2698,17 +2734,17 @@ class wn {
       this.auto = null;
       return;
     }
-    if (_t(this.lastOutcome, {
+    if (St(this.lastOutcome, {
       remaining: this.auto.remaining
     })) {
       this.auto = null;
       return;
     }
-    const t = mt(this.acceptedAt, this.now);
+    const t = At(this.acceptedAt, this.now);
     t <= this.now ? this.beginSpin() : this.auto.nextAt = t;
   }
   async ack(e, t) {
-    const r = await hn({
+    const r = await yn({
       kv: this.kv,
       locker: this.locker,
       memory: this.memory,
@@ -2723,11 +2759,11 @@ class wn {
   }
   restoreReceipt() {
     const e = this.snapshot.receipt;
-    e && (this.showRestoredFrame(e), this.postSummary(ze(e.outcome)), this.lastOutcome = e.outcome, e.acknowledged || (this.bootP = this.ack(e.id, e.revision)));
+    e && (this.showRestoredFrame(e), this.postSummary(lt(e.outcome)), this.lastOutcome = e.outcome, e.acknowledged || (this.bootP = this.ack(e.id, e.revision)));
   }
   showRestoredFrame(e) {
-    const t = Se(e.outcome, "reduced", e.id);
-    this.show(fe({
+    const t = Fe(e.outcome, "reduced", e.id);
+    this.show(Ae({
       outcome: e.outcome,
       schedule: t,
       elapsed: t.totalMs,
@@ -2745,7 +2781,7 @@ class wn {
       return;
     }
     try {
-      U(this.kv, this.snapshot);
+      oe(this.kv, this.snapshot);
     } catch {
       this.enterMemory("This browser could not save the demo. Play continues in this tab only. A reload will not restore it.");
     }
@@ -2757,30 +2793,23 @@ class wn {
     return !this.snapshot.prefs.onboarded && !this.locked ? "onboarding" : this.message && !this.locked && this.message.startsWith("The draw") ? "error" : this.locked ? this.framePhase === "idle" ? "spinning" : this.framePhase : "idle";
   }
 }
-const Pe = new URLSearchParams(location.search), bn = location.hostname === "localhost" || location.hostname === "127.0.0.1";
-bn && (Pe.get("api") || "").replace(/\/$/, "");
-Pe.get("geo");
-Pe.get("brand");
-function yn(s) {
-  return window.parent === window ? !1 : (window.parent.postMessage({ source: "biab-game", ...s }, location.origin), !0);
-}
-const Oe = {
+const Ye = {
   symbolById: {},
   paylines: []
-}, de = {}, vn = 240, kn = 5, An = 3, we = { outQuad: (s) => 1 - (1 - s) * (1 - s), inOutQuad: (s) => s < 0.5 ? 2 * s * s : 1 - Math.pow(-2 * s + 2, 2) / 2, outBack: (s) => 1 + 2.2 * Math.pow(s - 1, 3) + 1.2 * Math.pow(s - 1, 2) }, be = (s, e) => (s % e + e) % e;
-class xn {
+}, Ie = {}, Tn = 240, En = 5, In = 3, Le = { outQuad: (s) => 1 - (1 - s) * (1 - s), inOutQuad: (s) => s < 0.5 ? 2 * s * s : 1 - Math.pow(-2 * s + 2, 2) / 2, outBack: (s) => 1 + 2.2 * Math.pow(s - 1, 3) + 1.2 * Math.pow(s - 1, 2) }, Pe = (s, e) => (s % e + e) % e;
+class Ln {
   /**
    * opts is optional. Lucky Pots calls this with the canvas, the payline svg and the two marker
    * columns, and gets the 5 by 3 view it has always had. Another game can pass
    * { reels, rows, cell, paylines, symbolArt } and use the same spin, blur and bounce.
    */
   constructor(e, t, r, i, a = {}) {
-    this.c = e, this.ctx = e.getContext("2d"), this.svg = t, this.reelsN = a.reels ?? kn, this.rowsN = a.rows ?? An, this.cell = a.cell ?? vn, this.pitch = a.cellH ?? this.cell, this.w = this.reelsN * this.cell, this.h = this.rowsN * this.pitch, this.symbolArt = a.symbolArt ?? null, this.well = a.well ?? ["#1b4a2f", "#0a2217"], this.symbolFill = a.symbolFill === !0, this.plain = a.plain === !0, this.paylines = a.paylines ?? Oe.paylines, this.paused = !1, a.reels && (e.width = this.w, e.height = this.h), this.strips = null, this.pos = new Array(this.reelsN).fill(0), this.reel = Array.from({ length: this.reelsN }, () => ({ phase: "idle", speed: 0 })), this.highlight = null, this.labels = /* @__PURE__ */ new Map(), this.wildReels = [], this.wildAnim = /* @__PURE__ */ new Map(), this.onReelStop = () => {
-    }, this.glowReels = /* @__PURE__ */ new Set(), this.markers = { l: [], r: [] }, r && i && this.paylines.forEach((h, d) => {
-      const c = document.createElement("div");
-      c.className = "marker", c.textContent = d + 1, c.style.top = (h[0] + 0.5) * this.pitch + "px", r.appendChild(c);
-      const f = document.createElement("div");
-      f.className = "marker", f.textContent = d + 1, f.style.top = (h[this.reelsN - 1] + 0.5) * this.pitch + "px", i.appendChild(f), this.markers.l.push(c), this.markers.r.push(f);
+    this.c = e, this.ctx = e.getContext("2d"), this.svg = t, this.reelsN = a.reels ?? En, this.rowsN = a.rows ?? In, this.cell = a.cell ?? Tn, this.pitch = a.cellH ?? this.cell, this.w = this.reelsN * this.cell, this.h = this.rowsN * this.pitch, this.symbolArt = a.symbolArt ?? null, this.well = a.well ?? ["#1b4a2f", "#0a2217"], this.symbolFill = a.symbolFill === !0, this.plain = a.plain === !0, this.cellArt = a.cellArt ?? null, this.glowSprite = a.glowSprite ?? null, this.winSpark = a.winSpark ?? null, this.landSeconds = a.landSeconds ?? 0.42, this.paylines = a.paylines ?? Ye.paylines, this.paused = !1, a.reels && (e.width = this.w, e.height = this.h), this.strips = null, this.pos = new Array(this.reelsN).fill(0), this.reel = Array.from({ length: this.reelsN }, () => ({ phase: "idle", speed: 0 })), this.highlight = null, this.labels = /* @__PURE__ */ new Map(), this.wildReels = [], this.wildAnim = /* @__PURE__ */ new Map(), this.onReelStop = () => {
+    }, this.glowReels = /* @__PURE__ */ new Set(), this.markers = { l: [], r: [] }, r && i && this.paylines.forEach((h, c) => {
+      const d = document.createElement("div");
+      d.className = "marker", d.textContent = c + 1, d.style.top = (h[0] + 0.5) * this.pitch + "px", r.appendChild(d);
+      const p = document.createElement("div");
+      p.className = "marker", p.textContent = c + 1, p.style.top = (h[this.reelsN - 1] + 0.5) * this.pitch + "px", i.appendChild(p), this.markers.l.push(d), this.markers.r.push(p);
     }), this.last = performance.now(), requestAnimationFrame((h) => this.frame(h));
   }
   /** Install strips and sit the reels on the given stops. */
@@ -2793,7 +2822,7 @@ class xn {
   }
   symAt(e, t) {
     const r = this.strips[e];
-    return r[be(t, r.length)];
+    return r[Pe(t, r.length)];
   }
   /** Start all reels spinning. Resolves immediately; stopAt lands them. */
   spin({ stagger: e = 0.12 } = {}) {
@@ -2810,9 +2839,9 @@ class xn {
         i();
         return;
       }
-      for (let c = 0; c < this.rowsN; c++) a[be(t + c, a.length)] = r[c];
-      const h = this.reel[e], d = performance.now() / 1e3;
-      h.stopAt = Math.max(d, (h.startedAt || d) + 0.12), h.target = t, h.pendingStop = !0, h.onLand = () => {
+      for (let d = 0; d < this.rowsN; d++) a[Pe(t + d, a.length)] = r[d];
+      const h = this.reel[e], c = performance.now() / 1e3;
+      h.stopAt = Math.max(c, (h.startedAt || c) + 0.12), h.target = t, h.pendingStop = !0, h.onLand = () => {
         this.onReelStop(e, r.slice()), i();
       };
     });
@@ -2824,14 +2853,14 @@ class xn {
    */
   stopAt(e, t, { stagger: r = 0.22, minSpin: i = 0.6, delays: a = [] } = {}) {
     return new Promise((h) => {
-      const d = performance.now() / 1e3;
-      let c = this.reelsN;
-      e.forEach((f, w) => {
-        const n = this.strips[w];
-        for (let u = 0; u < this.rowsN; u++) n[be(f + u, n.length)] = t[w][u];
-        const o = this.reel[w], l = a[w] || 0;
-        o.stopAt = Math.max(d, o.startedAt + i) + w * r + l, o.target = f, o.landed = !1, o.pendingStop = !0, o.onLand = () => {
-          c--, this.onReelStop(w, t[w].slice()), c === 0 && h();
+      const c = performance.now() / 1e3;
+      let d = this.reelsN;
+      e.forEach((p, b) => {
+        const n = this.strips[b];
+        for (let u = 0; u < this.rowsN; u++) n[Pe(p + u, n.length)] = t[b][u];
+        const o = this.reel[b], l = a[b] || 0;
+        o.stopAt = Math.max(c, o.startedAt + i) + b * r + l, o.target = p, o.landed = !1, o.pendingStop = !0, o.onLand = () => {
+          d--, this.onReelStop(b, t[b].slice()), d === 0 && h();
         };
       });
     });
@@ -2867,15 +2896,15 @@ class xn {
           i.landFrom = i.target + 2.6 + h, this.pos[a] = i.landFrom;
         }
       } else if (i.phase === "land") {
-        const d = Math.min(1, (t - i.landT0) / 0.42), c = 0.26;
-        if (d < 0.62) {
-          const f = we.outQuad(d / 0.62);
-          this.pos[a] = i.landFrom + (i.target - c - i.landFrom) * f;
+        const h = this.landSeconds, c = Math.min(1, (t - i.landT0) / h), d = 0.26;
+        if (c < 0.62) {
+          const p = Le.outQuad(c / 0.62);
+          this.pos[a] = i.landFrom + (i.target - d - i.landFrom) * p;
         } else {
-          const f = we.inOutQuad((d - 0.62) / 0.38);
-          this.pos[a] = i.target - c + c * f;
+          const p = Le.inOutQuad((c - 0.62) / 0.38);
+          this.pos[a] = i.target - d + d * p;
         }
-        d >= 1 && (this.pos[a] = i.target, i.phase = "idle", i.speed = 0, i.onLand && i.onLand(), i.onLand = null);
+        c >= 1 && (this.pos[a] = i.target, i.phase = "idle", i.speed = 0, i.onLand && i.onLand(), i.onLand = null);
       }
     });
     for (const [, i] of this.wildAnim)
@@ -2888,73 +2917,90 @@ class xn {
       if (this.plain) this.drawDrum(t);
       else for (let r = 0; r < this.reelsN; r++) for (let i = 0; i < this.rowsN; i++) this.drawCell(t, r, i, e);
       for (let r = 0; r < this.reelsN; r++) {
-        const i = this.reel[r], a = this.pos[r], h = Math.floor(a), d = a - h, c = i.phase === "spin" ? Math.min(1, i.speed / 20) : 0;
+        const i = this.reel[r], a = this.pos[r], h = Math.floor(a), c = a - h, d = i.phase === "spin" ? Math.min(1, i.speed / 20) : 0;
         t.save(), t.beginPath(), t.rect(r * this.cell, 0, this.cell, this.h), t.clip();
-        const f = this.wildReels.find((w) => w.reel === r);
-        if (f && i.phase === "idle")
-          this.drawWildReel(t, r, f, e);
+        const p = this.wildReels.find((b) => b.reel === r);
+        if (p && i.phase === "idle")
+          this.drawWildReel(t, r, p, e);
         else
-          for (let w = -1; w <= this.rowsN; w++) {
-            const n = this.symAt(r, h + w), o = (w - d) * this.pitch;
-            this.drawSymbol(t, n, r * this.cell, o, c, i.phase === "idle" ? [r, w] : null, e);
+          for (let b = -1; b <= this.rowsN; b++) {
+            const n = this.symAt(r, h + b), o = (b - c) * this.pitch;
+            this.drawSymbol(t, n, r * this.cell, o, d, i.phase === "idle" ? [r, b] : null, e);
           }
-        t.restore(), this.glowReels.has(r) && i.phase !== "idle" && (t.save(), t.strokeStyle = `rgba(255,216,74,${0.6 + 0.4 * Math.sin(e * 10)})`, t.lineWidth = 8, t.shadowColor = "#ffd84a", t.shadowBlur = 30, t.strokeRect(r * this.cell + 6, 6, this.cell - 12, this.h - 12), t.restore());
+        if (t.restore(), this.glowReels.has(r) && i.phase !== "idle") {
+          const b = this.glowSprite;
+          if (t.save(), b && b.complete && b.naturalWidth) {
+            const n = 0.55 + 0.45 * Math.sin(e * 14);
+            t.globalAlpha = n, t.drawImage(b, r * this.cell - 4, -4, this.cell + 8, 28), t.drawImage(b, r * this.cell - 4, this.h - 24, this.cell + 8, 28), t.drawImage(b, r * this.cell - 6, this.h * 0.35, 22, this.h * 0.3), t.drawImage(b, r * this.cell + this.cell - 16, this.h * 0.2, 22, this.h * 0.3);
+          } else
+            t.strokeStyle = `rgba(255,216,74,${0.6 + 0.4 * Math.sin(e * 10)})`, t.lineWidth = 8, t.shadowColor = "#ffd84a", t.shadowBlur = 30, t.strokeRect(r * this.cell + 6, 6, this.cell - 12, this.h - 12);
+          t.restore();
+        }
       }
       if (this.highlight) {
-        const r = de.frame_win_cell;
+        const r = Ie.frame_win_cell;
         for (const i of this.highlight) {
-          const [a, h] = i.split(",").map(Number), d = 0.75 + 0.25 * Math.sin(e * 8);
-          if (t.save(), r) {
-            const c = this.cell * (0.06 + 0.025 * Math.sin(e * 6));
-            t.globalAlpha = 0.85 + 0.15 * Math.sin(e * 6), t.drawImage(r, a * this.cell - c / 2, h * this.cell - c / 2, this.cell + c, this.cell + c);
+          const [a, h] = i.split(",").map(Number), c = 0.75 + 0.25 * Math.sin(e * 8);
+          t.save();
+          const d = this.winSpark;
+          if (d && d.complete && d.naturalWidth)
+            t.globalAlpha = 0.55 + 0.45 * Math.sin(e * 8), t.drawImage(d, a * this.cell, h * this.pitch, this.cell, this.pitch);
+          else if (r) {
+            const p = this.cell * (0.06 + 0.025 * Math.sin(e * 6));
+            t.globalAlpha = 0.85 + 0.15 * Math.sin(e * 6), t.drawImage(r, a * this.cell - p / 2, h * this.cell - p / 2, this.cell + p, this.cell + p);
           } else
-            t.strokeStyle = `rgba(255,220,90,${d})`, t.lineWidth = 7, t.shadowColor = "#ffd84a", t.shadowBlur = 24, t.strokeRect(a * this.cell + 7, h * this.cell + 7, this.cell - 14, this.cell - 14);
+            t.strokeStyle = `rgba(255,220,90,${c})`, t.lineWidth = 7, t.shadowColor = "#ffd84a", t.shadowBlur = 24, t.strokeRect(a * this.cell + 7, h * this.cell + 7, this.cell - 14, this.cell - 14);
           t.restore();
         }
       }
       for (const [r, i] of this.labels) {
-        const [a, h] = r.split(",").map(Number), d = a * this.cell + this.cell / 2, c = h * this.cell + this.cell / 2;
+        const [a, h] = r.split(",").map(Number), c = a * this.cell + this.cell / 2, d = h * this.cell + this.cell / 2;
         t.save(), t.font = "700 34px Cinzel";
-        const f = t.measureText(i).width + 36;
-        t.fillStyle = "rgba(70,0,60,.85)", t.strokeStyle = "#ff3fd6", t.lineWidth = 4, Sn(t, d - f / 2, c - 28, f, 56, 14), t.fill(), t.stroke(), t.fillStyle = "#fff", t.textAlign = "center", t.textBaseline = "middle", t.fillText(i, d, c + 2), t.restore();
+        const p = t.measureText(i).width + 36;
+        t.fillStyle = "rgba(70,0,60,.85)", t.strokeStyle = "#ff3fd6", t.lineWidth = 4, Pn(t, c - p / 2, d - 28, p, 56, 14), t.fill(), t.stroke(), t.fillStyle = "#fff", t.textAlign = "center", t.textBaseline = "middle", t.fillText(i, c, d + 2), t.restore();
       }
     }
   }
   /** One shaded well per reel, so a window can clip the strip like a drum. */
   drawDrum(e) {
     for (let t = 0; t < this.reelsN; t++) {
-      const r = t * this.cell, i = e.createLinearGradient(0, 0, 0, this.h);
-      i.addColorStop(0, "#020807"), i.addColorStop(0.18, this.well[1]), i.addColorStop(0.5, this.well[0]), i.addColorStop(0.82, this.well[1]), i.addColorStop(1, "#020807"), e.fillStyle = i, e.fillRect(r, 0, this.cell, this.h);
+      const r = t * this.cell, i = this.cellArt ? this.cellArt(t) : null;
+      if (i && i.complete && i.naturalWidth) {
+        e.drawImage(i, r, 0, this.cell, this.h);
+        continue;
+      }
+      const a = e.createLinearGradient(0, 0, 0, this.h);
+      a.addColorStop(0, "#020807"), a.addColorStop(0.18, this.well[1]), a.addColorStop(0.5, this.well[0]), a.addColorStop(0.82, this.well[1]), a.addColorStop(1, "#020807"), e.fillStyle = a, e.fillRect(r, 0, this.cell, this.h);
     }
   }
   drawCell(e, t, r, i) {
-    const a = t * this.cell, h = r * this.pitch, d = this.cell, c = this.pitch, f = e.createRadialGradient(a + d / 2, h + c / 2, 20, a + d / 2, h + c / 2, Math.max(d, c) * 0.8);
-    f.addColorStop(0, this.well[0]), f.addColorStop(1, this.well[1]), e.fillStyle = f, e.fillRect(a, h, d, c), e.save(), e.beginPath(), e.rect(a, h, d, c), e.clip(), e.strokeStyle = "rgba(120,200,140,.07)", e.lineWidth = 2;
-    for (let w = -this.cell; w < this.cell * 2; w += 30)
-      e.beginPath(), e.moveTo(a + w, h), e.lineTo(a + w + this.cell, h + this.cell), e.stroke(), e.beginPath(), e.moveTo(a + w + this.cell, h), e.lineTo(a + w, h + this.cell), e.stroke();
-    e.restore(), e.strokeStyle = "#a67c2e", e.lineWidth = 3, e.strokeRect(a + 4, h + 4, d - 8, c - 8), e.strokeStyle = "rgba(0,0,0,.5)", e.lineWidth = 2, e.strokeRect(a + 1, h + 1, d - 2, c - 2), this.highlight && !this.highlight.has(`${t},${r}`) && !this.wildReels.some((w) => w.reel === t) && (e.fillStyle = "rgba(0,0,0,.55)", e.fillRect(a, h, d, c));
+    const a = t * this.cell, h = r * this.pitch, c = this.cell, d = this.pitch, p = e.createRadialGradient(a + c / 2, h + d / 2, 20, a + c / 2, h + d / 2, Math.max(c, d) * 0.8);
+    p.addColorStop(0, this.well[0]), p.addColorStop(1, this.well[1]), e.fillStyle = p, e.fillRect(a, h, c, d), e.save(), e.beginPath(), e.rect(a, h, c, d), e.clip(), e.strokeStyle = "rgba(120,200,140,.07)", e.lineWidth = 2;
+    for (let b = -this.cell; b < this.cell * 2; b += 30)
+      e.beginPath(), e.moveTo(a + b, h), e.lineTo(a + b + this.cell, h + this.cell), e.stroke(), e.beginPath(), e.moveTo(a + b + this.cell, h), e.lineTo(a + b, h + this.cell), e.stroke();
+    e.restore(), e.strokeStyle = "#a67c2e", e.lineWidth = 3, e.strokeRect(a + 4, h + 4, c - 8, d - 8), e.strokeStyle = "rgba(0,0,0,.5)", e.lineWidth = 2, e.strokeRect(a + 1, h + 1, c - 2, d - 2), this.highlight && !this.highlight.has(`${t},${r}`) && !this.wildReels.some((b) => b.reel === t) && (e.fillStyle = "rgba(0,0,0,.55)", e.fillRect(a, h, c, d));
   }
   drawSymbol(e, t, r, i, a, h) {
-    const d = this.symbolArt ? null : Oe.symbolById[t], c = this.symbolArt ? this.symbolArt(t) : d && de[d.art];
-    if (!c) return;
-    const f = this.pitch;
+    const c = this.symbolArt ? null : Ye.symbolById[t], d = this.symbolArt ? this.symbolArt(t) : c && Ie[c.art];
+    if (!d) return;
+    const p = this.pitch;
     if (this.symbolFill) {
-      const _ = c.naturalWidth || c.width || 1, m = c.naturalHeight || c.height || 1, p = this.cell * 0.8, y = f * 0.8;
-      let v = p, k = v * (m / _);
-      k > y && (k = y, v = k * (_ / m));
-      const M = (this.cell - v) / 2, T = (f - k) / 2;
-      e.save(), e.beginPath(), e.rect(r, i, this.cell, f), e.clip();
-      const P = h && this.highlight && !this.highlight.has(`${h[0]},${h[1]}`), C = Math.abs(i + f / 2 - this.h / 2), g = Math.min(1, Math.max(0, (C - this.pitch * 0.42) / (this.pitch * 0.55)));
-      e.save(), e.globalAlpha = P ? 0.45 : 1 - g * 0.5, a > 0.05 && (e.globalAlpha *= 0.82), e.drawImage(c, r + M, i + T, v, k), e.restore(), e.restore();
+      const f = d.naturalWidth || d.width || 1, _ = d.naturalHeight || d.height || 1, m = this.cell * 0.8, y = p * 0.8;
+      let k = m, A = k * (_ / f);
+      A > y && (A = y, k = A * (f / _));
+      const E = (this.cell - k) / 2, B = (p - A) / 2;
+      e.save(), e.beginPath(), e.rect(r, i, this.cell, p), e.clip();
+      const O = h && this.highlight && !this.highlight.has(`${h[0]},${h[1]}`), q = Math.abs(i + p / 2 - this.h / 2), x = Math.min(1, Math.max(0, (q - this.pitch * 0.42) / (this.pitch * 0.55)));
+      e.save(), e.globalAlpha = O ? 0.45 : 1 - x * 0.5, a > 0.05 && (e.globalAlpha *= 0.82), e.drawImage(d, r + E, i + B, k, A), e.restore(), e.restore();
       return;
     }
-    const n = Math.min(this.cell, f) - 14 * 2, o = (this.cell - n) / 2, l = (f - n) / 2, u = h && this.highlight && !this.highlight.has(`${h[0]},${h[1]}`);
+    const n = Math.min(this.cell, p) - 14 * 2, o = (this.cell - n) / 2, l = (p - n) / 2, u = h && this.highlight && !this.highlight.has(`${h[0]},${h[1]}`);
     if (e.save(), u && (e.globalAlpha = 0.45), a > 0.05) {
       e.globalAlpha = 0.55;
-      const _ = 1 + a * 0.6, m = n * _, p = (m - n) / 2;
-      e.drawImage(c, r + o, i + l - p, n, m), e.globalAlpha = 0.35, e.drawImage(c, r + o, i + l - p - a * 40, n, m);
+      const f = 1 + a * 0.6, _ = n * f, m = (_ - n) / 2;
+      e.drawImage(d, r + o, i + l - m, n, _), e.globalAlpha = 0.35, e.drawImage(d, r + o, i + l - m - a * 40, n, _);
     } else
-      e.drawImage(c, r + o, i + l, n, n), d && d.label && this.drawLabel(e, d.label, r + this.cell / 2, i + this.cell - 22);
+      e.drawImage(d, r + o, i + l, n, n), c && c.label && this.drawLabel(e, c.label, r + this.cell / 2, i + this.cell - 22);
     e.restore();
   }
   drawLabel(e, t, r, i, a = 34) {
@@ -2963,16 +3009,16 @@ class xn {
     h.addColorStop(0, "#fff2a8"), h.addColorStop(0.5, "#ffd84a"), h.addColorStop(1, "#d08a00"), e.fillStyle = h, e.fillText(t, r, i), e.restore();
   }
   drawWildReel(e, t, r, i) {
-    const a = this.wildAnim.get(t), h = a ? we.outBack(a.p) : 1, d = de.lep_full;
-    if (!d) return;
-    const c = t * this.cell, f = c + this.cell / 2, w = this.h / 2;
+    const a = this.wildAnim.get(t), h = a ? Le.outBack(a.p) : 1, c = Ie.lep_full;
+    if (!c) return;
+    const d = t * this.cell, p = d + this.cell / 2, b = this.h / 2;
     e.save();
-    const n = e.createLinearGradient(c, 0, c, this.h);
-    n.addColorStop(0, "#2a7a3a"), n.addColorStop(1, "#0d3a1c"), e.fillStyle = n, e.fillRect(c + 4, 4, this.cell - 8, this.h - 8), e.strokeStyle = "#ffd84a", e.lineWidth = 6, e.shadowColor = "#ffd84a", e.shadowBlur = 20 + 10 * Math.sin(i * 6), e.strokeRect(c + 6, 6, this.cell - 12, this.h - 12), e.shadowBlur = 0, e.translate(f, w), e.scale(h, h), e.translate(-f, -w);
-    const o = this.h - 60, l = o * d.width / d.height, u = Math.min(l, this.cell * 1.25), _ = u * d.height / d.width;
-    if (e.drawImage(d, f - u / 2, this.h - 20 - _, u, _), this.drawLabel(e, "WILD", f, this.h - 30, 44), r.mult > 1) {
-      const m = "x" + r.mult;
-      e.font = '400 72px "Luckiest Guy", Impact', e.textAlign = "center", e.textBaseline = "middle", e.lineJoin = "round", e.lineWidth = 12, e.strokeStyle = "#0b3a12", e.strokeText(m, f, this.h * 0.62), e.fillStyle = "#7dff6a", e.fillText(m, f, this.h * 0.62);
+    const n = e.createLinearGradient(d, 0, d, this.h);
+    n.addColorStop(0, "#2a7a3a"), n.addColorStop(1, "#0d3a1c"), e.fillStyle = n, e.fillRect(d + 4, 4, this.cell - 8, this.h - 8), e.strokeStyle = "#ffd84a", e.lineWidth = 6, e.shadowColor = "#ffd84a", e.shadowBlur = 20 + 10 * Math.sin(i * 6), e.strokeRect(d + 6, 6, this.cell - 12, this.h - 12), e.shadowBlur = 0, e.translate(p, b), e.scale(h, h), e.translate(-p, -b);
+    const o = this.h - 60, l = o * c.width / c.height, u = Math.min(l, this.cell * 1.25), f = u * c.height / c.width;
+    if (e.drawImage(c, p - u / 2, this.h - 20 - f, u, f), this.drawLabel(e, "WILD", p, this.h - 30, 44), r.mult > 1) {
+      const _ = "x" + r.mult;
+      e.font = '400 72px "Luckiest Guy", Impact', e.textAlign = "center", e.textBaseline = "middle", e.lineJoin = "round", e.lineWidth = 12, e.strokeStyle = "#0b3a12", e.strokeText(_, p, this.h * 0.62), e.fillStyle = "#7dff6a", e.fillText(_, p, this.h * 0.62);
     }
     e.restore();
   }
@@ -2991,55 +3037,76 @@ class xn {
   }
   showLine(e, t = "") {
     const r = this.paylines[e], i = [[-40, (r[0] + 0.5) * this.pitch]];
-    r.forEach((h, d) => i.push([(d + 0.5) * this.cell, (h + 0.5) * this.pitch])), i.push([this.w + 40, (r[this.reelsN - 1] + 0.5) * this.pitch]);
+    r.forEach((h, c) => i.push([(c + 0.5) * this.cell, (h + 0.5) * this.pitch])), i.push([this.w + 40, (r[this.reelsN - 1] + 0.5) * this.pitch]);
     const a = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
     a.setAttribute("points", i.map((h) => h.join(",")).join(" ")), t && a.setAttribute("class", t), this.svg.appendChild(a), this.markers.l[e].classList.add("on"), this.markers.r[e].classList.add("on");
   }
 }
-function Sn(s, e, t, r, i, a) {
+function Pn(s, e, t, r, i, a) {
   s.beginPath(), s.moveTo(e + a, t), s.arcTo(e + r, t, e + r, t + i, a), s.arcTo(e + r, t + i, e, t + i, a), s.arcTo(e, t + i, e, t, a), s.arcTo(e, t, e + r, t, a), s.closePath();
 }
-class Mn {
-  constructor(e, t = null) {
-    this.c = e, this.ctx = e.getContext("2d"), this.image = t, this.coins = [], this.active = !1, this.raf = 0, this.rate = 3;
+const le = ["blank", "0", "1", "5", "10", "00"], Ce = ["x1", "x2", "x5", "x10", "replace", "bank", "wheel"];
+function je(s, e) {
+  const t = Math.max(0, e.indexOf(s)), r = e[(t + e.length - 1) % e.length] ?? s, i = e[(t + 1) % e.length] ?? s;
+  return [r, s, i];
+}
+function _e(s, e) {
+  const t = [];
+  for (let r = 0; r < e; r++) t.push(...s);
+  return t;
+}
+function L(s) {
+  const e = new Image();
+  return e.src = R(s), e;
+}
+class Cn {
+  constructor(e, t) {
+    this.canvas = e, this.sheet = t;
   }
-  start(e = 3) {
+  canvas;
+  sheet;
+  coins = [];
+  active = !1;
+  raf = 0;
+  last = 0;
+  rate = 4;
+  acc = 0;
+  start(e) {
     this.rate = e, this.active = !0, this.raf || (this.last = performance.now(), this.raf = requestAnimationFrame((t) => this.frame(t)));
   }
   stop() {
     this.active = !1;
   }
   clear() {
-    this.active = !1, this.coins = [], this.ctx.clearRect(0, 0, this.c.width, this.c.height), this.raf && cancelAnimationFrame(this.raf), this.raf = 0;
+    this.active = !1, this.coins = [], this.canvas.getContext("2d")?.clearRect(0, 0, this.canvas.width, this.canvas.height), this.raf && cancelAnimationFrame(this.raf), this.raf = 0;
   }
   frame(e) {
-    const t = Math.min(0.05, (e - this.last) / 1e3);
+    const t = this.canvas.getContext("2d");
+    if (!t) return;
+    const r = Math.min(0.05, (e - this.last) / 1e3);
     this.last = e;
-    const r = this.image || de.sym_coin;
-    for (this.acc = (this.acc || 0) + (this.active ? this.rate : 0); this.acc >= 1; )
-      this.acc -= 1, this.coins.push({ x: Math.random() * this.c.width, y: -100, vx: (Math.random() - 0.5) * 200, vy: 100 + Math.random() * 300, r: Math.random() * 6.28, vr: (Math.random() - 0.5) * 8, s: 44 + Math.random() * 50 });
-    const i = this.ctx;
-    i.clearRect(0, 0, this.c.width, this.c.height), this.coins = this.coins.filter((a) => a.y < this.c.height + 100);
-    for (const a of this.coins)
-      a.vy += 900 * t, a.x += a.vx * t, a.y += a.vy * t, a.r += a.vr * t, i.save(), i.translate(a.x, a.y), i.rotate(a.r), i.scale(Math.cos(a.r * 1.7), 1), r && r.complete !== !1 && (r.naturalWidth || r.width) && i.drawImage(r, -a.s / 2, -a.s / 2, a.s, a.s), i.restore();
-    this.active || this.coins.length ? this.raf = requestAnimationFrame((a) => this.frame(a)) : this.raf = 0;
+    const i = this.canvas.width, a = this.canvas.height;
+    for (this.acc += this.active ? this.rate : 0; this.acc >= 1; )
+      this.acc -= 1, this.coins.push({
+        x: i * (0.18 + Math.random() * 0.64),
+        y: a * (0.08 + Math.random() * 0.2),
+        vy: 40 + Math.random() * 80,
+        s: 18 + Math.random() * 10,
+        frame: Math.floor(Math.random() * 12),
+        spin: 8 + Math.random() * 10
+      });
+    t.clearRect(0, 0, i, a);
+    const h = this.sheet, c = h.complete && h.naturalWidth >= 128;
+    this.coins = this.coins.filter((d) => d.y < a + 80 && d.s < 160);
+    for (const d of this.coins) {
+      if (d.vy += 280 * r, d.y += d.vy * r, d.s += 70 * r, d.frame = (d.frame + d.spin * r) % 12, !c) continue;
+      const p = Math.floor(d.frame) * 128;
+      t.drawImage(h, p, 0, 128, 128, d.x - d.s / 2, d.y - d.s / 2, d.s, d.s);
+    }
+    this.active || this.coins.length ? this.raf = requestAnimationFrame((d) => this.frame(d)) : this.raf = 0;
   }
 }
-const K = ["blank", "0", "1", "5", "10", "00"], ye = ["x1", "x2", "x5", "x10", "replace", "bank", "wheel"];
-function He(s, e) {
-  const t = Math.max(0, e.indexOf(s)), r = e[(t + e.length - 1) % e.length] ?? s, i = e[(t + 1) % e.length] ?? s;
-  return [r, s, i];
-}
-function oe(s, e) {
-  const t = [];
-  for (let r = 0; r < e; r++) t.push(...s);
-  return t;
-}
-function J(s) {
-  const e = new Image();
-  return e.src = D(s), e;
-}
-class Tn {
+class Nn {
   view = null;
   rain = null;
   reels = null;
@@ -3051,9 +3118,12 @@ class Tn {
   wasSpinning = !1;
   armed = !1;
   held = [null, null, null, null];
-  wheelArt = null;
   wheelFace = null;
   pointerArt = null;
+  bulbOn = null;
+  bulbOff = null;
+  glow = null;
+  spark = null;
   money = !1;
   symbols = /* @__PURE__ */ new Map();
   async mount(e) {
@@ -3064,24 +3134,26 @@ class Tn {
     r.id = "wheel-view", r.width = 420, r.height = 420;
     const i = document.createElement("div");
     i.id = "bigwin", i.hidden = !0;
-    const a = document.createElement("div");
-    a.id = "rays";
-    const h = document.createElement("canvas");
-    h.id = "coins", h.width = 960, h.height = 540;
-    const d = document.createElement("img");
-    d.id = "bigwin-art", d.alt = "";
+    const a = document.createElement("canvas");
+    a.id = "coins", a.id = "coins", a.width = 960, a.height = 540;
+    const h = document.createElement("img");
+    h.id = "bigwin-art", h.alt = "";
     const c = document.createElement("p");
     c.id = "plate-amount";
-    const f = document.createElement("button");
-    f.id = "bigwin-skip", f.type = "button", f.textContent = "Skip", f.addEventListener("click", () => {
+    const d = document.createElement("button");
+    d.id = "bigwin-skip", d.type = "button", d.textContent = "Skip", d.addEventListener("click", () => {
       document.getElementById("reveal")?.dispatchEvent(new MouseEvent("click", { bubbles: !0 }));
-    }), i.append(a, h, d, c, f);
-    const w = document.getElementById("overlay") ?? e, n = document.getElementById("wheel-host");
-    e.append(t), (n ?? e).append(r), w.append(i), this.reels = t, this.wheel = r, this.big = i, this.bigArt = d;
-    for (const [l, u] of Object.entries(I.symbols)) this.symbols.set(l, J(u));
-    this.wheelArt = J(I.wheel), this.wheelFace = J(I.wheelFace), this.pointerArt = J(I.pointer);
-    const o = J(I.coin);
-    this.view = new xn(t, null, null, null, {
+    }), i.append(a, h, c, d);
+    const p = document.getElementById("overlay") ?? e, b = document.getElementById("wheel-host");
+    e.append(t), (b ?? e).append(r), p.append(i), this.reels = t, this.wheel = r, this.big = i, this.bigArt = h, this.wheelFace = L(v.wheelFace), this.pointerArt = L(v.pointer);
+    const n = L(v.coinSheet), o = L(v.reelCell), l = document.createElement("canvas");
+    l.width = 720, l.height = 512;
+    const u = L(v.numerals[1]), f = L(v.numerals[0]), _ = () => {
+      if (!u.complete || !f.complete || !u.naturalWidth || !f.naturalWidth) return;
+      const m = l.getContext("2d");
+      m && (m.clearRect(0, 0, l.width, l.height), m.drawImage(u, 40, 40, 300, 430), m.drawImage(f, 340, 40, 340, 430));
+    };
+    u.addEventListener("load", _), f.addEventListener("load", _), _(), this.symbols.set("0", L(v.numerals[0])), this.symbols.set("1", u), this.symbols.set("5", L(v.numerals[5])), this.symbols.set("00", L(v.numerals["00"])), this.symbols.set("10", l), this.symbols.set("x1", L(v.modifiers.x1)), this.symbols.set("x2", L(v.modifiers.x2)), this.symbols.set("x5", L(v.modifiers.x5)), this.symbols.set("x10", L(v.modifiers.x10)), this.symbols.set("replace", L(v.modifiers.replace)), this.symbols.set("bank", L(v.modifiers.bank)), this.symbols.set("wheel", L(v.modifiers.wheel)), this.bulbOn = L(v.bulbOn), this.bulbOff = L(v.bulbOff), this.glow = L(v.glowEmerald), this.spark = L(v.spark), this.view = new Ln(t, null, null, null, {
       reels: 4,
       rows: 3,
       cell: 104,
@@ -3090,16 +3162,21 @@ class Tn {
       well: ["#123832", "#071614"],
       plain: !0,
       symbolFill: !0,
-      symbolArt: (l) => {
-        const u = this.symbols.get(l);
-        return u && u.complete && u.naturalWidth > 0 ? u : null;
+      landSeconds: 0.22,
+      cellArt: (m) => m < 3 && o.complete && o.naturalWidth ? o : null,
+      glowSprite: this.spark,
+      winSpark: this.glow,
+      symbolArt: (m) => {
+        if (m === "blank") return null;
+        const y = this.symbols.get(m);
+        return y ? y instanceof HTMLCanvasElement ? y.width ? y : null : y.complete && y.naturalWidth > 0 ? y : null : null;
       }
     }), this.view.setStrips(
-      [oe(K, 4), oe(K, 4), oe(K, 4), oe(ye, 3)],
+      [_e(le, 4), _e(le, 4), _e(le, 4), _e(Ce, 3)],
       [1, 2, 3, 0]
     ), this.view.onReelStop = () => {
       e.dispatchEvent(new CustomEvent("auric-land", { bubbles: !0 }));
-    }, this.rain = new Mn(h, o), this.resize();
+    }, this.rain = new Cn(a, n), this.resize();
   }
   setHidden(e) {
     this.view && (this.view.paused = e), e && this.rain?.stop();
@@ -3108,31 +3185,29 @@ class Tn {
     this.frame = e, this.cost = t;
     const r = this.view;
     if (!r) return;
-    const i = e.spinning.some(Boolean), a = [e.tokens[0], e.tokens[1], e.tokens[2], e.modifier], h = a.every((d) => d !== null);
+    const i = e.spinning.some(Boolean), a = [e.tokens[0], e.tokens[1], e.tokens[2], e.modifier], h = a.every((c) => c !== null);
     if (i && !this.wasSpinning && !e.reduced) {
-      const d = document.getElementById("turbo")?.checked === !0;
-      r.spin({ stagger: d ? 0.05 : 0.1 }), this.armed = !0, this.held.fill(null);
-      const c = document.getElementById("reel-sweep");
-      c && (c.classList.remove("go"), c.offsetWidth, c.classList.add("go"));
+      const c = document.getElementById("turbo")?.checked === !0;
+      r.spin({ stagger: c ? 0.02 : 0.04 }), this.armed = !0, this.held.fill(null);
+      const d = document.getElementById("reel-sweep");
+      d && (d.classList.remove("go"), d.offsetWidth, d.classList.add("go"));
     }
-    this.armed && !e.reduced ? (a.forEach((d, c) => {
-      if (d !== null && !e.spinning[c] && this.held[c] !== d) {
-        this.held[c] = d;
-        const f = c < 3 ? K : ye;
-        r.landReel(c, [3, 5, 7, 2][c] ?? 0, He(d, f));
+    this.armed && !e.reduced ? (a.forEach((c, d) => {
+      if (c !== null && !e.spinning[d] && this.held[d] !== c) {
+        this.held[d] = c;
+        const p = d < 3 ? le : Ce;
+        r.landReel(d, [3, 5, 7, 2][d] ?? 0, je(c, p));
       }
-    }), !i && h && (this.armed = !1)) : h && !r.isSpinning() && a.join("|") !== this.held.join("|") && (r.setStrips(a.map((d, c) => He(d, c < 3 ? K : ye)), [0, 0, 0, 0]), a.forEach((d, c) => {
-      this.held[c] = d;
-    })), this.wasSpinning = i, r.glowReels.clear(), e.anticipation && !e.reduced && e.spinning.forEach((d, c) => {
-      d && r.glowReels.add(c);
-    }), this.paintWheel(e), this.paintWin(e);
+    }), !i && h && (this.armed = !1)) : h && !r.isSpinning() && a.join("|") !== this.held.join("|") && (r.setStrips(a.map((c, d) => je(c, d < 3 ? le : Ce)), [0, 0, 0, 0]), a.forEach((c, d) => {
+      this.held[d] = c;
+    })), this.wasSpinning = i, r.glowReels.clear(), r.highlight = null, e.anticipation && !e.reduced && e.spinning.slice(0, 3).every((d) => !d) && e.spinning[3] && r.glowReels.add(3), !e.reduced && !i && e.cueTier > 0 && (r.highlight = /* @__PURE__ */ new Set(["0,1", "1,1", "2,1"])), this.paintWheel(e), this.paintWin(e);
   }
   /** Wallet amounts are cents. Practice amounts are shown as whole numbers. */
   setMoney(e) {
     this.money = e;
   }
   pointerWedge() {
-    return this.frame?.wheel ? Ze(this.frame.wheel.rotation) : null;
+    return this.frame?.wheel ? it(this.frame.wheel.rotation) : null;
   }
   /** Keeps the idle lamp chase moving between receipts. */
   tick(e) {
@@ -3151,48 +3226,53 @@ class Tn {
     this.rain?.clear(), this.view && (this.view.paused = !0), this.view = null, this.big?.remove(), this.wheel?.remove(), this.reels?.parentElement?.replaceChildren();
   }
   paintWheel(e) {
-    const t = this.wheel, r = t?.getContext("2d"), i = this.wheelArt;
+    const t = this.wheel, r = t?.getContext("2d"), i = this.wheelFace;
     if (!t || !r || !i) return;
-    const a = t.width, h = a / 2, d = e?.wheel ?? null, c = e?.reduced ?? !1, f = d?.rotation ?? 0;
-    r.clearRect(0, 0, a, a), r.save(), r.translate(h, h), r.rotate(f);
-    const w = this.wheelFace, n = a * 0.9;
-    w && w.complete && w.naturalWidth && r.drawImage(w, -n / 2, -n / 2, n, n);
-    const o = a * 0.98;
-    i.complete && i.naturalWidth && r.drawImage(i, -o / 2, -o / 2, o, o), r.fillStyle = "#fff6d8", r.strokeStyle = "#3a2200", r.lineWidth = Math.max(3, a * 0.013), r.lineJoin = "round", r.miterLimit = 2, r.textBaseline = "middle", r.shadowColor = "rgba(12, 8, 2, 0.9)", ue.forEach((m, p) => {
-      const y = (p + 0.5) * (Math.PI * 2 / 8) - Math.PI / 2, v = this.money ? (this.cost * m / 100).toFixed(2) : String(this.cost * m), k = a * 0.16;
-      let M = Math.round(a * 0.082);
-      for (r.font = `700 ${M}px Auric Serif, serif`; M > Math.round(a * 0.05) && r.measureText(v).width > k; )
-        M -= 1, r.font = `700 ${M}px Auric Serif, serif`;
-      const T = Math.cos(y) >= 0, P = T ? a * 0.225 : Math.min(a * 0.4, a * 0.225 + r.measureText(v).width);
-      r.save(), r.translate(Math.cos(y) * P, Math.sin(y) * P), r.rotate(T ? y : y + Math.PI), r.textAlign = "left", r.shadowBlur = Math.max(2, a * 0.01), r.strokeText(v, 0, 0), r.shadowBlur = 0, r.fillText(v, 0, 0), r.restore();
-    }), r.shadowBlur = 0, r.restore();
-    const l = this.pointerArt;
-    if (l && l.complete && l.naturalWidth) {
-      const m = a * 0.24, p = m * (l.naturalHeight / l.naturalWidth);
-      r.drawImage(l, h - m / 2, a * 5e-3, m, p);
+    const a = t.width, h = a / 2, c = e?.wheel ?? null, d = e?.reduced ?? !1, p = c?.rotation ?? 0;
+    if (r.clearRect(0, 0, a, a), r.save(), r.translate(h, h), r.rotate(p), i.complete && i.naturalWidth && r.drawImage(i, -a / 2, -a / 2, a, a), r.fillStyle = "#fff6d8", r.strokeStyle = "#3a2200", r.lineWidth = Math.max(3, a * 0.013), r.lineJoin = "round", r.miterLimit = 2, r.textBaseline = "middle", r.shadowColor = "rgba(12, 8, 2, 0.9)", ve.forEach((l, u) => {
+      const f = -Math.PI / 2 + (22.5 + u * 45) * Math.PI / 180, _ = this.money ? (this.cost * l / 100).toFixed(2) : String(this.cost * l), m = a * 0.16;
+      let y = Math.round(a * 0.07);
+      for (r.font = `700 ${y}px Auric Serif, serif`; y > Math.round(a * 0.045) && r.measureText(_).width > m; )
+        y -= 1, r.font = `700 ${y}px Auric Serif, serif`;
+      const k = Math.cos(f) >= 0, A = a * 0.33;
+      r.save(), r.translate(Math.cos(f) * A, Math.sin(f) * A), r.rotate(k ? f : f + Math.PI), r.textAlign = "center", r.shadowBlur = Math.max(2, a * 0.01), r.strokeText(_, 0, 0), r.shadowBlur = 0, r.fillText(_, 0, 0), r.restore();
+    }), r.restore(), c?.lit !== null && c?.lit !== void 0 && !c.spinning && this.glow?.complete && (r.globalAlpha = 0.9, r.drawImage(this.glow, h - a * 0.16, a * 0.02, a * 0.32, a * 0.22), r.globalAlpha = 1), c?.spinning && this.spark?.complete && !d) {
+      const l = this.spark, u = performance.now() / 40;
+      for (let f = 0; f < 6; f++) {
+        const _ = -Math.PI / 2 - (u + f * 7) * Math.PI / 180;
+        r.globalAlpha = 0.25 + f * 0.1, r.drawImage(l, h + Math.cos(_) * a * 0.42 - 12, h + Math.sin(_) * a * 0.42 - 12, 24, 24);
+      }
+      r.globalAlpha = 1;
     }
-    const u = !c && (!d || d.spinning || d.lit === null), _ = Math.floor(performance.now() / (d?.spinning ? 70 : 180));
-    for (let m = 0; m < 16; m++) {
-      const p = u && (m === _ % 16 || m === (_ + 1) % 16), y = d !== null && d.lit !== null && m % 2 === d.lit % 2;
-      if (!p && !y) continue;
-      const v = m / 16 * Math.PI * 2 - Math.PI / 2;
-      r.beginPath(), r.arc(h + Math.cos(v) * a * 0.455, h + Math.sin(v) * a * 0.455, a * 0.018, 0, Math.PI * 2), r.fillStyle = "rgba(255, 246, 216, 0.95)", r.shadowColor = "#e0b15a", r.shadowBlur = 14, r.fill();
+    const b = this.pointerArt;
+    if (b && b.complete && b.naturalWidth) {
+      const l = a * 0.2, u = l * (b.naturalWidth / b.naturalHeight), f = !d && c && c.lit !== null && !c.spinning ? Math.sin(performance.now() / 90) * a * 0.012 : 0;
+      r.drawImage(b, h - u / 2, a * 0.015 + f, u, l);
     }
-    r.shadowBlur = 0;
+    const n = this.bulbOn, o = this.bulbOff;
+    if (n?.complete && o?.complete) {
+      const l = !d && (!c || c.spinning || c.lit === null), u = Math.floor(performance.now() / (c?.spinning ? 70 : 180));
+      for (let f = 0; f < 16; f++) {
+        const _ = l && (f === u % 16 || f === (u + 1) % 16), m = c !== null && c.lit !== null && f % 2 === c.lit % 2, y = _ || m ? n : o, k = f / 16 * Math.PI * 2 - Math.PI / 2, A = a * 0.045;
+        r.drawImage(y, h + Math.cos(k) * a * 0.46 - A / 2, h + Math.sin(k) * a * 0.46 - A / 2, A, A);
+      }
+    }
   }
   paintWin(e) {
-    const t = e.reduced ? null : Zt(e.cueTier), r = e.phase === "celebrating" || e.phase === "resolving", i = t !== null && e.hero !== null && e.hero > 0 && r;
+    const t = e.reduced ? null : e.plate, r = e.phase === "celebrating" || e.phase === "resolving", i = t !== null && e.hero !== null && e.hero > 0 && r;
     if (!this.big || !this.bigArt) return;
     if (this.big.hidden = !i, !i) {
       this.rain?.stop();
       return;
     }
-    const a = I.plates[e.cueTier];
-    a && this.bigArt.dataset.tier !== String(e.cueTier) && (this.bigArt.dataset.tier = String(e.cueTier), this.bigArt.src = D(a)), this.rain?.start(e.cueTier >= 4 ? 8 : e.cueTier === 3 ? 5 : 3);
+    const a = v.plates[t];
+    this.bigArt.dataset.tier !== t && (this.bigArt.dataset.tier = t, this.bigArt.src = R(a));
+    const h = t === "epic" ? 7 : t === "super" ? 6 : t === "mega" ? 5 : 3;
+    this.rain?.start(h);
   }
 }
-const ae = window.matchMedia("(prefers-reduced-motion: reduce)");
-function En() {
+const ge = window.matchMedia("(prefers-reduced-motion: reduce)");
+function Bn() {
   const s = "locks" in navigator, e = s ? localStorage : sessionStorage, t = {
     get: (i) => {
       try {
@@ -3207,36 +3287,36 @@ function En() {
   };
   return s ? { kv: t, locker: {
     exclusive(i) {
-      return Promise.resolve(navigator.locks.request(dn, () => i()));
+      return Promise.resolve(navigator.locks.request(gn, () => i()));
     }
   }, storage: "durable", notice: null } : {
     kv: t,
-    locker: mn(),
+    locker: An(),
     storage: "tab",
     notice: "This browser keeps a separate demo balance in each tab."
   };
 }
-function b(s) {
+function w(s) {
   const e = document.getElementById(s);
   if (!e) throw new Error(`missing ${s}`);
   return e;
 }
-function In() {
+function On() {
   const s = Array.from(document.querySelectorAll("dialog")).filter((e) => e.open);
   return s[s.length - 1] ?? null;
 }
-function Ln(s) {
+function Fn(s) {
   return Array.from(s.querySelectorAll("button, a[href], input, select, textarea")).filter((e) => e.hasAttribute("disabled") || e.getAttribute("aria-hidden") === "true" ? !1 : e.tabIndex >= 0);
 }
-function O(s) {
-  return L(s);
+function $(s) {
+  return I(s);
 }
-function Re(s, e) {
+function Ue(s, e) {
   if (e === null) {
     s.dataset.value !== "" && s.replaceChildren(), s.dataset.value = "";
     return;
   }
-  const t = O(e);
+  const t = $(e);
   if (s.dataset.value !== t) {
     s.dataset.value = t, s.replaceChildren();
     for (const r of t) {
@@ -3245,35 +3325,46 @@ function Re(s, e) {
     }
   }
 }
-function F(s, e) {
-  b(s).style.backgroundImage = `url("${D(e)}")`;
+function H(s, e) {
+  w(s).style.backgroundImage = `url("${R(e)}")`;
 }
-function $e() {
-  const s = window.innerHeight > window.innerWidth, e = b("cabinet");
+function Ze() {
+  const s = window.innerHeight > window.innerWidth, e = w("cabinet");
   e.dataset.orient = s ? "portrait" : "landscape";
   const t = s ? 720 : 1280, r = s ? 1280 : 720;
-  e.style.width = `${t}px`, e.style.height = `${r}px`, e.style.backgroundImage = `url("${D(s ? I.cabinetP : I.cabinetL)}")`;
+  e.style.width = `${t}px`, e.style.height = `${r}px`, e.style.backgroundImage = `url("${R(s ? v.cabinetP : v.cabinetL)}")`;
   const i = Math.min(window.innerWidth / t, window.innerHeight / r), a = (window.innerWidth - t * i) / 2, h = (window.innerHeight - r * i) / 2;
-  e.style.transform = `translate(${a}px, ${h}px) scale(${i})`, F("spin", I.spin), F("cost-up", I.plus), F("cost-down", I.minus), F("turbo-btn", I.turbo), F("start-auto", I.auto), F("sound-btn", I.sound), F("music-btn", I.music), F("settings-open", I.gear), F("reveal", I.skip), F("stop-auto", I.stop), F("help-open", I.help), F("board-open", I.star);
-  const d = `url("${D(I.plaque)}")`, c = s ? "11px 12px" : "16px 18px";
-  for (const w of Array.from(document.querySelectorAll(".led, #auto-status, #short, #banner")))
-    w.style.borderStyle = "solid", w.style.borderWidth = c, w.style.borderImage = `${d} 78 90 fill / ${c} / 0 stretch`, w.style.background = "transparent";
-  const f = s ? "10px 12px" : "12px 16px";
-  for (const w of Array.from(document.querySelectorAll("#currency button")))
-    w.style.borderStyle = "solid", w.style.borderWidth = f, w.style.borderImage = `${d} 78 90 fill / ${f} / 0 stretch`, w.style.background = "transparent";
-  for (const w of Array.from(document.querySelectorAll("dialog")))
-    w.style.borderImage = `${d} 70 84 fill / 22px 26px / 0 stretch`;
+  e.style.transform = `translate(${a}px, ${h}px) scale(${i})`, H("cost-up", v.plus), H("cost-down", v.minus), H("turbo-btn", v.turbo), H("start-auto", v.auto), H("sound-btn", v.sound), H("music-btn", v.music), H("settings-open", v.gear), H("reveal", v.skip), H("stop-auto", v.stop), H("help-open", v.help), H("board-open", v.star);
+  const c = document.getElementById("reel-sweep");
+  c && (c.style.backgroundImage = `url("${R(v.streak)}")`);
+  const d = document.getElementById("shock");
+  d instanceof HTMLImageElement && (d.src = R(v.glowEmerald));
+  for (const l of Array.from(document.querySelectorAll("#sparks img"))) l.src = R(v.sparkSmall);
+  const p = document.getElementById("splash-art");
+  p instanceof HTMLImageElement && (p.src = R(s ? v.splashP : v.splashL));
+  const b = `url("${R(v.plaque)}")`, n = s ? "11px 12px" : "16px 18px";
+  for (const l of Array.from(document.querySelectorAll(".led, #auto-status, #short, #banner")))
+    l.style.borderStyle = "solid", l.style.borderWidth = n, l.style.borderImage = `${b} 78 90 fill / ${n} / 0 stretch`, l.style.background = "transparent";
+  const o = s ? "10px 12px" : "12px 16px";
+  for (const l of Array.from(document.querySelectorAll("#currency button")))
+    l.style.borderStyle = "solid", l.style.borderWidth = o, l.style.borderImage = `${b} 78 90 fill / ${o} / 0 stretch`, l.style.background = "transparent";
+  for (const l of Array.from(document.querySelectorAll("dialog")))
+    l.style.borderImage = `${b} 70 84 fill / 22px 26px / 0 stretch`;
 }
-function De() {
-  const s = b("bulb-rim"), e = 36;
+function Ke() {
+  const s = w("bulb-rim"), e = 36;
   if (s.childElementCount !== e) {
     s.replaceChildren();
     for (let i = 0; i < e; i += 1) {
-      const a = document.createElement("i");
-      a.style.setProperty("--i", String(i)), s.append(a);
+      const a = document.createElement("span");
+      a.className = "bulb", a.style.setProperty("--i", String(i));
+      const h = document.createElement("img");
+      h.alt = "", h.src = R(v.bulbOff);
+      const c = document.createElement("img");
+      c.alt = "", c.className = "on", c.src = R(v.bulbOn), a.append(h, c), s.append(a);
     }
   }
-  const t = b("cabinet").dataset.orient === "portrait", r = [];
+  const t = w("cabinet").dataset.orient === "portrait", r = [];
   if (t) {
     for (let i = 0; i < 20; i += 1) {
       const a = Math.PI * (1.08 + 0.84 * i / 19);
@@ -3294,21 +3385,21 @@ function De() {
     }
   }
   Array.from(s.children).forEach((i, a) => {
-    const h = i, d = r[a] ?? r[0];
-    h.style.left = `${d[0]}px`, h.style.top = `${d[1]}px`;
+    const h = i, c = r[a] ?? r[0];
+    h.style.left = `${c[0]}px`, h.style.top = `${c[1]}px`;
   });
 }
-function Pn(s) {
+function Hn(s) {
   const e = s.filter((t) => t !== null);
-  return e.length === 0 ? "" : e.some((t) => t === "blank") ? "0" : String(e.reduce((t, r) => t + Te[r], 0));
+  return e.length === 0 ? "" : e.some((t) => t === "blank") ? "0" : String(e.reduce((t, r) => t + Re[r], 0));
 }
-let ve = "";
-function Cn(s) {
-  const e = b("cabinet"), t = s?.spinning.some(Boolean) ?? !1, r = !!(s && s.cueTier >= 2 && (s.phase === "celebrating" || s.phase === "resolving"));
+let Ne = "";
+function Rn(s) {
+  const e = w("cabinet"), t = s?.spinning.some(Boolean) ?? !1, r = !!(s && s.cueTier >= 2 && (s.phase === "celebrating" || s.phase === "resolving"));
   e.dataset.energy = s?.reduced ? "idle" : r ? "win" : t ? "spin" : "idle", e.dataset.phase = s?.phase ?? "idle";
-  const i = b("feature-banner"), a = b("build-digits"), h = b("build"), d = b("fly");
+  const i = w("feature-banner"), a = w("build-digits"), h = w("build"), c = w("fly");
   if (!s || s.phase === "idle" || s.phase === "onboarding") {
-    i.textContent = "", a.textContent = "", a.dataset.len = "", h.classList.remove("slam", "shock", "sparks"), ve = "", d.hidden = !0;
+    i.textContent = "", a.textContent = "", a.dataset.len = "", h.classList.remove("slam", "shock", "sparks"), Ne = "", c.hidden = !0;
     return;
   }
   if (s.phase === "celebrating" || s.phase === "resolving") {
@@ -3316,28 +3407,28 @@ function Cn(s) {
     return;
   }
   i.textContent = s.phase === "replace" ? "Replace" : s.phase === "bank" ? "Bank + Add" : s.phase === "wheel" ? "Wheel" : "";
-  const c = Pn(s.tokens), f = c.length > (a.dataset.len?.length ?? 0);
-  a.dataset.len = c;
-  const w = s.modifier === "x2" ? 2 : s.modifier === "x5" ? 5 : s.modifier === "x10" ? 10 : 0, n = `${s.receiptId}:${s.modifier ?? ""}`;
-  if (w > 1 && s.cueTier > 0 && s.reading !== null && !s.reduced)
-    a.textContent = String(Number(s.reading) * w), f && a.classList.add("flash"), ve !== n && (ve = n, h.classList.remove("slam", "shock"), h.offsetWidth, h.classList.add("slam", "shock"));
+  const d = Hn(s.tokens), p = d.length > (a.dataset.len?.length ?? 0);
+  a.dataset.len = d;
+  const b = s.modifier === "x2" ? 2 : s.modifier === "x5" ? 5 : s.modifier === "x10" ? 10 : 0, n = `${s.receiptId}:${s.modifier ?? ""}`;
+  if (b > 1 && s.cueTier > 0 && s.reading !== null && !s.reduced)
+    a.textContent = String(Number(s.reading) * b), p && a.classList.add("flash"), Ne !== n && (Ne = n, h.classList.remove("slam", "shock"), h.offsetWidth, h.classList.add("slam", "shock"));
   else if (s.phase === "bank") {
-    const u = s.lines.find((m) => m.label === "Locked base")?.amount ?? 0, _ = s.lines.filter((m) => m.label.startsWith("Added")).reduce((m, p) => m + (p.amount ?? 0), 0);
-    a.textContent = u || _ ? O(u + _) : c, f && a.classList.add("flash");
+    const u = s.lines.find((_) => _.label === "Locked base")?.amount ?? 0, f = s.lines.filter((_) => _.label.startsWith("Added")).reduce((_, m) => _ + (m.amount ?? 0), 0);
+    a.textContent = u || f ? $(u + f) : d, p && a.classList.add("flash");
   } else {
-    const u = s.spinning.some(Boolean) || s.tokens.some((_) => _ === null);
-    a.textContent = u ? c : "", f && u && a.classList.add("flash");
+    const u = s.spinning.some(Boolean) || s.tokens.some((f) => f === null);
+    a.textContent = u ? d : "", p && u && a.classList.add("flash");
   }
   const o = s.tokens.every((u) => u !== null) && !!s.reading;
   h.classList.toggle("sparks", o && !s.reduced);
   const l = s.lines.find((u) => u.label === "Wheel prize");
-  l && l.amount !== null && !s.reduced && d.dataset.value !== String(l.amount) && (d.dataset.value = String(l.amount), d.hidden = !1, d.textContent = O(l.amount), d.classList.remove("go"), d.offsetWidth, d.classList.add("go")), l || (d.dataset.value = "", d.hidden = !0, d.classList.remove("go"));
+  l && l.amount !== null && !s.reduced && c.dataset.value !== String(l.amount) && (c.dataset.value = String(l.amount), c.hidden = !1, c.textContent = $(l.amount), c.classList.remove("go"), c.offsetWidth, c.classList.add("go")), l || (c.dataset.value = "", c.hidden = !0, c.classList.remove("go"));
 }
-function Nn(s) {
+function Dn(s) {
   const e = Math.floor(s / 1e3), t = Math.floor(e / 60), r = e % 60;
   return `${t}:${r.toString().padStart(2, "0")}`;
 }
-async function Bn() {
+async function $n() {
   const s = [
     new FontFace("Auric Serif", "url(assets/fonts/NotoSerif-Bold.ttf)", { weight: "700" }),
     new FontFace("Auric Sans", "url(assets/fonts/NotoSansDisplay-Bold.ttf)", { weight: "700" }),
@@ -3350,44 +3441,44 @@ async function Bn() {
     }
   }));
 }
-function ke(s, e) {
-  const t = b("lines");
+function be(s, e) {
+  const t = w("lines");
   t.replaceChildren();
-  const r = s?.lines ?? [{ label: "Cost", amount: e, text: O(e), strike: !1 }], i = r.length === 1 && r[0]?.label === "Cost" ? [] : r;
-  for (const d of i) {
-    const c = document.createElement("div");
-    c.className = d.strike ? "line strike" : "line";
-    const f = document.createElement("span");
-    f.textContent = d.label;
-    const w = document.createElement("span");
-    w.textContent = d.text, c.append(f, w), t.append(c);
+  const r = s?.lines ?? [{ label: "Cost", amount: e, text: $(e), strike: !1 }], i = r.length === 1 && r[0]?.label === "Cost" ? [] : r;
+  for (const c of i) {
+    const d = document.createElement("div");
+    d.className = c.strike ? "line strike" : "line";
+    const p = document.createElement("span");
+    p.textContent = c.label;
+    const b = document.createElement("span");
+    b.textContent = c.text, d.append(p, b), t.append(d);
   }
   const a = s == null || s.netText === "Net pending";
-  Re(b("hero"), s?.hero ?? (a ? 0 : null));
+  Ue(w("hero"), s?.hero ?? (a ? 0 : null));
   const h = document.getElementById("plate-amount");
-  h && Re(h, s?.hero ?? null), b("total-label").textContent = s?.totalLabel ?? "Total", b("net").textContent = s?.netText ?? "Net pending", b("meter").textContent = s?.meterFlourish ? "10/10 energy flourish, no credit reward" : `${s?.meterFilled ?? 0}/10`;
+  h && Ue(h, s?.hero ?? null), w("total-label").textContent = s?.totalLabel ?? "Total", w("net").textContent = s?.netText ?? "Net pending", w("meter").textContent = s?.meterFlourish ? "10/10 energy flourish, no credit reward" : `${s?.meterFilled ?? 0}/10`;
 }
-function Fn(s) {
-  let e = z();
+function Wn(s) {
+  let e = de();
   try {
-    e = St(s.get(Be));
+    e = Nt(s.get(Xe));
   } catch {
-    e = z();
+    e = de();
   }
-  const t = b("handle");
+  const t = w("handle");
   t.value = e.handle;
-  const r = b("wordmark");
-  r.src = D(I.logo);
+  const r = w("wordmark");
+  r.src = R(v.logo);
   const i = document.getElementById("onboard-logo");
-  i instanceof HTMLImageElement && (i.src = D(I.logo));
+  i instanceof HTMLImageElement && (i.src = R(v.logo));
   const a = document.getElementById("help-logo");
-  a instanceof HTMLImageElement && (a.src = D(I.logo));
+  a instanceof HTMLImageElement && (a.src = R(v.logo));
   const h = document.getElementById("help-wheel");
-  h instanceof HTMLImageElement && (h.src = D(I.wheel));
-  const d = () => {
-    const f = It(e), w = xt(f?.wins ?? 0);
-    b("board-level").textContent = f ? `Level ${w.level} ${w.name}. Wins ${f.wins}. Biggest net ${O(f.biggestWin)}. Today's best net ${O(f.dayBest)}.` : `Level ${w.level} ${w.name}. No scored play yet.`;
-    const n = b("board-body");
+  h instanceof HTMLImageElement && (h.src = R(v.wheelFace));
+  const c = () => {
+    const p = Ht(e), b = Ct(p?.wins ?? 0);
+    w("board-level").textContent = p ? `Level ${b.level} ${b.name}. Wins ${p.wins}. Biggest net ${$(p.biggestWin)}. Today's best net ${$(p.dayBest)}.` : `Level ${b.level} ${b.name}. No scored play yet.`;
+    const n = w("board-body");
     n.replaceChildren();
     const o = [
       ["Biggest net", "biggestWin"],
@@ -3395,279 +3486,317 @@ function Fn(s) {
       ["Wins", "wins"],
       ["Today's best net", "dayBest"]
     ];
-    for (const [_, m] of o) {
-      const p = document.createElement("h3");
-      p.textContent = _;
+    for (const [f, _] of o) {
+      const m = document.createElement("h3");
+      m.textContent = f;
       const y = document.createElement("table");
-      Lt(e.rows, m).forEach((v, k) => {
-        const M = document.createElement("tr");
-        for (const T of [String(k + 1), v.handle, m === "wins" ? String(v.wins) : O(v[m])]) {
-          const P = document.createElement("td");
-          P.textContent = T, M.append(P);
+      Rt(e.rows, _).forEach((k, A) => {
+        const E = document.createElement("tr");
+        for (const B of [String(A + 1), k.handle, _ === "wins" ? String(k.wins) : $(k[_])]) {
+          const O = document.createElement("td");
+          O.textContent = B, E.append(O);
         }
-        y.append(M);
-      }), n.append(p, y);
+        y.append(E);
+      }), n.append(m, y);
     }
-    const l = document.createElement("p"), u = kt.filter((_) => e.achievements.includes(_.id)).map((_) => _.label);
+    const l = document.createElement("p"), u = Lt.filter((f) => e.achievements.includes(f.id)).map((f) => f.label);
     l.textContent = u.length ? u.join(", ") : "No achievements yet.", n.append(l);
-  }, c = () => {
+  }, d = () => {
     try {
-      s.set(Be, Mt(e));
+      s.set(Xe, Bt(e));
     } catch {
     }
   };
   return t.addEventListener("change", () => {
-    e = { ...e, handle: Ve(t.value) }, t.value = e.handle, c(), d();
-  }), b("board-open").addEventListener("click", () => {
-    d();
-    const f = b("board-dialog");
-    f.open || f.showModal(), queueMicrotask(() => b("board-close").focus());
-  }), b("board-close").addEventListener("click", () => b("board-dialog").close()), d(), {
-    note(f, w) {
-      if (!f || w) return;
-      const n = Et(e, {
-        id: f.id,
-        net: f.net,
-        cost: f.cost,
-        sessionNet: f.sessionNet,
-        modifier: f.modifier,
-        flourish: f.flourish,
+    e = { ...e, handle: tt(t.value) }, t.value = e.handle, d(), c();
+  }), w("board-open").addEventListener("click", () => {
+    c();
+    const p = w("board-dialog");
+    p.open || p.showModal(), queueMicrotask(() => w("board-close").focus());
+  }), w("board-close").addEventListener("click", () => w("board-dialog").close()), c(), {
+    note(p, b) {
+      if (!p || b) return;
+      const n = Ft(e, {
+        id: p.id,
+        net: p.net,
+        cost: p.cost,
+        sessionNet: p.sessionNet,
+        modifier: p.modifier,
+        flourish: p.flourish,
         at: Date.now()
       });
-      n !== e && (e = n, c(), d());
+      n !== e && (e = n, d(), c());
     }
   };
 }
-function On() {
-  const s = En(), e = Fn(s.kv), t = new vt((g) => {
-    b("banner").hidden = !1, b("banner").textContent = g;
+function Gn() {
+  const s = Bn(), e = Wn(s.kv), t = new It((g) => {
+    w("banner").hidden = !1, w("banner").textContent = g;
   });
   t.load();
-  const r = new Tn(), i = new ln(_n());
-  let a = null, h = !1, d;
-  d = new wn(
+  const r = new Nn(), i = new _n(Sn());
+  let a = null, h = !1, c;
+  c = new Mn(
     s.kv,
     s.locker,
     i,
     t,
     (g) => {
-      a = g, r.render(g, g.cost), ke(g, g.cost), b("balance").textContent = O(g.balanceShown), b("session").textContent = O(g.sessionNetShown), h && T();
+      a = g, r.render(g, g.cost), be(g, g.cost), w("balance").textContent = $(g.balanceShown), w("session").textContent = $(g.sessionNetShown), h && P();
     },
     (g) => {
-      b("live").textContent = g;
+      w("live").textContent = g;
     },
     performance.now(),
     s.storage,
-    ae.matches
-  ), h = !0, s.notice && v(s.notice), d.resetReason && v("Saved demo data could not be read, so the demo credits were reset.");
-  const c = b("spin");
-  let f = Ge(), w = null, n = 0;
-  c.addEventListener("pointerdown", (g) => {
-    g.button === 0 && (f = ut(performance.now()), w = null, window.clearInterval(n), n = window.setInterval(() => {
-      f = ht(f, performance.now());
+    ge.matches
+  ), h = !0, s.notice && x(s.notice), c.resetReason && x("Saved demo data could not be read, so the demo credits were reset.");
+  const d = w("spin");
+  let p = !1, b = "", n = 0;
+  function o(g) {
+    const S = w("state-overlay");
+    S.textContent = g, S.hidden = !1, S.classList.remove("show"), S.offsetWidth, S.classList.add("show"), window.clearTimeout(n), n = window.setTimeout(() => {
+      S.classList.remove("show"), window.setTimeout(() => {
+        S.classList.contains("show") || (S.hidden = !0);
+      }, 1e3);
+    }, 1600);
+  }
+  function l() {
+    const g = w("splash");
+    g.hidden = !1, g.classList.remove("out"), queueMicrotask(() => w("splash-start").focus());
+  }
+  function u() {
+    const g = w("splash");
+    g.classList.add("out"), window.setTimeout(() => {
+      g.hidden = !0;
+    }, 1e3);
+  }
+  let f = ze(), _ = null, m = 0;
+  d.addEventListener("pointerdown", (g) => {
+    g.button === 0 && (p = !0, H("spin", v.spinPressed), f = wt(performance.now()), _ = null, window.clearInterval(m), m = window.setInterval(() => {
+      f = yt(f, performance.now());
     }, 40));
-  }), c.addEventListener("pointerup", (g) => {
-    window.clearInterval(n);
-    const A = g.target === c || c.contains(g.target), S = ft(f, A);
-    f = S.hold, w = S.action, window.setTimeout(() => {
-      w = null;
+  }), d.addEventListener("pointerup", (g) => {
+    window.clearInterval(m);
+    const S = g.target === d || d.contains(g.target);
+    p = !1;
+    const T = vt(f, S);
+    f = T.hold, _ = T.action, window.setTimeout(() => {
+      _ = null;
     }, 0);
-  }), c.addEventListener("pointercancel", () => {
-    window.clearInterval(n), f = se(f), w = "none";
-  }), c.addEventListener("pointerleave", () => {
-    f.phase !== "idle" && (f = se(f), w = "none");
-  }), c.addEventListener("blur", () => {
-    window.clearInterval(n), f = se(f);
-  }), c.addEventListener("click", () => {
-    const g = pt(w);
-    w = null, g === "spin" && d.spin(), g === "autoplay" && d.startAuto(d.status().autoplayCount), T();
-  }), c.addEventListener("keydown", (g) => {
-    g.key === "Escape" && (f = se(f), w = "none");
-  }), b("reveal").addEventListener("click", () => {
-    d.reveal(), T();
-  }), b("start-auto").addEventListener("click", () => {
-    d.startAuto(d.status().autoplayCount), T();
-  }), b("stop-auto").addEventListener("click", () => {
-    d.stopAutoplay(), T();
+  }), d.addEventListener("pointercancel", () => {
+    window.clearInterval(m), f = fe(f), _ = "none";
+  }), d.addEventListener("pointerleave", () => {
+    f.phase !== "idle" && (f = fe(f), _ = "none");
+  }), d.addEventListener("blur", () => {
+    window.clearInterval(m), f = fe(f);
+  }), d.addEventListener("click", () => {
+    const g = kt(_);
+    _ = null, g === "spin" && c.spin(), g === "autoplay" && (c.startAuto(c.status().autoplayCount), o("Auto Spin Enabled")), P();
+  }), d.addEventListener("keydown", (g) => {
+    g.key === "Escape" && (f = fe(f), _ = "none");
+  }), w("reveal").addEventListener("click", () => {
+    c.reveal(), P();
+  }), w("start-auto").addEventListener("click", () => {
+    c.startAuto(c.status().autoplayCount), o("Auto Spin Enabled"), P();
+  }), w("stop-auto").addEventListener("click", () => {
+    c.stopAutoplay(), o("Auto Spin Disabled"), P();
   });
-  const o = () => {
-    if (d.status().locked) return;
-    b("reset-dialog").showModal(), queueMicrotask(() => b("reset-cancel").focus());
+  const y = () => {
+    if (c.status().locked) return;
+    w("reset-dialog").showModal(), queueMicrotask(() => w("reset-cancel").focus());
   };
-  b("reset").addEventListener("click", o), b("short-reset").addEventListener("click", o), b("reset-confirm").addEventListener("click", () => {
-    d.reset().then(() => {
-      b("reset-dialog").close(), a = null, ke(null, d.status().cost), T();
+  w("reset").addEventListener("click", y), w("short-reset").addEventListener("click", y), w("reset-confirm").addEventListener("click", () => {
+    c.reset().then(() => {
+      w("reset-dialog").close(), a = null, be(null, c.status().cost), P();
     });
-  }), b("reset-cancel").addEventListener("click", () => b("reset-dialog").close());
-  let l = null;
-  b("help-open").addEventListener("click", () => {
-    l = b("help-open"), k();
-  }), b("help-close").addEventListener("click", () => b("help-dialog").close()), b("help-dialog").addEventListener("close", () => {
-    d.noteHelp(!1);
-    const g = b("onboard-dialog");
-    if (!d.status().onboarded) {
-      g.open || g.showModal(), queueMicrotask(() => b("onboard-start").focus());
+  }), w("reset-cancel").addEventListener("click", () => w("reset-dialog").close());
+  let k = null;
+  w("help-open").addEventListener("click", () => {
+    k = w("help-open"), Z();
+  }), w("help-close").addEventListener("click", () => w("help-dialog").close()), w("help-dialog").addEventListener("close", () => {
+    if (c.noteHelp(!1), !c.status().onboarded) {
+      l();
       return;
     }
-    (l ?? c).focus();
-  }), b("onboard-help").addEventListener("click", () => {
-    l = b("onboard-start"), k();
-  }), b("onboard-start").addEventListener("click", () => {
-    d.finishOnboarding(), b("onboard-dialog").close(), T(), c.focus();
+    (k ?? d).focus();
+  }), w("onboard-help").addEventListener("click", () => {
+    k = w("onboard-start"), Z();
+  }), w("onboard-start").addEventListener("click", () => {
+    c.finishOnboarding(), w("onboard-dialog").close(), u(), P(), d.focus();
+  }), w("splash-start").addEventListener("click", () => {
+    c.finishOnboarding(), u(), P(), d.focus();
   });
-  const u = (g) => {
-    const A = Array.from(document.querySelectorAll('input[name="cost"]')), S = A.findIndex((N) => N.checked), x = A[S + g];
-    !x || x.disabled || (x.checked = !0, x.dispatchEvent(new Event("change", { bubbles: !0 })));
+  const A = (g) => {
+    const S = Array.from(document.querySelectorAll('input[name="cost"]')), T = S.findIndex((D) => D.checked), M = S[T + g];
+    !M || M.disabled || (M.checked = !0, M.dispatchEvent(new Event("change", { bubbles: !0 })));
   };
-  b("cost-down").addEventListener("click", () => u(-1)), b("cost-up").addEventListener("click", () => u(1)), b("exit").addEventListener("click", () => {
-    yn({ type: "close" });
+  w("cost-down").addEventListener("click", () => A(-1)), w("cost-up").addEventListener("click", () => A(1)), w("exit").addEventListener("click", () => {
   });
   for (const g of Array.from(document.querySelectorAll('input[name="cost"]')))
     g.addEventListener("change", () => {
-      g.checked && (d.setCost(Number(g.value)), T());
+      g.checked && (c.setCost(Number(g.value)), P());
     });
-  b("turbo").addEventListener("change", (g) => {
-    d.setTurbo(g.target.checked);
-  }), b("muted").addEventListener("change", (g) => {
-    d.setAudioPrefs({ muted: g.target.checked }), M();
-  }), b("music").addEventListener("change", (g) => {
-    d.setAudioPrefs({ music: g.target.checked }), M();
-  }), b("effects").addEventListener("change", (g) => {
-    d.setAudioPrefs({ effects: g.target.checked }), M();
-  }), b("reduced").addEventListener("change", (g) => {
-    const A = g.target.value;
-    d.setReduced(A === "device" ? null : A === "reduce"), T();
-  }), b("auto-count").addEventListener("change", (g) => {
-    d.setAutoCount(Number(g.target.value));
+  w("turbo").addEventListener("change", (g) => {
+    c.setSpeed(g.target.checked ? 1 : 0);
+  }), w("muted").addEventListener("change", (g) => {
+    c.setAudioPrefs({ muted: g.target.checked }), Y();
+  }), w("music").addEventListener("change", (g) => {
+    c.setAudioPrefs({ music: g.target.checked }), Y();
+  }), w("effects").addEventListener("change", (g) => {
+    c.setAudioPrefs({ effects: g.target.checked }), Y();
+  }), w("reduced").addEventListener("change", (g) => {
+    const S = g.target.value;
+    c.setReduced(S === "device" ? null : S === "reduce"), P();
+  }), w("auto-count").addEventListener("change", (g) => {
+    c.setAutoCount(Number(g.target.value));
   }), document.addEventListener("keydown", (g) => {
-    const A = In();
-    if (A) {
+    const S = On();
+    if (S) {
       if (g.key === "Escape") {
-        g.preventDefault(), A.close();
+        g.preventDefault(), S.close();
         return;
       }
       if (g.key === "Tab") {
-        const x = Ln(A);
-        if (x.length > 0) {
+        const M = Fn(S);
+        if (M.length > 0) {
           g.preventDefault();
-          const N = x.indexOf(document.activeElement), E = g.shiftKey ? -1 : 1;
-          x[(N + E + x.length) % x.length].focus();
+          const D = M.indexOf(document.activeElement), z = g.shiftKey ? -1 : 1;
+          M[(D + z + M.length) % M.length].focus();
         }
       }
       return;
     }
     if (g.key !== " " && g.key !== "Enter") return;
-    const S = g.target;
-    !S || S.closest("dialog, input, select, textarea, button, a") || S.closest("#play-surface") && (g.preventDefault(), d.spin(), T());
+    const T = g.target;
+    !T || T.closest("dialog, input, select, textarea, button, a") || T.closest("#play-surface") && (g.preventDefault(), c.spin(), P());
   });
-  const _ = () => t.unlock();
-  window.addEventListener("pointerdown", _, { once: !1 }), window.addEventListener("keydown", _), document.addEventListener("visibilitychange", () => {
+  const E = () => t.unlock();
+  window.addEventListener("pointerdown", E, { once: !1 }), window.addEventListener("keydown", E), document.addEventListener("visibilitychange", () => {
     const g = document.hidden;
-    d.setHidden(g), t.setHidden(g), r.setHidden(g);
+    c.setHidden(g), t.setHidden(g), r.setHidden(g);
   }), window.addEventListener("blur", () => {
-    d.setHidden(!0), t.setHidden(!0);
+    c.setHidden(!0), t.setHidden(!0);
   }), window.addEventListener("focus", () => {
-    document.hidden || (d.setHidden(!1), t.setHidden(!1));
-  }), ae.addEventListener("change", () => {
-    d.osReduced = ae.matches;
+    document.hidden || (c.setHidden(!1), t.setHidden(!1));
+  }), ge.addEventListener("change", () => {
+    c.osReduced = ge.matches;
   });
-  let m = performance.now(), p = -1;
-  const y = (g) => {
-    const A = Math.min(100, g - m);
-    m = g, d.advance(A);
-    const S = Math.floor(d.status().activeMs / 1e3);
-    S !== p && (p = S, b("time").textContent = Nn(d.status().activeMs)), r.tick(a), T(), requestAnimationFrame(y);
+  let B = performance.now(), O = -1;
+  const q = (g) => {
+    const S = Math.min(100, g - B);
+    B = g, c.advance(S);
+    const T = Math.floor(c.status().activeMs / 1e3);
+    T !== O && (O = T, w("time").textContent = Dn(c.status().activeMs)), r.tick(a), P(), requestAnimationFrame(q);
   };
-  function v(g) {
-    const A = b("banner");
-    A.hidden = !1, A.textContent = g;
+  function x(g) {
+    const S = w("banner");
+    S.hidden = !1, S.textContent = g;
   }
-  function k() {
-    d.noteHelp(!0);
-    const g = b("onboard-dialog");
+  function Z() {
+    c.noteHelp(!0);
+    const g = w("onboard-dialog");
     g.open && g.close();
-    const A = b("help-dialog");
-    A.open || A.showModal(), A.scrollTop = 0, queueMicrotask(() => b("help-title").focus());
+    const S = w("help-dialog");
+    S.open || S.showModal(), S.scrollTop = 0, queueMicrotask(() => w("help-title").focus());
   }
-  function M() {
-    const g = d.status();
+  function Y() {
+    const g = c.status();
     t.setPrefs(g.muted, g.music, g.effects), t.setPresenting(g.locked);
   }
-  function T() {
-    const g = d.status();
-    b("session").textContent = O(a?.sessionNetShown ?? g.sessionNet), b("balance").textContent = O(a?.balanceShown ?? g.balance), c.disabled = g.locked || !g.onboarded, b("reveal").disabled = !g.reveal, b("start-auto").disabled = g.locked || !g.onboarded, b("reset").disabled = g.locked, b("stop-auto").disabled = g.autoRemaining === null;
-    for (const V of Array.from(document.querySelectorAll('input[name="cost"]')))
-      V.disabled = g.locked, V.checked = Number(V.value) === g.cost;
-    b("turbo").checked = g.turbo, b("turbo").disabled = g.locked, b("turbo-btn").setAttribute("aria-pressed", String(g.turbo)), b("turbo-btn").disabled = g.locked, b("sound-btn").setAttribute("aria-pressed", String(!g.muted)), b("music-btn").setAttribute("aria-pressed", String(g.music)), b("muted").checked = g.muted, b("music").checked = g.music, b("effects").checked = g.effects;
-    const A = b("reduced");
-    A.value = g.reducedMotion === null ? "device" : g.reducedMotion ? "reduce" : "allow", b("auto-count").value = String(g.autoplayCount), b("auto-count").disabled = g.locked;
-    const S = b("auto-status");
-    S.textContent = g.autoRemaining === null ? "Autoplay off" : `Autoplay ${g.autoRemaining} left`;
-    const x = g.message ?? g.warning ?? "", E = !g.locked && g.balance < g.cost || x.includes("Not enough");
-    S.hidden = E;
-    const B = b("note");
-    B.textContent = E ? "" : x, B.hidden = E || x === "", b("short").hidden = !E, b("short-text").textContent = x || "Not enough for this cost.", b("short-reset").hidden = !d.allowsReset(), b("reset").hidden = !d.allowsReset(), M(), e.note(d.receiptView(), g.locked), b("cost-read").textContent = O(g.cost), b("cost-down").disabled = g.locked || g.cost <= 10, b("cost-up").disabled = g.locked || g.cost >= 100;
-    const q = g.reducedMotion === !0 || g.reducedMotion === null && ae.matches;
-    b("cabinet").dataset.motion = (g.locked ? a?.reduced : q) ? "reduce" : "allow", t.setReelLoop(!!(a && a.spinning.some(Boolean) && !a.reduced)), Cn(a);
-  }
   function P() {
-    const g = b("help-body");
-    for (const A of Dt()) {
-      const S = document.createElement("h3");
-      S.textContent = A.heading;
-      const x = document.createElement("p");
-      x.textContent = A.body, g.append(S, x);
+    const g = c.status();
+    w("session").textContent = $(a?.sessionNetShown ?? g.sessionNet), w("balance").textContent = $(a?.balanceShown ?? g.balance), d.disabled = g.locked || !g.onboarded;
+    const S = p ? v.spinPressed : d.disabled ? v.spinDisabled : v.spin;
+    H("spin", S), w("reveal").disabled = !g.reveal, w("start-auto").disabled = g.locked || !g.onboarded, w("reset").disabled = g.locked, w("stop-auto").disabled = g.autoRemaining === null;
+    for (const te of Array.from(document.querySelectorAll('input[name="cost"]')))
+      te.disabled = g.locked, te.checked = Number(te.value) === g.cost;
+    w("turbo").checked = g.turbo, w("turbo").disabled = g.locked, w("turbo-btn").setAttribute("aria-pressed", String(g.turbo)), w("turbo-btn").disabled = g.locked, w("sound-btn").setAttribute("aria-pressed", String(!g.muted)), w("music-btn").setAttribute("aria-pressed", String(g.music)), w("muted").checked = g.muted, w("music").checked = g.music, w("effects").checked = g.effects;
+    const T = w("reduced");
+    T.value = g.reducedMotion === null ? "device" : g.reducedMotion ? "reduce" : "allow", w("auto-count").value = String(g.autoplayCount), w("auto-count").disabled = g.locked;
+    const M = w("auto-status");
+    M.textContent = g.autoRemaining === null ? "Autoplay off" : `Autoplay ${g.autoRemaining} left`;
+    const D = g.message ?? g.warning ?? "", K = !g.locked && g.balance < g.cost || D.includes("Not enough");
+    M.hidden = K;
+    const ee = w("note");
+    ee.textContent = K ? "" : D, ee.hidden = K || D === "", w("short").hidden = !K, w("short-text").textContent = D || "Insufficient balance", K ? b !== "low" && (b = "low", o("Insufficient balance")) : b === "low" && (b = ""), w("short-reset").hidden = !c.allowsReset(), w("reset").hidden = !c.allowsReset(), Y(), e.note(c.receiptView(), g.locked), w("cost-read").textContent = $(g.cost), w("cost-down").disabled = g.locked || g.cost <= 10, w("cost-up").disabled = g.locked || g.cost >= 100;
+    const Me = g.reducedMotion === !0 || g.reducedMotion === null && ge.matches;
+    w("cabinet").dataset.motion = (g.locked ? a?.reduced : Me) ? "reduce" : "allow", t.setReelLoop(!!(a && a.spinning.some(Boolean) && !a.reduced)), Rn(a);
+  }
+  function J() {
+    const g = w("help-body");
+    for (const S of jt()) {
+      const T = document.createElement("h3");
+      T.textContent = S.heading;
+      const M = document.createElement("p");
+      M.textContent = S.body, g.append(T, M);
     }
   }
-  P(), $e(), De(), window.addEventListener("resize", () => {
-    $e(), De(), r.resize();
-  }), ke(null, d.status().cost), b("stage").addEventListener("auric-land", () => {
-    const g = b("build-digits");
+  J(), Ze(), Ke(), window.addEventListener("resize", () => {
+    Ze(), Ke(), r.resize();
+  }), be(null, c.status().cost), w("stage").addEventListener("auric-land", () => {
+    const g = w("build-digits");
     g.classList.remove("flash"), g.offsetWidth, g.classList.add("flash");
   });
-  const C = (g, A) => {
-    b(A).addEventListener("click", () => {
-      const S = b(g);
-      S.disabled || (S.checked = !S.checked, S.dispatchEvent(new Event("change", { bubbles: !0 })));
+  const C = (g, S) => {
+    w(S).addEventListener("click", () => {
+      const T = w(g);
+      T.disabled || (T.checked = !T.checked, T.dispatchEvent(new Event("change", { bubbles: !0 })));
     });
   };
-  C("turbo", "turbo-btn"), C("muted", "sound-btn"), C("music", "music-btn"), b("settings-open").addEventListener("click", () => {
-    const g = b("settings-dialog");
-    g.open || g.showModal(), queueMicrotask(() => b("settings-close").focus());
-  }), b("settings-close").addEventListener("click", () => b("settings-dialog").close()), Bn().then(() => r.mount(b("stage"))).then(() => {
+  w("turbo-btn").addEventListener("click", () => {
+    if (c.status().locked) return;
+    const g = (c.status().speed + 1) % 3;
+    c.setSpeed(g), o(g === 2 ? "Super Turbo Spin Enabled" : g === 1 ? "Turbo Spin Enabled" : "Turbo Spin Disabled"), P();
+  }), C("muted", "sound-btn"), C("music", "music-btn");
+  const F = (g, S, T) => {
+    const M = w(g);
+    M.addEventListener("pointerdown", () => H(g, T));
+    const D = () => H(g, S);
+    M.addEventListener("pointerup", D), M.addEventListener("pointercancel", D);
+  };
+  F("cost-down", v.minus, v.minusPressed), F("cost-up", v.plus, v.plusPressed), F("turbo-btn", v.turbo, v.turboPressed), F("start-auto", v.auto, v.autoPressed), F("stop-auto", v.stop, v.stopPressed), F("sound-btn", v.sound, v.soundPressed), F("music-btn", v.music, v.musicPressed), F("settings-open", v.gear, v.gearPressed), F("help-open", v.help, v.helpPressed), w("settings-open").addEventListener("click", () => {
+    const g = w("settings-dialog");
+    g.open || g.showModal(), queueMicrotask(() => w("settings-close").focus());
+  }), w("settings-close").addEventListener("click", () => w("settings-dialog").close()), $n().then(() => r.mount(w("stage"))).then(() => {
     document.getElementById("boot")?.remove(), r.resize(), r.tick(a), a && r.render(a, a.cost);
-  }), ot(() => [
-    ["Big", [9700, 9700, 2200, 0]],
-    ["Mega", [9700, 9200, 9200, 8e3]],
-    ["Epic", [9700, 9700, 9700, 8700]],
-    ["Wheel", [2200, 7269, 2200, 9920, 7]]
-  ].map(([g, A]) => ({
+  });
+  const V = (g, S) => ({
     label: g,
     run: () => {
-      let S = 0;
-      const x = Ue({
-        nextInt(q) {
-          const V = A[S++] ?? 0;
-          return V >= q ? 0 : V;
+      let T = 0;
+      const M = rt({
+        nextInt(Me) {
+          const te = S[T++] ?? 0;
+          return te >= Me ? 0 : te;
         }
-      }, 10, 0), N = Se(x, "normal", "fx"), E = fe({
-        outcome: x,
-        schedule: N,
-        elapsed: N.totalMs,
+      }, 10, 0), D = Fe(M, "normal", "fx"), z = Ae({
+        outcome: M,
+        schedule: D,
+        elapsed: D.totalMs,
         balanceAfter: 0,
         sessionNetAfter: 0
-      }), B = G(x.net, x.cost);
-      r.render({
-        ...E,
-        phase: x.modifier === "wheel" ? "wheel" : B >= 2 ? "celebrating" : E.phase,
-        hero: x.gross,
-        cueTier: B
-      }, x.cost);
+      }), K = Q(M.net, M.cost), ee = {
+        ...z,
+        phase: M.modifier === "wheel" ? "wheel" : z.plate ? "celebrating" : z.phase,
+        hero: M.gross,
+        cueTier: K
+      };
+      a = ee, r.render(ee, M.cost), be(ee, M.cost);
     }
-  })), "#e0b15a"), d.status().onboarded || d.finishOnboarding(), b("exit").hidden = !0, b("currency").hidden = !0, T(), requestAnimationFrame(y), window.addEventListener("pagehide", () => {
-    d.destroy().then(() => {
+  });
+  pt(() => [
+    V("Small", [N("10"), N("10"), N("0"), re("x1")]),
+    V("Big", [N("00"), N("00"), N("0"), re("x1")]),
+    V("Mega", [N("00"), N("10"), N("10"), re("x5")]),
+    V("Super", [N("00"), N("00"), N("00"), re("x5")]),
+    V("Epic", [N("00"), N("00"), N("00"), re("x10")]),
+    V("Wheel", [N("0"), N("1"), N("0"), re("wheel"), 7]),
+    { label: "Low balance", run: () => o("Insufficient balance") }
+  ], "#e0b15a"), P(), new URLSearchParams(location.search).get("brand") || (w("exit").hidden = !0), c.status().onboarded || l(), requestAnimationFrame(q), window.addEventListener("pagehide", () => {
+    c.destroy().then(() => {
       t.destroy(), r.destroy();
     });
   });
 }
-On();
+Gn();

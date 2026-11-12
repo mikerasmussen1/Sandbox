@@ -2,12 +2,12 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8" />
-<base href="./" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#070b10" />
 <link rel="icon" href="art/icon-32.png" sizes="32x32" type="image/png" />
 <link rel="apple-touch-icon" href="art/icon-180.png" />
 <link rel="manifest" href="manifest.webmanifest" />
+<base href="./" />
 <title>Auric Dynamo</title>
 <link rel="stylesheet" href="css/game.css" />
 </head>
@@ -37,10 +37,12 @@
       <div id="build" aria-hidden="true">
         <p id="feature-banner"></p>
         <p id="build-digits"></p>
-        <div id="sparks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+        <div id="sparks" aria-hidden="true"><img alt="" /><img alt="" /><img alt="" /><img alt="" /><img alt="" /><img alt="" /></div>
+        <img id="shock" alt="" />
       </div>
       <div id="stage" role="img" aria-label="Auric Dynamo clockwork reels"></div>
       <div id="reel-sweep" aria-hidden="true"></div>
+      <div id="wheel-dim" aria-hidden="true"></div>
       <div id="wheel-host" aria-hidden="true"></div>
       <span id="fly" hidden></span>
     </div>
@@ -146,6 +148,11 @@
     <button type="button" id="reset-cancel">Cancel</button>
   </div>
 </dialog>
+<div id="splash" hidden>
+  <img id="splash-art" alt="" />
+  <button type="button" id="splash-start">Start</button>
+</div>
+<p id="state-overlay" hidden></p>
 <noscript><p>Auric Dynamo needs JavaScript to run this demo.</p></noscript>
 <script type="module" src="js/game.js"></script>
 </body>
