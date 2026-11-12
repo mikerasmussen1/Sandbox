@@ -1,0 +1,260 @@
+{
+  "slug": "thunderscale-depths",
+  "name": "Thunderscale Depths",
+  "returnPercent": "96.50",
+  "returnRangePercent4": {
+    "min": "96.4800",
+    "max": "96.5000"
+  },
+  "entryLevelsCents": [
+    1,
+    2,
+    5,
+    10,
+    20,
+    50,
+    100
+  ],
+  "defaultLevelIndex": 0,
+  "maxWinMultiplier": 1000,
+  "maxPayoutCents": 1000000,
+  "weapons": [
+    {
+      "id": "conduit",
+      "costFactor": 1,
+      "maxHits": 1
+    },
+    {
+      "id": "twin",
+      "costFactor": 1,
+      "maxHits": 1
+    },
+    {
+      "id": "lance",
+      "costFactor": 3,
+      "maxHits": 1
+    },
+    {
+      "id": "surge",
+      "costFactor": 5,
+      "maxHits": 8
+    },
+    {
+      "id": "chain",
+      "costFactor": 4,
+      "maxHits": 6
+    }
+  ],
+  "species": [
+    {
+      "id": "S1",
+      "name": "Sparkfry",
+      "expectedMultiplier": "2.0000",
+      "maxMultiplier": 2
+    },
+    {
+      "id": "S2",
+      "name": "Static Clownet",
+      "expectedMultiplier": "3.0000",
+      "maxMultiplier": 3
+    },
+    {
+      "id": "S3",
+      "name": "Volt Tang",
+      "expectedMultiplier": "5.0000",
+      "maxMultiplier": 5
+    },
+    {
+      "id": "S4",
+      "name": "Nimbus Jelly",
+      "expectedMultiplier": "6.0000",
+      "maxMultiplier": 6
+    },
+    {
+      "id": "S5",
+      "name": "Rainstar",
+      "expectedMultiplier": "8.0000",
+      "maxMultiplier": 8
+    },
+    {
+      "id": "S6",
+      "name": "Gustpuff",
+      "expectedMultiplier": "10.0000",
+      "maxMultiplier": 10
+    },
+    {
+      "id": "M1",
+      "name": "Thundermanta",
+      "expectedMultiplier": "20.0000",
+      "maxMultiplier": 20
+    },
+    {
+      "id": "M2",
+      "name": "Stormshell Turtle",
+      "expectedMultiplier": "30.0000",
+      "maxMultiplier": 30
+    },
+    {
+      "id": "M3",
+      "name": "Coilback Eel",
+      "expectedMultiplier": "40.0000",
+      "maxMultiplier": 40
+    },
+    {
+      "id": "M4",
+      "name": "Crowned Volt Tang",
+      "expectedMultiplier": "25.0000",
+      "maxMultiplier": 25
+    },
+    {
+      "id": "K1",
+      "name": "Crownspike",
+      "expectedMultiplier": "150.0000",
+      "maxMultiplier": 150
+    },
+    {
+      "id": "B1",
+      "name": "Voltmaw",
+      "expectedMultiplier": "300.0000",
+      "maxMultiplier": 300
+    },
+    {
+      "id": "B2",
+      "name": "Frostcoil",
+      "expectedMultiplier": "300.0000",
+      "maxMultiplier": 300
+    },
+    {
+      "id": "B3",
+      "name": "Emberwake",
+      "expectedMultiplier": "300.0000",
+      "maxMultiplier": 300
+    },
+    {
+      "id": "T1",
+      "name": "Stormcourt Pearl",
+      "expectedMultiplier": "178.0105",
+      "maxMultiplier": 1000
+    }
+  ],
+  "pearl": {
+    "id": "T1",
+    "expectedNumerator": "46,282,728,521",
+    "expectedDenominator": "260,000,000",
+    "expectedMultiplier": "178.0105"
+  },
+  "court": [
+    "Silverhorn",
+    "Tidecrest",
+    "Sunflare",
+    "Rosefang",
+    "Jadewhisker"
+  ],
+  "headSets": [
+    {
+      "values": [
+        10,
+        20,
+        30,
+        24,
+        16
+      ],
+      "weight": 30
+    },
+    {
+      "values": [
+        15,
+        30,
+        45,
+        36,
+        24
+      ],
+      "weight": 25
+    },
+    {
+      "values": [
+        20,
+        40,
+        60,
+        48,
+        32
+      ],
+      "weight": 15
+    },
+    {
+      "values": [
+        12,
+        18,
+        28,
+        22,
+        14
+      ],
+      "weight": 18
+    },
+    {
+      "values": [
+        8,
+        16,
+        40,
+        20,
+        12
+      ],
+      "weight": 12
+    }
+  ],
+  "litWeights": [
+    40,
+    30,
+    18,
+    9,
+    3
+  ],
+  "tokenCountWeights": [
+    40,
+    35,
+    18,
+    7
+  ],
+  "tokenValues": [
+    {
+      "value": 2,
+      "weight": 60
+    },
+    {
+      "value": 3,
+      "weight": 30
+    },
+    {
+      "value": 5,
+      "weight": 10
+    }
+  ],
+  "productCap": 30,
+  "clipped": [
+    {
+      "species": "S1",
+      "weapon": "lance",
+      "returnPercent4": "66.6667"
+    },
+    {
+      "species": "S1",
+      "weapon": "surge",
+      "returnPercent4": "40.0000"
+    },
+    {
+      "species": "S1",
+      "weapon": "chain",
+      "returnPercent4": "50.0000"
+    },
+    {
+      "species": "S2",
+      "weapon": "surge",
+      "returnPercent4": "60.0000"
+    },
+    {
+      "species": "S2",
+      "weapon": "chain",
+      "returnPercent4": "75.0000"
+    }
+  ]
+}

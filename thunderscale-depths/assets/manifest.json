@@ -1,0 +1,1784 @@
+{
+ "version": 1,
+ "project": "Thunderscale Depths",
+ "slug": "thunderscale-depths",
+ "style_suffix": "stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design",
+ "render": {
+  "camera": "orthographic, 60 deg elevation, heading +X, fixed light rig (BBB family)",
+  "fps": 24,
+  "format": "webp atlas, 2048 wide, pages within 4096, PixiJS spritesheet JSON"
+ },
+ "assets": [
+  {
+   "id": "H1",
+   "name": "Storm dragon head",
+   "kind": "meshy",
+   "group": "hero",
+   "size": "XL",
+   "sprite_px": 380,
+   "animations": [
+    "idle",
+    "hit",
+    "death"
+   ],
+   "view": "side",
+   "prompt": "the head of a majestic eastern storm sea dragon in side profile facing right, long snout with a slightly open fanged jaw, two swept back branching antler horns made of translucent crystal, finned ear frills, two long flowing whisker barbels, a small glowing lightning sigil on the brow, pearl white and pale silver scales with storm gold horn bases and gold brow ridges, glowing cyan eyes, head and a short neck stump only, no body, stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design",
+   "meshy": {
+    "concept_task_id": "01a1cd52-e2f9-7681-b8af-03816a44f6b1",
+    "model_task_id": "01a1cd55-f533-74dc-8874-c7a692c64400",
+    "concept_model": "nano-banana-2-1",
+    "ai_model": "meshy-7.1",
+    "concept_settings": {
+     "ai_model": "nano-banana-2-1",
+     "prompt": "the head of a majestic eastern storm sea dragon in side profile facing right, long snout with a slightly open fanged jaw, two swept back branching antler horns made of translucent crystal, finned ear frills, two long flowing whisker barbels, a small glowing lightning sigil on the brow, pearl white and pale silver scales with storm gold horn bases and gold brow ridges, glowing cyan eyes, head and a short neck stump only, no body, stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design, side view of the whole subject facing right, slightly from above, whole subject visible, original character design, isolated on a plain white background",
+     "aspect_ratio": "1:1",
+     "remove_background": true
+    },
+    "concept_credits": 4,
+    "history": [
+     {
+      "step": "concept",
+      "task_id": "01a1cd52-e2f9-7681-b8af-03816a44f6b1",
+      "credits": 4
+     },
+     {
+      "step": "model",
+      "task_id": "01a1cd55-f533-74dc-8874-c7a692c64400",
+      "credits": 30
+     }
+    ],
+    "model_settings": {
+     "input_task_id": "01a1cd52-e2f9-7681-b8af-03816a44f6b1",
+     "ai_model": "meshy-7.1",
+     "should_texture": true,
+     "enable_pbr": false,
+     "texture_resolution": "2k",
+     "should_remesh": true,
+     "target_polycount": 80000,
+     "target_formats": [
+      "glb"
+     ]
+    },
+    "model_credits": 30
+   },
+   "files": {
+    "concept_png": "art_src/H1/concept.png",
+    "glb": "art_src/H1/model.glb",
+    "base_color_png": "art_src/H1/base_color.png",
+    "thumbnail_png": "art_src/H1/thumbnail.png"
+   },
+   "est_credits": {
+    "concept": 4,
+    "model": 30
+   },
+   "status": "model_done"
+  },
+  {
+   "id": "H2",
+   "name": "Storm dragon body segment",
+   "kind": "meshy",
+   "group": "hero",
+   "size": "L",
+   "sprite_px": 260,
+   "animations": [
+    "idle",
+    "hit",
+    "death"
+   ],
+   "view": "side",
+   "prompt": "one short section of a long eastern sea dragon serpent body seen from the side, horizontal, shaped like a smooth rounded capsule with both ends softly tapered and closed with scales, overlapping pearl white and silver scales on top, pale ivory ridged belly plates underneath, a tall translucent fin crest along the back held up by storm gold spines, no cut, no flesh, no head, no tail, no legs, stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design",
+   "meshy": {
+    "concept_task_id": "01a1cd55-6091-71ad-a5ce-896cd0604e27",
+    "model_task_id": "01a1cd5e-964e-74c5-805c-ac7eab650195",
+    "concept_model": "nano-banana-2-1",
+    "ai_model": "meshy-7.1",
+    "concept_settings": {
+     "ai_model": "nano-banana-2-1",
+     "prompt": "one short section of a long eastern sea dragon serpent body seen from the side, horizontal, shaped like a smooth rounded capsule with both ends softly tapered and closed with scales, overlapping pearl white and silver scales on top, pale ivory ridged belly plates underneath, a tall translucent fin crest along the back held up by storm gold spines, no cut, no flesh, no head, no tail, no legs, stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design, side view of the whole subject facing right, slightly from above, whole subject visible, original character design, isolated on a plain white background",
+     "aspect_ratio": "1:1",
+     "remove_background": true
+    },
+    "concept_credits": 4,
+    "history": [
+     {
+      "step": "concept",
+      "task_id": "01a1cd53-7ca5-7304-bf02-a6cc03ab733b",
+      "credits": 4
+     },
+     {
+      "step": "concept",
+      "task_id": "01a1cd55-6091-71ad-a5ce-896cd0604e27",
+      "credits": 4
+     },
+     {
+      "step": "model",
+      "task_id": "01a1cd55-fff1-7799-9f7c-936a6ba778f4",
+      "credits": 15
+     },
+     {
+      "step": "model",
+      "task_id": "01a1cd5e-964e-74c5-805c-ac7eab650195",
+      "credits": 30
+     }
+    ],
+    "model_settings": {
+     "input_task_id": "01a1cd55-6091-71ad-a5ce-896cd0604e27",
+     "ai_model": "meshy-7.1",
+     "should_texture": true,
+     "enable_pbr": false,
+     "texture_resolution": "2k",
+     "should_remesh": true,
+     "target_polycount": 80000,
+     "target_formats": [
+      "glb"
+     ]
+    },
+    "model_credits": 30
+   },
+   "files": {
+    "concept_png": "art_src/H2/concept.png",
+    "glb": "art_src/H2/model.glb",
+    "base_color_png": "art_src/H2/base_color.png",
+    "thumbnail_png": "art_src/H2/thumbnail.png"
+   },
+   "est_credits": {
+    "concept": 4,
+    "model": 30
+   },
+   "status": "model_done"
+  },
+  {
+   "id": "H3",
+   "name": "Crownspike, the Tide King",
+   "kind": "meshy",
+   "group": "hero",
+   "size": "XL",
+   "sprite_px": 600,
+   "animations": [
+    "swim",
+    "hit",
+    "death"
+   ],
+   "view": "side",
+   "prompt": "a huge round royal pufferfish king covered in long sharp golden spines, polished gold and amber scales, a regal crown of branching red and coral orange coral growing on its head set with small glowing pearls, big fierce glowing turquoise eyes, pouty mouth, small translucent fins, side view facing right, stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design",
+   "meshy": {
+    "concept_task_id": "01a1cd53-8575-719f-8c3e-a5ad44d2b81f",
+    "model_task_id": "01a1cd56-0a27-71bb-a678-56f1b34dac1a",
+    "concept_model": "nano-banana-2-1",
+    "ai_model": "meshy-7.1",
+    "concept_settings": {
+     "ai_model": "nano-banana-2-1",
+     "prompt": "a huge round royal pufferfish king covered in long sharp golden spines, polished gold and amber scales, a regal crown of branching red and coral orange coral growing on its head set with small glowing pearls, big fierce glowing turquoise eyes, pouty mouth, small translucent fins, side view facing right, stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design, side view of the whole subject facing right, slightly from above, whole subject visible, original character design, isolated on a plain white background",
+     "aspect_ratio": "1:1",
+     "remove_background": true
+    },
+    "concept_credits": 4,
+    "history": [
+     {
+      "step": "concept",
+      "task_id": "01a1cd53-8575-719f-8c3e-a5ad44d2b81f",
+      "credits": 4
+     },
+     {
+      "step": "model",
+      "task_id": "01a1cd56-0a27-71bb-a678-56f1b34dac1a",
+      "credits": 30
+     }
+    ],
+    "model_settings": {
+     "input_task_id": "01a1cd53-8575-719f-8c3e-a5ad44d2b81f",
+     "ai_model": "meshy-7.1",
+     "should_texture": true,
+     "enable_pbr": false,
+     "texture_resolution": "2k",
+     "should_remesh": true,
+     "target_polycount": 80000,
+     "target_formats": [
+      "glb"
+     ]
+    },
+    "model_credits": 30
+   },
+   "files": {
+    "concept_png": "art_src/H3/concept.png",
+    "glb": "art_src/H3/model.glb",
+    "base_color_png": "art_src/H3/base_color.png",
+    "thumbnail_png": "art_src/H3/thumbnail.png"
+   },
+   "est_credits": {
+    "concept": 4,
+    "model": 30
+   },
+   "status": "model_done"
+  },
+  {
+   "id": "H4",
+   "name": "Conduit Cannon",
+   "kind": "meshy",
+   "group": "hero",
+   "size": "M",
+   "sprite_px": 260,
+   "animations": [
+    "idle",
+    "fire",
+    "hit",
+    "death"
+   ],
+   "view": "turret",
+   "prompt": "an ornate fantasy lightning cannon turret, a round bronze base platform engraved with storm runes, a thick straight barrel built from stacked bronze rings around a glowing cyan crystal core, a pointed crystal emitter at the muzzle, storm gold trim and small violet gems, the barrel pointing straight forward, stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design",
+   "meshy": {
+    "concept_task_id": "01a1cd53-8c42-739b-9fb3-fdf5f73d2044",
+    "model_task_id": "01a1cd56-14de-7573-bfe9-928638d43c87",
+    "concept_model": "nano-banana-2-1",
+    "ai_model": "meshy-7.1",
+    "concept_settings": {
+     "ai_model": "nano-banana-2-1",
+     "prompt": "an ornate fantasy lightning cannon turret, a round bronze base platform engraved with storm runes, a thick straight barrel built from stacked bronze rings around a glowing cyan crystal core, a pointed crystal emitter at the muzzle, storm gold trim and small violet gems, the barrel pointing straight forward, stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design, three quarter view from slightly above and behind, whole object visible, original character design, isolated on a plain white background",
+     "aspect_ratio": "1:1",
+     "remove_background": true
+    },
+    "concept_credits": 4,
+    "history": [
+     {
+      "step": "concept",
+      "task_id": "01a1cd53-8c42-739b-9fb3-fdf5f73d2044",
+      "credits": 4
+     },
+     {
+      "step": "model",
+      "task_id": "01a1cd56-14de-7573-bfe9-928638d43c87",
+      "credits": 30
+     }
+    ],
+    "model_settings": {
+     "input_task_id": "01a1cd53-8c42-739b-9fb3-fdf5f73d2044",
+     "ai_model": "meshy-7.1",
+     "should_texture": true,
+     "enable_pbr": false,
+     "texture_resolution": "2k",
+     "should_remesh": true,
+     "target_polycount": 80000,
+     "target_formats": [
+      "glb"
+     ]
+    },
+    "model_credits": 30
+   },
+   "files": {
+    "concept_png": "art_src/H4/concept.png",
+    "glb": "art_src/H4/model.glb",
+    "base_color_png": "art_src/H4/base_color.png",
+    "thumbnail_png": "art_src/H4/thumbnail.png"
+   },
+   "est_credits": {
+    "concept": 4,
+    "model": 30
+   },
+   "status": "model_done"
+  },
+  {
+   "id": "M1",
+   "name": "Thundermanta",
+   "kind": "meshy",
+   "group": "medium",
+   "size": "L",
+   "sprite_px": 340,
+   "animations": [
+    "swim",
+    "hit",
+    "death"
+   ],
+   "view": "manta",
+   "prompt": "a wide manta ray with a dark slate blue back patterned like swirling storm clouds, glowing electric cyan edges along the wing tips, pale belly, long thin whip tail, gentle face, wings spread wide, stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design",
+   "meshy": {
+    "concept_task_id": "01a1cd53-ed17-73c1-a2f8-a65a95a166f5",
+    "model_task_id": "01a1cd5e-b15f-74ff-a092-bf29e12ef69d",
+    "concept_model": "nano-banana-2-1",
+    "ai_model": "meshy-7.1",
+    "concept_settings": {
+     "ai_model": "nano-banana-2-1",
+     "prompt": "a wide manta ray with a dark slate blue back patterned like swirling storm clouds, glowing electric cyan edges along the wing tips, pale belly, long thin whip tail, gentle face, wings spread wide, stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design, seen from above at a three quarter angle with the head toward the right, whole creature visible, original character design, isolated on a plain white background",
+     "aspect_ratio": "1:1",
+     "remove_background": true
+    },
+    "concept_credits": 4,
+    "history": [
+     {
+      "step": "concept",
+      "task_id": "01a1cd53-ed17-73c1-a2f8-a65a95a166f5",
+      "credits": 4
+     },
+     {
+      "step": "model",
+      "task_id": "01a1cd57-db65-75be-bcb3-61b3cee2b34b",
+      "credits": 15
+     },
+     {
+      "step": "model",
+      "task_id": "01a1cd5e-b15f-74ff-a092-bf29e12ef69d",
+      "credits": 30
+     }
+    ],
+    "model_settings": {
+     "input_task_id": "01a1cd53-ed17-73c1-a2f8-a65a95a166f5",
+     "ai_model": "meshy-7.1",
+     "should_texture": true,
+     "enable_pbr": false,
+     "texture_resolution": "2k",
+     "should_remesh": true,
+     "target_polycount": 80000,
+     "target_formats": [
+      "glb"
+     ]
+    },
+    "model_credits": 30
+   },
+   "files": {
+    "concept_png": "art_src/M1/concept.png",
+    "glb": "art_src/M1/model.glb",
+    "base_color_png": "art_src/M1/base_color.png",
+    "thumbnail_png": "art_src/M1/thumbnail.png"
+   },
+   "est_credits": {
+    "concept": 4,
+    "model": 30
+   },
+   "status": "model_done"
+  },
+  {
+   "id": "M2",
+   "name": "Stormshell Turtle",
+   "kind": "meshy",
+   "group": "medium",
+   "size": "L",
+   "sprite_px": 330,
+   "animations": [
+    "swim",
+    "hit",
+    "death"
+   ],
+   "view": "side",
+   "prompt": "a sea turtle swimming with its flippers spread, its shell is a cracked dome of glowing blue crystal with bright cyan lightning veins in the cracks, deep teal scaly skin with gold freckles, side view facing right slightly from above, stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design",
+   "meshy": {
+    "concept_task_id": "01a1cd53-fbbd-73eb-9cd9-80312525a6a0",
+    "model_task_id": "01a1cd5e-bc7b-74de-b0b9-67b4755ea01e",
+    "concept_model": "nano-banana-2-1",
+    "ai_model": "meshy-7.1",
+    "concept_settings": {
+     "ai_model": "nano-banana-2-1",
+     "prompt": "a sea turtle swimming with its flippers spread, its shell is a cracked dome of glowing blue crystal with bright cyan lightning veins in the cracks, deep teal scaly skin with gold freckles, side view facing right slightly from above, stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design, side view of the whole subject facing right, slightly from above, whole subject visible, original character design, isolated on a plain white background",
+     "aspect_ratio": "1:1",
+     "remove_background": true
+    },
+    "concept_credits": 4,
+    "history": [
+     {
+      "step": "concept",
+      "task_id": "01a1cd53-fbbd-73eb-9cd9-80312525a6a0",
+      "credits": 4
+     },
+     {
+      "step": "model",
+      "task_id": "01a1cd5a-0632-7357-9188-2822a8a4a595",
+      "credits": 15
+     },
+     {
+      "step": "model",
+      "task_id": "01a1cd5e-bc7b-74de-b0b9-67b4755ea01e",
+      "credits": 30
+     }
+    ],
+    "model_settings": {
+     "input_task_id": "01a1cd53-fbbd-73eb-9cd9-80312525a6a0",
+     "ai_model": "meshy-7.1",
+     "should_texture": true,
+     "enable_pbr": false,
+     "texture_resolution": "2k",
+     "should_remesh": true,
+     "target_polycount": 80000,
+     "target_formats": [
+      "glb"
+     ]
+    },
+    "model_credits": 30
+   },
+   "files": {
+    "concept_png": "art_src/M2/concept.png",
+    "glb": "art_src/M2/model.glb",
+    "base_color_png": "art_src/M2/base_color.png",
+    "thumbnail_png": "art_src/M2/thumbnail.png"
+   },
+   "est_credits": {
+    "concept": 4,
+    "model": 30
+   },
+   "status": "model_done"
+  },
+  {
+   "id": "M3",
+   "name": "Coilback Eel",
+   "kind": "meshy",
+   "group": "medium",
+   "size": "L",
+   "sprite_px": 360,
+   "animations": [
+    "swim",
+    "hit",
+    "death"
+   ],
+   "view": "side",
+   "prompt": "a long sea eel with a dark teal body and a row of segmented polished copper armor plates along its back, small electric cyan sparks between the plates, glowing violet eyes, finned tail, body stretched out straight horizontally, side view facing right, stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design",
+   "meshy": {
+    "concept_task_id": "01a1cd54-1b9e-778e-b8c3-dcdb36496caa",
+    "model_task_id": "01a1cd5e-9ee5-74e1-b460-f1292a85ccf6",
+    "concept_model": "nano-banana-2-1",
+    "ai_model": "meshy-7.1",
+    "concept_settings": {
+     "ai_model": "nano-banana-2-1",
+     "prompt": "a long sea eel with a dark teal body and a row of segmented polished copper armor plates along its back, small electric cyan sparks between the plates, glowing violet eyes, finned tail, body stretched out straight horizontally, side view facing right, stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design, side view of the whole subject facing right, slightly from above, whole subject visible, original character design, isolated on a plain white background",
+     "aspect_ratio": "1:1",
+     "remove_background": true
+    },
+    "concept_credits": 4,
+    "history": [
+     {
+      "step": "concept",
+      "task_id": "01a1cd54-1b9e-778e-b8c3-dcdb36496caa",
+      "credits": 4
+     },
+     {
+      "step": "model",
+      "task_id": "01a1cd5a-1119-73c8-bd60-00401eccc03d",
+      "credits": 15
+     },
+     {
+      "step": "model",
+      "task_id": "01a1cd5e-9ee5-74e1-b460-f1292a85ccf6",
+      "credits": 30
+     }
+    ],
+    "model_settings": {
+     "input_task_id": "01a1cd54-1b9e-778e-b8c3-dcdb36496caa",
+     "ai_model": "meshy-7.1",
+     "should_texture": true,
+     "enable_pbr": false,
+     "texture_resolution": "2k",
+     "should_remesh": true,
+     "target_polycount": 80000,
+     "target_formats": [
+      "glb"
+     ]
+    },
+    "model_credits": 30
+   },
+   "files": {
+    "concept_png": "art_src/M3/concept.png",
+    "glb": "art_src/M3/model.glb",
+    "base_color_png": "art_src/M3/base_color.png",
+    "thumbnail_png": "art_src/M3/thumbnail.png"
+   },
+   "est_credits": {
+    "concept": 4,
+    "model": 30
+   },
+   "status": "model_done"
+  },
+  {
+   "id": "S1",
+   "name": "Sparkfry",
+   "kind": "meshy",
+   "group": "small",
+   "size": "XS",
+   "sprite_px": 100,
+   "animations": [
+    "swim",
+    "hit",
+    "death"
+   ],
+   "view": "side",
+   "prompt": "a tiny cute minnow fish with silver blue scales and a glowing cyan spark of light inside its belly, big eyes, side view facing right, stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design",
+   "meshy": {
+    "concept_task_id": "01a1cd5e-ab1e-7280-9782-6026ce696581",
+    "model_task_id": "01a1cd5f-51ea-77dd-a97e-925d009643c7",
+    "concept_model": "nano-banana-2-1",
+    "ai_model": "meshy-7.1",
+    "concept_settings": {
+     "ai_model": "nano-banana-2-1",
+     "prompt": "a tiny cute minnow fish with silver blue scales and a glowing cyan spark of light inside its belly, big eyes, side view facing right, stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design, side view of the whole subject facing right, slightly from above, whole subject visible, original character design, isolated on a plain white background",
+     "aspect_ratio": "1:1",
+     "remove_background": true
+    },
+    "concept_credits": 4,
+    "history": [
+     {
+      "step": "concept",
+      "task_id": "01a1cd5e-ab1e-7280-9782-6026ce696581",
+      "credits": 4
+     },
+     {
+      "step": "model",
+      "task_id": "01a1cd5f-51ea-77dd-a97e-925d009643c7",
+      "credits": 30
+     }
+    ],
+    "model_settings": {
+     "input_task_id": "01a1cd5e-ab1e-7280-9782-6026ce696581",
+     "ai_model": "meshy-7.1",
+     "should_texture": true,
+     "enable_pbr": false,
+     "texture_resolution": "2k",
+     "should_remesh": true,
+     "target_polycount": 80000,
+     "target_formats": [
+      "glb"
+     ]
+    },
+    "model_credits": 30
+   },
+   "files": {
+    "concept_png": "art_src/S1/concept.png",
+    "glb": "art_src/S1/model.glb",
+    "base_color_png": "art_src/S1/base_color.png",
+    "thumbnail_png": "art_src/S1/thumbnail.png"
+   },
+   "est_credits": {
+    "concept": 4,
+    "model": 30
+   },
+   "status": "model_done"
+  },
+  {
+   "id": "S2",
+   "name": "Static Clownet",
+   "kind": "meshy",
+   "group": "small",
+   "size": "XS",
+   "sprite_px": 110,
+   "animations": [
+    "swim",
+    "hit",
+    "death"
+   ],
+   "view": "side",
+   "prompt": "a small round reef fish, bright orange with jagged white lightning bolt shaped stripes edged in black, big friendly eyes, side view facing right, stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design",
+   "meshy": {
+    "concept_task_id": "01a1cd60-fc2e-70c0-8d1e-f1fdf9496708",
+    "model_task_id": "01a1cd61-6506-7742-87a3-0ab4e208939c",
+    "concept_model": "nano-banana-2-1",
+    "ai_model": "meshy-7.1",
+    "concept_settings": {
+     "ai_model": "nano-banana-2-1",
+     "prompt": "a small round reef fish, bright orange with jagged white lightning bolt shaped stripes edged in black, big friendly eyes, side view facing right, stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design, side view of the whole subject facing right, slightly from above, whole subject visible, original character design, isolated on a plain white background",
+     "aspect_ratio": "1:1",
+     "remove_background": true
+    },
+    "concept_credits": 4,
+    "history": [
+     {
+      "step": "concept",
+      "task_id": "01a1cd60-fc2e-70c0-8d1e-f1fdf9496708",
+      "credits": 4
+     },
+     {
+      "step": "model",
+      "task_id": "01a1cd61-6506-7742-87a3-0ab4e208939c",
+      "credits": 30
+     }
+    ],
+    "model_settings": {
+     "input_task_id": "01a1cd60-fc2e-70c0-8d1e-f1fdf9496708",
+     "ai_model": "meshy-7.1",
+     "should_texture": true,
+     "enable_pbr": false,
+     "texture_resolution": "2k",
+     "should_remesh": true,
+     "target_polycount": 80000,
+     "target_formats": [
+      "glb"
+     ]
+    },
+    "model_credits": 30
+   },
+   "files": {
+    "concept_png": "art_src/S2/concept.png",
+    "glb": "art_src/S2/model.glb",
+    "base_color_png": "art_src/S2/base_color.png",
+    "thumbnail_png": "art_src/S2/thumbnail.png"
+   },
+   "est_credits": {
+    "concept": 4,
+    "model": 30
+   },
+   "status": "model_done"
+  },
+  {
+   "id": "S3",
+   "name": "Volt Tang",
+   "kind": "meshy",
+   "group": "small",
+   "size": "S",
+   "sprite_px": 130,
+   "animations": [
+    "swim",
+    "hit",
+    "death"
+   ],
+   "view": "side",
+   "prompt": "an oval violet surgeonfish with a bright gold zigzag lightning stripe along its side and a gold tail, side view facing right, stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design",
+   "meshy": {
+    "concept_task_id": "01a1cd61-137b-73ea-b8c5-c2ee15e9ba2e",
+    "model_task_id": "01a1cd61-9f9f-722a-99ef-2d852ae84959",
+    "concept_model": "nano-banana-2-1",
+    "ai_model": "meshy-7.1",
+    "concept_settings": {
+     "ai_model": "nano-banana-2-1",
+     "prompt": "an oval violet surgeonfish with a bright gold zigzag lightning stripe along its side and a gold tail, side view facing right, stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design, side view of the whole subject facing right, slightly from above, whole subject visible, original character design, isolated on a plain white background",
+     "aspect_ratio": "1:1",
+     "remove_background": true
+    },
+    "concept_credits": 4,
+    "history": [
+     {
+      "step": "concept",
+      "task_id": "01a1cd61-137b-73ea-b8c5-c2ee15e9ba2e",
+      "credits": 4
+     },
+     {
+      "step": "model",
+      "task_id": "01a1cd61-9f9f-722a-99ef-2d852ae84959",
+      "credits": 30
+     }
+    ],
+    "model_settings": {
+     "input_task_id": "01a1cd61-137b-73ea-b8c5-c2ee15e9ba2e",
+     "ai_model": "meshy-7.1",
+     "should_texture": true,
+     "enable_pbr": false,
+     "texture_resolution": "2k",
+     "should_remesh": true,
+     "target_polycount": 80000,
+     "target_formats": [
+      "glb"
+     ]
+    },
+    "model_credits": 30
+   },
+   "files": {
+    "concept_png": "art_src/S3/concept.png",
+    "glb": "art_src/S3/model.glb",
+    "base_color_png": "art_src/S3/base_color.png",
+    "thumbnail_png": "art_src/S3/thumbnail.png"
+   },
+   "est_credits": {
+    "concept": 4,
+    "model": 30
+   },
+   "status": "model_done"
+  },
+  {
+   "id": "S4",
+   "name": "Nimbus Jelly",
+   "kind": "meshy",
+   "group": "small",
+   "size": "S",
+   "sprite_px": 130,
+   "animations": [
+    "swim",
+    "hit",
+    "death"
+   ],
+   "view": "jelly",
+   "prompt": "a small pale blue translucent jellyfish with a little glowing cloud of white light inside its bell and short ribbon tentacles, stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design",
+   "meshy": {
+    "concept_task_id": "01a1cd61-1bd4-7111-af42-604100b37822",
+    "model_task_id": "01a1cd61-756d-74b0-97ea-1456e92ddfe8",
+    "concept_model": "nano-banana-2-1",
+    "ai_model": "meshy-7.1",
+    "concept_settings": {
+     "ai_model": "nano-banana-2-1",
+     "prompt": "a small pale blue translucent jellyfish with a little glowing cloud of white light inside its bell and short ribbon tentacles, stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design, three quarter view from slightly above, whole creature visible, original character design, isolated on a plain white background",
+     "aspect_ratio": "1:1",
+     "remove_background": true
+    },
+    "concept_credits": 4,
+    "history": [
+     {
+      "step": "concept",
+      "task_id": "01a1cd61-1bd4-7111-af42-604100b37822",
+      "credits": 4
+     },
+     {
+      "step": "model",
+      "task_id": "01a1cd61-756d-74b0-97ea-1456e92ddfe8",
+      "credits": 30
+     }
+    ],
+    "model_settings": {
+     "input_task_id": "01a1cd61-1bd4-7111-af42-604100b37822",
+     "ai_model": "meshy-7.1",
+     "should_texture": true,
+     "enable_pbr": false,
+     "texture_resolution": "2k",
+     "should_remesh": true,
+     "target_polycount": 80000,
+     "target_formats": [
+      "glb"
+     ]
+    },
+    "model_credits": 30
+   },
+   "files": {
+    "concept_png": "art_src/S4/concept.png",
+    "glb": "art_src/S4/model.glb",
+    "base_color_png": "art_src/S4/base_color.png",
+    "thumbnail_png": "art_src/S4/thumbnail.png"
+   },
+   "est_credits": {
+    "concept": 4,
+    "model": 30
+   },
+   "status": "model_done"
+  },
+  {
+   "id": "S5",
+   "name": "Rainstar",
+   "kind": "meshy",
+   "group": "small",
+   "size": "S",
+   "sprite_px": 130,
+   "animations": [
+    "swim",
+    "hit",
+    "death"
+   ],
+   "view": "top",
+   "prompt": "a coral red five armed starfish with small glowing aqua dots along its arms, chubby rounded arms, seen from above, stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design",
+   "meshy": {
+    "concept_task_id": "01a1cd61-253a-757e-8c78-62b69771de9a",
+    "model_task_id": "01a1cd61-8243-742a-a071-a96daa8b2b80",
+    "concept_model": "nano-banana-2-1",
+    "ai_model": "meshy-7.1",
+    "concept_settings": {
+     "ai_model": "nano-banana-2-1",
+     "prompt": "a coral red five armed starfish with small glowing aqua dots along its arms, chubby rounded arms, seen from above, stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design, seen from directly above, whole creature visible, original character design, isolated on a plain white background",
+     "aspect_ratio": "1:1",
+     "remove_background": true
+    },
+    "concept_credits": 4,
+    "history": [
+     {
+      "step": "concept",
+      "task_id": "01a1cd61-253a-757e-8c78-62b69771de9a",
+      "credits": 4
+     },
+     {
+      "step": "model",
+      "task_id": "01a1cd61-8243-742a-a071-a96daa8b2b80",
+      "credits": 30
+     }
+    ],
+    "model_settings": {
+     "input_task_id": "01a1cd61-253a-757e-8c78-62b69771de9a",
+     "ai_model": "meshy-7.1",
+     "should_texture": true,
+     "enable_pbr": false,
+     "texture_resolution": "2k",
+     "should_remesh": true,
+     "target_polycount": 80000,
+     "target_formats": [
+      "glb"
+     ]
+    },
+    "model_credits": 30
+   },
+   "files": {
+    "concept_png": "art_src/S5/concept.png",
+    "glb": "art_src/S5/model.glb",
+    "base_color_png": "art_src/S5/base_color.png",
+    "thumbnail_png": "art_src/S5/thumbnail.png"
+   },
+   "est_credits": {
+    "concept": 4,
+    "model": 30
+   },
+   "status": "model_done"
+  },
+  {
+   "id": "S6",
+   "name": "Gustpuff",
+   "kind": "meshy",
+   "group": "small",
+   "size": "S",
+   "sprite_px": 130,
+   "animations": [
+    "swim",
+    "hit",
+    "death"
+   ],
+   "view": "side",
+   "prompt": "a small round spiky pufferfish, slate blue with silver spines and a pale belly, big eyes, side view facing right, stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design",
+   "meshy": {
+    "concept_task_id": "01a1cd61-346d-7305-8313-07af0d06f575",
+    "model_task_id": "01a1cd61-94b4-71be-a362-b1cbd81556b8",
+    "concept_model": "nano-banana-2-1",
+    "ai_model": "meshy-7.1",
+    "concept_settings": {
+     "ai_model": "nano-banana-2-1",
+     "prompt": "a small round spiky pufferfish, slate blue with silver spines and a pale belly, big eyes, side view facing right, stylized 3D game asset, premium hand painted look, storm dragon underwater palette of deep indigo, electric cyan, violet and storm gold, crisp readable silhouette, soft even studio light, single object, centered, plain background, no text, no logo, original design, side view of the whole subject facing right, slightly from above, whole subject visible, original character design, isolated on a plain white background",
+     "aspect_ratio": "1:1",
+     "remove_background": true
+    },
+    "concept_credits": 4,
+    "history": [
+     {
+      "step": "concept",
+      "task_id": "01a1cd61-346d-7305-8313-07af0d06f575",
+      "credits": 4
+     },
+     {
+      "step": "model",
+      "task_id": "01a1cd61-94b4-71be-a362-b1cbd81556b8",
+      "credits": 30
+     }
+    ],
+    "model_settings": {
+     "input_task_id": "01a1cd61-346d-7305-8313-07af0d06f575",
+     "ai_model": "meshy-7.1",
+     "should_texture": true,
+     "enable_pbr": false,
+     "texture_resolution": "2k",
+     "should_remesh": true,
+     "target_polycount": 80000,
+     "target_formats": [
+      "glb"
+     ]
+    },
+    "model_credits": 30
+   },
+   "files": {
+    "concept_png": "art_src/S6/concept.png",
+    "glb": "art_src/S6/model.glb",
+    "base_color_png": "art_src/S6/base_color.png",
+    "thumbnail_png": "art_src/S6/thumbnail.png"
+   },
+   "est_credits": {
+    "concept": 4,
+    "model": 30
+   },
+   "status": "model_done"
+  },
+  {
+   "id": "B1",
+   "name": "Voltmaw (head)",
+   "kind": "derived",
+   "group": "boss",
+   "source": "H1",
+   "palette": "voltmaw",
+   "size": "L",
+   "sprite_px": 380,
+   "animations": [
+    "idle",
+    "hit",
+    "death"
+   ],
+   "est_credits": {
+    "concept": 0,
+    "model": 0
+   },
+   "status": "planned"
+  },
+  {
+   "id": "B1S",
+   "name": "Voltmaw (segment)",
+   "kind": "derived",
+   "group": "boss",
+   "source": "H2",
+   "palette": "voltmaw",
+   "size": "L",
+   "sprite_px": 260,
+   "animations": [
+    "idle",
+    "hit",
+    "death"
+   ],
+   "est_credits": {
+    "concept": 0,
+    "model": 0
+   },
+   "status": "planned"
+  },
+  {
+   "id": "B2",
+   "name": "Frostcoil (head)",
+   "kind": "derived",
+   "group": "boss",
+   "source": "H1",
+   "palette": "frostcoil",
+   "size": "L",
+   "sprite_px": 380,
+   "animations": [
+    "idle",
+    "hit",
+    "death"
+   ],
+   "est_credits": {
+    "concept": 0,
+    "model": 0
+   },
+   "status": "planned"
+  },
+  {
+   "id": "B2S",
+   "name": "Frostcoil (segment)",
+   "kind": "derived",
+   "group": "boss",
+   "source": "H2",
+   "palette": "frostcoil",
+   "size": "L",
+   "sprite_px": 260,
+   "animations": [
+    "idle",
+    "hit",
+    "death"
+   ],
+   "est_credits": {
+    "concept": 0,
+    "model": 0
+   },
+   "status": "planned"
+  },
+  {
+   "id": "B3",
+   "name": "Emberwake (head)",
+   "kind": "derived",
+   "group": "boss",
+   "source": "H1",
+   "palette": "emberwake",
+   "size": "L",
+   "sprite_px": 380,
+   "animations": [
+    "idle",
+    "hit",
+    "death"
+   ],
+   "est_credits": {
+    "concept": 0,
+    "model": 0
+   },
+   "status": "planned"
+  },
+  {
+   "id": "B3S",
+   "name": "Emberwake (segment)",
+   "kind": "derived",
+   "group": "boss",
+   "source": "H2",
+   "palette": "emberwake",
+   "size": "L",
+   "sprite_px": 260,
+   "animations": [
+    "idle",
+    "hit",
+    "death"
+   ],
+   "est_credits": {
+    "concept": 0,
+    "model": 0
+   },
+   "status": "planned"
+  },
+  {
+   "id": "C1",
+   "name": "Silverhorn",
+   "kind": "derived",
+   "group": "court",
+   "source": "H1",
+   "palette": "silverhorn",
+   "size": "L",
+   "sprite_px": 360,
+   "animations": [
+    "idle",
+    "lit",
+    "hit",
+    "death"
+   ],
+   "est_credits": {
+    "concept": 0,
+    "model": 0
+   },
+   "status": "planned"
+  },
+  {
+   "id": "C2",
+   "name": "Tidecrest",
+   "kind": "derived",
+   "group": "court",
+   "source": "H1",
+   "palette": "tidecrest",
+   "size": "L",
+   "sprite_px": 360,
+   "animations": [
+    "idle",
+    "lit",
+    "hit",
+    "death"
+   ],
+   "est_credits": {
+    "concept": 0,
+    "model": 0
+   },
+   "status": "planned"
+  },
+  {
+   "id": "C3",
+   "name": "Sunflare",
+   "kind": "derived",
+   "group": "court",
+   "source": "H1",
+   "palette": "sunflare",
+   "size": "L",
+   "sprite_px": 360,
+   "animations": [
+    "idle",
+    "lit",
+    "hit",
+    "death"
+   ],
+   "est_credits": {
+    "concept": 0,
+    "model": 0
+   },
+   "status": "planned"
+  },
+  {
+   "id": "C4",
+   "name": "Rosefang",
+   "kind": "derived",
+   "group": "court",
+   "source": "H1",
+   "palette": "rosefang",
+   "size": "L",
+   "sprite_px": 360,
+   "animations": [
+    "idle",
+    "lit",
+    "hit",
+    "death"
+   ],
+   "est_credits": {
+    "concept": 0,
+    "model": 0
+   },
+   "status": "planned"
+  },
+  {
+   "id": "C5",
+   "name": "Jadewhisker",
+   "kind": "derived",
+   "group": "court",
+   "source": "H1",
+   "palette": "jadewhisker",
+   "size": "L",
+   "sprite_px": 360,
+   "animations": [
+    "idle",
+    "lit",
+    "hit",
+    "death"
+   ],
+   "est_credits": {
+    "concept": 0,
+    "model": 0
+   },
+   "status": "planned"
+  },
+  {
+   "id": "CN1",
+   "name": "Conduit Cannon tier 1 (bronze)",
+   "kind": "derived",
+   "group": "cannon",
+   "source": "H4",
+   "palette": "bronze",
+   "size": "L",
+   "sprite_px": 260,
+   "animations": [
+    "idle",
+    "fire",
+    "hit",
+    "death"
+   ],
+   "est_credits": {
+    "concept": 0,
+    "model": 0
+   },
+   "status": "planned"
+  },
+  {
+   "id": "CN2",
+   "name": "Conduit Cannon tier 2 (silver)",
+   "kind": "derived",
+   "group": "cannon",
+   "source": "H4",
+   "palette": "silver",
+   "size": "L",
+   "sprite_px": 260,
+   "animations": [
+    "idle",
+    "fire",
+    "hit",
+    "death"
+   ],
+   "est_credits": {
+    "concept": 0,
+    "model": 0
+   },
+   "status": "planned"
+  },
+  {
+   "id": "CN3",
+   "name": "Conduit Cannon tier 3 (storm gold)",
+   "kind": "derived",
+   "group": "cannon",
+   "source": "H4",
+   "palette": "stormgold",
+   "size": "L",
+   "sprite_px": 270,
+   "animations": [
+    "idle",
+    "fire",
+    "hit",
+    "death"
+   ],
+   "est_credits": {
+    "concept": 0,
+    "model": 0
+   },
+   "status": "planned"
+  },
+  {
+   "id": "CTF",
+   "name": "Twin Fang Barrel",
+   "kind": "derived",
+   "group": "cannon",
+   "source": "H4",
+   "palette": "twinfang",
+   "size": "L",
+   "sprite_px": 280,
+   "animations": [
+    "idle",
+    "fire",
+    "hit",
+    "death"
+   ],
+   "est_credits": {
+    "concept": 0,
+    "model": 0
+   },
+   "status": "planned"
+  },
+  {
+   "id": "CTL",
+   "name": "Thunder Lance",
+   "kind": "derived",
+   "group": "cannon",
+   "source": "H4",
+   "palette": "lance",
+   "size": "L",
+   "sprite_px": 300,
+   "animations": [
+    "idle",
+    "fire",
+    "hit",
+    "death"
+   ],
+   "est_credits": {
+    "concept": 0,
+    "model": 0
+   },
+   "status": "planned"
+  },
+  {
+   "id": "M4",
+   "name": "Crowned Volt Tang",
+   "kind": "derived",
+   "group": "medium",
+   "source": "S3",
+   "palette": "crowned",
+   "size": "L",
+   "sprite_px": 170,
+   "animations": [
+    "swim",
+    "hit",
+    "death"
+   ],
+   "est_credits": {
+    "concept": 0,
+    "model": 0
+   },
+   "status": "planned"
+  },
+  {
+   "id": "K1",
+   "name": "Crownspike, the Tide King",
+   "kind": "derived",
+   "group": "king",
+   "source": "H3",
+   "palette": null,
+   "size": "L",
+   "sprite_px": 600,
+   "animations": [
+    "swim",
+    "hit",
+    "death"
+   ],
+   "est_credits": {
+    "concept": 0,
+    "model": 0
+   },
+   "status": "planned"
+  },
+  {
+   "id": "T1",
+   "name": "Stormcourt Pearl",
+   "kind": "blender",
+   "group": "feature",
+   "size": "M",
+   "sprite_px": 160,
+   "animations": [
+    "idle",
+    "hit",
+    "death"
+   ],
+   "est_credits": {
+    "concept": 0,
+    "model": 0
+   },
+   "status": "planned"
+  }
+ ],
+ "art2d": {
+  "BG1": {
+   "task_id": "01a1cd54-7aef-750d-9e95-dfe0ed9297a5",
+   "settings": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "Crystal Spire Reef: the floor of a drowned sky temple deep under a stormy sea, dark slate stone floor slabs with thin glowing cyan lightning veins running through the cracks, clusters of tall glowing blue crystal spires and violet branching coral along all four edges, faint shimmering caustic light patterns, scattered small glowing pebbles, seen from directly above, top-down orthographic game background, the middle of the image is a wide open calm floor area kept clear for gameplay, detail concentrated around the outer edges, premium hand painted mobile arcade game art, rich deep indigo and midnight blue water, electric cyan and violet glow accents, storm gold trim, dramatic soft volumetric light, crisp clean detail, no text, no letters, no numbers, no logo, no characters, no creatures, original design",
+    "aspect_ratio": "1:1",
+    "remove_background": false
+   },
+   "credits": 4,
+   "file": "art_src/2d/BG1.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd54-7aef-750d-9e95-dfe0ed9297a5",
+     "credits": 4,
+     "time": "2026-11-12 10:17 JST"
+    }
+   ]
+  },
+  "BG3": {
+   "task_id": "01a1cd54-8b5f-73f0-8a9b-21b22540fe22",
+   "settings": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "Storm Throne Ring: a huge round carved stone arena floor deep underwater, concentric rings of carved runes and a large flat inlaid bronze medallion of a coiled dragon at the very center, a broken stone throne and storm gold braziers with cyan flames around the outer rim, lightning glow in the carvings, seen from directly above, top-down orthographic game background, the middle of the image is a wide open calm floor area kept clear for gameplay, detail concentrated around the outer edges, premium hand painted mobile arcade game art, rich deep indigo and midnight blue water, electric cyan and violet glow accents, storm gold trim, dramatic soft volumetric light, crisp clean detail, no text, no letters, no numbers, no logo, no characters, no creatures, original design",
+    "aspect_ratio": "1:1",
+    "remove_background": false
+   },
+   "credits": 4,
+   "file": "art_src/2d/BG3.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd54-8b5f-73f0-8a9b-21b22540fe22",
+     "credits": 4,
+     "time": "2026-11-12 10:17 JST"
+    }
+   ]
+  },
+  "BG2": {
+   "task_id": "01a1cd54-8313-764a-a49e-3c1b35005cd5",
+   "settings": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "Kelp Cathedral: the stone floor of a ruined underwater cathedral nave, worn mossy flagstones with a faded circular mosaic of waves and lightning, broken carved columns and tall emerald green kelp forests along the edges, pale shafts of light falling through the water, drifting particles, seen from directly above, top-down orthographic game background, the middle of the image is a wide open calm floor area kept clear for gameplay, detail concentrated around the outer edges, premium hand painted mobile arcade game art, rich deep indigo and midnight blue water, electric cyan and violet glow accents, storm gold trim, dramatic soft volumetric light, crisp clean detail, no text, no letters, no numbers, no logo, no characters, no creatures, original design",
+    "aspect_ratio": "1:1",
+    "remove_background": false
+   },
+   "credits": 4,
+   "file": "art_src/2d/BG2.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd54-8313-764a-a49e-3c1b35005cd5",
+     "credits": 4,
+     "time": "2026-11-12 10:17 JST"
+    }
+   ]
+  },
+  "BG4": {
+   "task_id": "01a1cd54-924b-742f-a36e-eaf8aab5fbc1",
+   "settings": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "Stormcourt bonus board backdrop: a grand ancient underwater temple wall of dark indigo stone seen straight on, a large circular carved stone ring track with twenty four empty round gem sockets around a big empty round bronze medallion in the center, five tall empty arched stone alcoves in a row across the top, storm gold trim and glowing cyan lightning glyph carvings, flat front view game bonus screen background, premium hand painted mobile arcade game art, rich deep indigo and midnight blue water, electric cyan and violet glow accents, storm gold trim, dramatic soft volumetric light, crisp clean detail, no text, no letters, no numbers, no logo, no characters, no creatures, original design",
+    "aspect_ratio": "1:1",
+    "remove_background": false
+   },
+   "credits": 4,
+   "file": "art_src/2d/BG4.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd54-924b-742f-a36e-eaf8aab5fbc1",
+     "credits": 4,
+     "time": "2026-11-12 10:17 JST"
+    }
+   ]
+  },
+  "TILE_B": {
+   "task_id": "01a1cd65-1cbc-7437-a6fa-8c36ae744350",
+   "settings": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "lobby key art for a premium underwater arcade game, portrait composition: a majestic eastern storm sea dragon with deep violet scales, storm gold brow plates and fin spines, translucent crystal antler horns, glowing cyan eyes and long whisker barbels, its long serpent body coiled in a full spiral around a huge glowing pearl that radiates cyan light, the dragon head at the upper right looking down at the pearl, crackling cyan and violet lightning arcing through deep indigo water, a round carved stone temple arena far below, light rays from above, drifting particles, cinematic rim light, dramatic depth, premium hand painted mobile arcade game art, rich deep indigo and midnight blue water, electric cyan and violet glow accents, storm gold trim, dramatic soft volumetric light, crisp clean detail, no text, no letters, no numbers, no logo, original design",
+    "aspect_ratio": "3:4",
+    "remove_background": false
+   },
+   "credits": 4,
+   "file": "art_src/2d/TILE_B.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd65-1cbc-7437-a6fa-8c36ae744350",
+     "credits": 4,
+     "time": "2026-11-12 10:35 JST"
+    }
+   ]
+  },
+  "TILE_A": {
+   "task_id": "01a1cd65-13c3-7558-a212-feaa520d3cc2",
+   "settings": {
+    "ai_model": "nano-banana-pro",
+    "prompt": "lobby key art for a premium underwater arcade game, portrait composition: a majestic eastern storm sea dragon with deep violet scales, storm gold brow plates and fin spines, translucent crystal antler horns, glowing cyan eyes and long whisker barbels, its long serpent body coiled in a full spiral around a huge glowing pearl that radiates cyan light, the dragon head at the upper right looking down at the pearl, crackling cyan and violet lightning arcing through deep indigo water, a round carved stone temple arena far below, light rays from above, drifting particles, cinematic rim light, dramatic depth, premium hand painted mobile arcade game art, rich deep indigo and midnight blue water, electric cyan and violet glow accents, storm gold trim, dramatic soft volumetric light, crisp clean detail, no text, no letters, no numbers, no logo, original design",
+    "aspect_ratio": "3:4",
+    "remove_background": false
+   },
+   "credits": 9,
+   "file": "art_src/2d/TILE_A.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd65-13c3-7558-a212-feaa520d3cc2",
+     "credits": 9,
+     "time": "2026-11-12 10:35 JST"
+    }
+   ]
+  },
+  "UI_auto": {
+   "task_id": "01a1cd8f-d10c-763f-925a-ccfb1bd75e40",
+   "settings": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "a round glossy game UI button, a dark indigo crystal gem dome inside a storm gold ring rim, with a bright glowing cyan symbol of two curved arrows chasing each other in a circle around a small lightning bolt, premium mobile game UI element, glossy polished, storm gold metal rim, deep indigo crystal, glowing electric cyan accents, centered, isolated, flat front view, no text, no letters, no numbers, original design",
+    "aspect_ratio": "1:1",
+    "remove_background": true
+   },
+   "credits": 4,
+   "file": "art_src/2d/UI_auto.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd8f-d10c-763f-925a-ccfb1bd75e40",
+     "credits": 4,
+     "time": "2026-11-12 11:22 JST"
+    }
+   ]
+  },
+  "UI_aim": {
+   "task_id": "01a1cd8f-da3f-7216-bffb-4dc0394ee0c8",
+   "settings": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "a round glossy game UI button, a dark indigo crystal gem dome inside a storm gold ring rim, with a bright glowing cyan crosshair target symbol, premium mobile game UI element, glossy polished, storm gold metal rim, deep indigo crystal, glowing electric cyan accents, centered, isolated, flat front view, no text, no letters, no numbers, original design",
+    "aspect_ratio": "1:1",
+    "remove_background": true
+   },
+   "credits": 4,
+   "file": "art_src/2d/UI_aim.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd8f-da3f-7216-bffb-4dc0394ee0c8",
+     "credits": 4,
+     "time": "2026-11-12 11:22 JST"
+    }
+   ]
+  },
+  "UI_plus": {
+   "task_id": "01a1cd8f-e243-732a-8d22-a7d4301ef89c",
+   "settings": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "a round glossy game UI button, a dark indigo crystal gem dome inside a storm gold ring rim, with a bright glowing cyan plus sign symbol, premium mobile game UI element, glossy polished, storm gold metal rim, deep indigo crystal, glowing electric cyan accents, centered, isolated, flat front view, no text, no letters, no numbers, original design",
+    "aspect_ratio": "1:1",
+    "remove_background": true
+   },
+   "credits": 4,
+   "file": "art_src/2d/UI_plus.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd8f-e243-732a-8d22-a7d4301ef89c",
+     "credits": 4,
+     "time": "2026-11-12 11:22 JST"
+    }
+   ]
+  },
+  "UI_minus": {
+   "task_id": "01a1cd8f-eab9-72b6-a965-058283eb1f9c",
+   "settings": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "a round glossy game UI button, a dark indigo crystal gem dome inside a storm gold ring rim, with a bright glowing cyan minus sign symbol, premium mobile game UI element, glossy polished, storm gold metal rim, deep indigo crystal, glowing electric cyan accents, centered, isolated, flat front view, no text, no letters, no numbers, original design",
+    "aspect_ratio": "1:1",
+    "remove_background": true
+   },
+   "credits": 4,
+   "file": "art_src/2d/UI_minus.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd8f-eab9-72b6-a965-058283eb1f9c",
+     "credits": 4,
+     "time": "2026-11-12 11:22 JST"
+    }
+   ]
+  },
+  "UI_freeze": {
+   "task_id": "01a1cd90-4208-76be-b75f-8a58ceeb2fb9",
+   "settings": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "a round glossy game UI button, a dark indigo crystal gem dome inside a storm gold ring rim, with a bright glowing ice blue six pointed snowflake ice crystal symbol, premium mobile game UI element, glossy polished, storm gold metal rim, deep indigo crystal, glowing electric cyan accents, centered, isolated, flat front view, no text, no letters, no numbers, original design",
+    "aspect_ratio": "1:1",
+    "remove_background": true
+   },
+   "credits": 4,
+   "file": "art_src/2d/UI_freeze.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd90-4208-76be-b75f-8a58ceeb2fb9",
+     "credits": 4,
+     "time": "2026-11-12 11:22 JST"
+    }
+   ]
+  },
+  "UI_surge": {
+   "task_id": "01a1cd90-2602-746b-bcc1-7187e76421d0",
+   "settings": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "a round glossy game UI button, a dark indigo crystal gem dome inside a storm gold ring rim, with a bright glowing orange flaming spear symbol with fire trailing behind it, premium mobile game UI element, glossy polished, storm gold metal rim, deep indigo crystal, glowing electric cyan accents, centered, isolated, flat front view, no text, no letters, no numbers, original design",
+    "aspect_ratio": "1:1",
+    "remove_background": true
+   },
+   "credits": 4,
+   "file": "art_src/2d/UI_surge.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd90-2602-746b-bcc1-7187e76421d0",
+     "credits": 4,
+     "time": "2026-11-12 11:22 JST"
+    }
+   ]
+  },
+  "UI_lance": {
+   "task_id": "01a1cd90-67b0-7723-8e4d-bbc3ec80fb8a",
+   "settings": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "a round glossy game UI button, a dark indigo crystal gem dome inside a storm gold ring rim, with a bright glowing cyan symbol of a crystal tipped lance missile pointing up with a short spark trail, premium mobile game UI element, glossy polished, storm gold metal rim, deep indigo crystal, glowing electric cyan accents, centered, isolated, flat front view, no text, no letters, no numbers, original design",
+    "aspect_ratio": "1:1",
+    "remove_background": true
+   },
+   "credits": 4,
+   "file": "art_src/2d/UI_lance.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd90-67b0-7723-8e4d-bbc3ec80fb8a",
+     "credits": 4,
+     "time": "2026-11-12 11:22 JST"
+    }
+   ]
+  },
+  "UI_chain": {
+   "task_id": "01a1cd90-5bb2-7007-8c7a-84d212645ac3",
+   "settings": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "a round glossy game UI button, a dark indigo crystal gem dome inside a storm gold ring rim, with a bright glowing violet forked branching lightning bolt symbol, premium mobile game UI element, glossy polished, storm gold metal rim, deep indigo crystal, glowing electric cyan accents, centered, isolated, flat front view, no text, no letters, no numbers, original design",
+    "aspect_ratio": "1:1",
+    "remove_background": true
+   },
+   "credits": 4,
+   "file": "art_src/2d/UI_chain.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd90-5bb2-7007-8c7a-84d212645ac3",
+     "credits": 4,
+     "time": "2026-11-12 11:23 JST"
+    }
+   ]
+  },
+  "UI_close": {
+   "task_id": "01a1cd90-939f-73ab-9ca9-2f3f49ea799e",
+   "settings": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "a round glossy game UI button, a dark indigo crystal gem dome inside a storm gold ring rim, with a bright glowing cyan X cross symbol, premium mobile game UI element, glossy polished, storm gold metal rim, deep indigo crystal, glowing electric cyan accents, centered, isolated, flat front view, no text, no letters, no numbers, original design",
+    "aspect_ratio": "1:1",
+    "remove_background": true
+   },
+   "credits": 4,
+   "file": "art_src/2d/UI_close.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd90-939f-73ab-9ca9-2f3f49ea799e",
+     "credits": 4,
+     "time": "2026-11-12 11:23 JST"
+    }
+   ]
+  },
+  "UI_menu": {
+   "task_id": "01a1cd90-a05b-72e9-aee6-24af015994fb",
+   "settings": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "a round glossy game UI button, a dark indigo crystal gem dome inside a storm gold ring rim, with a bright glowing cyan symbol of three short horizontal bars stacked, premium mobile game UI element, glossy polished, storm gold metal rim, deep indigo crystal, glowing electric cyan accents, centered, isolated, flat front view, no text, no letters, no numbers, original design",
+    "aspect_ratio": "1:1",
+    "remove_background": true
+   },
+   "credits": 4,
+   "file": "art_src/2d/UI_menu.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd90-a05b-72e9-aee6-24af015994fb",
+     "credits": 4,
+     "time": "2026-11-12 11:23 JST"
+    }
+   ]
+  },
+  "UI_sound": {
+   "task_id": "01a1cd90-d1df-7280-9def-3d0baeca329d",
+   "settings": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "a round glossy game UI button, a dark indigo crystal gem dome inside a storm gold ring rim, with a bright glowing cyan speaker symbol with two sound wave arcs, premium mobile game UI element, glossy polished, storm gold metal rim, deep indigo crystal, glowing electric cyan accents, centered, isolated, flat front view, no text, no letters, no numbers, original design",
+    "aspect_ratio": "1:1",
+    "remove_background": true
+   },
+   "credits": 4,
+   "file": "art_src/2d/UI_sound.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd90-d1df-7280-9def-3d0baeca329d",
+     "credits": 4,
+     "time": "2026-11-12 11:23 JST"
+    }
+   ]
+  },
+  "UI_music": {
+   "task_id": "01a1cd90-dfd2-7020-b902-88e490987f64",
+   "settings": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "a round glossy game UI button, a dark indigo crystal gem dome inside a storm gold ring rim, with a bright glowing cyan musical eighth note symbol, premium mobile game UI element, glossy polished, storm gold metal rim, deep indigo crystal, glowing electric cyan accents, centered, isolated, flat front view, no text, no letters, no numbers, original design",
+    "aspect_ratio": "1:1",
+    "remove_background": true
+   },
+   "credits": 4,
+   "file": "art_src/2d/UI_music.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd90-dfd2-7020-b902-88e490987f64",
+     "credits": 4,
+     "time": "2026-11-12 11:23 JST"
+    }
+   ]
+  },
+  "UI_help": {
+   "task_id": "01a1cd90-f92e-7603-ab5a-155345a89fc1",
+   "settings": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "a round glossy game UI button, a dark indigo crystal gem dome inside a storm gold ring rim, with a bright glowing cyan question mark symbol, premium mobile game UI element, glossy polished, storm gold metal rim, deep indigo crystal, glowing electric cyan accents, centered, isolated, flat front view, no text, no letters, no numbers, original design",
+    "aspect_ratio": "1:1",
+    "remove_background": true
+   },
+   "credits": 4,
+   "file": "art_src/2d/UI_help.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd90-f92e-7603-ab5a-155345a89fc1",
+     "credits": 4,
+     "time": "2026-11-12 11:23 JST"
+    }
+   ]
+  },
+  "UI_gauge": {
+   "task_id": "01a1cd91-0cef-72e6-b656-9add1bf386d1",
+   "settings": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "a circular ring shaped energy meter frame, a thick storm gold ring with small engraved notches and a glass channel inside it, completely empty transparent center hole, premium mobile game UI element, glossy polished, storm gold metal rim, deep indigo crystal, glowing electric cyan accents, centered, isolated, flat front view, no text, no letters, no numbers, original design",
+    "aspect_ratio": "1:1",
+    "remove_background": true
+   },
+   "credits": 4,
+   "file": "art_src/2d/UI_gauge.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd91-0cef-72e6-b656-9add1bf386d1",
+     "credits": 4,
+     "time": "2026-11-12 11:23 JST"
+    }
+   ]
+  },
+  "UI_reticle": {
+   "task_id": "01a1cd91-21f0-70c3-b2bb-547195bd07b5",
+   "settings": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "a lock on targeting reticle, a thin glowing cyan and magenta energy ring with four bracket corners and small tick marks, empty transparent center, glowing holographic, premium mobile game UI element, glossy polished, storm gold metal rim, deep indigo crystal, glowing electric cyan accents, centered, isolated, flat front view, no text, no letters, no numbers, original design",
+    "aspect_ratio": "1:1",
+    "remove_background": true
+   },
+   "credits": 4,
+   "file": "art_src/2d/UI_reticle.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd91-21f0-70c3-b2bb-547195bd07b5",
+     "credits": 4,
+     "time": "2026-11-12 11:23 JST"
+    }
+   ]
+  },
+  "UI_coin": {
+   "task_id": "01a1cd93-dc3d-70c0-b212-e303ea5c4bdb",
+   "settings": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "a single shiny solid gold coin seen straight on, entirely polished yellow gold metal, raised rim, a lightning bolt emblem embossed in gold in the center, chunky game coin icon, premium mobile game UI element, glossy polished, storm gold metal rim, deep indigo crystal, glowing electric cyan accents, centered, isolated, flat front view, no text, no letters, no numbers, original design",
+    "aspect_ratio": "1:1",
+    "remove_background": true
+   },
+   "credits": 4,
+   "file": "art_src/2d/UI_coin.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd91-461f-762e-a319-8bcca43488b7",
+     "credits": 4,
+     "time": "2026-11-12 11:24 JST"
+    },
+    {
+     "task_id": "01a1cd93-dc3d-70c0-b212-e303ea5c4bdb",
+     "credits": 4,
+     "time": "2026-11-12 11:26 JST"
+    }
+   ]
+  },
+  "UI_orb": {
+   "task_id": "01a1cd91-729c-7371-ad22-43f262a5917f",
+   "settings": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "a single glowing glass storm orb sphere with crackling white and cyan lightning inside it, premium mobile game UI element, glossy polished, storm gold metal rim, deep indigo crystal, glowing electric cyan accents, centered, isolated, flat front view, no text, no letters, no numbers, original design",
+    "aspect_ratio": "1:1",
+    "remove_background": true
+   },
+   "credits": 4,
+   "file": "art_src/2d/UI_orb.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd91-729c-7371-ad22-43f262a5917f",
+     "credits": 4,
+     "time": "2026-11-12 11:24 JST"
+    }
+   ]
+  },
+  "UI_gem": {
+   "task_id": "01a1cd93-e4bf-7205-9664-934adabd283d",
+   "settings": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "a single solid opaque faceted gemstone, bright saturated cyan with a glowing core, brilliant cut, held in a small storm gold four prong setting, chunky readable game item icon, premium mobile game UI element, glossy polished, storm gold metal rim, deep indigo crystal, glowing electric cyan accents, centered, isolated, flat front view, no text, no letters, no numbers, original design",
+    "aspect_ratio": "1:1",
+    "remove_background": true
+   },
+   "credits": 4,
+   "file": "art_src/2d/UI_gem.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd91-50c9-72d0-b9a0-1e97fa4478b0",
+     "credits": 4,
+     "time": "2026-11-12 11:24 JST"
+    },
+    {
+     "task_id": "01a1cd93-e4bf-7205-9664-934adabd283d",
+     "credits": 4,
+     "time": "2026-11-12 11:26 JST"
+    }
+   ]
+  },
+  "UI_token": {
+   "task_id": "01a1cd91-8adf-7706-aad8-c761a74425b6",
+   "settings": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "a round thick bronze and storm gold medallion token with a raised ornate rim and a smooth blank empty center face, premium mobile game UI element, glossy polished, storm gold metal rim, deep indigo crystal, glowing electric cyan accents, centered, isolated, flat front view, no text, no letters, no numbers, original design",
+    "aspect_ratio": "1:1",
+    "remove_background": true
+   },
+   "credits": 4,
+   "file": "art_src/2d/UI_token.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd91-8adf-7706-aad8-c761a74425b6",
+     "credits": 4,
+     "time": "2026-11-12 11:24 JST"
+    }
+   ]
+  },
+  "UI_plate": {
+   "task_id": "01a1cd91-d042-75e7-8d15-4c7d6b6069a6",
+   "settings": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "a wide horizontal rounded rectangle game UI panel plate, deep indigo glass inner panel with a storm gold ornate frame and small cyan gem studs at both ends, empty center, premium mobile game UI element, glossy polished, storm gold metal rim, deep indigo crystal, glowing electric cyan accents, centered, isolated, flat front view, no text, no letters, no numbers, original design",
+    "aspect_ratio": "16:9",
+    "remove_background": true
+   },
+   "credits": 4,
+   "file": "art_src/2d/UI_plate.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd91-d042-75e7-8d15-4c7d6b6069a6",
+     "credits": 4,
+     "time": "2026-11-12 11:24 JST"
+    }
+   ]
+  },
+  "UI_banner": {
+   "task_id": "01a1cd91-c083-721c-9634-2f55949b8f25",
+   "settings": {
+    "ai_model": "nano-banana-2-1",
+    "prompt": "a wide horizontal ornate game announcement banner strip, dark indigo storm cloud ribbon with storm gold scroll ends and lightning arcs along its edges, wide empty center area, premium mobile game UI element, glossy polished, storm gold metal rim, deep indigo crystal, glowing electric cyan accents, centered, isolated, flat front view, no text, no letters, no numbers, original design",
+    "aspect_ratio": "16:9",
+    "remove_background": true
+   },
+   "credits": 4,
+   "file": "art_src/2d/UI_banner.png",
+   "status": "generated",
+   "history": [
+    {
+     "task_id": "01a1cd91-c083-721c-9634-2f55949b8f25",
+     "credits": 4,
+     "time": "2026-11-12 11:24 JST"
+    }
+   ]
+  }
+ }
+}

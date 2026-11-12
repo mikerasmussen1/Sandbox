@@ -1,0 +1,387 @@
+{
+ "formats": [
+  "ogg"
+ ],
+ "entries": [
+  {
+   "key": "mus_reef",
+   "files": [
+    "mus_reef"
+   ],
+   "loop": true,
+   "bus": "Music",
+   "volume": 0.45,
+   "maxVoices": 1
+  },
+  {
+   "key": "mus_kelp",
+   "files": [
+    "mus_kelp"
+   ],
+   "loop": true,
+   "bus": "Music",
+   "volume": 0.45,
+   "maxVoices": 1
+  },
+  {
+   "key": "mus_throne",
+   "files": [
+    "mus_throne"
+   ],
+   "loop": true,
+   "bus": "Music",
+   "volume": 0.45,
+   "maxVoices": 1
+  },
+  {
+   "key": "mus_boss",
+   "files": [
+    "mus_boss"
+   ],
+   "loop": true,
+   "bus": "Music",
+   "volume": 0.4,
+   "maxVoices": 1
+  },
+  {
+   "key": "mus_bonus",
+   "files": [
+    "mus_bonus"
+   ],
+   "loop": true,
+   "bus": "Music",
+   "volume": 0.4,
+   "maxVoices": 1
+  },
+  {
+   "key": "sfx_beam_loop",
+   "files": [
+    "sfx_beam_loop"
+   ],
+   "loop": true,
+   "bus": "SFX",
+   "volume": 0.35,
+   "maxVoices": 2
+  },
+  {
+   "key": "sfx_hit",
+   "files": [
+    "sfx_hit"
+   ],
+   "loop": false,
+   "bus": "SFX",
+   "volume": 0.6,
+   "maxVoices": 2
+  },
+  {
+   "key": "sfx_capture_s",
+   "files": [
+    "sfx_capture_s"
+   ],
+   "loop": false,
+   "bus": "SFX",
+   "volume": 0.7,
+   "maxVoices": 2
+  },
+  {
+   "key": "sfx_capture_m",
+   "files": [
+    "sfx_capture_m"
+   ],
+   "loop": false,
+   "bus": "SFX",
+   "volume": 0.75,
+   "maxVoices": 2
+  },
+  {
+   "key": "sfx_capture_l",
+   "files": [
+    "sfx_capture_l"
+   ],
+   "loop": false,
+   "bus": "SFX",
+   "volume": 0.85,
+   "maxVoices": 2
+  },
+  {
+   "key": "sfx_coins",
+   "files": [
+    "sfx_coins"
+   ],
+   "loop": false,
+   "bus": "SFX",
+   "volume": 0.6,
+   "maxVoices": 2
+  },
+  {
+   "key": "sfx_level_up",
+   "files": [
+    "sfx_level_up"
+   ],
+   "loop": false,
+   "bus": "UI",
+   "volume": 0.6,
+   "maxVoices": 1
+  },
+  {
+   "key": "sfx_level_down",
+   "files": [
+    "sfx_level_down"
+   ],
+   "loop": false,
+   "bus": "UI",
+   "volume": 0.55,
+   "maxVoices": 1
+  },
+  {
+   "key": "sfx_auto_on",
+   "files": [
+    "sfx_auto_on"
+   ],
+   "loop": false,
+   "bus": "UI",
+   "volume": 0.55,
+   "maxVoices": 1
+  },
+  {
+   "key": "sfx_auto_off",
+   "files": [
+    "sfx_auto_off"
+   ],
+   "loop": false,
+   "bus": "UI",
+   "volume": 0.5,
+   "maxVoices": 1
+  },
+  {
+   "key": "sfx_aim_lock",
+   "files": [
+    "sfx_aim_lock"
+   ],
+   "loop": false,
+   "bus": "UI",
+   "volume": 0.5,
+   "maxVoices": 1
+  },
+  {
+   "key": "sfx_surge",
+   "files": [
+    "sfx_surge"
+   ],
+   "loop": false,
+   "bus": "SFX",
+   "volume": 0.8,
+   "maxVoices": 2
+  },
+  {
+   "key": "sfx_freeze",
+   "files": [
+    "sfx_freeze"
+   ],
+   "loop": false,
+   "bus": "SFX",
+   "volume": 0.65,
+   "maxVoices": 2
+  },
+  {
+   "key": "sfx_chain",
+   "files": [
+    "sfx_chain"
+   ],
+   "loop": false,
+   "bus": "SFX",
+   "volume": 0.7,
+   "maxVoices": 2
+  },
+  {
+   "key": "sfx_twin_on",
+   "files": [
+    "sfx_twin_on"
+   ],
+   "loop": false,
+   "bus": "SFX",
+   "volume": 0.65,
+   "maxVoices": 2
+  },
+  {
+   "key": "sfx_twin_end",
+   "files": [
+    "sfx_twin_end"
+   ],
+   "loop": false,
+   "bus": "SFX",
+   "volume": 0.5,
+   "maxVoices": 2
+  },
+  {
+   "key": "sfx_lance_arm",
+   "files": [
+    "sfx_lance_arm"
+   ],
+   "loop": false,
+   "bus": "UI",
+   "volume": 0.6,
+   "maxVoices": 1
+  },
+  {
+   "key": "sfx_lance_fire",
+   "files": [
+    "sfx_lance_fire"
+   ],
+   "loop": false,
+   "bus": "SFX",
+   "volume": 0.8,
+   "maxVoices": 2
+  },
+  {
+   "key": "sfx_lance_burst",
+   "files": [
+    "sfx_lance_burst"
+   ],
+   "loop": false,
+   "bus": "SFX",
+   "volume": 0.85,
+   "maxVoices": 2
+  },
+  {
+   "key": "sfx_warn_dragon",
+   "files": [
+    "sfx_warn_dragon"
+   ],
+   "loop": false,
+   "bus": "SFX",
+   "volume": 0.8,
+   "maxVoices": 2
+  },
+  {
+   "key": "sfx_warn_king",
+   "files": [
+    "sfx_warn_king"
+   ],
+   "loop": false,
+   "bus": "SFX",
+   "volume": 0.75,
+   "maxVoices": 2
+  },
+  {
+   "key": "sfx_dragon_roar",
+   "files": [
+    "sfx_dragon_roar"
+   ],
+   "loop": false,
+   "bus": "SFX",
+   "volume": 0.8,
+   "maxVoices": 2
+  },
+  {
+   "key": "sfx_king_inflate",
+   "files": [
+    "sfx_king_inflate"
+   ],
+   "loop": false,
+   "bus": "SFX",
+   "volume": 0.7,
+   "maxVoices": 2
+  },
+  {
+   "key": "sfx_stormfront",
+   "files": [
+    "sfx_stormfront"
+   ],
+   "loop": false,
+   "bus": "SFX",
+   "volume": 0.75,
+   "maxVoices": 2
+  },
+  {
+   "key": "sfx_bonus_enter",
+   "files": [
+    "sfx_bonus_enter"
+   ],
+   "loop": false,
+   "bus": "SFX",
+   "volume": 0.7,
+   "maxVoices": 2
+  },
+  {
+   "key": "sfx_wheel_tick",
+   "files": [
+    "sfx_wheel_tick"
+   ],
+   "loop": false,
+   "bus": "SFX",
+   "volume": 0.45,
+   "maxVoices": 2
+  },
+  {
+   "key": "sfx_orb_land",
+   "files": [
+    "sfx_orb_land"
+   ],
+   "loop": false,
+   "bus": "SFX",
+   "volume": 0.6,
+   "maxVoices": 2
+  },
+  {
+   "key": "sfx_mult_drop",
+   "files": [
+    "sfx_mult_drop"
+   ],
+   "loop": false,
+   "bus": "SFX",
+   "volume": 0.6,
+   "maxVoices": 2
+  },
+  {
+   "key": "sfx_breath",
+   "files": [
+    "sfx_breath"
+   ],
+   "loop": false,
+   "bus": "SFX",
+   "volume": 0.55,
+   "maxVoices": 2
+  },
+  {
+   "key": "sfx_rollup",
+   "files": [
+    "sfx_rollup"
+   ],
+   "loop": false,
+   "bus": "UI",
+   "volume": 0.5,
+   "maxVoices": 1
+  },
+  {
+   "key": "sfx_bonus_total",
+   "files": [
+    "sfx_bonus_total"
+   ],
+   "loop": false,
+   "bus": "SFX",
+   "volume": 0.8,
+   "maxVoices": 2
+  },
+  {
+   "key": "sfx_ui_tap",
+   "files": [
+    "sfx_ui_tap"
+   ],
+   "loop": false,
+   "bus": "UI",
+   "volume": 0.45,
+   "maxVoices": 1
+  },
+  {
+   "key": "sfx_error",
+   "files": [
+    "sfx_error"
+   ],
+   "loop": false,
+   "bus": "UI",
+   "volume": 0.5,
+   "maxVoices": 1
+  }
+ ]
+}

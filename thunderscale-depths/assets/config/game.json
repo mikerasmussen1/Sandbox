@@ -1,0 +1,32 @@
+{
+  "slug": "thunderscale-depths",
+  "species": [
+    { "id": "S1", "name": "Sparkfry", "multiplier": 2, "size": "S", "spawnWeight": 22, "radius": 26, "color": "#3ee0ff" },
+    { "id": "S2", "name": "Static Clownet", "multiplier": 3, "size": "S", "spawnWeight": 18, "radius": 30, "color": "#ff8a3d" },
+    { "id": "S3", "name": "Volt Tang", "multiplier": 5, "size": "S", "spawnWeight": 14, "radius": 32, "color": "#b388ff" },
+    { "id": "S4", "name": "Nimbus Jelly", "multiplier": 6, "size": "S", "spawnWeight": 12, "radius": 34, "color": "#d7f4ff" },
+    { "id": "S5", "name": "Rainstar", "multiplier": 8, "size": "S", "spawnWeight": 8, "radius": 28, "color": "#ff5a6a" },
+    { "id": "S6", "name": "Gustpuff", "multiplier": 10, "size": "S", "spawnWeight": 8, "radius": 32, "color": "#9bb4c8" },
+    { "id": "M1", "name": "Thundermanta", "multiplier": 20, "size": "M", "spawnWeight": 6, "radius": 56, "color": "#6d7cff" },
+    { "id": "M2", "name": "Stormshell Turtle", "multiplier": 30, "size": "M", "spawnWeight": 4, "radius": 52, "color": "#49d6c5" },
+    { "id": "M3", "name": "Coilback Eel", "multiplier": 40, "size": "M", "spawnWeight": 3, "radius": 40, "color": "#e0a15a" },
+    { "id": "M4", "name": "Crowned Volt Tang", "multiplier": 25, "size": "M", "spawnWeight": 3, "radius": 36, "color": "#ffd35a" },
+    { "id": "K1", "name": "Crownspike", "multiplier": 150, "size": "XL", "spawnWeight": 1, "radius": 92, "color": "#ffcc33" },
+    { "id": "B1", "name": "Voltmaw", "multiplier": 300, "size": "XL", "spawnWeight": 1, "radius": 48, "color": "#c9a4ff" },
+    { "id": "B2", "name": "Frostcoil", "multiplier": 300, "size": "XL", "spawnWeight": 1, "radius": 48, "color": "#d8f6ff" },
+    { "id": "B3", "name": "Emberwake", "multiplier": 300, "size": "XL", "spawnWeight": 1, "radius": 48, "color": "#ff6a4a" },
+    { "id": "T1", "name": "Stormcourt Pearl", "size": "S", "spawnWeight": 2, "radius": 22, "color": "#fff4c2" }
+  ],
+  "weapons": {
+    "conduit": { "name": "Conduit Cannon", "costFactor": 1, "maxHits": 1 },
+    "twin": { "name": "Twin Fang Barrel", "costFactor": 1, "maxHits": 1 },
+    "lance": { "name": "Thunder Lance", "costFactor": 3, "maxHits": 1 },
+    "surge": { "name": "Searing Surge", "costFactor": 5, "maxHits": 8 },
+    "chain": { "name": "Chain Bolt", "costFactor": 4, "maxHits": 6 }
+  },
+  "scenes": [
+    { "id": "reef", "name": "Crystal Spire Reef", "plate": "BG1" },
+    { "id": "kelp", "name": "Kelp Cathedral", "plate": "BG2" },
+    { "id": "throne", "name": "Storm Throne Ring", "plate": "BG3" }
+  ]
+}
