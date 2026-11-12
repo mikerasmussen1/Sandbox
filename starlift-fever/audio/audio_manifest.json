@@ -1021,12 +1021,12 @@
    "bpm": 156,
    "bars": 32,
    "qa": {
-    "peak_dbfs": -4.28,
+    "peak_dbfs": -4.37,
     "clipped_samples": 0,
     "lufs": -16.0,
     "seam": {
-     "jump": 0.2734,
-     "p99_step": 0.2258
+     "jump": 0.1492,
+     "p99_step": 0.1711
     }
    }
   },

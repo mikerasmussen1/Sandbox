@@ -20876,21 +20876,17 @@ var AE = {
 			"PIN"
 		],
 		starlift: ["starlift", "STL"],
-		funnel: ["FUN"],
-		hatchFrame: ["HATF"],
+		funnel: ["board_funnel"],
 		lcdBezel: ["lcd_bezel", "LCD"],
 		halo: ["halo", "HALO"],
 		dock: ["dock", "DOCK"],
 		dial: ["power_dial", "DIAL"],
 		push: ["push_button", "PUSH"],
-		crown: ["CRN"],
 		nova: ["mascot_nova", "NOVA"],
 		lyra: ["pilot_lyra", "LYRA"],
 		orbi: ["orbi", "ORBI"],
 		satellite: ["satellite", "SAT"],
 		gyro: ["gyro", "GYRO"],
-		pillar: ["PIL"],
-		beacon: ["BEACON"],
 		asteroid: ["asteroid", "AST"],
 		drone: ["drone", "DRONE"],
 		sy0: ["sym_planet", "SY_PLANET"],
@@ -20960,7 +20956,7 @@ var AE = {
 		vfxTrail: ["lifter_trail"],
 		vfxLiftoff: ["liftoff_burst"],
 		vfxWipe: ["round_wipe"],
-		pinHead: ["pin_head", "PIN_HEAD"],
+		pinHead: ["pin_head"],
 		btnPlay: ["btn_play"],
 		btnPlayDown: ["btn_play_down"],
 		btnGhost: ["btn_ghost"],
@@ -20977,7 +20973,11 @@ var AE = {
 		roundCard: ["round_plate"],
 		titleLogo: ["title_logo"],
 		cardMission: ["mission_complete"],
-		hatchDoor: ["HATD"]
+		boardFrame: ["board_frame"],
+		boardRails: ["board_rails"],
+		novaFilm: ["nova_film"],
+		lyraFilm: ["lyra_film"],
+		beacons: ["idle_beacons"]
 	},
 	audio: /* @__PURE__ */ "mus_lobby.mus_normal.mus_reach_1.mus_reach_2.mus_reach_3.mus_fever.sfx_ball_roll.sfx_clatter_heavy.sfx_clatter_light.sfx_crack_creak.sfx_crack_shatter.sfx_drain.sfx_end_stinger.sfx_fever_siren.sfx_gate_close.sfx_gate_open.sfx_get_tick.sfx_get_total.sfx_gyro_whoosh.sfx_lifter_hum.sfx_lifter_surge.sfx_liftoff_fanfare.sfx_mash_rev.sfx_mash_tap.sfx_pocket_chime.sfx_push_click.sfx_reach_alert.sfx_reach_miss.sfx_reel_spin.sfx_round_fanfare.sfx_round_slam.sfx_satellite_ping.sfx_stepup_whoosh.sfx_thrust_burst.sfx_ui_back.sfx_ui_click.sfx_ui_error.sfx_ui_hover.sfx_pin_01.sfx_pin_02.sfx_pin_03.sfx_pin_04.sfx_pin_05.sfx_pin_06.sfx_pin_07.sfx_pin_08.sfx_pin_09.sfx_pin_10.sfx_pin_11.sfx_pin_12.sfx_launch_1.sfx_launch_2.sfx_launch_3.sfx_reel_stop_1.sfx_reel_stop_2.sfx_reel_stop_3.sfx_hatch_entry_1.sfx_hatch_entry_2.sfx_hatch_entry_3.sfx_hatch_entry_4.sfx_hatch_entry_5.sfx_reach_sting_1.sfx_reach_sting_2.sfx_reach_sting_3".split(".")
 }, jE = class {
@@ -22036,7 +22036,7 @@ var AE = {
 		let i = Math.max(0, Math.min(1, t));
 		Math.abs(i - r.level) < .02 || (r.level += (i - r.level) * .25, n.volume(this.base(e) * r.level * this.sfxVol, r.id));
 	}
-}(), FE = (e) => e, IE = (e) => 1 - (1 - e) * (1 - e), LE = (e) => e * e, RE = (e) => 1 - (1 - e) ** 3, zE = (e) => 1 + 2.70158 * (e - 1) ** 3 + 1.70158 * (e - 1) ** 2, q = new class {
+}(), FE = (e) => e, IE = (e) => 1 - (1 - e) * (1 - e), LE = (e) => e * e, RE = (e) => 1 - (1 - e) ** 3, zE = (e) => 1 + 2.70158 * (e - 1) ** 3 + 1.70158 * (e - 1) ** 2, BE = new class {
 	list = [];
 	now = 0;
 	speed = 1;
@@ -22077,7 +22077,7 @@ var AE = {
 	wait(e) {
 		return this.to({ v: 0 }, { v: 1 }, e, FE);
 	}
-}(), BE = (e) => e >= 1 ? 1 : 1 - 2 ** (-10 * e), VE = (e) => 2.70158 * e * e * e - 1.70158 * e * e, HE = (e) => e <= 0 ? 0 : e >= 1 ? 1 : 2 ** (-10 * e) * Math.sin((e * 10 - .75) * (2 * Math.PI / 3)) + 1, UE = (e) => -(Math.cos(Math.PI * e) - 1) / 2, WE = {
+}(), VE = (e) => e >= 1 ? 1 : 1 - 2 ** (-10 * e), HE = (e) => 2.70158 * e * e * e - 1.70158 * e * e, UE = (e) => e <= 0 ? 0 : e >= 1 ? 1 : 2 ** (-10 * e) * Math.sin((e * 10 - .75) * (2 * Math.PI / 3)) + 1, WE = (e) => -(Math.cos(Math.PI * e) - 1) / 2, GE = {
 	demoStartBalls: 1e3,
 	fireRatePerMin: 100,
 	feverFireRatePerMin: 200,
@@ -22120,46 +22120,46 @@ var AE = {
 	},
 	demoSeed: 0
 };
-function GE(e, t = WE) {
+function KE(e, t = GE) {
 	let n = structuredClone(t);
 	if (!e) return n;
 	for (let [t, r] of Object.entries(e)) {
 		let e = n[t];
-		r !== void 0 && t in n && (Array.isArray(e) ? Array.isArray(r) && r.length === e.length && r.every((e) => typeof e == "number") && (n[t] = [...r]) : e && typeof e == "object" ? n[t] = GE(r, e) : typeof r == typeof e && (n[t] = r));
+		r !== void 0 && t in n && (Array.isArray(e) ? Array.isArray(r) && r.length === e.length && r.every((e) => typeof e == "number") && (n[t] = [...r]) : e && typeof e == "object" ? n[t] = KE(r, e) : typeof r == typeof e && (n[t] = r));
 	}
 	return n;
 }
-async function KE(e = "config/tune.json") {
+async function qE(e = "config/tune.json") {
 	try {
 		let t = await fetch(e);
-		return t.ok ? GE(await t.json()) : WE;
+		return t.ok ? KE(await t.json()) : GE;
 	} catch {
-		return WE;
+		return GE;
 	}
 }
 // src/game/board.ts
-var qE = 1080, JE = 1920, YE = {
+var JE = 1080, YE = 1920, XE = {
 	cx: 515,
 	cy: 700,
 	r: 450
-}, XE = YE.r - 13, ZE = 1560, QE = 1.1, J = {
+}, ZE = XE.r - 13, QE = 1560, $E = 1592, eD = 1.1, q = {
 	x: 185,
 	y: 422,
 	w: 660,
 	h: 495
-}, $E = {
-	x: J.x - 12,
-	y: J.y - 12,
-	w: J.w + 24,
-	h: J.h + 24,
+}, tD = {
+	x: q.x - 12,
+	y: q.y - 12,
+	w: q.w + 24,
+	h: q.h + 24,
 	chamfer: 78,
 	chamferTL: 112
-}, eD = Math.round(($E.chamferTL - 6) / QE), Y = {
+}, nD = Math.round((tD.chamferTL - 6) / eD), J = {
 	x: 515,
 	y: 1082,
 	w: 38,
 	depth: 28
-}, tD = [{
+}, rD = [{
 	x: 245,
 	y: 1236,
 	w: 42,
@@ -22169,52 +22169,52 @@ var qE = 1080, JE = 1920, YE = {
 	y: 1236,
 	w: 42,
 	depth: 26
-}], X = {
+}], Y = {
 	x: 515,
 	y: 1446,
 	w: 236
-}, nD = {
+}, iD = {
 	x: 150,
 	y: 958,
 	r: 30
-}, rD = [{
-	x: nD.x,
-	y: nD.y,
-	r: nD.r,
+}, aD = [{
+	x: iD.x,
+	y: iD.y,
+	r: iD.r,
 	spin: 1
 }, {
 	x: 880,
 	y: 975,
 	r: 24,
 	spin: -1
-}], iD = [{
-	x0: $E.x - 17,
-	x1: $E.x - 11,
+}], oD = [{
+	x0: tD.x - 17,
+	x1: tD.x - 11,
 	y0: 640,
 	y1: 740,
 	side: -1
 }, {
-	x0: $E.x + $E.w + 11,
-	x1: $E.x + $E.w + 17,
+	x0: tD.x + tD.w + 11,
+	x1: tD.x + tD.w + 17,
 	y0: 640,
 	y1: 740,
 	side: 1
-}], aD = {
+}], sD = {
 	x: 515,
-	y: $E.y + $E.h + 14
-}, oD = {
+	y: tD.y + tD.h + 14
+}, cD = {
 	ax: 950,
 	ay: 1338,
-	bx: X.x + X.w / 2 + 8,
+	bx: Y.x + Y.w / 2 + 8,
 	by: 1428
-}, sD = (e) => e * Math.PI / 180;
-function cD(e, t = XE) {
+}, lD = (e) => e * Math.PI / 180;
+function uD(e, t = ZE) {
 	return {
-		x: YE.cx + t * Math.cos(sD(e)),
-		y: YE.cy + t * Math.sin(sD(e))
+		x: XE.cx + t * Math.cos(lD(e)),
+		y: XE.cy + t * Math.sin(lD(e))
 	};
 }
-function lD(e, t, n) {
+function dD(e, t, n) {
 	let r = [];
 	for (let i = 0; i < e.length - 1; i++) (e[i][0] !== e[i + 1][0] || e[i][1] !== e[i + 1][1]) && r.push({
 		ax: e[i][0],
@@ -22226,9 +22226,9 @@ function lD(e, t, n) {
 	});
 	return r;
 }
-function uD(e, t, n, r) {
+function fD(e, t, n, r) {
 	let i = e - n / 2 - 3, a = e + n / 2 + 3;
-	return [...lD([
+	return [...dD([
 		[i - 7, t - 6],
 		[i, t],
 		[i, t + r],
@@ -22237,21 +22237,21 @@ function uD(e, t, n, r) {
 		[a + 7, t - 6]
 	], .3, "cup")];
 }
-function dD() {
+function pD() {
 	let e = [], t = [];
 	for (let e = 180; e <= 360; e += 4) {
-		let n = cD(e, YE.r);
+		let n = uD(e, XE.r);
 		t.push([n.x, n.y]);
 	}
-	e.push(...lD(t, .3, "wall")), e.push(...lD([[965, YE.cy], [965, 1622]], .3, "wall"));
-	let n = [[97, 1622], [97, YE.cy]];
+	e.push(...dD(t, .3, "wall")), e.push(...dD([[965, XE.cy], [965, 1622]], .3, "wall"));
+	let n = [[97, 1622], [97, XE.cy]];
 	for (let e = 180; e <= 214; e += 4) {
-		let t = cD(e, YE.cx - 97);
+		let t = uD(e, XE.cx - 97);
 		n.push([t.x, t.y]);
 	}
-	e.push(...lD(n, .3, "rail"));
-	let r = $E, i = r.chamfer;
-	e.push(...lD([
+	e.push(...dD(n, .3, "rail"));
+	let r = tD, i = r.chamfer;
+	e.push(...dD([
 		[r.x, r.y + r.chamferTL],
 		[r.x + r.chamferTL, r.y],
 		[r.x + r.w / 2, r.y - 30],
@@ -22262,25 +22262,25 @@ function dD() {
 		[r.x + i, r.y + r.h],
 		[r.x, r.y + r.h - i],
 		[r.x, r.y + r.chamferTL]
-	], .35, "frame")), e.push(...uD(Y.x, Y.y, Y.w, Y.depth));
-	for (let t of tD) e.push(...uD(t.x, t.y, t.w, t.depth));
-	let a = X.x - X.w / 2, o = X.x + X.w / 2;
-	e.push(...lD([[a, X.y + 1], [a, X.y + 30]], .3, "cup")), e.push(...lD([[o, X.y + 1], [o, X.y + 30]], .3, "cup")), e.push({
+	], .35, "frame")), e.push(...fD(J.x, J.y, J.w, J.depth));
+	for (let t of rD) e.push(...fD(t.x, t.y, t.w, t.depth));
+	let a = Y.x - Y.w / 2, o = Y.x + Y.w / 2;
+	e.push(...dD([[a, Y.y + 1], [a, Y.y + 30]], .3, "cup")), e.push(...dD([[o, Y.y + 1], [o, Y.y + 30]], .3, "cup")), e.push({
 		ax: a,
-		ay: X.y,
-		bx: X.x,
-		by: X.y - 12,
+		ay: Y.y,
+		bx: Y.x,
+		by: Y.y - 12,
 		e: .25,
 		tag: "flap"
 	}), e.push({
-		ax: X.x,
-		ay: X.y - 12,
+		ax: Y.x,
+		ay: Y.y - 12,
 		bx: o,
-		by: X.y,
+		by: Y.y,
 		e: .25,
 		tag: "flap"
 	});
-	let s = oD;
+	let s = cD;
 	e.push({
 		ax: s.ax,
 		ay: s.ay,
@@ -22296,7 +22296,7 @@ function dD() {
 		e: .2,
 		tag: "rail"
 	});
-	for (let [t, n, r, i] of pD) e.push({
+	for (let [t, n, r, i] of hD) e.push({
 		ax: t,
 		ay: n,
 		bx: r,
@@ -22306,14 +22306,14 @@ function dD() {
 	});
 	return e;
 }
-function fD() {
+function mD() {
 	let e = [], t = (t, n, r) => {
-		if (hD(t, n, 16) || Math.hypot(t - YE.cx, n - YE.cy) > YE.r - 26 - 6 && n < YE.cy + 40 || t < 127 || t > 935) return !1;
-		for (let e of rD) if (Math.hypot(t - e.x, n - e.y) < e.r + 26 + 6) return !1;
-		for (let e of iD) if (t > e.x0 - 30 && t < e.x1 + 30 && n > e.y0 - 20 && n < e.y1 + 20) return !1;
-		if (Math.abs(t - Y.x) < 40 && n > Y.y - 20 && n < Y.y + 60 || tD.some((e) => Math.abs(t - e.x) < 50 && n > e.y - 40 && n < e.y + 44) || Math.abs(t - X.x) < X.w / 2 + 26 && n > X.y - 46 || n > 1492) return !1;
-		for (let [e, r, i, a] of pD) if (mD(t, n, e, r, i, a) < 37) return !1;
-		if (t > 640 && n > gD(t) - 30) return !1;
+		if (_D(t, n, 16) || Math.hypot(t - XE.cx, n - XE.cy) > XE.r - 26 - 6 && n < XE.cy + 40 || t < 127 || t > 935) return !1;
+		for (let e of aD) if (Math.hypot(t - e.x, n - e.y) < e.r + 26 + 6) return !1;
+		for (let e of oD) if (t > e.x0 - 30 && t < e.x1 + 30 && n > e.y0 - 20 && n < e.y1 + 20) return !1;
+		if (Math.abs(t - J.x) < 40 && n > J.y - 20 && n < J.y + 60 || rD.some((e) => Math.abs(t - e.x) < 50 && n > e.y - 40 && n < e.y + 44) || Math.abs(t - Y.x) < Y.w / 2 + 26 && n > Y.y - 46 || n > 1492) return !1;
+		for (let [e, r, i, a] of hD) if (gD(t, n, e, r, i, a) < 37) return !1;
+		if (t > 640 && n > vD(t) - 30) return !1;
 		for (let i of e) if (Math.hypot(i.x - t, i.y - n) < (r && i.line ? 18 : 38)) return !1;
 		return !0;
 	}, n = (n, r, i = !1) => {
@@ -22328,30 +22328,30 @@ function fD() {
 			let s = o / c, d = Math.sin(s * Math.PI) * a;
 			n(e + (r - e) * s + l * d, t + (i - t) * s + u * d, !0);
 		}
-	}, i = $E, a = i.y + i.h;
+	}, i = tD, a = i.y + i.h;
 	for (let [t, n] of [
 		[-30, -30],
 		[30, -30],
 		[-50, -66],
 		[50, -66]
 	]) e.push({
-		x: Y.x + t,
-		y: Y.y + n,
+		x: J.x + t,
+		y: J.y + n,
 		line: !0
 	});
-	r(Y.x - 70, Y.y - 104, Y.x - 54, Y.y - 72, 0, 16), r(Y.x + 70, Y.y - 104, Y.x + 54, Y.y - 72, 0, 16);
+	r(J.x - 70, J.y - 104, J.x - 54, J.y - 72, 0, 16), r(J.x + 70, J.y - 104, J.x + 54, J.y - 72, 0, 16);
 	for (let e = 222; e <= 318; e += 4.2) {
 		if (e > 258 && e < 282) continue;
-		let t = cD(e, YE.r - 44);
+		let t = uD(e, XE.r - 44);
 		n(t.x, t.y, !0);
 	}
-	r(i.x - 40, 560, i.x - 40, 760, 0, 26), r(i.x + i.w + 44, 520, i.x + i.w + 44, 800, 0, 26), r(i.x + 64, a + 36, Y.x - 104, Y.y - 92, -12, 21), r(i.x + i.w - 64, a + 36, Y.x + 104, Y.y - 92, 12, 21), r(i.x + 72, a + 54, Y.x - 112, Y.y - 74, -12, 21), r(i.x + i.w - 72, a + 54, Y.x + 112, Y.y - 74, 12, 21);
+	r(i.x - 40, 560, i.x - 40, 760, 0, 26), r(i.x + i.w + 44, 520, i.x + i.w + 44, 800, 0, 26), r(i.x + 64, a + 36, J.x - 104, J.y - 92, -12, 21), r(i.x + i.w - 64, a + 36, J.x + 104, J.y - 92, 12, 21), r(i.x + 72, a + 54, J.x - 112, J.y - 74, -12, 21), r(i.x + i.w - 72, a + 54, J.x + 112, J.y - 74, 12, 21);
 	for (let e = 226; e <= 314; e += 4.6) {
 		if (e > 256 && e < 284) continue;
-		let t = cD(e, YE.r - 66);
+		let t = uD(e, XE.r - 66);
 		n(t.x, t.y, !0);
 	}
-	r(133, 1300, 207, 1380, 0, 21), r(929, 1200, 869, 1262, 0, 21), r(137, 1090, tD[0].x - 60, tD[0].y - 60, -18, 24), r(925, 1090, tD[1].x + 96, tD[1].y - 70, 14, 24), r(X.x - X.w / 2 - 70, X.y - 110, X.x - X.w / 2 - 34, X.y - 50, 0, 22);
+	r(133, 1300, 207, 1380, 0, 21), r(929, 1200, 869, 1262, 0, 21), r(137, 1090, rD[0].x - 60, rD[0].y - 60, -18, 24), r(925, 1090, rD[1].x + 96, rD[1].y - 70, 14, 24), r(Y.x - Y.w / 2 - 70, Y.y - 110, Y.x - Y.w / 2 - 34, Y.y - 50, 0, 22);
 	for (let e = 0; e < 46; e++) {
 		let t = 466 + e * 33, r = e % 2 ? 21 : 0;
 		for (let e = 118 + r; e < 960; e += 42) n(e, t);
@@ -22372,7 +22372,7 @@ function fD() {
 		y: t
 	}));
 }
-var pD = [[
+var hD = [[
 	97,
 	1500,
 	330,
@@ -22383,30 +22383,30 @@ var pD = [[
 	700,
 	1572
 ]];
-function mD(e, t, n, r, i, a) {
+function gD(e, t, n, r, i, a) {
 	let o = i - n, s = a - r, c = Math.max(0, Math.min(1, ((e - n) * o + (t - r) * s) / (o * o + s * s)));
 	return Math.hypot(e - n - o * c, t - r - s * c);
 }
-function hD(e, t, n = 0) {
-	let r = $E, i = r.chamfer;
+function _D(e, t, n = 0) {
+	let r = tD, i = r.chamfer;
 	if (e < r.x - n || e > r.x + r.w + n || t < r.y - 34 - n || t > r.y + r.h + n) return !1;
 	let a = e - (r.x - n), o = r.x + r.w + n - e, s = t - (r.y - n), c = r.y + r.h + n - t;
 	return !(a + s < r.chamferTL || o + s < i || a + c < i || o + c < i);
 }
-function gD(e) {
-	let t = oD;
+function vD(e) {
+	let t = cD;
 	return t.ay + (e - t.ax) * (t.by - t.ay) / (t.bx - t.ax);
 }
-function _D() {
+function yD() {
 	let e = [{
 		kind: "dock",
 		index: 0,
-		x0: Y.x - Y.w / 2,
-		x1: Y.x + Y.w / 2,
-		y0: Y.y + 4,
-		y1: Y.y + Y.depth + 4
+		x0: J.x - J.w / 2,
+		x1: J.x + J.w / 2,
+		y0: J.y + 4,
+		y1: J.y + J.depth + 4
 	}];
-	return tD.forEach((t, n) => e.push({
+	return rD.forEach((t, n) => e.push({
 		kind: "satellite",
 		index: n,
 		x0: t.x - t.w / 2,
@@ -22416,14 +22416,14 @@ function _D() {
 	})), e.push({
 		kind: "hatch",
 		index: 0,
-		x0: X.x - X.w / 2 + 2,
-		x1: X.x + X.w / 2 - 2,
-		y0: X.y - 2,
-		y1: X.y + 30
+		x0: Y.x - Y.w / 2 + 2,
+		x1: Y.x + Y.w / 2 - 2,
+		y0: Y.y - 2,
+		y1: Y.y + 30
 	}), e;
 }
 // src/core/fx.ts
-function vD(e, t, n, r, i = 2.2) {
+function bD(e, t, n, r, i = 2.2) {
 	for (let a = n; a >= 1; a--) {
 		let o = a / n;
 		e.circle(t, t, t * o).fill({
@@ -22432,11 +22432,11 @@ function vD(e, t, n, r, i = 2.2) {
 		});
 	}
 }
-function yD(e) {
+function xD(e) {
 	let t = new KS();
-	vD(t, 64, 32, 16777215, 1.6);
+	bD(t, 64, 32, 16777215, 1.6);
 	let n = new KS();
-	vD(n, 16, 12, 16777215, 1.1), n.circle(16, 16, 3).fill({
+	bD(n, 16, 12, 16777215, 1.1), n.circle(16, 16, 3).fill({
 		color: 16777215,
 		alpha: 1
 	});
@@ -22449,7 +22449,7 @@ function yD(e) {
 		});
 	}
 	let i = new KS();
-	vD(i, 32, 10, 16777215, 1.4);
+	bD(i, 32, 10, 16777215, 1.4);
 	for (let [e, t] of [[32, 2.2], [2.2, 32]]) for (let n = 0; n < 6; n++) i.ellipse(32, 32, e * (1 - n / 7), t * (1 - n / 7) + .4).fill({
 		color: 16777215,
 		alpha: .18
@@ -22466,7 +22466,7 @@ function yD(e) {
 		alpha: .9
 	});
 	let o = new KS();
-	vD(o, 24, 8, 16777215, 1.5);
+	bD(o, 24, 8, 16777215, 1.5);
 	let s = [];
 	for (let e = 0; e < 10; e++) {
 		let t = -Math.PI / 2 + e * Math.PI / 5, n = e % 2 ? 7 : 16;
@@ -22493,7 +22493,7 @@ function yD(e) {
 		chip: c(o)
 	};
 }
-var bD = class {
+var SD = class {
 	cap;
 	root = new H();
 	pool = [];
@@ -22505,8 +22505,8 @@ var bD = class {
 		let t = e.n ?? 10;
 		for (let n = 0; n < t; n++) {
 			if (this.live.length >= this.cap) return;
-			let t = this.pool.pop() ?? this.make(), n = xD(e.angle ?? [0, Math.PI * 2]), r = xD(e.speed ?? [80, 260]);
-			t.s.texture = e.tex, t.s.position.set(e.x + (Math.random() - .5) * (e.spread ?? 0), e.y + (Math.random() - .5) * (e.spread ?? 0)), t.vx = Math.cos(n) * r, t.vy = Math.sin(n) * r, t.g = e.gravity ?? 0, t.max = t.life = xD(e.life ?? [.4, .9]), t.s0 = xD(e.scale ?? [.3, .6]), t.s1 = t.s0 * (e.endScale ?? .2), t.a0 = e.alpha ?? 1, t.spin = (Math.random() - .5) * (e.spin ?? 0), t.drag = e.drag ?? 0;
+			let t = this.pool.pop() ?? this.make(), n = CD(e.angle ?? [0, Math.PI * 2]), r = CD(e.speed ?? [80, 260]);
+			t.s.texture = e.tex, t.s.position.set(e.x + (Math.random() - .5) * (e.spread ?? 0), e.y + (Math.random() - .5) * (e.spread ?? 0)), t.vx = Math.cos(n) * r, t.vy = Math.sin(n) * r, t.g = e.gravity ?? 0, t.max = t.life = CD(e.life ?? [.4, .9]), t.s0 = CD(e.scale ?? [.3, .6]), t.s1 = t.s0 * (e.endScale ?? .2), t.a0 = e.alpha ?? 1, t.spin = (Math.random() - .5) * (e.spin ?? 0), t.drag = e.drag ?? 0;
 			let i = e.tint;
 			t.s.tint = Array.isArray(i) ? i[Math.random() * i.length | 0] : i ?? 16777215, t.s.rotation = Math.random() * Math.PI * 2 * !!e.spin, t.s.visible = !0, t.active = !0, this.live.push(t);
 		}
@@ -22547,10 +22547,10 @@ var bD = class {
 		return this.live.length;
 	}
 };
-function xD([e, t]) {
+function CD([e, t]) {
 	return e + Math.random() * (t - e);
 }
-var SD = class {
+var wD = class {
 	trauma = 0;
 	enabled = !0;
 	t = 0;
@@ -22564,34 +22564,34 @@ var SD = class {
 	}
 };
 // src/core/sprite.ts
-function Z(e, t = .5, n = .5) {
+function X(e, t = .5, n = .5) {
 	let r = new ha(e);
 	return r.anchor.set(t, n), r;
 }
-function CD(e, t, n) {
+function TD(e, t, n) {
 	let r = e.texture.width || 1, i = e.texture.height || 1;
 	return e.scale.set(Math.max(t / r, n / i)), e;
 }
-function wD(e, t, n) {
+function Z(e, t, n) {
 	let r = e.texture.width || 1, i = e.texture.height || 1;
 	return e.scale.set(Math.min(t / r, n / i)), e;
 }
-function TD(e, t, n, r, i = {}) {
+function ED(e, t, n, r, i = {}) {
 	if (!t.length) return;
 	let a = new oE(t);
 	return a.anchor.set(.5), a.position.set(n, r), a.scale.set(i.sx ?? i.scale ?? 1, i.sy ?? i.scale ?? 1), i.rotation && (a.rotation = i.rotation), i.tint !== void 0 && (a.tint = i.tint), i.add !== !1 && (a.blendMode = "add"), a.animationSpeed = (i.fps ?? 30) / 60, a.loop = !1, a.onComplete = () => a.destroy(), e.addChild(a), a.play(), a;
 }
-function ED(e, t = 24) {
+function DD(e, t = 24) {
 	let n = new oE(e.length ? e : [B.EMPTY]);
 	return n.anchor.set(.5), n.animationSpeed = t / 60, n.loop = !0, n.play(), n;
 }
 // src/outcome/types.ts
-var DD = class extends Error {
+var OD = class extends Error {
 	code;
 	constructor(e, t) {
 		super(e), this.code = t;
 	}
-}, OD = "Orbitron, Exo 2, sans-serif", kD = "Exo 2, sans-serif", AD = "Rajdhani, Orbitron, sans-serif", Q = {
+}, kD = "Orbitron, Exo 2, sans-serif", AD = "Exo 2, sans-serif", jD = "Rajdhani, Orbitron, sans-serif", Q = {
 	navy: 461598,
 	cyan: 3076863,
 	magenta: 16727499,
@@ -22599,9 +22599,9 @@ var DD = class extends Error {
 	white: 16777215,
 	amber: 16757575
 };
-function jD(e, t = Q.cyan, n) {
+function MD(e, t = Q.cyan, n) {
 	return {
-		fontFamily: OD,
+		fontFamily: kD,
 		fontWeight: "900",
 		fontSize: e,
 		fill: new Ly({
@@ -22641,18 +22641,18 @@ function jD(e, t = Q.cyan, n) {
 		padding: e * .4
 	};
 }
-var MD = [
+var ND = [
 	[0, "#ffffff"],
 	[.4, "#ffd0f4"],
 	[.56, "#ff3dcb"],
 	[1, "#8a2cff"]
-], ND = [
+], PD = [
 	[0, "#ffffff"],
 	[.5, "#fff6cf"],
 	[.62, "#ffcf5a"],
 	[1, "#ff7a2e"]
 ];
-function PD(e, t, n = 15267583, r = "700", i = kD) {
+function FD(e, t, n = 15267583, r = "700", i = AD) {
 	let a = new EE({
 		text: e,
 		style: {
@@ -22678,18 +22678,716 @@ function PD(e, t, n = 15267583, r = "700", i = kD) {
 	});
 	return a.anchor.set(.5), a;
 }
-function FD(e, t, n = Q.cyan, r) {
+function ID(e, t, n = Q.cyan, r) {
 	let i = new EE({
 		text: e,
-		style: jD(t, n, r)
+		style: MD(t, n, r)
 	});
 	return i.anchor.set(.5), i;
 }
-var ID = 172, LD = [
+var LD = [
+	"point",
+	"startled",
+	"wave",
+	"cheer"
+], RD = [
+	"ready",
+	"point",
+	"salute",
+	"fist",
+	"triumph"
+], zD = {
+	quick: [
+		{
+			bg: "lcdReachQuick",
+			ms: 1500,
+			cam: [
+				-40,
+				0,
+				1.06,
+				40,
+				-12,
+				1.18
+			],
+			props: ["asteroid"],
+			lines: "horiz",
+			leak: Q.cyan,
+			actors: [{
+				slot: "novaFilm",
+				anim: "worry",
+				x: 105,
+				y: 300,
+				h: 290,
+				enter: "left"
+			}]
+		},
+		{
+			bg: "lcdReachQuick",
+			ms: 1100,
+			cam: [
+				0,
+				0,
+				1.32,
+				0,
+				0,
+				1.06
+			],
+			lines: "radial",
+			leak: Q.white,
+			actors: [{
+				slot: "lyraFilm",
+				anim: "aim",
+				x: 495,
+				y: 300,
+				h: 320,
+				enter: "right"
+			}]
+		},
+		{
+			bg: "cutBg",
+			ms: 1300,
+			cam: [
+				30,
+				0,
+				1.12,
+				-30,
+				6,
+				1.12
+			],
+			props: ["drone"],
+			lines: "horiz",
+			leak: Q.magenta,
+			letterbox: !0,
+			actors: [{
+				slot: "orbi",
+				anim: "panic",
+				x: 110,
+				y: 320,
+				h: 180,
+				enter: "up"
+			}]
+		}
+	],
+	stepup: [
+		{
+			bg: "lcdReachStep",
+			ms: 1600,
+			cam: [
+				50,
+				10,
+				1.1,
+				-50,
+				-10,
+				1.2
+			],
+			props: ["drone"],
+			lines: "horiz",
+			leak: 6160282,
+			actors: [{
+				slot: "lyraFilm",
+				anim: "fly",
+				x: 110,
+				y: 290,
+				h: 320,
+				enter: "left"
+			}]
+		},
+		{
+			bg: "lcdReachStep",
+			ms: 1300,
+			cam: [
+				0,
+				-20,
+				1,
+				0,
+				20,
+				1.14
+			],
+			props: ["orbi"],
+			leak: Q.cyan,
+			actors: [{
+				slot: "nova",
+				anim: LD,
+				x: 495,
+				y: 300,
+				h: 290,
+				enter: "right"
+			}]
+		},
+		{
+			bg: "cutBg",
+			ms: 1100,
+			cam: [
+				0,
+				0,
+				1.35,
+				0,
+				0,
+				1.05
+			],
+			lines: "radial",
+			leak: Q.white,
+			letterbox: !0,
+			actors: [{
+				slot: "novaFilm",
+				anim: "worry",
+				x: 105,
+				y: 300,
+				h: 290,
+				enter: "zoom"
+			}]
+		},
+		{
+			bg: "lcdReachStep",
+			ms: 1500,
+			cam: [
+				-60,
+				0,
+				1.15,
+				60,
+				0,
+				1.15
+			],
+			props: ["asteroid"],
+			lines: "horiz",
+			leak: 6160282,
+			actors: [{
+				slot: "lyraFilm",
+				anim: "aim",
+				x: 495,
+				y: 300,
+				h: 320,
+				enter: "right"
+			}]
+		}
+	],
+	mission: [
+		{
+			bg: "lcdReachA",
+			ms: 1700,
+			cam: [
+				0,
+				0,
+				1.4,
+				0,
+				0,
+				1.08
+			],
+			lines: "radial",
+			leak: Q.magenta,
+			props: ["asteroid"],
+			actors: [{
+				slot: "lyraFilm",
+				anim: "fly",
+				x: 495,
+				y: 290,
+				h: 330,
+				enter: "zoom"
+			}]
+		},
+		{
+			bg: "lcdReachB",
+			ms: 1500,
+			cam: [
+				-60,
+				10,
+				1.12,
+				60,
+				-10,
+				1.2
+			],
+			lines: "horiz",
+			leak: Q.cyan,
+			props: ["drone", "asteroid"],
+			actors: [{
+				slot: "novaFilm",
+				anim: "thrust",
+				x: 105,
+				y: 290,
+				h: 300,
+				enter: "left"
+			}]
+		},
+		{
+			bg: "cutBg",
+			ms: 1200,
+			cam: [
+				20,
+				0,
+				1.2,
+				-20,
+				0,
+				1.28
+			],
+			letterbox: !0,
+			leak: Q.white,
+			lines: "horiz",
+			actors: [{
+				slot: "lyra",
+				anim: RD,
+				x: 495,
+				y: 300,
+				h: 330,
+				enter: "right"
+			}]
+		},
+		{
+			bg: "lcdReachB",
+			ms: 1400,
+			cam: [
+				0,
+				30,
+				1.05,
+				0,
+				-30,
+				1.18
+			],
+			lines: "rise",
+			leak: Q.magenta,
+			props: ["orbi"],
+			actors: [{
+				slot: "novaFilm",
+				anim: "worry",
+				x: 105,
+				y: 300,
+				h: 290,
+				enter: "up"
+			}]
+		},
+		{
+			bg: "lcdReachA",
+			ms: 1500,
+			cam: [
+				70,
+				0,
+				1.18,
+				-70,
+				0,
+				1.18
+			],
+			lines: "horiz",
+			leak: 16764762,
+			props: ["asteroid", "drone"],
+			actors: [{
+				slot: "lyraFilm",
+				anim: "aim",
+				x: 495,
+				y: 300,
+				h: 330,
+				enter: "right"
+			}]
+		}
+	],
+	hit: [{
+		bg: "lcdFever",
+		ms: 1300,
+		cam: [
+			0,
+			0,
+			1.4,
+			0,
+			0,
+			1.05
+		],
+		lines: "radial",
+		leak: 16764762,
+		actors: [{
+			slot: "novaFilm",
+			anim: "cheer",
+			x: 120,
+			y: 300,
+			h: 300,
+			enter: "zoom"
+		}, {
+			slot: "lyraFilm",
+			anim: "pump",
+			x: 480,
+			y: 300,
+			h: 330,
+			enter: "zoom"
+		}]
+	}, {
+		bg: "lcdFever",
+		ms: 1300,
+		cam: [
+			-50,
+			0,
+			1.15,
+			50,
+			-10,
+			1.22
+		],
+		lines: "rise",
+		leak: Q.magenta,
+		props: ["beacons"],
+		actors: [{
+			slot: "orbi",
+			anim: "spin",
+			x: 300,
+			y: 330,
+			h: 170,
+			enter: "up"
+		}]
+	}],
+	fever: [
+		{
+			bg: "lcdFever",
+			ms: 2200,
+			cam: [
+				0,
+				0,
+				1.35,
+				0,
+				0,
+				1.06
+			],
+			lines: "radial",
+			leak: Q.magenta,
+			props: ["asteroid"],
+			actors: [{
+				slot: "lyraFilm",
+				anim: "fly",
+				x: 300,
+				y: 300,
+				h: 330,
+				enter: "zoom"
+			}]
+		},
+		{
+			bg: "lcdGet",
+			ms: 1900,
+			cam: [
+				-60,
+				10,
+				1.12,
+				60,
+				-10,
+				1.2
+			],
+			lines: "horiz",
+			leak: Q.cyan,
+			props: ["drone", "orbi"],
+			actors: [{
+				slot: "novaFilm",
+				anim: "cheer",
+				x: 140,
+				y: 300,
+				h: 300,
+				enter: "left"
+			}]
+		},
+		{
+			bg: "lcdFever",
+			ms: 1800,
+			cam: [
+				0,
+				30,
+				1.08,
+				0,
+				-30,
+				1.2
+			],
+			lines: "rise",
+			leak: 16764762,
+			props: ["beacons"],
+			actors: [{
+				slot: "lyraFilm",
+				anim: "pump",
+				x: 460,
+				y: 300,
+				h: 330,
+				enter: "right"
+			}]
+		},
+		{
+			bg: "cutBg",
+			ms: 1500,
+			cam: [
+				40,
+				0,
+				1.2,
+				-40,
+				0,
+				1.2
+			],
+			lines: "horiz",
+			leak: Q.white,
+			letterbox: !0,
+			actors: [{
+				slot: "novaFilm",
+				anim: "thrust",
+				x: 150,
+				y: 300,
+				h: 300,
+				enter: "left"
+			}, {
+				slot: "orbi",
+				anim: "float",
+				x: 470,
+				y: 290,
+				h: 170,
+				enter: "right"
+			}]
+		},
+		{
+			bg: "lcdFever",
+			ms: 2e3,
+			cam: [
+				-70,
+				0,
+				1.15,
+				70,
+				0,
+				1.15
+			],
+			lines: "horiz",
+			leak: Q.magenta,
+			props: ["asteroid", "drone"],
+			actors: [{
+				slot: "lyra",
+				anim: RD,
+				x: 300,
+				y: 300,
+				h: 330,
+				enter: "up"
+			}]
+		}
+	],
+	end: [{
+		bg: "lcdEnd",
+		ms: 2400,
+		cam: [
+			0,
+			0,
+			1.25,
+			0,
+			0,
+			1.05
+		],
+		lines: "rise",
+		leak: 16764762,
+		props: ["beacons"],
+		actors: [{
+			slot: "novaFilm",
+			anim: "cheer",
+			x: 110,
+			y: 320,
+			h: 280,
+			enter: "left"
+		}, {
+			slot: "lyraFilm",
+			anim: "pump",
+			x: 490,
+			y: 320,
+			h: 310,
+			enter: "right"
+		}]
+	}, {
+		bg: "lcdEnd",
+		ms: 2200,
+		cam: [
+			-40,
+			-10,
+			1.1,
+			40,
+			10,
+			1.18
+		],
+		lines: "radial",
+		leak: Q.magenta,
+		actors: [{
+			slot: "orbi",
+			anim: "spin",
+			x: 300,
+			y: 330,
+			h: 160,
+			enter: "up"
+		}]
+	}]
+}, BD = class {
+	art;
+	fxt;
+	root = new H();
+	cam = new H();
+	bg;
+	mid = new H();
+	near = new H();
+	lineLayer = new H();
+	lines = [];
+	leaks = [];
+	bars = [];
+	flash;
+	live = [];
+	list = [];
+	idx = 0;
+	t = 0;
+	shot;
+	on = !1;
+	reel;
+	constructor(e, t) {
+		this.art = e, this.fxt = t, this.root.alpha = 0, this.root.visible = !1, this.cam.pivot.set(300, 225), this.cam.position.set(300, 225), this.bg = X(B.EMPTY), this.cam.addChild(this.bg, this.mid, this.near);
+		for (let e = 0; e < 34; e++) {
+			let e = X(t.streak, 0, .5);
+			e.blendMode = "add", e.alpha = 0, this.lineLayer.addChild(e), this.lines.push({
+				s: e,
+				a: 0,
+				d: 0,
+				v: 0
+			});
+		}
+		for (let e = 0; e < 3; e++) {
+			let e = X(t.glow);
+			e.blendMode = "add", e.alpha = 0, this.leaks.push(e);
+		}
+		for (let e = 0; e < 2; e++) {
+			let e = new ha(B.WHITE);
+			e.tint = 0, e.width = 640, e.height = 0, e.x = -20, this.bars.push(e);
+		}
+		this.flash = new ha(B.WHITE), this.flash.width = 600, this.flash.height = 450, this.flash.alpha = 0, this.flash.blendMode = "add", this.root.addChild(this.cam, this.lineLayer, ...this.leaks, ...this.bars, this.flash);
+	}
+	get active() {
+		return this.on;
+	}
+	play(e) {
+		this.on && this.reel === e || (this.reel = e, this.list = zD[e], this.idx = 0, this.on = !0, this.root.visible = !0, this.cut(this.list[0]));
+	}
+	stop() {
+		this.on = !1, this.reel = void 0;
+	}
+	clear() {
+		for (let e of this.live) e.node.destroy({ children: !0 });
+		this.live = [];
+	}
+	anim(e, t) {
+		return this.art.frames(e, t);
+	}
+	cut(e) {
+		this.shot = e, this.t = 0, this.clear(), this.bg.texture = this.art.tex(e.bg), this.bg.position.set(300, 225), TD(this.bg, 750, 562.5), this.flash.alpha = .55, this.flash.tint = e.leak ?? Q.white;
+		for (let t of e.props ?? []) this.addProp(t);
+		for (let t of e.actors ?? []) this.addActor(t);
+		this.leaks.forEach((t, n) => {
+			t.tint = n === 1 ? Q.white : e.leak ?? Q.cyan, t.width = 600 * (.9 + n * .3), t.height = 450 * (.7 + n * .2), t.position.set(n === 0 ? -60 : n === 1 ? 640 : 300, n === 2 ? 490 : 450 * (.2 + .3 * n));
+		});
+		for (let e of this.lines) this.resetLine(e, !0);
+	}
+	addProp(e) {
+		let t = e, n = this.art.frames(t);
+		if (!n.length) return;
+		let r = new oE(n);
+		r.anchor.set(.5), r.animationSpeed = .4, r.play();
+		let i = Math.random(), a = {
+			x: 720,
+			y: 80 + i * 120
+		}, o = {
+			vx: -260 - i * 120,
+			vy: 30,
+			spin: .6
+		};
+		e === "drone" ? (a = {
+			x: -120,
+			y: 60 + i * 100
+		}, o = {
+			vx: 300 + i * 100,
+			vy: -10,
+			spin: 0
+		}, Z(r, 120, 120)) : e === "orbi" ? (a = {
+			x: 600 * (i < .5 ? .2 : .8),
+			y: 110
+		}, o = {
+			vx: 0,
+			vy: 0,
+			spin: 0
+		}, Z(r, 120, 120)) : e === "beacons" ? (a = {
+			x: 300,
+			y: 390
+		}, o = {
+			vx: 0,
+			vy: 0,
+			spin: 0
+		}, Z(r, 420, 150), r.alpha = .9) : Z(r, 110 + i * 60, 110 + i * 60), r.position.set(a.x, a.y), this.mid.addChild(r), this.live.push({
+			node: r,
+			base: a,
+			layer: 1.5,
+			t: 0,
+			pose: 0,
+			h: r.height,
+			flip: !1,
+			drift: o
+		});
+	}
+	addActor(e) {
+		let t, n;
+		if (Array.isArray(e.anim)) n = e.anim.map((t) => this.art.tex(e.slot, t)).filter((e) => e !== B.EMPTY), t = X(n[0] ?? B.EMPTY, .5, .5);
+		else {
+			let n = this.anim(e.slot, e.anim);
+			if (n.length > 1) {
+				let r = new oE(n);
+				r.anchor.set(.5), r.animationSpeed = (e.fps ?? 18) / 60, r.play(), t = r;
+			} else t = X(n[0] ?? this.art.tex(e.slot), .5, .5);
+		}
+		Z(t, e.h * 1.1, e.h), e.flip && (t.scale.x *= -1);
+		let r = new H(), i = X(this.fxt.glow);
+		i.blendMode = "add", i.tint = Q.magenta, i.width = e.h * .9, i.height = e.h * .28, i.y = e.h * .42, i.alpha = .5, r.addChild(i, t), r.position.set(e.x, e.y), this.near.addChild(r), this.live.push({
+			node: r,
+			base: {
+				x: e.x,
+				y: e.y
+			},
+			layer: 2.1,
+			t: 0,
+			enter: e.enter,
+			poses: n,
+			pose: 0,
+			h: e.h,
+			flip: !!e.flip
+		});
+	}
+	resetLine(e, t) {
+		let n = this.shot?.lines;
+		e.s.alpha = 0, n && (e.s.tint = Math.random() < .3 ? this.shot?.leak ?? Q.cyan : Q.white, n === "radial" ? (e.a = Math.random() * Math.PI * 2, e.d = t ? Math.random() * 300 : 20 + Math.random() * 40, e.v = 900 + Math.random() * 900) : n === "horiz" ? (e.a = Math.PI, e.d = t ? Math.random() * 900 : 0, e.v = 1300 + Math.random() * 1200, e.s.y = Math.random() * 450) : (e.a = -Math.PI / 2, e.d = t ? Math.random() * 650 : 0, e.v = 700 + Math.random() * 700, e.s.x = Math.random() * 600));
+	}
+	update(e) {
+		let t = +!!this.on;
+		if (this.root.alpha += (t - this.root.alpha) * Math.min(1, e * (this.on ? 10 : 4)), !this.on && this.root.alpha < .01) {
+			this.root.visible && (this.root.visible = !1, this.clear());
+			return;
+		}
+		let n = this.shot;
+		if (!n) return;
+		if (this.t += e * 1e3, this.on && this.t >= n.ms) {
+			this.idx = (this.idx + 1) % this.list.length, this.cut(this.list[this.idx]);
+			return;
+		}
+		let r = WE(Math.min(1, this.t / n.ms)), [i, a, o, s, c, l] = n.cam, u = i + (s - i) * r, d = a + (c - a) * r, f = o + (l - o) * r;
+		this.cam.scale.set(f), this.bg.position.set(300 - u, 225 - d), this.flash.alpha = Math.max(0, this.flash.alpha - e * 4.5);
+		let p = n.letterbox ? 38 : 0;
+		this.bars[0].height += (p - this.bars[0].height) * Math.min(1, e * 10), this.bars[1].height = this.bars[0].height, this.bars[1].y = 450 - this.bars[1].height;
+		let m = this.t / 1e3;
+		this.leaks.forEach((t, n) => {
+			t.x += (n === 1 ? -60 : 50) * e, t.alpha = (n === 1 ? .12 : .2) + .12 * Math.sin(m * (2 + n) + n);
+		});
+		for (let t of this.live) {
+			t.t += e;
+			let n = t.enter ? VE(Math.min(1, t.t / .38)) : 1, r = 0, i = 0, a = 1;
+			if (t.enter === "left" ? r = -(1 - n) * 420 : t.enter === "right" ? r = (1 - n) * 420 : t.enter === "up" ? i = (1 - n) * 320 : t.enter === "zoom" && (a = 1.8 - .8 * n), t.drift && (t.base.x += t.drift.vx * e, t.base.y += t.drift.vy * e, t.node.rotation += t.drift.spin * e), t.poses && t.poses.length > 1) {
+				let e = Math.floor(t.t / .42) % t.poses.length;
+				if (e !== t.pose) {
+					t.pose = e;
+					let n = t.node.children[1];
+					n.texture = t.poses[e], Z(n, t.h * 1.1, t.h), t.flip && (n.scale.x *= -1), a *= 1.08, this.flash.alpha = Math.max(this.flash.alpha, .18);
+				}
+			}
+			let o = t.layer > 2 ? Math.sin(m * 3 + t.base.x) * 5 : 0;
+			t.node.position.set(t.base.x + r - u * (t.layer - 1), t.base.y + i + o - d * (t.layer - 1)), (a !== 1 || t.enter === "zoom") && t.node.scale.set(a);
+		}
+		let h = n.lines;
+		for (let t of this.lines) h ? (t.d += t.v * e, h === "radial" ? (t.s.position.set(300 + Math.cos(t.a) * t.d, 225 + Math.sin(t.a) * t.d), t.s.rotation = t.a, t.s.scale.set(.6 + t.d / 220, .5), t.s.alpha = Math.min(.75, t.d / 260), t.d > 520 && this.resetLine(t, !1)) : h === "horiz" ? (t.s.x = 750 - t.d, t.s.rotation = 0, t.s.scale.set(2.2, .35), t.s.alpha = .5, t.d > 1e3 && this.resetLine(t, !1)) : (t.s.y = 570 - t.d, t.s.rotation = -Math.PI / 2, t.s.scale.set(1.6, .35), t.s.alpha = .45, t.d > 750 && this.resetLine(t, !1))) : t.s.alpha = 0;
+	}
+}, VD = 172, HD = [
 	110,
 	300,
 	490
-], RD = 236, zD = 15, BD = [
+], UD = 236, WD = 15, GD = [
 	"sy0",
 	"sy1",
 	"sy2",
@@ -22699,7 +23397,7 @@ var ID = 172, LD = [
 	"sy6",
 	"sy7",
 	"sy8"
-], VD = class {
+], KD = class {
 	art;
 	root = new H();
 	frame;
@@ -22708,24 +23406,24 @@ var ID = 172, LD = [
 	numArt;
 	sym = -1;
 	constructor(e) {
-		this.art = e, this.frame = Z(e.tex("reelCard")), e.has("reelCard") && wD(this.frame, 176, 168), this.icon = Z(B.EMPTY), this.num = FD("1", 74, Q.magenta), this.num.position.set(40, 44), this.numArt = Z(B.EMPTY), this.numArt.position.set(28, 48), this.numArt.tint = Q.magenta, this.num.visible = !e.has("numerals"), this.root.addChild(this.frame, this.icon, this.num, this.numArt);
+		this.art = e, this.frame = X(e.tex("reelCard")), e.has("reelCard") && Z(this.frame, 176, 168), this.icon = X(B.EMPTY), this.num = ID("1", 74, Q.magenta), this.num.position.set(40, 44), this.numArt = X(B.EMPTY), this.numArt.position.set(28, 48), this.numArt.tint = Q.magenta, this.num.visible = !e.has("numerals"), this.root.addChild(this.frame, this.icon, this.num, this.numArt);
 	}
 	set(e) {
-		e !== this.sym && (this.sym = e, this.icon.texture = this.art.tex(BD[e]), wD(this.icon, 112, 112), this.icon.y = -8, this.num.text = String(e + 1), this.art.has("numerals") && (this.numArt.texture = this.art.tex("numerals", String(e + 1)), wD(this.numArt, 50, 62)));
+		e !== this.sym && (this.sym = e, this.icon.texture = this.art.tex(GD[e]), Z(this.icon, 112, 112), this.icon.y = -8, this.num.text = String(e + 1), this.art.has("numerals") && (this.numArt.texture = this.art.tex("numerals", String(e + 1)), Z(this.numArt, 50, 62)));
 	}
-}, HD = class {
+}, qD = class {
 	x;
 	root = new H();
 	cards = [];
 	pos = 0;
 	spinning = !1;
-	speed = zD;
+	speed = WD;
 	blur = 0;
 	glow = 0;
 	constructor(e, t) {
 		this.x = t;
 		for (let t = 0; t < 4; t++) {
-			let t = new VD(e);
+			let t = new KD(e);
 			this.cards.push(t), this.root.addChild(t.root);
 		}
 		this.root.x = t, this.layout();
@@ -22740,8 +23438,8 @@ var ID = 172, LD = [
 		let e = Math.floor(this.pos), t = this.pos - e;
 		for (let n = 0; n < this.cards.length; n++) {
 			let r = e - 1 + n, i = this.cards[n];
-			i.set((r % 9 + 9) % 9), i.root.y = RD + (t - (n - 1)) * ID;
-			let a = Math.abs(i.root.y - RD) / ID;
+			i.set((r % 9 + 9) % 9), i.root.y = UD + (t - (n - 1)) * VD;
+			let a = Math.abs(i.root.y - UD) / VD;
 			i.root.alpha = Math.max(0, 1 - a * .55), i.root.scale.set(1 - Math.min(.25, a * .12), (1 - Math.min(.25, a * .12)) * (1 + this.blur * .35)), i.icon.alpha = 1 - this.blur * .35;
 		}
 	}
@@ -22765,22 +23463,23 @@ var ID = 172, LD = [
 		}, RE), this.pos = i, this.blur = 0;
 	}
 	spin() {
-		this.spinning = !0, this.speed = zD, this.blur = 1;
+		this.spinning = !0, this.speed = WD, this.blur = 1;
 	}
-}, UD = class {
+}, JD = class {
 	art;
 	tw;
 	root = new H();
 	backdrop = new H();
 	reelLayer = new H();
+	film;
 	overlay = new H();
 	reels;
 	bgA;
 	bgB;
 	scan;
 	current = "lcdIdle";
-	constructor(e, t) {
-		this.art = e, this.tw = t, this.root.position.set(J.x, J.y), this.root.scale.set(QE), this.bgA = this.plate("lcdIdle"), this.bgB = this.plate("lcdIdle"), this.bgB.alpha = 0, this.backdrop.addChild(this.bgA, this.bgB), this.reels = LD.map((t) => new HD(e, t));
+	constructor(e, t, n) {
+		this.art = e, this.tw = t, this.root.position.set(q.x, q.y), this.root.scale.set(eD), this.bgA = this.plate("lcdIdle"), this.bgB = this.plate("lcdIdle"), this.bgB.alpha = 0, this.backdrop.addChild(this.bgA, this.bgB), this.film = new BD(e, n), this.reels = HD.map((t) => new qD(e, t));
 		for (let e of this.reels) this.reelLayer.addChild(e.root);
 		this.scan = new KS();
 		for (let e = 0; e < 450; e += 4) this.scan.rect(0, e, 600, 1).fill({
@@ -22788,10 +23487,10 @@ var ID = 172, LD = [
 			alpha: .025
 		});
 		this.scan.blendMode = "add";
-		let n = new KS().poly([
+		let r = new KS().poly([
 			0,
-			eD,
-			eD,
+			nD,
+			nD,
 			0,
 			600,
 			0,
@@ -22800,18 +23499,34 @@ var ID = 172, LD = [
 			0,
 			450
 		]).fill(16777215);
-		this.root.addChild(this.backdrop, this.reelLayer, this.overlay, this.scan, n), this.root.mask = n;
+		this.root.addChild(this.backdrop, this.film.root, this.reelLayer, this.overlay, this.scan, r), this.root.mask = r;
 	}
 	plate(e) {
-		let t = Z(this.art.tex(e));
-		return t.position.set(300, 225), CD(t, 600, 450), t;
+		let t = X(this.art.tex(e));
+		return t.position.set(300, 225), TD(t, 600, 450), t;
 	}
 	async setBackdrop(e, t = 450) {
-		e !== this.current && (this.current = e, this.bgB.texture = this.art.tex(e), CD(this.bgB, 600, 450), this.bgB.alpha = 0, await this.tw.to(this.bgB, { alpha: 1 }, t), this.bgA.texture = this.bgB.texture, CD(this.bgA, 600, 450), this.bgB.alpha = 0);
+		e !== this.current && (this.current = e, this.bgB.texture = this.art.tex(e), TD(this.bgB, 600, 450), this.bgB.alpha = 0, await this.tw.to(this.bgB, { alpha: 1 }, t), this.bgA.texture = this.bgB.texture, TD(this.bgA, 600, 450), this.bgB.alpha = 0);
 	}
 	update(e, t) {
 		for (let t of this.reels) t.update(e);
-		this.bgA.x = 300 + Math.sin(t * .15) * 6, this.bgA.scale.set(this.bgA.scale.x);
+		this.film.update(e), this.bgA.x = 300 + Math.sin(t * .15) * 6, this.bgA.scale.set(this.bgA.scale.x);
+	}
+	reachLayout(e, t = 360) {
+		let n = [0, 2].map((n) => {
+			let r = this.reels[n], i = e ? .5 : 1, a = e ? n === 0 ? 78 : 522 : HD[n], o = e ? 64 - UD * i : 0;
+			return this.tw.to(r.root.scale, {
+				x: i,
+				y: i
+			}, t, RE), this.tw.to(r.root, {
+				x: a,
+				y: o
+			}, t, RE);
+		}), r = this.reels[1].root, i = e ? 1.12 : 1;
+		return this.tw.to(r.scale, {
+			x: i,
+			y: i
+		}, t, RE), this.tw.to(r, { y: e ? -236 * (i - 1) + 10 : 0 }, t, RE), Promise.all(n).then(() => void 0);
 	}
 	showReels(e) {
 		return this.tw.to(this.reelLayer, { alpha: +!!e }, 260);
@@ -22821,21 +23536,21 @@ var ID = 172, LD = [
 	}
 	toBoard(e, t) {
 		return {
-			x: this.root.x + e * QE,
-			y: this.root.y + t * QE
+			x: this.root.x + e * eD,
+			y: this.root.y + t * eD
 		};
 	}
 	get reelX() {
-		return LD;
+		return HD;
 	}
 	get centerY() {
-		return RD;
+		return UD;
 	}
-}, WD = class extends Error {}, GD = {
+}, YD = class extends Error {}, XD = {
 	quick: 1,
 	stepup: 2,
 	mission: 3
-}, KD = class {
+}, ZD = class {
 	tune;
 	mode = "title";
 	lcd = "idle";
@@ -22881,11 +23596,11 @@ var ID = 172, LD = [
 		return this.mode === "fever" && this.fever?.stage === "open";
 	}
 	start() {
-		if (this.mode !== "title") throw new WD(`start from ${this.mode}`);
+		if (this.mode !== "title") throw new YD(`start from ${this.mode}`);
 		this.setMode("normal"), this.maybeSpin();
 	}
 	toTitle() {
-		if (this.mode === "fever" || this.lcd !== "idle") throw new WD("cannot leave during a show or fever");
+		if (this.mode === "fever" || this.lcd !== "idle") throw new YD("cannot leave during a show or fever");
 		this.setMode("title");
 	}
 	queueSpin(e) {
@@ -22907,14 +23622,14 @@ var ID = 172, LD = [
 	}
 	reachStarted() {
 		let e = this.current;
-		if (this.lcd !== "spinning" || !e) throw new WD(`reach from ${this.lcd}`);
-		if (e.kind === "miss") throw new WD("a miss has no reach");
-		this.lcd = "reach", e.tier && (!this.bestTier || GD[e.tier] > GD[this.bestTier]) && (this.bestTier = e.tier), this.setLed("reach");
+		if (this.lcd !== "spinning" || !e) throw new YD(`reach from ${this.lcd}`);
+		if (e.kind === "miss") throw new YD("a miss has no reach");
+		this.lcd = "reach", e.tier && (!this.bestTier || XD[e.tier] > XD[this.bestTier]) && (this.bestTier = e.tier), this.setLed("reach");
 	}
 	spinFinished() {
 		let e = this.current;
-		if (!e || this.lcd !== "spinning" && this.lcd !== "reach") throw new WD(`spin end from ${this.lcd}`);
-		if (e.kind !== "miss" && this.lcd !== "reach") throw new WD("a reach must be shown before it ends");
+		if (!e || this.lcd !== "spinning" && this.lcd !== "reach") throw new YD(`spin end from ${this.lcd}`);
+		if (e.kind !== "miss" && this.lcd !== "reach") throw new YD("a reach must be shown before it ends");
 		this.emit({
 			type: "spin-end",
 			spin: e
@@ -22922,7 +23637,7 @@ var ID = 172, LD = [
 	}
 	hitShown() {
 		let e = this.current;
-		if (this.lcd !== "celebrate" || !e?.fever) throw new WD(`fever from ${this.lcd}`);
+		if (this.lcd !== "celebrate" || !e?.fever) throw new YD(`fever from ${this.lcd}`);
 		this.fever = {
 			plan: e.fever,
 			round: 0,
@@ -22993,17 +23708,17 @@ var ID = 172, LD = [
 		});
 	}
 	endcardDone() {
-		if (this.mode !== "endcard") throw new WD(`results from ${this.mode}`);
+		if (this.mode !== "endcard") throw new YD(`results from ${this.mode}`);
 		this.setMode("results");
 	}
 	resultsDone() {
-		if (this.mode !== "results") throw new WD(`normal from ${this.mode}`);
+		if (this.mode !== "results") throw new YD(`normal from ${this.mode}`);
 		this.setMode("normal"), this.maybeSpin();
 	}
-}, qD = 1500, JD = 1 / 240, YD = 2400, XD = 48, ZD = .35, QD = .4, $D = 1880, eO = class {
-	pins = fD();
-	segs = dD();
-	pockets = _D();
+}, QD = 1500, $D = 1 / 240, eO = 2400, tO = 48, nO = .35, rO = .4, iO = 1880, aO = class {
+	pins = mD();
+	segs = pD();
+	pockets = yD();
 	balls = [];
 	hatchOpen = !1;
 	gyroAngle = 0;
@@ -23020,9 +23735,9 @@ var ID = 172, LD = [
 		this.rng = e;
 		for (let e of this.pins) this.cellPush(this.pinGrid, e.x, e.y, e);
 		for (let e of this.segs) {
-			let t = Math.floor((Math.min(e.ax, e.bx) - 13) / XD), n = Math.floor((Math.max(e.ax, e.bx) + 13) / XD), r = Math.floor((Math.min(e.ay, e.by) - 13) / XD), i = Math.floor((Math.max(e.ay, e.by) + 13) / XD);
+			let t = Math.floor((Math.min(e.ax, e.bx) - 13) / tO), n = Math.floor((Math.max(e.ax, e.bx) + 13) / tO), r = Math.floor((Math.min(e.ay, e.by) - 13) / tO), i = Math.floor((Math.max(e.ay, e.by) + 13) / tO);
 			for (let a = t; a <= n; a++) for (let t = r; t <= i; t++) {
-				let n = tO(a, t), r = this.segGrid.get(n);
+				let n = oO(a, t), r = this.segGrid.get(n);
 				r ? r.push(e) : this.segGrid.set(n, [e]);
 			}
 		}
@@ -23034,17 +23749,17 @@ var ID = 172, LD = [
 		for (let t of this.listeners) t(e);
 	}
 	cellPush(e, t, n, r) {
-		let i = tO(Math.floor(t / XD), Math.floor(n / XD)), a = e.get(i);
+		let i = oO(Math.floor(t / tO), Math.floor(n / tO)), a = e.get(i);
 		a ? a.push(r) : e.set(i, [r]);
 	}
 	get live() {
 		return this.balls.length;
 	}
 	launch(e) {
-		let t = $D + 900 * Math.min(1, Math.max(0, e)) + (this.rng() - .5) * 36, n = {
+		let t = iO + 900 * Math.min(1, Math.max(0, e)) + (this.rng() - .5) * 36, n = {
 			id: this.nextId++,
 			x: 81,
-			y: ZE,
+			y: QE,
 			vx: 0,
 			vy: -t,
 			phase: "rail-up",
@@ -23057,11 +23772,11 @@ var ID = 172, LD = [
 		return this.balls.push(n), n;
 	}
 	step(e) {
-		for (this.acc += Math.min(e, .05); this.acc >= JD;) this.acc -= JD, this.time += JD, this.substep(JD);
+		for (this.acc += Math.min(e, .05); this.acc >= $D;) this.acc -= $D, this.time += $D, this.substep($D);
 		this.balls = this.balls.filter((e) => e.alive);
 	}
 	get alpha() {
-		return this.acc / JD;
+		return this.acc / $D;
 	}
 	substep(e) {
 		this.gyroAngle += this.gyroSpin * e, this.ballGrid.clear();
@@ -23069,42 +23784,42 @@ var ID = 172, LD = [
 		for (let t of this.balls) t.alive && (t.phase === "rail-up" ? this.railUp(t, e) : t.phase === "rail-arc" ? this.railArc(t, e) : t.phase === "foul" ? this.foul(t, e) : t.phase === "warp" ? this.warp(t, e) : this.free(t, e));
 	}
 	railUp(e, t) {
-		e.v -= (qD + ZD * e.v) * t, e.y -= e.v * t, e.spin += e.v * t / 13, e.v <= 0 ? e.phase = "foul" : e.y <= YE.cy && (e.phase = "rail-arc", e.deg = 180, e.y = YE.cy);
+		e.v -= (QD + nO * e.v) * t, e.y -= e.v * t, e.spin += e.v * t / 13, e.v <= 0 ? e.phase = "foul" : e.y <= XE.cy && (e.phase = "rail-arc", e.deg = 180, e.y = XE.cy);
 	}
 	railArc(e, t) {
 		let n = e.deg * Math.PI / 180;
-		e.v += (qD * Math.cos(n) - ZD * e.v) * t, e.deg += e.v * t / XE * (180 / Math.PI);
+		e.v += (QD * Math.cos(n) - nO * e.v) * t, e.deg += e.v * t / ZE * (180 / Math.PI);
 		let r = e.deg * Math.PI / 180;
-		if (e.x = YE.cx + XE * Math.cos(r), e.y = YE.cy + XE * Math.sin(r), e.spin += e.v * t / 13, e.v <= 0) {
-			e.deg < 214 ? (e.phase = "foul", e.x = YE.cx - XE | 0) : this.release(e);
+		if (e.x = XE.cx + ZE * Math.cos(r), e.y = XE.cy + ZE * Math.sin(r), e.spin += e.v * t / 13, e.v <= 0) {
+			e.deg < 214 ? (e.phase = "foul", e.x = XE.cx - ZE | 0) : this.release(e);
 			return;
 		}
-		let i = e.v * e.v + qD * XE * Math.sin(r) >= 0;
+		let i = e.v * e.v + QD * ZE * Math.sin(r) >= 0;
 		(e.deg > 214 && !i || e.deg >= 354) && this.release(e);
 	}
 	release(e) {
 		let t = e.deg * Math.PI / 180;
-		e.vx = -Math.sin(t) * e.v, e.vy = Math.cos(t) * e.v, e.x = YE.cx + (XE - 1.5) * Math.cos(t), e.y = YE.cy + (XE - 1.5) * Math.sin(t), e.phase = "free";
+		e.vx = -Math.sin(t) * e.v, e.vy = Math.cos(t) * e.v, e.x = XE.cx + (ZE - 1.5) * Math.cos(t), e.y = XE.cy + (ZE - 1.5) * Math.sin(t), e.phase = "free";
 	}
 	warp(e, t) {
 		let n = e.warpSide ?? -1;
 		e.warpT = (e.warpT ?? 0) + t / .9;
-		let r = Math.min(1, e.warpT), i = $E, a = n < 0 ? i.x - 7 : i.x + i.w + 7, o = n < 0 ? i.x + 97 : i.x + i.w - 97, s = i.y + i.h + 3, c = 1 - r;
-		e.x = c * c * a + 2 * c * r * o + r * r * aD.x, e.y = c * c * 700 + 2 * c * r * s + r * r * aD.y, e.spin += t * 20 * -n, r >= 1 && (e.phase = "free", e.x = aD.x + (this.rng() - .5) * 30, e.y = aD.y, e.vx = (this.rng() - .5) * 90, e.vy = 40, this.emit({
+		let r = Math.min(1, e.warpT), i = tD, a = n < 0 ? i.x - 7 : i.x + i.w + 7, o = n < 0 ? i.x + 97 : i.x + i.w - 97, s = i.y + i.h + 3, c = 1 - r;
+		e.x = c * c * a + 2 * c * r * o + r * r * sD.x, e.y = c * c * 700 + 2 * c * r * s + r * r * sD.y, e.spin += t * 20 * -n, r >= 1 && (e.phase = "free", e.x = sD.x + (this.rng() - .5) * 30, e.y = sD.y, e.vx = (this.rng() - .5) * 90, e.vy = 40, this.emit({
 			type: "stage-drop",
 			ball: e
 		}));
 	}
 	foul(e, t) {
-		e.y < YE.cy && e.x < 82 && (e.x = 81), e.vy = Math.min(YD, (e.vy > 0 ? e.vy : 0) + qD * t), e.y < YE.cy && (e.x = 81), e.y += e.vy * t, e.y >= 1560 && (e.alive = !1, this.emit({
+		e.y < XE.cy && e.x < 82 && (e.x = 81), e.vy = Math.min(eO, (e.vy > 0 ? e.vy : 0) + QD * t), e.y < XE.cy && (e.x = 81), e.y += e.vy * t, e.y >= 1560 && (e.alive = !1, this.emit({
 			type: "foul",
 			ball: e
 		}));
 	}
 	free(e, t) {
-		e.vy += qD * t;
+		e.vy += QD * t;
 		let n = Math.hypot(e.vx, e.vy);
-		if (n > YD && (e.vx *= YD / n, e.vy *= YD / n), e.x += e.vx * t, e.y += e.vy * t, e.spin += e.vx * t / 13, Math.abs(e.vx) + Math.abs(e.vy) < 30) {
+		if (n > eO && (e.vx *= eO / n, e.vy *= eO / n), e.x += e.vx * t, e.y += e.vy * t, e.spin += e.vx * t / 13, Math.abs(e.vx) + Math.abs(e.vy) < 30) {
 			if (e.still = (e.still ?? 0) + t, e.still > 1.2 && (e.vx = (this.rng() < .5 ? -1 : 1) * (80 + this.rng() * 80), e.vy = -60, e.still > 4)) {
 				e.alive = !1, this.emit({
 					type: "drain",
@@ -23113,16 +23828,16 @@ var ID = 172, LD = [
 				return;
 			}
 		} else e.still &&= Math.max(0, e.still - t * .5);
-		let r = Math.floor(e.x / XD), i = Math.floor(e.y / XD);
+		let r = Math.floor(e.x / tO), i = Math.floor(e.y / tO);
 		for (let t = -1; t <= 1; t++) for (let n = -1; n <= 1; n++) {
-			let a = tO(r + t, i + n), o = this.pinGrid.get(a);
+			let a = oO(r + t, i + n), o = this.pinGrid.get(a);
 			if (o) for (let t of o) this.hitCircle(e, t.x, t.y, 5, .48, !0);
 			let s = this.ballGrid.get(a);
 			if (s) for (let t of s) t !== e && t.id > e.id && this.hitBall(e, t);
 		}
-		let a = this.segGrid.get(tO(r, i));
+		let a = this.segGrid.get(oO(r, i));
 		if (a) for (let t of a) t.tag === "flap" && this.hatchOpen || this.hitSeg(e, t);
-		for (let t of rD) {
+		for (let t of aD) {
 			let n = e.x - t.x, r = e.y - t.y, i = Math.hypot(n, r);
 			if (i < t.r + 13 && this.hitCircle(e, t.x, t.y, t.r, .4, !1)) {
 				let a = -r / i, o = n / i;
@@ -23133,8 +23848,8 @@ var ID = 172, LD = [
 				});
 			}
 		}
-		for (let t of iD) if (e.x > t.x0 && e.x < t.x1 && e.y > t.y0 && e.y < t.y1) {
-			if (e.warpTried || (e.warpTried = !0, this.rng() > QD)) continue;
+		for (let t of oD) if (e.x > t.x0 && e.x < t.x1 && e.y > t.y0 && e.y < t.y1) {
+			if (e.warpTried || (e.warpTried = !0, this.rng() > rO)) continue;
 			e.phase = "warp", e.warpT = 0, e.warpSide = t.side, this.emit({
 				type: "warp",
 				ball: e,
@@ -23209,12 +23924,12 @@ var ID = 172, LD = [
 		}
 	}
 };
-function tO(e, t) {
+function oO(e, t) {
 	return (e + 64) * 4096 + (t + 64);
 }
 // src/game/shows.ts
-var nO = (e, t) => e.tw.wait(t);
-function rO(e, t, n, r = {}) {
+var sO = (e, t) => e.tw.wait(t);
+function cO(e, t, n, r = {}) {
 	let i = e.lcd.toBoard(t, n);
 	e.fx.emit({
 		...r,
@@ -23223,20 +23938,20 @@ function rO(e, t, n, r = {}) {
 		y: i.y
 	});
 }
-function iO(e, t, n, r) {
-	if (e.art.has(t)) return wD(Z(e.art.tex(t)), n, r);
+function lO(e, t, n, r) {
+	if (e.art.has(t)) return Z(X(e.art.tex(t)), n, r);
 }
-async function aO(e) {
+async function uO(e) {
 	e.audio.play("sfx_reach_alert");
 	let t = new H();
 	t.position.set(300, 92);
-	let n = iO(e, "plateReach", 520, 140);
+	let n = lO(e, "plateReach", 520, 140);
 	n && t.addChild(n);
-	let r = Z(e.fxt.streak);
+	let r = X(e.fxt.streak);
 	r.tint = Q.magenta, r.blendMode = "add", r.scale.set(5.5, 5);
 	let i = e.art.has("reachBanner"), a = (t) => {
-		if (!i) return t === Q.cyan ? FD("REACH", 104, Q.cyan) : FD("REACH", 104, Q.magenta, MD);
-		let n = ED(e.art.frames("reachBanner", "pulse"), 16);
+		if (!i) return t === Q.cyan ? ID("REACH", 104, Q.cyan) : ID("REACH", 104, Q.magenta, ND);
+		let n = DD(e.art.frames("reachBanner", "pulse"), 16);
 		return n.anchor.set(.5), n.scale.set(.9), t !== void 0 && (n.tint = t), n;
 	}, o = a(Q.magenta), s = a(Q.cyan);
 	o.alpha = s.alpha = i ? .3 : .6, o.blendMode = s.blendMode = "add";
@@ -23244,7 +23959,7 @@ async function aO(e) {
 	t.addChild(r, o, s, c), e.lcd.overlay.addChild(t), t.scale.set(3.2), t.alpha = 0, e.hooks.flash(Q.magenta, .35, 220), await e.tw.to(t, { alpha: 1 }, 90), await e.tw.to(t.scale, {
 		x: 1,
 		y: 1
-	}, 260, zE), e.shake.add(.35), rO(e, 300, 92, {
+	}, 260, zE), e.shake.add(.35), cO(e, 300, 92, {
 		n: 36,
 		speed: [200, 620],
 		life: [.3, .7],
@@ -23256,61 +23971,61 @@ async function aO(e) {
 		scale: [.4, .9]
 	}), await e.tw.run(420, (e) => {
 		o.x = -14 * (1 - e), s.x = 14 * (1 - e), i && (o.alpha = s.alpha = .3 * (1 - e));
-	}, RE), await nO(e, 700), e.tw.to(t, {
+	}, RE), await sO(e, 700), e.tw.to(t, {
 		alpha: 0,
 		y: 70
 	}, 380).then(() => t.destroy({ children: !0 }));
 }
-function oO(e, t) {
+function dO(e, t) {
 	let n = [];
 	for (let r of t) {
-		let t = Z(e.fxt.glow);
-		t.tint = Q.magenta, t.blendMode = "add", t.scale.set(2.4, 2.6), t.position.set(e.lcd.reelX[r], e.lcd.centerY), t.alpha = 0, e.lcd.reelLayer.addChildAt(t, 0), e.tw.to(t, { alpha: .65 }, 300), n.push(t);
+		let t = X(e.fxt.glow);
+		t.tint = Q.magenta, t.blendMode = "add", t.scale.set(2.4, 2.6), t.position.set(0, e.lcd.centerY), t.alpha = 0, e.lcd.reels[r].root.addChildAt(t, 0), e.tw.to(t, { alpha: .65 }, 300), n.push(t);
 	}
 	return n;
 }
-async function sO(e, t) {
+async function fO(e, t) {
 	let [n, r, i] = t.reels, a = e.lcd.reels;
 	await e.lcd.setBackdrop("lcdReel", 300), e.audio.play("sfx_reel_spin", {
 		vol: .7,
 		max: 1
 	});
 	for (let e of a) e.spin();
-	if (t.surge && e.hooks.surge(!0), await nO(e, 1100), e.audio.play("sfx_reel_stop_1"), await a[0].stop(e.tw, n, 380), rO(e, e.lcd.reelX[0], e.lcd.centerY, {
+	if (t.surge && e.hooks.surge(!0), await sO(e, 1100), e.audio.play("sfx_reel_stop_1"), await a[0].stop(e.tw, n, 380), cO(e, e.lcd.reelX[0], e.lcd.centerY, {
 		n: 8,
 		speed: [60, 200],
 		tint: Q.cyan,
 		life: [.2, .4]
-	}), await nO(e, 260), e.audio.play("sfx_reel_stop_2"), await a[2].stop(e.tw, i, 380), rO(e, e.lcd.reelX[2], e.lcd.centerY, {
+	}), await sO(e, 260), e.audio.play("sfx_reel_stop_2"), await a[2].stop(e.tw, i, 380), cO(e, e.lcd.reelX[2], e.lcd.centerY, {
 		n: 8,
 		speed: [60, 200],
 		tint: Q.cyan,
 		life: [.2, .4]
 	}), t.kind === "miss") {
-		await nO(e, 420), e.audio.play("sfx_reel_stop_3"), await a[1].stop(e.tw, r, 420), e.hooks.surge(!1), await nO(e, 650);
+		await sO(e, 420), e.audio.play("sfx_reel_stop_3"), await a[1].stop(e.tw, r, 420), e.hooks.surge(!1), await sO(e, 650);
 		return;
 	}
 	e.onReach();
 	let o = t.tier ?? "quick";
 	e.hooks.reachMusic(o), e.hooks.halo("reach"), a[1].speed = 9;
-	let s = oO(e, [0, 2]), c = e.art.frames("vfxReachGlow", "loop"), l;
-	c.length && (l = ED(c, 20), l.blendMode = "add", l.tint = o === "quick" ? Q.cyan : o === "stepup" ? 6160282 : Q.magenta, l.position.set(300, 225), l.width = 630, l.height = 472.5, e.lcd.overlay.addChildAt(l, 0)), o === "quick" && e.lcd.setBackdrop("lcdReachQuick", 400), await aO(e), o === "quick" ? await cO(e, t) : o === "stepup" ? await uO(e, t) : await gO(e, t);
+	let s = dO(e, [0, 2]), c = e.art.frames("vfxReachGlow", "loop"), l;
+	c.length && (l = DD(c, 20), l.blendMode = "add", l.tint = o === "quick" ? Q.cyan : o === "stepup" ? 6160282 : Q.magenta, l.position.set(300, 225), l.width = 630, l.height = 472.5, e.lcd.overlay.addChildAt(l, 0)), o === "quick" && e.lcd.setBackdrop("lcdReachQuick", 400), e.lcd.film.play(o), e.lcd.reachLayout(!0), await uO(e), o === "quick" ? await pO(e, t) : o === "stepup" ? await hO(e, t) : await xO(e, t);
 	for (let t of s) e.tw.to(t, { alpha: 0 }, 300).then(() => t.destroy());
-	if (l) {
+	if (e.lcd.reachLayout(!1), t.kind === "hit" ? e.lcd.film.play("hit") : e.lcd.film.stop(), l) {
 		let t = l;
 		e.tw.to(t, { alpha: 0 }, 300).then(() => t.destroy());
 	}
-	e.hooks.surge(!1), t.kind !== "hit" && (e.audio.play("sfx_reach_miss"), e.hooks.reachMusic("none"), e.hooks.halo("idle"), await e.tw.to(e.lcd.reelLayer, { alpha: .55 }, 260), await nO(e, 600), await e.tw.to(e.lcd.reelLayer, { alpha: 1 }, 300), await e.lcd.setBackdrop("lcdReel", 400));
+	e.hooks.surge(!1), t.kind !== "hit" && (e.audio.play("sfx_reach_miss"), e.hooks.reachMusic("none"), e.hooks.halo("idle"), await e.tw.to(e.lcd.reelLayer, { alpha: .55 }, 260), await sO(e, 600), await e.tw.to(e.lcd.reelLayer, { alpha: 1 }, 300), await e.lcd.setBackdrop("lcdReel", 400));
 }
-async function cO(e, t) {
+async function pO(e, t) {
 	let n = Math.max(2400, e.tune.reach.quickMs - 2600);
-	e.audio.play("sfx_reach_sting_1"), await e.lcd.reels[1].crawl(e.tw, t.reels[1], n, 7), e.audio.play("sfx_reel_stop_3"), await nO(e, 400);
+	e.audio.play("sfx_reach_sting_1"), await e.lcd.reels[1].crawl(e.tw, t.reels[1], n, 7), e.audio.play("sfx_reel_stop_3"), await sO(e, 400);
 }
-async function lO(e, t = 520) {
+async function mO(e, t = 520) {
 	e.audio.play("sfx_stepup_whoosh");
 	let n = e.art.tex(e.lcd.current), r = [];
 	for (let t = 0; t < 9; t++) {
-		let i = CD(Z(n, .5, .5), 600, 450);
+		let i = TD(X(n, .5, .5), 600, 450);
 		i.position.set(300, 225);
 		let a = new KS().rect(0, t * 450 / 9, 600, 51).fill(16777215);
 		i.mask = a, i.tint = t % 2 ? Q.cyan : Q.magenta, i.blendMode = "add", i.alpha = .7, e.lcd.overlay.addChild(a, i), r.push(i);
@@ -23321,19 +24036,19 @@ async function lO(e, t = 520) {
 	}), e.lcd.reels[1].root.x = e.lcd.reelX[1];
 	for (let e of r) e.mask.destroy(), e.destroy();
 }
-async function uO(e, t) {
+async function hO(e, t) {
 	e.audio.play("sfx_reach_sting_2"), await e.lcd.setBackdrop("lcdReachStep", 500);
 	let n = e.tune.reach.stepUpMs, r = t.stepUpFirst ?? t.reels[1];
-	if (await e.lcd.reels[1].crawl(e.tw, r, Math.max(3e3, n * .4), 8), e.audio.play("sfx_reel_stop_3"), await nO(e, 700), !t.stepUpRespin) return;
-	await lO(e);
-	let i = PD("RE-SPIN!", 46, Q.cyan, "900");
+	if (await e.lcd.reels[1].crawl(e.tw, r, Math.max(3e3, n * .4), 8), e.audio.play("sfx_reel_stop_3"), await sO(e, 700), !t.stepUpRespin) return;
+	await mO(e);
+	let i = FD("RE-SPIN!", 46, Q.cyan, "900");
 	i.position.set(300, 400), e.lcd.overlay.addChild(i), i.scale.set(.2), e.tw.to(i.scale, {
 		x: 1,
 		y: 1
-	}, 300, zE), e.lcd.reels[1].spin(), e.lcd.reels[1].speed = 20, await nO(e, Math.max(1200, n * .15)), e.shake.add(.2), await e.lcd.reels[1].crawl(e.tw, t.reels[1], Math.max(2400, n * .25), 6), e.audio.play("sfx_reel_stop_3"), e.tw.to(i, { alpha: 0 }, 300).then(() => i.destroy()), await nO(e, 500);
+	}, 300, zE), e.lcd.reels[1].spin(), e.lcd.reels[1].speed = 20, await sO(e, Math.max(1200, n * .15)), e.shake.add(.2), await e.lcd.reels[1].crawl(e.tw, t.reels[1], Math.max(2400, n * .25), 6), e.audio.play("sfx_reel_stop_3"), e.tw.to(i, { alpha: 0 }, 300).then(() => i.destroy()), await sO(e, 500);
 }
-async function dO(e, t, n, r, i = Q.cyan) {
-	let a = new H(), o = CD(Z(e.art.tex("cutBg")), 720, 240);
+async function gO(e, t, n, r, i = Q.cyan) {
+	let a = new H(), o = TD(X(e.art.tex("cutBg")), 720, 240);
 	o.position.set(300, 0);
 	let s = new KS().poly([
 		-600,
@@ -23346,17 +24061,17 @@ async function dO(e, t, n, r, i = Q.cyan) {
 		140
 	]).fill(16777215);
 	a.addChild(s, o), o.mask = s;
-	let c = e.art.frames(t, "cutin"), l = c.length > 1 ? new oE(c) : Z(e.art.tex(t, "point"));
-	l.anchor.set(.5, .62), l instanceof oE && (l.loop = !1, l.animationSpeed = .4, l.play()), wD(l, 330, 330), l.position.set(t === "nova" ? 150 : 450, 10);
-	let u = FD(n, n.length > 10 ? 54 : 62, i, t === "lyra" ? MD : void 0), d = u.width > 360 ? 360 / u.width : 1;
-	u.scale.set(d), u.position.set(t === "nova" ? 384 : 216, 4), a.addChild(l, u), a.position.set(0, 225), a.x = t === "nova" ? -600 : 600, e.lcd.overlay.addChild(a), e.hooks.flash(Q.white, .5, 140), e.audio.play("sfx_thrust_burst", { vol: .8 }), await e.tw.to(a, { x: 0 }, 300, BE), e.shake.add(.25), await e.tw.run(Math.max(600, r - 600), (e) => {
+	let c = e.art.frames(t, "cutin"), l = c.length > 1 ? new oE(c) : X(e.art.tex(t, "point"));
+	l.anchor.set(.5, .62), l instanceof oE && (l.loop = !1, l.animationSpeed = .4, l.play()), Z(l, 330, 330), l.position.set(t === "nova" ? 150 : 450, 10);
+	let u = ID(n, n.length > 10 ? 54 : 62, i, t === "lyra" ? ND : void 0), d = u.width > 360 ? 360 / u.width : 1;
+	u.scale.set(d), u.position.set(t === "nova" ? 384 : 216, 4), a.addChild(l, u), a.position.set(0, 225), a.x = t === "nova" ? -600 : 600, e.lcd.overlay.addChild(a), e.hooks.flash(Q.white, .5, 140), e.audio.play("sfx_thrust_burst", { vol: .8 }), await e.tw.to(a, { x: 0 }, 300, VE), e.shake.add(.25), await e.tw.run(Math.max(600, r - 600), (e) => {
 		l.x += t === "nova" ? .35 : -.35, u.scale.set(d * (1 + .04 * Math.sin(e * 20)));
 	}), await e.tw.to(a, {
 		x: t === "nova" ? 600 : -600,
 		alpha: .4
-	}, 300, VE), a.destroy({ children: !0 });
+	}, 300, HE), a.destroy({ children: !0 });
 }
-async function fO(e, t) {
+async function _O(e, t) {
 	let n = new KS();
 	n.blendMode = "add", e.lcd.overlay.addChild(n);
 	let r = 0, i = 0;
@@ -23382,7 +24097,7 @@ async function fO(e, t) {
 				alpha: .95
 			});
 		}
-		Math.random() < .3 && TD(e.lcd.overlay, e.art.frames("vfxBolt", "loop"), Math.random() * 600, Math.random() * 450, {
+		Math.random() < .3 && ED(e.lcd.overlay, e.art.frames("vfxBolt", "loop"), Math.random() * 600, Math.random() * 450, {
 			scale: .9 + Math.random() * .6,
 			rotation: (Math.random() - .5) * 2.4,
 			fps: 30
@@ -23392,31 +24107,31 @@ async function fO(e, t) {
 		}), e.shake.add(.12));
 	}), n.destroy();
 }
-function pO(e, t) {
+function vO(e, t) {
 	for (let n = 0; n < 5; n++) {
-		let r = n % 2 ? "drone" : "asteroid", i = wD(Z(e.art.tex(r)), 90 + Math.random() * 60, 90 + Math.random() * 60), a = 60 + Math.random() * 330;
+		let r = n % 2 ? "drone" : "asteroid", i = Z(X(e.art.tex(r)), 90 + Math.random() * 60, 90 + Math.random() * 60), a = 60 + Math.random() * 330;
 		i.position.set(-120, a), i.alpha = .95, e.lcd.backdrop.addChild(i);
 		let o = n * t / 6;
 		e.tw.wait(o).then(() => e.tw.to(i, {
 			x: 740,
 			y: a + (Math.random() - .5) * 120,
 			rotation: (Math.random() - .5) * 4
-		}, t * .5, UE).then(() => i.destroy()));
+		}, t * .5, WE).then(() => i.destroy()));
 	}
 }
-async function mO(e, t, n, r, i) {
+async function yO(e, t, n, r, i) {
 	let a = new oE(e.art.frames("capsule", "intact"));
 	a.anchor.set(.5), a.scale.set(1.05), a.animationSpeed = 12 / 60, a.play(), r.addChild(i, a), r.scale.set(.2), r.alpha = 0, e.lcd.overlay.addChild(r), await e.lcd.showReels(!1), e.tw.to(r, { alpha: 1 }, 250), await e.tw.to(r.scale, {
 		x: 1,
 		y: 1
-	}, 600, HE), e.tw.to(i, { alpha: .8 }, 800);
+	}, 600, UE), e.tw.to(i, { alpha: .8 }, 800);
 	let o = e.art.frames("capsule", "crack");
 	a.stop(), a.textures = o;
 	for (let n = 0; n < 6; n++) {
 		let s = Math.round((n + 1) / 6 * (o.length - 1));
-		a.gotoAndStop(s), e.audio.play("sfx_crack_creak", { vol: .8 }), e.shake.add(.18), r.x = 300 + (Math.random() - .5) * 12, i.alpha = .6 + n / 6 * .4, await nO(e, t * .55 / 6);
+		a.gotoAndStop(s), e.audio.play("sfx_crack_creak", { vol: .8 }), e.shake.add(.18), r.x = 300 + (Math.random() - .5) * 12, i.alpha = .6 + n / 6 * .4, await sO(e, t * .55 / 6);
 	}
-	r.x = 300, n && await e.hooks.waitPush(3e3), e.audio.play("sfx_crack_shatter"), e.hooks.flash(Q.white, .85, 260), e.shake.add(.6), a.textures = e.art.frames("capsule", "shatter"), a.loop = !1, a.animationSpeed = 30 / 60, a.gotoAndPlay(0), rO(e, 300, 225, {
+	r.x = 300, n && await e.hooks.waitPush(3e3), e.audio.play("sfx_crack_shatter"), e.hooks.flash(Q.white, .85, 260), e.shake.add(.6), a.textures = e.art.frames("capsule", "shatter"), a.loop = !1, a.animationSpeed = 30 / 60, a.gotoAndPlay(0), cO(e, 300, 225, {
 		tex: "chip",
 		n: 50,
 		speed: [250, 700],
@@ -23430,7 +24145,7 @@ async function mO(e, t, n, r, i) {
 		scale: [.4, .9],
 		gravity: 300,
 		spin: 8
-	}), rO(e, 300, 225, {
+	}), cO(e, 300, 225, {
 		tex: "ring",
 		n: 1,
 		speed: [0, 0],
@@ -23438,18 +24153,18 @@ async function mO(e, t, n, r, i) {
 		scale: [.3, .3],
 		endScale: 14,
 		tint: Q.white
-	}), await nO(e, 420), await e.lcd.showReels(!0), e.tw.to(r, { alpha: 0 }, 400).then(() => r.destroy({ children: !0 }));
+	}), await sO(e, 420), await e.lcd.showReels(!0), e.tw.to(r, { alpha: 0 }, 400).then(() => r.destroy({ children: !0 }));
 }
-async function hO(e, t, n) {
+async function bO(e, t, n) {
 	let r = new H();
 	r.position.set(300, 233);
-	let i = Z(e.fxt.glow);
-	if (i.tint = Q.violet, i.blendMode = "add", i.scale.set(4), i.alpha = 0, e.art.frames("capsule", "crack").length > 0) return mO(e, t, n, r, i);
-	let a = wD(Z(e.art.tex("capsule")), 230, 230), o = new KS();
+	let i = X(e.fxt.glow);
+	if (i.tint = Q.violet, i.blendMode = "add", i.scale.set(4), i.alpha = 0, e.art.frames("capsule", "crack").length > 0) return yO(e, t, n, r, i);
+	let a = Z(X(e.art.tex("capsule")), 230, 230), o = new KS();
 	o.blendMode = "add", r.addChild(i, a, o), r.scale.set(.2), r.alpha = 0, e.lcd.overlay.addChild(r), await e.lcd.showReels(!1), e.tw.to(r, { alpha: 1 }, 250), await e.tw.to(r.scale, {
 		x: 1,
 		y: 1
-	}, 600, HE), e.tw.to(i, { alpha: .8 }, 800);
+	}, 600, UE), e.tw.to(i, { alpha: .8 }, 800);
 	let s = [];
 	for (let n = 0; n < 6; n++) {
 		let n = Math.random() * Math.PI * 2, i = 0, a = 0, c = [i, a];
@@ -23464,12 +24179,12 @@ async function hO(e, t, n) {
 			color: 16777215,
 			alpha: 1
 		});
-		e.audio.play("sfx_crack_creak", { vol: .8 }), e.shake.add(.18), r.x = 300 + (Math.random() - .5) * 12, await nO(e, t * .55 / 6);
+		e.audio.play("sfx_crack_creak", { vol: .8 }), e.shake.add(.18), r.x = 300 + (Math.random() - .5) * 12, await sO(e, t * .55 / 6);
 	}
 	r.x = 300, n && await e.hooks.waitPush(3e3), e.audio.play("sfx_crack_shatter"), e.hooks.flash(Q.white, .85, 260), e.shake.add(.6);
 	let c = a.texture, l = [];
 	for (let t = 0; t < 4; t++) {
-		let n = Z(c);
+		let n = X(c);
 		n.scale.copyFrom(a.scale);
 		let i = c.width * a.scale.x, o = c.height * a.scale.y, s = new KS().rect(t % 2 ? 0 : -i / 2, t < 2 ? -o / 2 : 0, i / 2, o / 2).fill(16777215);
 		n.mask = s;
@@ -23483,7 +24198,7 @@ async function hO(e, t, n) {
 			alpha: 0
 		}, 700, RE);
 	}
-	a.visible = !1, o.visible = !1, rO(e, 300, 225, {
+	a.visible = !1, o.visible = !1, cO(e, 300, 225, {
 		tex: "chip",
 		n: 50,
 		speed: [250, 700],
@@ -23497,7 +24212,7 @@ async function hO(e, t, n) {
 		scale: [.4, .9],
 		gravity: 300,
 		spin: 8
-	}), rO(e, 300, 225, {
+	}), cO(e, 300, 225, {
 		tex: "ring",
 		n: 1,
 		speed: [0, 0],
@@ -23507,32 +24222,32 @@ async function hO(e, t, n) {
 		tint: Q.white
 	}), await e.lcd.showReels(!0), e.tw.to(i, { alpha: 0 }, 500).then(() => r.destroy({ children: !0 }));
 }
-async function gO(e, t) {
+async function xO(e, t) {
 	let n = e.tune.reach.missionMs / 4e4, r = (e) => Math.max(300, e * n);
 	e.audio.play("sfx_reach_sting_3"), e.hooks.flash(Q.white, .9, 320), await e.lcd.setBackdrop("lcdReachA", 300);
-	let i = wD(Z(e.art.tex("halo")), 300, 300);
+	let i = Z(X(e.art.tex("halo")), 300, 300);
 	i.position.set(300, 225), i.blendMode = "add", i.alpha = 0, e.lcd.overlay.addChild(i), await e.tw.to(i, { alpha: 1 }, 200), e.tw.to(i.scale, {
 		x: i.scale.x * 1.8,
 		y: i.scale.y * 1.8
 	}, r(1600), RE), await e.tw.to(i, {
 		alpha: 0,
 		rotation: 1
-	}, r(1600)), i.destroy(), e.lcd.reels[1].speed = 6, await dO(e, "nova", "LOCKING ON!", r(3200)), await e.lcd.setBackdrop("lcdReachB", 500), pO(e, r(7e3)), e.lcd.reels[1].speed = 4, await fO(e, r(5200)), e.shake.add(.5), await dO(e, "lyra", "ORBIT STRIKE", r(3600), Q.magenta), e.shake.add(.7), e.hooks.flash(Q.magenta, .55, 260), e.lcd.reels[1].spinning = !1, e.lcd.reels[1].pos = e.lcd.reels[1].target(t.reels[1], 0), e.lcd.reels[1].blur = 0;
-	let a = fO(e, r(9e3));
-	await hO(e, r(12e3), t.pushPrompt), await a, e.audio.play("sfx_reel_stop_3"), await nO(e, 600);
+	}, r(1600)), i.destroy(), e.lcd.reels[1].speed = 6, await gO(e, "nova", "LOCKING ON!", r(3200)), await e.lcd.setBackdrop("lcdReachB", 500), vO(e, r(7e3)), e.lcd.reels[1].speed = 4, await _O(e, r(5200)), e.shake.add(.5), await gO(e, "lyra", "ORBIT STRIKE", r(3600), Q.magenta), e.shake.add(.7), e.hooks.flash(Q.magenta, .55, 260), e.lcd.reels[1].spinning = !1, e.lcd.reels[1].pos = e.lcd.reels[1].target(t.reels[1], 0), e.lcd.reels[1].blur = 0;
+	let a = _O(e, r(9e3));
+	await bO(e, r(12e3), t.pushPrompt), await a, e.audio.play("sfx_reel_stop_3"), await sO(e, 600);
 }
-async function _O(e, t) {
+async function SO(e, t) {
 	let n = String(t.reels[0] + 1);
 	e.audio.play("sfx_reach_sting_3"), e.hooks.halo("hot"), e.hooks.flash(Q.white, .9, 400), e.shake.add(.6), await e.lcd.showReels(!1);
 	let r = [];
 	for (let t = 0; t < 3; t++) {
-		let i = FD(n, 190, Q.cyan, ND);
+		let i = ID(n, 190, Q.cyan, PD);
 		i.position.set(e.lcd.reelX[t], e.lcd.centerY), i.scale.set(3), i.alpha = 0, e.lcd.overlay.addChild(i), r.push(i);
 	}
 	for (let [t, n] of r.entries()) e.tw.to(n, { alpha: 1 }, 80), await e.tw.to(n.scale, {
 		x: 1,
 		y: 1
-	}, 260, zE), e.audio.play("sfx_round_slam", { vol: .6 }), e.shake.add(.3), rO(e, e.lcd.reelX[t], e.lcd.centerY, {
+	}, 260, zE), e.audio.play("sfx_round_slam", { vol: .6 }), e.shake.add(.3), cO(e, e.lcd.reelX[t], e.lcd.centerY, {
 		tex: "star",
 		n: 14,
 		speed: [160, 480],
@@ -23543,35 +24258,35 @@ async function _O(e, t) {
 		],
 		scale: [.4, .9]
 	});
-	let i = Z(e.fxt.streak);
-	i.blendMode = "add", i.scale.set(2.4, 14), i.rotation = .35, i.position.set(-150, e.lcd.centerY), e.lcd.overlay.addChild(i), await e.tw.to(i, { x: 750 }, 700, UE), i.destroy(), await nO(e, 600);
+	let i = X(e.fxt.streak);
+	i.blendMode = "add", i.scale.set(2.4, 14), i.rotation = .35, i.position.set(-150, e.lcd.centerY), e.lcd.overlay.addChild(i), await e.tw.to(i, { x: 750 }, 700, WE), i.destroy(), await sO(e, 600);
 	for (let t of r) e.tw.to(t, { alpha: 0 }, 300).then(() => t.destroy());
-	await vO(e);
+	await CO(e);
 }
-async function vO(e) {
+async function CO(e) {
 	e.audio.play("sfx_liftoff_fanfare"), e.audio.play("sfx_lifter_surge");
 	let t = new H();
 	t.position.set(300, 225);
 	let n = new H();
 	for (let t = 0; t < 14; t++) {
-		let r = Z(e.fxt.streak, 0, .5);
+		let r = X(e.fxt.streak, 0, .5);
 		r.tint = t % 2 ? Q.magenta : 16764762, r.blendMode = "add", r.scale.set(4.5, 2.6), r.rotation = t / 14 * Math.PI * 2, r.alpha = .55, n.addChild(r);
 	}
-	let r = e.art.has("cardLiftoff"), i = r ? void 0 : iO(e, "plateLiftoff", 560, 260), a;
+	let r = e.art.has("cardLiftoff"), i = r ? void 0 : lO(e, "plateLiftoff", 560, 260), a;
 	if (r) {
-		let t = e.art.frames("cardLiftoff", "burst"), n = ED(t.length ? t : e.art.frames("cardLiftoff"), 16);
+		let t = e.art.frames("cardLiftoff", "burst"), n = DD(t.length ? t : e.art.frames("cardLiftoff"), 16);
 		n.anchor.set(.5), n.scale.set(560 / (n.texture.width || 560)), a = n;
-	} else a = FD("LIFT-OFF!", 112, Q.magenta, ND);
-	let o = PD("STARLIFT FEVER", 34, Q.cyan, "900");
-	o.y = 88, t.addChild(n), i && t.addChild(i), t.addChild(a, o), t.scale.set(.1), e.lcd.overlay.addChild(t), e.hooks.flash(16764762, .8, 380), e.shake.add(.8), TD(e.lcd.overlay, e.art.frames("vfxFeverBurst", "burst"), 300, 225, { scale: 1.3 });
-	for (let t of [108, 600 * .82]) TD(e.lcd.overlay, e.art.frames("vfxLiftoff", "launch"), t, 205, {
+	} else a = ID("LIFT-OFF!", 112, Q.magenta, PD);
+	let o = FD("STARLIFT FEVER", 34, Q.cyan, "900");
+	o.y = 88, t.addChild(n), i && t.addChild(i), t.addChild(a, o), t.scale.set(.1), e.lcd.overlay.addChild(t), e.hooks.flash(16764762, .8, 380), e.shake.add(.8), ED(e.lcd.overlay, e.art.frames("vfxFeverBurst", "burst"), 300, 225, { scale: 1.3 });
+	for (let t of [108, 600 * .82]) ED(e.lcd.overlay, e.art.frames("vfxLiftoff", "launch"), t, 205, {
 		scale: 1.15,
 		fps: 24
 	});
 	await e.tw.to(t.scale, {
 		x: 1,
 		y: 1
-	}, 420, zE), rO(e, 300, 285, {
+	}, 420, zE), cO(e, 300, 285, {
 		tex: "glow",
 		n: 30,
 		speed: [100, 400],
@@ -23584,7 +24299,7 @@ async function vO(e) {
 		],
 		scale: [.3, .7],
 		gravity: 500
-	}), rO(e, 300, 225, {
+	}), cO(e, 300, 225, {
 		tex: "chip",
 		n: 70,
 		speed: [300, 800],
@@ -23602,9 +24317,9 @@ async function vO(e) {
 		n.rotation = e * 1.2, a.scale.set(1 + .05 * Math.sin(e * 30));
 	}), await e.tw.to(t, { alpha: 0 }, 350), t.destroy({ children: !0 }), await e.lcd.showReels(!0);
 }
-async function yO(e) {
-	e.audio.play("sfx_fever_siren"), await e.lcd.setBackdrop("lcdFever", 300), TD(e.lcd.overlay, e.art.frames("vfxFeverBurst", "burst"), 300, 225, { scale: 1.2 }), await e.lcd.showReels(!1);
-	let t = e.tune.feverIntroMs, n = setInterval(() => rO(e, 300, 225, {
+async function wO(e) {
+	e.audio.play("sfx_fever_siren"), e.lcd.film.play("fever"), await e.lcd.setBackdrop("lcdFever", 300), ED(e.lcd.overlay, e.art.frames("vfxFeverBurst", "burst"), 300, 225, { scale: 1.2 }), await e.lcd.showReels(!1);
+	let t = e.tune.feverIntroMs, n = setInterval(() => cO(e, 300, 225, {
 		tex: "streak",
 		n: 6,
 		speed: [700, 1300],
@@ -23616,15 +24331,15 @@ async function yO(e) {
 			Q.white,
 			Q.magenta
 		]
-	}), 50), r = wD(Z(e.art.tex("lyra", "salute"), .5, .6), 320, 320);
+	}), 50), r = Z(X(e.art.tex("lyra", "salute"), .5, .6), 320, 320);
 	r.position.set(300, 650), e.lcd.overlay.addChild(r);
-	let i = FD("STARLIFT FEVER", 64, Q.magenta, MD);
+	let i = ID("STARLIFT FEVER", 64, Q.magenta, ND);
 	i.position.set(300, 70), i.alpha = 0, e.lcd.overlay.addChild(i), e.tw.to(r, { y: 285 }, 700, zE), e.tw.to(i, { alpha: 1 }, 300), await e.tw.run(Math.max(600, t - 500), (e) => {
 		i.alpha = .6 + .4 * Math.abs(Math.sin(e * 18));
 	}), clearInterval(n), e.tw.to(r, { alpha: 0 }, 300).then(() => r.destroy()), await e.tw.to(i, { alpha: 0 }, 250), i.destroy();
 }
-async function bO(e, t) {
-	e.audio.play("sfx_round_slam"), e.audio.play("sfx_round_fanfare", { vol: .7 }), TD(e.lcd.overlay, e.art.frames("vfxWipe", "wipe"), 300, 225, {
+async function TO(e, t) {
+	e.audio.play("sfx_round_slam"), e.audio.play("sfx_round_fanfare", { vol: .7 }), ED(e.lcd.overlay, e.art.frames("vfxWipe", "wipe"), 300, 225, {
 		scale: .5390625,
 		fps: 40
 	});
@@ -23632,19 +24347,19 @@ async function bO(e, t) {
 	n.position.set(300, 225);
 	let r = e.art.frames("numFever", `${t}_shine`).length > 0, i;
 	if (e.art.has("roundCard")) {
-		let t = Z(e.art.tex("roundCard"));
+		let t = X(e.art.tex("roundCard"));
 		t.anchor.set(.5), t.scale.set(220 / (t.texture.width || 220)), i = t;
-	} else i = PD("ROUND", 46, Q.cyan, "900");
+	} else i = FD("ROUND", 46, Q.cyan, "900");
 	i.y = r ? -150 : -96;
 	let a = (n) => {
-		if (!r) return n === Q.cyan ? FD(String(t), 220, Q.cyan) : FD(String(t), 220, Q.magenta, n === Q.magenta ? MD : ND);
-		let i = ED(n === void 0 ? e.art.frames("numFever", `${t}_shine`) : e.art.frames("numFever", String(t)), 14);
+		if (!r) return n === Q.cyan ? ID(String(t), 220, Q.cyan) : ID(String(t), 220, Q.magenta, n === Q.magenta ? ND : PD);
+		let i = DD(n === void 0 ? e.art.frames("numFever", `${t}_shine`) : e.art.frames("numFever", String(t)), 14);
 		return i.anchor.set(.5), i.scale.set(260 / (i.texture.height || 260)), n !== void 0 && (i.tint = n), i;
 	}, o = a(), s = a(Q.magenta), c = a(Q.cyan);
 	s.alpha = c.alpha = .55, s.blendMode = c.blendMode = "add", n.addChild(s, c, o, i), n.scale.set(4), n.alpha = 0, e.lcd.overlay.addChild(n), e.tw.to(n, { alpha: 1 }, 80), await e.tw.to(n.scale, {
 		x: 1,
 		y: 1
-	}, 240, LE), e.shake.add(.65), e.hooks.flash(Q.white, .6, 200), e.hooks.halo("fever"), rO(e, 300, 225, {
+	}, 240, LE), e.shake.add(.65), e.hooks.flash(Q.white, .6, 200), e.hooks.halo("fever"), cO(e, 300, 225, {
 		tex: "ring",
 		n: 1,
 		speed: [0, 0],
@@ -23652,7 +24367,7 @@ async function bO(e, t) {
 		scale: [.4, .4],
 		endScale: 12,
 		tint: Q.cyan
-	}), rO(e, 300, 225, {
+	}), cO(e, 300, 225, {
 		tex: "star",
 		n: 30,
 		speed: [300, 800],
@@ -23665,24 +24380,24 @@ async function bO(e, t) {
 		life: [.4, .8]
 	}), await e.tw.run(500, (e) => {
 		s.x = -18 * (1 - e), c.x = 18 * (1 - e);
-	}, RE), await nO(e, Math.max(200, e.tune.roundSlamMs - 900)), await e.tw.to(n, {
+	}, RE), await sO(e, Math.max(200, e.tune.roundSlamMs - 900)), await e.tw.to(n, {
 		alpha: 0,
 		y: 195
 	}, 200), n.destroy({ children: !0 });
 }
-async function xO(e, t, n, r) {
+async function EO(e, t, n, r) {
 	await e.lcd.setBackdrop("lcdGet", 300);
 	let i = new H();
 	i.position.set(300, 225);
 	let a;
 	if (e.art.has("cardGet")) {
-		let t = e.art.frames("cardGet", "shine"), n = ED(t.length ? t : e.art.frames("cardGet"), 16);
+		let t = e.art.frames("cardGet", "shine"), n = DD(t.length ? t : e.art.frames("cardGet"), 16);
 		n.anchor.set(.5), n.scale.set(400 / (n.texture.width || 400)), a = n;
-	} else a = FD("GET", 120, Q.cyan);
+	} else a = ID("GET", 120, Q.cyan);
 	a.y = -100;
-	let o = FD("0", 130, Q.magenta, ND);
+	let o = ID("0", 130, Q.magenta, PD);
 	o.y = 30;
-	let s = PD(`TOTAL ${n - t}`, 36, 14678271, "800");
+	let s = FD(`TOTAL ${n - t}`, 36, 14678271, "800");
 	s.y = 150, i.addChild(a, o, s), i.alpha = 0, e.lcd.overlay.addChild(i), await e.tw.to(i, { alpha: 1 }, 200);
 	let c = -1;
 	await e.tw.run(Math.min(1400, r * .4), (n) => {
@@ -23691,7 +24406,7 @@ async function xO(e, t, n, r) {
 			vol: .5,
 			max: 2
 		}));
-	}, RE), o.text = String(t), s.text = `TOTAL ${n}`, e.audio.play("sfx_get_total"), rO(e, 300, 255, {
+	}, RE), o.text = String(t), s.text = `TOTAL ${n}`, e.audio.play("sfx_get_total"), cO(e, 300, 255, {
 		tex: "chip",
 		n: 40,
 		speed: [200, 600],
@@ -23711,24 +24426,24 @@ async function xO(e, t, n, r) {
 	}, 120).then(() => e.tw.to(o.scale, {
 		x: 1,
 		y: 1
-	}, 260, zE)), await nO(e, Math.max(300, r * .6 - 700)), await e.tw.to(i, { alpha: 0 }, 250), i.destroy({ children: !0 }), await e.lcd.setBackdrop("lcdFever", 300);
+	}, 260, zE)), await sO(e, Math.max(300, r * .6 - 700)), await e.tw.to(i, { alpha: 0 }, 250), i.destroy({ children: !0 }), await e.lcd.setBackdrop("lcdFever", 300);
 }
-async function SO(e, t) {
-	e.audio.cutMusic(), e.audio.play("sfx_end_stinger"), e.lcd.showReels(!1), await e.lcd.setBackdrop("lcdEnd", 300);
+async function DO(e, t) {
+	e.audio.cutMusic(), e.audio.play("sfx_end_stinger"), e.lcd.showReels(!1), e.lcd.film.play("end"), await e.lcd.setBackdrop("lcdEnd", 300);
 	let n = new H();
 	n.position.set(300, 225);
 	let r = new H();
 	for (let t = 0; t < 12; t++) {
-		let n = Z(e.fxt.streak, 0, .5);
+		let n = X(e.fxt.streak, 0, .5);
 		n.tint = t % 2 ? Q.cyan : Q.violet, n.blendMode = "add", n.scale.set(4.5, 2), n.rotation = t / 12 * Math.PI * 2, n.alpha = .4, r.addChild(n);
 	}
-	let i = FD("MISSION", 72, Q.cyan);
+	let i = ID("MISSION", 72, Q.cyan);
 	i.y = -86;
-	let a = FD("COMPLETE", 72, Q.magenta, MD);
+	let a = ID("COMPLETE", 72, Q.magenta, ND);
 	a.width > 540 && a.scale.set(540 / a.width), a.y = 4;
-	let o = PD(`${t} BALLS`, 46, 16777215, "900");
+	let o = FD(`${t} BALLS`, 46, 16777215, "900");
 	if (o.y = 110, e.art.has("cardMission")) {
-		let t = e.art.frames("cardMission", "shine"), i = ED(t.length ? t : e.art.frames("cardMission"), 12);
+		let t = e.art.frames("cardMission", "shine"), i = DD(t.length ? t : e.art.frames("cardMission"), 12);
 		i.anchor.set(.5), i.scale.set(540 / (i.texture.width || 540)), i.y = -40, n.addChild(r, i, o);
 	} else n.addChild(r, i, a, o);
 	n.scale.set(.3), e.lcd.overlay.addChild(n), e.hooks.flash(Q.white, .8, 300), e.shake.add(.5), await e.tw.to(n.scale, {
@@ -23736,12 +24451,12 @@ async function SO(e, t) {
 		y: 1
 	}, 500, zE);
 	let s = e.art.frames("vfxConfetti", "rain");
-	if (s.length) for (let t of [150, 450]) TD(e.lcd.overlay, s, t, 225, {
+	if (s.length) for (let t of [150, 450]) ED(e.lcd.overlay, s, t, 225, {
 		scale: 1.2,
 		add: !1,
 		fps: 24
 	});
-	let c = setInterval(() => rO(e, Math.random() * 600, -10, {
+	let c = setInterval(() => cO(e, Math.random() * 600, -10, {
 		tex: Math.random() < .5 ? "chip" : "star",
 		n: 2,
 		speed: [40, 120],
@@ -23759,24 +24474,24 @@ async function SO(e, t) {
 	}), 60);
 	await e.tw.run(3e3, (e) => {
 		r.rotation = e * .8;
-	}), clearInterval(c), await e.tw.to(n, { alpha: 0 }, 500), n.destroy({ children: !0 }), await e.lcd.setBackdrop("lcdIdle", 800), await e.lcd.showReels(!0);
+	}), clearInterval(c), await e.tw.to(n, { alpha: 0 }, 500), n.destroy({ children: !0 }), e.lcd.film.stop(), await e.lcd.setBackdrop("lcdIdle", 800), await e.lcd.showReels(!0);
 }
-async function CO(e, t, n, r) {
+async function OO(e, t, n, r) {
 	let i = new H();
 	i.position.set(300, 235);
-	let a = wD(Z(e.art.tex("gauge")), 270, 270), o = new KS();
+	let a = Z(X(e.art.tex("gauge")), 270, 270), o = new KS();
 	o.blendMode = "add";
-	let s = Z(e.fxt.streak, .1, .5);
+	let s = X(e.fxt.streak, .1, .5);
 	s.scale.set(1, 1.3), s.tint = Q.magenta, s.blendMode = "add";
-	let c = e.art.has("cardReady"), l = c ? void 0 : iO(e, "plateReady", 420, 110), u = FD("READY...", 70, Q.cyan);
+	let c = e.art.has("cardReady"), l = c ? void 0 : lO(e, "plateReady", 420, 110), u = ID("READY...", 70, Q.cyan);
 	u.y = -170, l && (l.y = -170, i.addChild(l));
 	let d;
 	if (c) {
-		let t = e.art.frames("cardReady", "pulse"), n = ED(t.length ? t : e.art.frames("cardReady"), 16);
+		let t = e.art.frames("cardReady", "pulse"), n = DD(t.length ? t : e.art.frames("cardReady"), 16);
 		n.anchor.set(.5), n.scale.set(420 / (n.texture.width || 420)), n.y = -170, d = n, u.visible = !1, i.addChild(n);
 	}
 	let f = e.art.frames("gauge", "fill"), p = f.length > 1;
-	p && (a.texture = f[0], wD(a, 300, 300), o.visible = s.visible = !1), i.addChild(a, o, s, u), i.alpha = 0, e.lcd.overlay.addChild(i), await e.lcd.showReels(!1), await e.tw.to(i, { alpha: 1 }, 250), e.audio.play("sfx_push_click"), await nO(e, 900), u.text = "PUSH!", u.style = FD("PUSH!", 84, Q.magenta, MD).style, u.visible = !0, d && (d.visible = !1), e.audio.play("sfx_reach_alert", { vol: .6 });
+	p && (a.texture = f[0], Z(a, 300, 300), o.visible = s.visible = !1), i.addChild(a, o, s, u), i.alpha = 0, e.lcd.overlay.addChild(i), await e.lcd.showReels(!1), await e.tw.to(i, { alpha: 1 }, 250), e.audio.play("sfx_push_click"), await sO(e, 900), u.text = "PUSH!", u.style = ID("PUSH!", 84, Q.magenta, ND).style, u.visible = !0, d && (d.visible = !1), e.audio.play("sfx_reach_alert", { vol: .6 });
 	let m = n.count, h = 0;
 	e.audio.bed("sfx_mash_rev", .8), await e.tw.run(t, (e) => {
 		let t = n.count - m, r = Math.min(1, Math.max(e * .95, t / 22 + e * .4));
@@ -23791,10 +24506,10 @@ async function CO(e, t, n, r) {
 			color: 16777215,
 			alpha: .9
 		}), s.rotation = c, p && (a.texture = f[Math.min(f.length - 1, Math.round(h * (f.length - 1)))]), u.scale.set(1 + .06 * Math.sin(e * 60));
-	}), e.audio.bed("sfx_mash_rev", 0), e.audio.play("sfx_thrust_burst"), TD(e.lcd.overlay, e.art.frames("vfxExhaust", "loop"), 300, 415, {
+	}), e.audio.bed("sfx_mash_rev", 0), e.audio.play("sfx_thrust_burst"), ED(e.lcd.overlay, e.art.frames("vfxExhaust", "loop"), 300, 415, {
 		scale: 1.4,
 		fps: 30
-	}), e.hooks.flash(Q.magenta, .7, 300), e.shake.add(.7), rO(e, 300, 345, {
+	}), e.hooks.flash(Q.magenta, .7, 300), e.shake.add(.7), cO(e, 300, 345, {
 		tex: "glow",
 		n: 60,
 		speed: [200, 700],
@@ -23810,12 +24525,12 @@ async function CO(e, t, n, r) {
 	}), await e.tw.to(i, {
 		y: -300,
 		alpha: 0
-	}, 600, VE), i.destroy({ children: !0 });
-	let g = FD(`BONUS +${await r()}`, 76, Q.cyan, ND);
+	}, 600, HE), i.destroy({ children: !0 });
+	let g = ID(`BONUS +${await r()}`, 76, Q.cyan, PD);
 	g.position.set(300, 225), g.scale.set(.2), e.lcd.overlay.addChild(g), e.audio.play("sfx_get_total"), await e.tw.to(g.scale, {
 		x: 1,
 		y: 1
-	}, 380, zE), rO(e, 300, 225, {
+	}, 380, zE), cO(e, 300, 225, {
 		tex: "chip",
 		n: 40,
 		speed: [200, 600],
@@ -23827,14 +24542,14 @@ async function CO(e, t, n, r) {
 		],
 		scale: [.35, .7],
 		spin: 8
-	}), await nO(e, 1300), await e.tw.to(g, { alpha: 0 }, 300), g.destroy(), await e.lcd.showReels(!0);
+	}), await sO(e, 1300), await e.tw.to(g, { alpha: 0 }, 300), g.destroy(), await e.lcd.showReels(!0);
 }
 // src/game/table.ts
-var wO = 1022, TO = 268, EO = 1612, DO = 50, OO = 1344 / DO;
-function kO(e) {
+var kO = 1022, AO = 268, jO = 1612, MO = 50, NO = 1344 / MO;
+function PO(e) {
 	return e <= .6 ? .24 + e / .6 * .16 : e <= .75 ? .4 + (e - .6) / .15 * .4 : .8 + (e - .75) / .25 * .2;
 }
-var AO = .76, jO = class {
+var FO = .76, IO = class {
 	art;
 	tune;
 	provider;
@@ -23844,8 +24559,8 @@ var AO = .76, jO = class {
 	world = new H();
 	machine;
 	physics;
-	fx = new bD(1100);
-	shake = new SD();
+	fx = new SD(1100);
+	shake = new wD();
 	fxt;
 	lcd;
 	ctx;
@@ -23886,7 +24601,6 @@ var AO = .76, jO = class {
 	haloMode = "idle";
 	halo;
 	gyros = [];
-	door;
 	doorGlow;
 	lamps = [];
 	flashS;
@@ -23896,6 +24610,11 @@ var AO = .76, jO = class {
 	roundText;
 	hatchCount;
 	timerText;
+	feverHud = new H();
+	fhRound;
+	fhTime;
+	fhCount;
+	fhBar;
 	shootRight;
 	dial;
 	dialArc = [];
@@ -23911,39 +24630,40 @@ var AO = .76, jO = class {
 	lastPinSound = 0;
 	sparkBudget = 0;
 	constructor(e, t, n, r, i, a) {
-		this.art = t, this.tune = n, this.provider = r, this.audio = i, this.ui = a, this.fxt = yD(e.renderer), this.machine = new KD(n), this.physics = new eO(), this.lcd = new UD(t, q), this.root.addChild(this.world), this.bg = CD(Z(t.tex("bgField")), qE, JE), this.bg.position.set(qE / 2, JE / 2), this.bgFever = CD(Z(t.tex("bgFever")), qE, JE), this.bgFever.position.set(qE / 2, JE / 2), this.bgFever.alpha = 0, this.world.addChild(this.bg, this.bgFever);
-		let o = Z(t.tex("pillar"));
-		o.height = 1500, o.width = 64, o.position.set(32, 940), this.world.addChild(o), this.liftGlow = Z(this.fxt.glow), this.liftGlow.blendMode = "add", this.liftGlow.tint = Q.cyan, this.liftGlow.scale.set(1.3, 12), this.liftGlow.position.set(wO, 940), this.liftGlow.alpha = .35, this.world.addChild(this.liftGlow);
-		let s = t.frames("starlift", "loop"), c = s.length > 1 ? ED(s, 20) : Z(t.tex("starlift"));
-		c.anchor.set(.5), this.stl = c, c.height = 1464, c.width = s.length > 1 ? 150 : 104, c.position.set(wO, 940), c.alpha = .92, this.world.addChild(c);
-		for (let e = 0; e < DO; e++) {
-			let e = Z(this.fxt.glow);
+		this.art = t, this.tune = n, this.provider = r, this.audio = i, this.ui = a, this.fxt = xD(e.renderer), this.machine = new ZD(n), this.physics = new aO(), this.lcd = new JD(t, BE, this.fxt), this.root.addChild(this.world), this.bg = TD(X(t.tex("bgField")), JE, YE), this.bg.position.set(JE / 2, YE / 2), this.bgFever = TD(X(t.tex("bgFever")), JE, YE), this.bgFever.position.set(JE / 2, YE / 2), this.bgFever.alpha = 0, this.world.addChild(this.bg, this.bgFever);
+		let o = new ha(t.tex("boardFrame"));
+		this.world.addChild(o);
+		let s = t.frames("funnel", "idle"), c = s.length > 1 ? DD(s, 12) : X(t.tex("funnel"));
+		c.anchor.set(0, 0), c.position.set(85, $E - 40), c.width = 892, c.height = 170, this.world.addChild(c), this.liftGlow = X(this.fxt.glow), this.liftGlow.blendMode = "add", this.liftGlow.tint = Q.cyan, this.liftGlow.scale.set(1.3, 12), this.liftGlow.position.set(kO, 940), this.liftGlow.alpha = .35, this.world.addChild(this.liftGlow);
+		let l = t.frames("starlift", "loop"), u = l.length > 1 ? DD(l, 20) : X(t.tex("starlift"));
+		u.anchor.set(.5), this.stl = u, u.height = 1464, u.width = l.length > 1 ? 150 : 104, u.position.set(kO, 940), u.alpha = .92, this.world.addChild(u);
+		for (let e = 0; e < MO; e++) {
+			let e = X(this.fxt.glow);
 			e.blendMode = "add", e.width = e.height = 52, e.alpha = 0;
-			let n = Z(t.tex("ball", "roll"));
+			let n = X(t.tex("ball", "roll"));
 			n.width = n.height = 28.6, this.liftGlows.push(e), this.liftBalls.push(n), this.world.addChild(e, n);
 		}
-		let l = t.frames("vfxTrail", "loop");
-		if (l.length) {
+		let d = t.frames("vfxTrail", "loop");
+		if (d.length) {
 			let e = 384 * 1.1;
-			for (let t = EO; t > TO - e / 2; t -= e) {
-				let n = ED(l, 24);
-				n.anchor.set(.5), n.scale.set(.9, 1.1), n.position.set(wO, t - e / 2), n.alpha = .75, n.blendMode = "add", n.gotoAndPlay(Math.floor(Math.random() * l.length)), this.world.addChild(n);
+			for (let t = jO; t > AO - e / 2; t -= e) {
+				let n = DD(d, 24);
+				n.anchor.set(.5), n.scale.set(.9, 1.1), n.position.set(kO, t - e / 2), n.alpha = .75, n.blendMode = "add", n.gotoAndPlay(Math.floor(Math.random() * d.length)), this.world.addChild(n);
 			}
 		}
 		for (let e = 182, t = 0; e <= 358; e += 5, t++) {
-			let n = cD(e, YE.r + 8);
+			let n = uD(e, XE.r + 8);
 			this.addLed(n.x, n.y, t, 0);
 		}
-		let u = t.frames("ledStrip", "idle");
-		if (u.length > 1) for (let e of [58, 975]) {
-			let t = ED(u, 16);
-			t.anchor.set(.5), t.height = 1560 - YE.cy, t.width = 34, t.position.set(e, (YE.cy + 1560) / 2), this.world.addChild(t), this.ledStrips.push(t);
+		let f = t.frames("ledStrip", "idle");
+		if (f.length > 1) for (let e of [58, 975]) {
+			let t = DD(f, 16);
+			t.anchor.set(.5), t.height = 1560 - XE.cy, t.width = 34, t.position.set(e, (XE.cy + 1560) / 2), this.world.addChild(t), this.ledStrips.push(t);
 		}
-		else for (let e = YE.cy + 30, t = 0; e < 1560; e += 34, t++) this.addLed(56, e, t, -1), this.addLed(974, e, t, 1);
-		let d = wD(Z(t.tex("crown")), 600, 200);
-		d.position.set(515, 128), this.haloGlow = Z(this.fxt.glow), this.haloGlow.blendMode = "add", this.haloGlow.scale.set(2.4), this.haloGlow.position.set(515, 128);
-		let f = t.frames("halo", "pulse");
-		this.halo = f.length > 1 ? ED(f, 16) : Z(t.tex("halo")), this.halo.anchor.set(.5), wD(this.halo, 196, 196), this.halo.position.set(515, 128), this.world.addChild(d, this.haloGlow, this.halo);
+		else for (let e = XE.cy + 30, t = 0; e < 1560; e += 34, t++) this.addLed(56, e, t, -1), this.addLed(974, e, t, 1);
+		this.haloGlow = X(this.fxt.glow), this.haloGlow.blendMode = "add", this.haloGlow.scale.set(2.4), this.haloGlow.position.set(515, 128);
+		let p = t.frames("halo", "pulse");
+		this.halo = p.length > 1 ? DD(p, 16) : X(t.tex("halo")), this.halo.anchor.set(.5), Z(this.halo, 196, 196), this.halo.position.set(515, 128), this.world.addChild(this.haloGlow, this.halo);
 		for (let [e, t, n] of [
 			[
 				352,
@@ -23966,66 +24686,70 @@ var AO = .76, jO = class {
 				1
 			]
 		]) {
-			let r = Z(this.fxt.glow);
+			let r = X(this.fxt.glow);
 			r.blendMode = "add", r.width = 230, r.height = 120, r.rotation = n * .35, r.position.set(e, t), r.alpha = 0, this.world.addChild(r), this.wingLamps.push(r);
 		}
-		let p = t.frames("lcdBezel", "pulse"), m = p.length > 1 ? ED(p, 12) : Z(t.tex("lcdBezel"));
-		m.anchor.set(.5), m.width = J.w + 200, m.height = J.h + 176, m.position.set(J.x + J.w / 2, J.y + J.h / 2);
-		let h = J.x + J.w / 2, g = J.y + J.h / 2;
-		this.ringBloom = Z(this.fxt.glow), this.ringBloom.blendMode = "add", this.ringBloom.width = J.w + 420, this.ringBloom.height = J.h + 400, this.ringBloom.position.set(h, g), this.ringLight = Z(this.fxt.ring), this.ringLight.blendMode = "add", this.ringLight.width = J.w + 150, this.ringLight.height = J.h + 140, this.ringLight.position.set(h, g), this.world.addChild(this.ringBloom, m, this.ringLight);
+		let m = t.frames("lcdBezel", "pulse"), h = m.length > 1 ? DD(m, 12) : X(t.tex("lcdBezel"));
+		h.anchor.set(.5), h.width = q.w + 200, h.height = q.h + 176, h.position.set(q.x + q.w / 2, q.y + q.h / 2);
+		let g = q.x + q.w / 2, _ = q.y + q.h / 2;
+		this.ringBloom = X(this.fxt.glow), this.ringBloom.blendMode = "add", this.ringBloom.width = q.w + 420, this.ringBloom.height = q.h + 400, this.ringBloom.position.set(g, _), this.ringLight = X(this.fxt.ring), this.ringLight.blendMode = "add", this.ringLight.width = q.w + 150, this.ringLight.height = q.h + 140, this.ringLight.position.set(g, _), this.world.addChild(this.ringBloom, h, this.ringLight);
 		for (let e = 0; e < 44; e++) {
-			let t = e / 44 * Math.PI * 2, n = Z(this.fxt.glow);
-			n.blendMode = "add", n.width = n.height = 30, n.position.set(h + Math.cos(t) * (J.w / 2 + 62), g + Math.sin(t) * (J.h / 2 + 58)), this.world.addChild(n), this.ringDots.push(n);
+			let t = e / 44 * Math.PI * 2, n = X(this.fxt.glow);
+			n.blendMode = "add", n.width = n.height = 30, n.position.set(g + Math.cos(t) * (q.w / 2 + 62), _ + Math.sin(t) * (q.h / 2 + 58)), this.world.addChild(n), this.ringDots.push(n);
 		}
-		this.world.addChild(this.lcd.root), this.roundTag.position.set(J.x + J.w - 70, J.y + 34), t.has("plateRound") && this.roundTag.addChild(wD(Z(t.tex("plateRound")), 150, 60)), this.roundText = FD("× 01", 34, Q.magenta), this.roundTag.addChild(this.roundText), this.roundTag.visible = !1, this.world.addChild(this.roundTag);
+		this.world.addChild(this.lcd.root), this.roundTag.position.set(q.x + q.w - 70, q.y + 34), t.has("plateRound") && this.roundTag.addChild(Z(X(t.tex("plateRound")), 150, 60)), this.roundText = ID("× 01", 34, Q.magenta), this.roundTag.addChild(this.roundText), this.roundTag.visible = !1, this.world.addChild(this.roundTag);
 		for (let e = 0; e < 4; e++) {
-			let n = Z(this.fxt.glow);
+			let n = X(this.fxt.glow);
 			n.blendMode = "add", n.tint = Q.cyan, n.scale.set(.55), n.alpha = 0;
-			let r = t.frames("lamp", "on").length > 0, i = wD(Z(t.tex("lamp", "off")), r ? 40 : 34, r ? 40 : 34), a = 449 + e * 44;
-			i.position.set(a, J.y + J.h + 2), n.position.copyFrom(i.position), i.alpha = r ? 1 : .35, r || (i.tint = 6715289), this.world.addChild(n, i), this.lamps.push({
+			let r = t.frames("lamp", "on").length > 0, i = Z(X(t.tex("lamp", "off")), r ? 40 : 34, r ? 40 : 34), a = 449 + e * 44;
+			i.position.set(a, q.y + q.h + 2), n.position.copyFrom(i.position), i.alpha = r ? 1 : .35, r || (i.tint = 6715289), this.world.addChild(n, i), this.lamps.push({
 				s: i,
 				glow: n,
 				on: !1
 			});
 		}
-		let _ = t.has("pinHead"), v = _ ? t.tex("pinHead") : t.tex("pin", "static"), y = !_ && v.height > v.width * 1.6;
+		let v = t.has("pinHead"), y = v ? t.tex("pinHead") : t.tex("pin", "static"), b = !v && y.height > y.width * 1.6;
 		for (let e of this.physics.pins) {
-			if (_) {
-				let t = Z(this.fxt.glow);
+			if (v) {
+				let t = X(this.fxt.glow);
 				t.tint = 0, t.alpha = .55, t.width = t.height = 25, t.position.set(e.x + 3, e.y + 5), this.pinLayer.addChild(t);
 			}
-			let t = Z(v, .5, y ? .16 : .5);
-			y ? t.scale.set(30 / (v.height || 1)) : wD(t, _ ? 16.5 : 17, _ ? 16.5 : 17), t.position.set(e.x, e.y), this.pinLayer.addChild(t), this.pinSprites.push(t);
+			let t = X(y, .5, b ? .16 : .5);
+			b ? t.scale.set(30 / (y.height || 1)) : Z(t, v ? 16.5 : 17, v ? 16.5 : 17), t.position.set(e.x, e.y), this.pinLayer.addChild(t), this.pinSprites.push(t);
 		}
-		this.world.addChild(this.pinLayer), this.dockS = wD(Z(t.tex("dock", "idle")), 130, 130), this.dockS.position.set(Y.x, Y.y + 10), this.world.addChild(this.dockS);
-		for (let [e, n] of tD.entries()) {
-			let r = wD(Z(t.tex("satellite", "idle")), 112, 112);
+		this.world.addChild(this.pinLayer), this.world.addChild(new ha(t.tex("boardRails"))), this.dockS = Z(X(t.tex("dock", "idle")), 130, 130), this.dockS.position.set(J.x, J.y + 10), this.world.addChild(this.dockS);
+		for (let [e, n] of rD.entries()) {
+			let r = Z(X(t.tex("satellite", "idle")), 112, 112);
 			r.position.set(n.x, n.y + 10), e === 1 && t.frames("satellite", "hit").length && (r.scale.x *= -1), this.world.addChild(r), this.satS.push(r);
 		}
-		this.gyros = rD.map((e) => {
-			let n = wD(Z(t.tex("gyro")), e.r * 2.7, e.r * 2.7);
+		this.gyros = aD.map((e) => {
+			let n = Z(X(t.tex("gyro")), e.r * 2.7, e.r * 2.7);
 			return n.position.set(e.x, e.y), e.spin < 0 && (n.scale.x *= -1), this.world.addChild(n), n;
-		});
-		let b = Z(t.tex("hatchFrame"));
-		b.width = X.w + 70, b.height = 92, b.position.set(X.x, X.y + 10), this.doorGlow = Z(this.fxt.glow), this.doorGlow.blendMode = "add", this.doorGlow.tint = Q.magenta, this.doorGlow.scale.set(2.6, .7), this.doorGlow.position.set(X.x, X.y + 10), this.doorGlow.alpha = 0, this.door = Z(t.tex("hatchDoor")), this.door.width = X.w + 6, this.door.height = 50, this.door.position.set(X.x, X.y + 8), this.world.addChild(this.doorGlow), t.has("hatch") ? (this.hatchAnim = new oE(t.frames("hatch", "idle").length ? t.frames("hatch", "idle") : [t.tex("hatch")]), this.hatchAnim.anchor.set(.5), this.hatchAnim.scale.set((X.w + 96) / 420), this.hatchAnim.position.set(X.x, X.y + 14), this.hatchAnim.animationSpeed = .4, this.hatchAnim.play(), this.world.addChild(this.hatchAnim)) : this.world.addChild(b, this.door), this.hatchCount = FD("0/10", 40, Q.magenta), this.hatchCount.position.set(X.x, X.y + 66), this.hatchCount.visible = !1, this.timerText = PD("", 26, Q.cyan, "800"), this.timerText.position.set(X.x, X.y - 42), this.timerText.visible = !1, this.world.addChild(this.hatchCount, this.timerText);
-		let x = Z(t.tex("funnel"));
-		x.width = 890, x.height = 120, x.position.set(530, 1640), this.world.addChild(x), this.world.addChild(this.ballLayer, this.fx.root), this.shootRight = FD("SHOOT RIGHT ▶", 44, Q.magenta), this.shootRight.position.set(700, 300), this.shootRight.visible = !1, this.world.addChild(this.shootRight);
+		}), this.doorGlow = X(this.fxt.glow), this.doorGlow.blendMode = "add", this.doorGlow.tint = Q.magenta, this.doorGlow.scale.set(2.6, .7), this.doorGlow.position.set(Y.x, Y.y + 10), this.doorGlow.alpha = 0, this.world.addChild(this.doorGlow);
+		let x = t.frames("hatch", "idle");
+		this.hatchAnim = new oE(x.length ? x : [t.tex("hatch")]), this.hatchAnim.anchor.set(.5), this.hatchAnim.scale.set((Y.w + 96) / 420), this.hatchAnim.position.set(Y.x, Y.y + 14), this.hatchAnim.animationSpeed = .4, this.hatchAnim.play(), this.world.addChild(this.hatchAnim), this.hatchCount = ID("0/10", 40, Q.magenta), this.hatchCount.position.set(Y.x, Y.y + 66), this.hatchCount.visible = !1, this.timerText = FD("", 26, Q.cyan, "800"), this.timerText.position.set(Y.x, Y.y - 42), this.timerText.visible = !1, this.world.addChild(this.hatchCount, this.timerText), this.world.addChild(this.ballLayer, this.fx.root), this.shootRight = ID("SHOOT RIGHT ▶", 44, Q.magenta), this.shootRight.position.set(700, 300), this.shootRight.visible = !1, this.world.addChild(this.shootRight);
 		let S = new H();
 		this.world.addChild(S);
-		let C = PD("BALLS", 24, Q.cyan, "800");
-		C.position.set(150, 1712), this.ballsText = FD("0", 60, Q.cyan), this.ballsText.style.fontFamily = AD, this.ballsText.position.set(150, 1772), this.liveText = PD("IN PLAY 0", 22, 12577279, "700"), this.liveText.position.set(150, 1836);
-		let w = PD("DEMO PLAY · NO MONEY", 18, 10467030, "700");
-		w.position.set(150, 1878), S.addChild(C, this.ballsText, this.liveText, w), this.pushGlow = Z(this.fxt.glow), this.pushGlow.blendMode = "add", this.pushGlow.tint = Q.magenta, this.pushGlow.scale.set(2.2), this.pushGlow.alpha = .25, this.pushGlow.position.set(540, 1790), this.push = wD(Z(t.tex("push")), 176, 176), this.push.position.set(540, 1790), this.push.eventMode = "static", this.push.cursor = "pointer", this.push.on("pointerdown", () => this.pressPush());
-		let ee = PD("PUSH", 26, 16777215, "900");
-		ee.position.set(540, 1898), S.addChild(this.pushGlow, this.push, ee);
+		let C = FD("BALLS", 24, Q.cyan, "800");
+		C.position.set(150, 1712), this.ballsText = ID("0", 60, Q.cyan), this.ballsText.style.fontFamily = jD, this.ballsText.position.set(150, 1772), this.liveText = FD("IN PLAY 0", 22, 12577279, "700"), this.liveText.position.set(150, 1836);
+		let w = FD("DEMO PLAY · NO MONEY", 18, 10467030, "700");
+		w.position.set(150, 1878), S.addChild(C, this.ballsText, this.liveText, w), this.feverHud.position.set(352, 1772), this.fhRound = FD("ROUND 1/8", 20, 16777215, "900"), this.fhRound.position.set(0, -58), this.fhTime = ID("25.0", 46, Q.cyan), this.fhTime.style.fontFamily = jD, this.fhTime.position.set(-46, -8);
+		let ee = FD("TIME", 15, 10476799, "800");
+		ee.position.set(-46, 26), this.fhCount = ID("0/10", 40, Q.magenta), this.fhCount.style.fontFamily = jD, this.fhCount.position.set(58, -8);
+		let T = FD("IN", 15, 16757740, "800");
+		T.position.set(58, 26);
+		let E = new ha(B.WHITE);
+		E.tint = 1712448, E.width = 200, E.height = 7, E.position.set(-100, 44), this.fhBar = new ha(B.WHITE), this.fhBar.tint = Q.cyan, this.fhBar.width = 200, this.fhBar.height = 7, this.fhBar.position.set(-100, 44), this.feverHud.addChild(this.fhRound, this.fhTime, ee, this.fhCount, T, E, this.fhBar), this.feverHud.visible = !1, S.addChild(this.feverHud), this.pushGlow = X(this.fxt.glow), this.pushGlow.blendMode = "add", this.pushGlow.tint = Q.magenta, this.pushGlow.scale.set(2.2), this.pushGlow.alpha = .25, this.pushGlow.position.set(540, 1790), this.push = Z(X(t.tex("push")), 176, 176), this.push.position.set(540, 1790), this.push.eventMode = "static", this.push.cursor = "pointer", this.push.on("pointerdown", () => this.pressPush());
+		let te = FD("PUSH", 26, 16777215, "900");
+		te.position.set(540, 1898), S.addChild(this.pushGlow, this.push, te);
 		for (let e = 0; e < 24; e++) {
-			let e = Z(this.fxt.spark);
+			let e = X(this.fxt.spark);
 			e.blendMode = "add", e.scale.set(.7), this.dialArc.push(e), S.addChild(e);
 		}
-		this.dial = wD(Z(t.tex("dial")), 190, 190), this.dial.position.set(905, 1782), this.dial.eventMode = "static", this.dial.cursor = "grab", S.addChild(this.dial);
-		let T = PD("HOLD TO FIRE", 20, 14677759, "800");
-		T.position.set(905, 1898), this.lockText = PD("LOCK ○", 22, 12577279, "800"), this.lockText.position.set(745, 1880), this.lockText.eventMode = "static", this.lockText.cursor = "pointer", this.lockText.on("pointerdown", () => this.toggleLock()), S.addChild(T, this.lockText), this.bindDial(), this.flashS = new ha(B.WHITE), this.flashS.width = qE, this.flashS.height = JE, this.flashS.alpha = 0, this.flashS.blendMode = "add", this.root.addChild(this.flashS), this.ctx = {
-			tw: q,
+		this.dial = Z(X(t.tex("dial")), 190, 190), this.dial.position.set(905, 1782), this.dial.eventMode = "static", this.dial.cursor = "grab", S.addChild(this.dial);
+		let ne = FD("HOLD TO FIRE", 20, 14677759, "800");
+		ne.position.set(905, 1898), this.lockText = FD("LOCK ○", 22, 12577279, "800"), this.lockText.position.set(745, 1880), this.lockText.eventMode = "static", this.lockText.cursor = "pointer", this.lockText.on("pointerdown", () => this.toggleLock()), S.addChild(ne, this.lockText), this.bindDial(), this.flashS = new ha(B.WHITE), this.flashS.width = JE, this.flashS.height = YE, this.flashS.alpha = 0, this.flashS.blendMode = "add", this.root.addChild(this.flashS), this.ctx = {
+			tw: BE,
 			art: t,
 			audio: i,
 			fx: this.fx,
@@ -24044,7 +24768,7 @@ var AO = .76, jO = class {
 		}, this.machine.on((e) => this.onMachine(e)), this.physics.on((e) => this.onPhysics(e));
 	}
 	addLed(e, t, n, r) {
-		let i = Z(this.fxt.spark);
+		let i = X(this.fxt.spark);
 		i.blendMode = "add", i.position.set(e, t), i.scale.set(.9), this.leds.push({
 			s: i,
 			i: n,
@@ -24097,10 +24821,10 @@ var AO = .76, jO = class {
 	}
 	pressPush() {
 		let e = this.art.frames("push", "pressed");
-		if (e.length && (this.pushDown = !0, this.push.texture = e[e.length - 1], window.setTimeout(() => this.pushDown = !1, 140)), this.audio.unlock(), this.audio.play("sfx_push_click"), this.mash.count++, q.to(this.push.scale, {
+		if (e.length && (this.pushDown = !0, this.push.texture = e[e.length - 1], window.setTimeout(() => this.pushDown = !1, 140)), this.audio.unlock(), this.audio.play("sfx_push_click"), this.mash.count++, BE.to(this.push.scale, {
 			x: this.push.scale.x * .9,
 			y: this.push.scale.y * .9
-		}, 60).then(() => q.to(this.push.scale, {
+		}, 60).then(() => BE.to(this.push.scale, {
 			x: this.push.scale.x / .9,
 			y: this.push.scale.y / .9
 		}, 160, zE)), this.fx.emit({
@@ -24127,8 +24851,8 @@ var AO = .76, jO = class {
 			max: 3
 		}), this.fx.emit({
 			tex: this.fxt.glow,
-			x: X.x,
-			y: X.y + 30,
+			x: Y.x,
+			y: Y.y + 30,
 			n: 10,
 			speed: [100, 300],
 			angle: [Math.PI * 1.1, Math.PI * 1.9],
@@ -24140,18 +24864,18 @@ var AO = .76, jO = class {
 		}
 	}
 	flash(e, t, n) {
-		q.reduced || (this.flashS.tint = e, this.flashS.alpha = t, q.to(this.flashS, { alpha: 0 }, n, RE));
+		BE.reduced || (this.flashS.tint = e, this.flashS.alpha = t, BE.to(this.flashS, { alpha: 0 }, n, RE));
 	}
 	reachMusic(e) {
 		this.machine.mode === "normal" && this.audio.setMusic(e === "none" ? "normal" : e === "quick" ? "reach1" : e === "stepup" ? "reach2" : "reach3", 300);
 	}
 	waitPush(e) {
 		return new Promise((t) => {
-			let n = this.art.has("cardPush"), r = n ? ED(this.art.frames("cardPush", "pulse").length ? this.art.frames("cardPush", "pulse") : this.art.frames("cardPush"), 16) : wD(Z(this.art.tex(this.art.has("platePush") ? "platePush" : "push")), 170, 170);
-			n && (r.anchor.set(.5), r.scale.set(300 / (r.texture.height || 300))), r.position.set(J.x + J.w / 2, J.y + J.h / 2);
-			let i = Z(this.fxt.ring);
+			let n = this.art.has("cardPush"), r = n ? DD(this.art.frames("cardPush", "pulse").length ? this.art.frames("cardPush", "pulse") : this.art.frames("cardPush"), 16) : Z(X(this.art.tex(this.art.has("platePush") ? "platePush" : "push")), 170, 170);
+			n && (r.anchor.set(.5), r.scale.set(300 / (r.texture.height || 300))), r.position.set(q.x + q.w / 2, q.y + q.h / 2);
+			let i = X(this.fxt.ring);
 			i.blendMode = "add", i.tint = Q.magenta, i.position.copyFrom(r.position);
-			let a = FD("PUSH!", 70, Q.magenta);
+			let a = ID("PUSH!", 70, Q.magenta);
 			a.position.set(r.x, r.y + 120), a.visible = !n, this.world.addChild(i, r, a), this.audio.play("sfx_reach_alert", { vol: .7 }), r.eventMode = "static", r.on("pointerdown", () => this.pressPush()), this.pushPrompt = {
 				resolve: (e) => {
 					this.fx.emit({
@@ -24182,7 +24906,7 @@ var AO = .76, jO = class {
 							"b",
 							"c"
 						][Math.floor(Math.random() * 3)];
-						TD(this.fx.root, this.art.frames("vfxSpark", t), e.x, e.y, { scale: .35 });
+						ED(this.fx.root, this.art.frames("vfxSpark", t), e.x, e.y, { scale: .35 });
 					} else this.fx.emit({
 						tex: this.fxt.star,
 						x: e.x,
@@ -24245,11 +24969,11 @@ var AO = .76, jO = class {
 		}
 	}
 	popup(e, t, n, r = Q.cyan) {
-		let i = FD(n, 36, r);
-		i.position.set(e, t), i.scale.set(.4), this.world.addChild(i), q.to(i.scale, {
+		let i = ID(n, 36, r);
+		i.position.set(e, t), i.scale.set(.4), this.world.addChild(i), BE.to(i.scale, {
 			x: 1,
 			y: 1
-		}, 220, zE), q.to(i, {
+		}, 220, zE), BE.to(i, {
 			y: t - 70,
 			alpha: 0
 		}, 900, RE).then(() => i.destroy());
@@ -24263,10 +24987,10 @@ var AO = .76, jO = class {
 		o();
 	}
 	onDock(e) {
-		this.audio.play("sfx_pocket_chime"), this.playAnim(this.dockS, "dock", "entry", "idle"), TD(this.fx.root, this.art.frames("vfxPocket", "burst"), Y.x, Y.y + 8, { scale: .6 }), this.fx.emit({
+		this.audio.play("sfx_pocket_chime"), this.playAnim(this.dockS, "dock", "entry", "idle"), ED(this.fx.root, this.art.frames("vfxPocket", "burst"), J.x, J.y + 8, { scale: .6 }), this.fx.emit({
 			tex: this.fxt.ring,
-			x: Y.x,
-			y: Y.y + 14,
+			x: J.x,
+			y: J.y + 14,
 			n: 1,
 			speed: [0, 0],
 			life: [.4, .4],
@@ -24284,7 +25008,7 @@ var AO = .76, jO = class {
 		});
 		let t = this.machine.pendingCount + this.inflightPort;
 		this.inflightPort++, this.provider.portEntry(Math.min(t, this.tune.pendingCap)).then((e) => {
-			this.setBalance(e.balance), e.award && this.popup(Y.x, Y.y - 20, `+${e.award}`), e.spin && this.machine.queueSpin(e.spin);
+			this.setBalance(e.balance), e.award && this.popup(J.x, J.y - 20, `+${e.award}`), e.spin && this.machine.queueSpin(e.spin);
 		}).catch((e) => this.refused(e)).finally(() => this.inflightPort--);
 	}
 	onSatellite(e) {
@@ -24310,27 +25034,27 @@ var AO = .76, jO = class {
 		let t = this.machine.fever, n = this.machine.hatchEntry();
 		if (!t || n < 0) return;
 		let r = t.round;
-		TD(this.fx.root, this.art.frames("vfxPocket", "burst"), e.x, X.y + 6, {
+		ED(this.fx.root, this.art.frames("vfxPocket", "burst"), e.x, Y.y + 6, {
 			scale: .5,
 			tint: Q.magenta
 		}), this.audio.play(`sfx_hatch_entry_${Math.min(5, 1 + Math.floor(n * 5 / t.plan.ballCap))}`, { max: 4 }), this.fx.emit({
 			tex: this.fxt.glow,
 			x: e.x,
-			y: X.y + 10,
+			y: Y.y + 10,
 			n: 8,
 			speed: [60, 220],
 			angle: [Math.PI * 1.1, Math.PI * 1.9],
 			tint: [Q.magenta, Q.white],
 			scale: [.2, .4]
-		}), this.hatchCount.text = `${n + 1}/${t.plan.ballCap}`, this.hatchCount.scale.set(1.3), q.to(this.hatchCount.scale, {
+		}), this.hatchCount.text = `${n + 1}/${t.plan.ballCap}`, this.hatchCount.scale.set(1.3), BE.to(this.hatchCount.scale, {
 			x: 1,
 			y: 1
 		}, 200, zE), this.provider.hatchEntry(t.plan.feverId, r, n).then((t) => {
-			this.setBalance(t.balance), this.machine.credit(t.award, r), this.feverTotal += t.award, t.award && this.popup(e.x, X.y - 30, `+${t.award}`, Q.magenta);
+			this.setBalance(t.balance), this.machine.credit(t.award, r), this.feverTotal += t.award, t.award && this.popup(e.x, Y.y - 30, `+${t.award}`, Q.magenta);
 		}).catch((e) => this.refused(e));
 	}
 	refused(e) {
-		e instanceof DD ? (this.firing = !1, this.locked && this.toggleLock(), this.audio.play("sfx_ui_error"), this.ui.toast(e.message)) : console.error(e);
+		e instanceof OD ? (this.firing = !1, this.locked && this.toggleLock(), this.audio.play("sfx_ui_error"), this.ui.toast(e.message)) : console.error(e);
 	}
 	onMachine(e) {
 		switch (e.type) {
@@ -24356,10 +25080,10 @@ var AO = .76, jO = class {
 		}
 	}
 	async runSpin(e) {
-		await sO(this.ctx, e), this.machine.spinFinished(), e.kind === "hit" && (await _O(this.ctx, e), this.machine.hitShown());
+		await fO(this.ctx, e), this.machine.spinFinished(), e.kind === "hit" && (await SO(this.ctx, e), this.machine.hitShown());
 	}
 	async onMode(e) {
-		if (e === "fever") this.feverTotal = 0, this.startShower(), this.audio.setMusic("fever", 400), q.to(this.bgFever, { alpha: 1 }, 900), this.roundTag.visible = !0;
+		if (e === "fever") this.feverTotal = 0, this.startShower(), this.audio.setMusic("fever", 400), BE.to(this.bgFever, { alpha: 1 }, 900), this.roundTag.visible = !0;
 		else if (e === "endcard") {
 			this.stopShower(), this.roundTag.visible = !1, this.hatchCount.visible = !1, this.timerText.visible = !1, this.shootRight.visible = !1;
 			let e = this.machine.lastFever, t = e ? await this.provider.endFever(e.plan.feverId) : {
@@ -24368,68 +25092,66 @@ var AO = .76, jO = class {
 				balance: this.balance,
 				feverId: ""
 			};
-			this.setBalance(t.balance), await SO(this.ctx, t.total), this.haloMode = "idle", q.to(this.bgFever, { alpha: 0 }, 1200), this.machine.endcardDone(), this.ui.results({
+			this.setBalance(t.balance), await DO(this.ctx, t.total), this.haloMode = "idle", BE.to(this.bgFever, { alpha: 0 }, 1200), this.machine.endcardDone(), this.ui.results({
 				total: t.total,
 				perRound: t.perRound,
 				rounds: e?.plan.rounds ?? 0,
 				best: this.machine.bestTier,
 				balance: this.balance
 			}, () => this.machine.resultsDone());
-		} else e === "normal" && (this.audio.setMusic("normal", 900), this.lcd.setBackdrop("lcdIdle", 600));
+		} else e === "normal" && (this.lcd.film.stop(), this.audio.setMusic("normal", 900), this.lcd.setBackdrop("lcdIdle", 600));
 	}
 	shower = [];
 	startShower() {
 		let e = this.art.frames("vfxShower", "loop");
 		if (e.length) for (let t of [300, 730]) {
-			let n = ED(e, 24);
-			n.blendMode = "add", n.position.set(t, 900), n.scale.set(1.6, 2.6), n.alpha = 0, this.world.addChildAt(n, 3), q.to(n, { alpha: .55 }, 900), this.shower.push(n);
+			let n = DD(e, 24);
+			n.blendMode = "add", n.position.set(t, 900), n.scale.set(1.6, 2.6), n.alpha = 0, this.world.addChildAt(n, 3), BE.to(n, { alpha: .55 }, 900), this.shower.push(n);
 		}
 	}
 	stopShower() {
-		for (let e of this.shower) q.to(e, { alpha: 0 }, 800).then(() => e.destroy());
+		for (let e of this.shower) BE.to(e, { alpha: 0 }, 800).then(() => e.destroy());
 		this.shower = [];
 	}
 	async onFeverStage(e, t) {
 		let n = this.machine.fever;
-		if (e === "intro") await yO(this.ctx);
-		else if (e === "slam") this.roundText.text = `× ${String(t).padStart(2, "0")}`, this.roundTag.scale.set(1.5), q.to(this.roundTag.scale, {
+		if (e === "intro") await wO(this.ctx);
+		else if (e === "slam") this.roundText.text = `× ${String(t).padStart(2, "0")}`, this.roundTag.scale.set(1.5), BE.to(this.roundTag.scale, {
 			x: 1,
 			y: 1
-		}, 300, zE), await bO(this.ctx, t);
+		}, 300, zE), await TO(this.ctx, t);
 		else if (e === "open" && n) this.hatchCount.text = `0/${n.plan.ballCap}`, this.hatchCount.visible = !0, this.timerText.visible = !0;
 		else if (e === "interval" && n) {
 			this.timerText.visible = !1;
 			let e = n.won[t - 1];
-			await xO(this.ctx, e, n.won.reduce((e, t) => e + t, 0), this.tune.intervalMs);
+			await EO(this.ctx, e, n.won.reduce((e, t) => e + t, 0), this.tune.intervalMs);
 		}
 	}
 	async runGauge() {
 		let e = this.machine.fever;
 		if (!e) return;
 		let t = e.round;
-		await CO(this.ctx, this.tune.gaugeMs, this.mash, async () => {
+		await OO(this.ctx, this.tune.gaugeMs, this.mash, async () => {
 			let n = await this.provider.gaugeReveal(e.plan.feverId);
 			return this.setBalance(n.balance), this.machine.credit(n.award, t), n.award;
 		});
 	}
 	setHatch(e) {
-		if (this.physics.hatchOpen = e, this.audio.play(e ? "sfx_gate_open" : "sfx_gate_close"), this.hatchAnim) {
+		this.physics.hatchOpen = e, this.audio.play(e ? "sfx_gate_open" : "sfx_gate_close");
+		{
 			let t = this.hatchAnim, n = this.art.frames("hatch", e ? "open" : "close");
 			n.length && (t.textures = n, t.loop = !1, t.animationSpeed = .5, t.onComplete = () => {
 				let n = this.art.frames("hatch", e ? "lit" : "idle");
 				n.length && (t.textures = n, t.loop = !0, t.animationSpeed = .4, t.play());
-			}, t.gotoAndPlay(0)), e && TD(this.world, this.art.frames("vfxShock", "open"), X.x, X.y + 10, {
+			}, t.gotoAndPlay(0)), e && ED(this.world, this.art.frames("vfxShock", "open"), Y.x, Y.y + 10, {
 				sx: 1.1,
 				sy: .6
 			});
 		}
-		q.to(this.door, {
-			alpha: e ? .35 : 1,
-			y: X.y + (e ? -4 : 8)
-		}, 260, RE), q.to(this.door.scale, { y: this.door.scale.y * (e ? .25 : 4) }, 260, RE), q.to(this.doorGlow, { alpha: +!!e }, 260), e && (this.shake.add(.2), this.fx.emit({
+		BE.to(this.doorGlow, { alpha: +!!e }, 260), e && (this.shake.add(.2), this.fx.emit({
 			tex: this.fxt.glow,
-			x: X.x,
-			y: X.y,
+			x: Y.x,
+			y: Y.y,
 			n: 24,
 			speed: [60, 260],
 			angle: [Math.PI, Math.PI * 2],
@@ -24439,7 +25161,7 @@ var AO = .76, jO = class {
 				Q.white
 			],
 			scale: [.2, .5],
-			spread: X.w * .8
+			spread: Y.w * .8
 		}));
 	}
 	setLamps(e) {
@@ -24451,16 +25173,16 @@ var AO = .76, jO = class {
 			if (r) {
 				this.audio.play("sfx_ui_hover", { vol: .6 }), t.s.tint = 16777215, t.s.alpha = 1, i.length && (t.s.texture = i[i.length - 1]);
 				let e = t.s.scale.x;
-				t.s.scale.set(e * 1.6), q.to(t.s.scale, {
+				t.s.scale.set(e * 1.6), BE.to(t.s.scale, {
 					x: e,
 					y: e
-				}, 260, zE), q.to(t.glow, { alpha: .9 }, 160);
-			} else q.to(t.glow, { alpha: 0 }, 300), i.length ? t.s.texture = this.art.tex("lamp", "off") : (t.s.tint = 6715289, q.to(t.s, { alpha: .35 }, 300));
+				}, 260, zE), BE.to(t.glow, { alpha: .9 }, 160);
+			} else BE.to(t.glow, { alpha: 0 }, 300), i.length ? t.s.texture = this.art.tex("lamp", "off") : (t.s.tint = 6715289, BE.to(t.s, { alpha: .35 }, 300));
 		});
 	}
 	update(e) {
 		let t = e * this.timeScale, n = t / 1e3;
-		if (this.time += n, this.sparkBudget = Math.min(40, this.sparkBudget + n * 60), q.update(t), !this.paused) {
+		if (this.time += n, this.sparkBudget = Math.min(40, this.sparkBudget + n * 60), BE.update(t), !this.paused) {
 			this.machine.tick(t);
 			let e = Math.min(n, .05);
 			this.fire(e), this.physics.step(e);
@@ -24473,7 +25195,11 @@ var AO = .76, jO = class {
 		} else for (let e of this.gyros) e.rotation = this.physics.gyroAngle;
 		this.shake.update(n, this.world);
 		let i = this.machine.fever;
-		i && i.stage === "open" ? (this.timerText.text = `${Math.max(0, (i.plan.openMs - i.t) / 1e3).toFixed(1)}s`, this.shootRight.visible = this.power < AO, this.shootRight.alpha = .55 + .45 * Math.abs(Math.sin(this.time * 5))) : this.shootRight.visible = !1, this.liveText.text = `IN PLAY ${this.physics.live}`;
+		if (this.feverHud.visible = !!i && this.machine.mode === "fever", i) {
+			let e = i.stage === "open", t = e ? Math.max(0, i.plan.openMs - i.t) : i.stage === "interval" ? 0 : i.plan.openMs;
+			this.fhRound.text = `ROUND ${i.round}/${i.plan.rounds}`, this.fhTime.text = (t / 1e3).toFixed(1), this.fhCount.text = `${Math.min(i.entries, i.plan.ballCap)}/${i.plan.ballCap}`, this.fhBar.width = 200 * (t / i.plan.openMs), this.fhBar.tint = t < 5e3 && e ? Q.magenta : Q.cyan, this.fhTime.tint = t < 5e3 && e && Math.floor(this.time * 4) % 2 ? Q.magenta : 16777215;
+		}
+		i && i.stage === "open" ? (this.timerText.text = `${Math.max(0, (i.plan.openMs - i.t) / 1e3).toFixed(1)}s`, this.shootRight.visible = this.power < FO, this.shootRight.alpha = .55 + .45 * Math.abs(Math.sin(this.time * 5))) : this.shootRight.visible = !1, this.liveText.text = `IN PLAY ${this.physics.live}`;
 		let a = this.art.frames("dial", "angle");
 		a.length > 1 ? this.dial.texture = a[Math.round(this.power * (a.length - 1))] : this.dial.rotation = -2.2 + this.power * 4.4;
 		let o = this.art.frames("push", "glow");
@@ -24484,7 +25210,7 @@ var AO = .76, jO = class {
 			e.position.set(this.dial.x + Math.cos(n) * 112, this.dial.y + Math.sin(n) * 112), e.tint = t < s ? t / this.dialArc.length > .68 ? Q.magenta : Q.cyan : 3359846, e.alpha = t < s ? .95 : .35;
 		}), this.pushGlow.alpha = this.pushPrompt ? .6 + .4 * Math.sin(this.time * 14) : .25 + .1 * Math.sin(this.time * 2), this.pushPrompt) {
 			let e = this.pushPrompt;
-			e.t += t, e.ring.scale.set(1 + this.time * 2 % 1 * 1.5), e.ring.alpha = 1 - this.time * 2 % 1, e.btn.scale.set(e.btn.scale.x), e.word.alpha = .6 + .4 * Math.abs(Math.sin(this.time * 8)), e.t >= q.ms(e.ms) && (this.pushPrompt = void 0, e.resolve(!1));
+			e.t += t, e.ring.scale.set(1 + this.time * 2 % 1 * 1.5), e.ring.alpha = 1 - this.time * 2 % 1, e.btn.scale.set(e.btn.scale.x), e.word.alpha = .6 + .4 * Math.abs(Math.sin(this.time * 8)), e.t >= BE.ms(e.ms) && (this.pushPrompt = void 0, e.resolve(!1));
 		}
 		let c = this.machine.mode === "fever";
 		this.audio.bed("sfx_lifter_hum", this.balance > 0 ? .6 : 0);
@@ -24504,7 +25230,7 @@ var AO = .76, jO = class {
 				return;
 			}
 			if (this.physics.live >= this.tune.maxLiveBalls) return;
-			this.physics.launch(kO(this.power)), this.setBalance(this.balance - 1), this.audio.bank("sfx_launch", 3, {
+			this.physics.launch(PO(this.power)), this.setBalance(this.balance - 1), this.audio.bank("sfx_launch", 3, {
 				vol: .5,
 				max: 2
 			}), this.provider.launch(1).then((e) => this.setBalance(e.balance)).catch((e) => this.refused(e));
@@ -24530,11 +25256,11 @@ var AO = .76, jO = class {
 		return this.art.frames("ball", "fever");
 	}
 	newBall() {
-		let e = new H(), t = Z(this.fxt.streak, .92, .5);
+		let e = new H(), t = X(this.fxt.streak, .92, .5);
 		t.blendMode = "add", t.width = 120, t.height = 19.5;
-		let n = Z(this.fxt.glow);
+		let n = X(this.fxt.glow);
 		n.blendMode = "add", n.width = n.height = 54.6;
-		let r = Z(this.art.tex("ball", "roll"));
+		let r = X(this.art.tex("ball", "roll"));
 		return r.width = r.height = 31.2, e.addChild(t, n, r), this.ballLayer.addChild(e), {
 			c: e,
 			body: r,
@@ -24544,11 +25270,11 @@ var AO = .76, jO = class {
 	}
 	drawLift(e) {
 		let t = this.machine.mode === "fever", n = this.firing || this.locked || t, r = t ? 760 : n ? 420 : 110;
-		this.liftOffset = (this.liftOffset + r * e) % OO, this.liftPulse = Math.max(0, this.liftPulse - e * .8);
-		let i = this.balance > 0 ? this.liftBalls.length : 0, a = 1344, o = EO - this.time * r % a;
+		this.liftOffset = (this.liftOffset + r * e) % NO, this.liftPulse = Math.max(0, this.liftPulse - e * .8);
+		let i = this.balance > 0 ? this.liftBalls.length : 0, a = 1344, o = jO - this.time * r % a;
 		this.liftBalls.forEach((e, r) => {
-			let s = EO - (r * OO + this.liftOffset) % a;
-			e.visible = r < i, e.position.set(wO + Math.sin(r * 1.7 + this.time * 3) * 2.2, s), e.alpha = s < 308 ? (s - TO) / 40 : 1, e.rotation = -s / 13;
+			let s = jO - (r * NO + this.liftOffset) % a;
+			e.visible = r < i, e.position.set(kO + Math.sin(r * 1.7 + this.time * 3) * 2.2, s), e.alpha = s < 308 ? (s - AO) / 40 : 1, e.rotation = -s / 13;
 			let c = this.liftGlows[r];
 			c.visible = e.visible, c.position.copyFrom(e.position);
 			let l = Math.max(0, 1 - Math.abs(s - o) / 220);
@@ -24565,8 +25291,8 @@ var AO = .76, jO = class {
 		let l = this.surgeOn ? .95 : n ? .55 : .3;
 		this.liftGlow.alpha += (l - this.liftGlow.alpha) * Math.min(1, e * 4), Math.random() < (n ? .6 : .15) && this.fx.emit({
 			tex: this.fxt.glow,
-			x: wO + (Math.random() - .5) * 30,
-			y: EO,
+			x: kO + (Math.random() - .5) * 30,
+			y: jO,
 			n: 1,
 			speed: [500, 800],
 			angle: [-Math.PI / 2, -Math.PI / 2],
@@ -24646,14 +25372,14 @@ var AO = .76, jO = class {
 		}, r = () => {
 			this.ledLevel = this.machine.ledLevel, this.haloMode = "idle";
 		};
-		e === "quick" || e === "stepup" || e === "mission" ? sO(n, t("reach", e)).then(r) : e === "hit" ? sO(n, t("hit", "mission")).then(() => _O(n, t("hit", "mission"))).then(r) : e === "liftoff" ? _O(n, t("hit", "quick")).then(r) : e === "intro" ? yO(this.ctx) : e === "round" ? bO(this.ctx, 3) : e === "get" ? xO(this.ctx, 150, 600, 4500) : e === "end" ? SO(this.ctx, 1250) : e === "gauge" ? CO(this.ctx, 5e3, this.mash, async () => this.tune.gaugeBonusBalls) : e === "surge" && (this.surgeOn = !0, window.setTimeout(() => this.surgeOn = !1, 3e3));
+		e === "quick" || e === "stepup" || e === "mission" ? fO(n, t("reach", e)).then(r) : e === "hit" ? fO(n, t("hit", "mission")).then(() => SO(n, t("hit", "mission"))).then(r) : e === "liftoff" ? SO(n, t("hit", "quick")).then(r) : e === "intro" ? wO(this.ctx) : e === "round" ? TO(this.ctx, 3) : e === "get" ? EO(this.ctx, 150, 600, 4500) : e === "end" ? DO(this.ctx, 1250) : e === "gauge" ? OO(this.ctx, 5e3, this.mash, async () => this.tune.gaugeBonusBalls) : e === "surge" && (this.surgeOn = !0, window.setTimeout(() => this.surgeOn = !1, 3e3));
 	}
 	previewLed(e) {
 		this.ledLevel = e, window.setTimeout(() => this.ledLevel = this.machine.ledLevel, 4e3);
 	}
 };
 // src/core/rng.ts
-function MO(e) {
+function LO(e) {
 	let t = e >>> 0 || 2654435769;
 	return () => {
 		t = t + 1831565813 >>> 0;
@@ -24661,17 +25387,17 @@ function MO(e) {
 		return e = Math.imul(e ^ e >>> 15, e | 1), e ^= e + Math.imul(e ^ e >>> 7, e | 61), ((e ^ e >>> 14) >>> 0) / 4294967296;
 	};
 }
-function NO(e, t, n) {
+function RO(e, t, n) {
 	let r = n.reduce((e, t) => e + Math.max(0, t), 0), i = e() * r;
 	for (let e = 0; e < t.length; e++) if (i -= Math.max(0, n[e]), i < 0) return t[e];
 	return t[t.length - 1];
 }
 // src/outcome/demo.ts
-var PO = [
+var zO = [
 	"quick",
 	"stepup",
 	"mission"
-], FO = class {
+], BO = class {
 	tune;
 	mode = "demo";
 	balance;
@@ -24680,7 +25406,7 @@ var PO = [
 	fevers = /* @__PURE__ */ new Map();
 	forceNext;
 	constructor(e, t = e.demoSeed || Date.now()) {
-		this.tune = e, this.balance = e.demoStartBalls, this.rng = MO(t);
+		this.tune = e, this.balance = e.demoStartBalls, this.rng = LO(t);
 	}
 	async connect() {
 		return {
@@ -24690,8 +25416,8 @@ var PO = [
 		};
 	}
 	async launch(e) {
-		if (!Number.isInteger(e) || e < 1) throw new DD("bad launch count", "refused");
-		if (this.balance < e) throw new DD("Out of demo balls. Refill from the menu.", "insufficient_balance");
+		if (!Number.isInteger(e) || e < 1) throw new OD("bad launch count", "refused");
+		if (this.balance < e) throw new OD("Out of demo balls. Refill from the menu.", "insufficient_balance");
 		return this.balance -= e, {
 			award: 0,
 			balance: this.balance
@@ -24783,7 +25509,7 @@ var PO = [
 				surge: !1
 			};
 		}
-		let a = n?.tier ?? NO(this.rng, PO, i === "hit" ? e.hitTierWeights : e.missTierWeights), o = this.sym(), s = this.rng() < (i === "hit" ? e.surgeOnHit : e.surgeOnMiss), c = a === "mission" && (i === "hit" || this.rng() < e.pushOnMissionMiss);
+		let a = n?.tier ?? RO(this.rng, zO, i === "hit" ? e.hitTierWeights : e.missTierWeights), o = this.sym(), s = this.rng() < (i === "hit" ? e.surgeOnHit : e.surgeOnMiss), c = a === "mission" && (i === "hit" || this.rng() < e.pushOnMissionMiss);
 		if (i === "hit") {
 			let e = {
 				spinId: t,
@@ -24832,31 +25558,31 @@ var PO = [
 	}
 };
 // src/outcome/index.ts
-function IO(e) {
-	return new FO(e);
+function VO(e) {
+	return new BO(e);
 }
 // shared/api-base.ts
-var LO = new URLSearchParams(location.search);
-(location.hostname === "localhost" || location.hostname === "127.0.0.1") && (LO.get("api") || "").replace(/\/$/, ""), LO.get("geo");
-var RO = LO.get("brand") || "";
-function zO(e) {
+var HO = new URLSearchParams(location.search);
+(location.hostname === "localhost" || location.hostname === "127.0.0.1") && (HO.get("api") || "").replace(/\/$/, ""), HO.get("geo");
+var UO = HO.get("brand") || "";
+function WO(e) {
 	return window.parent !== window && (window.parent.postMessage({
 		source: "biab-game",
 		...e
 	}, location.origin), !0);
 }
 // src/bridge.ts
-function BO(e) {
-	zO({ type: "close" }) || (RO ? location.assign(`/b/${encodeURIComponent(RO)}`) : e());
+function GO(e) {
+	WO({ type: "close" }) || (UO ? location.assign(`/b/${encodeURIComponent(UO)}`) : e());
 }
 // src/ui/dom.ts
-var VO = () => document.getElementById("ui");
+var KO = () => document.getElementById("ui");
 function $(e, t = "", n = "") {
 	let r = document.createElement(e);
 	return t && (r.className = t), n && (r.innerHTML = n), r;
 }
-var HO = "starlift-fever-settings";
-function UO() {
+var qO = "starlift-fever-settings";
+function JO() {
 	let e = {
 		music: .7,
 		sfx: .9,
@@ -24867,27 +25593,27 @@ function UO() {
 	try {
 		return {
 			...e,
-			...JSON.parse(localStorage.getItem(HO) || "{}")
+			...JSON.parse(localStorage.getItem(qO) || "{}")
 		};
 	} catch {
 		return e;
 	}
 }
-function WO(e) {
+function YO(e) {
 	try {
-		localStorage.setItem(HO, JSON.stringify(e));
+		localStorage.setItem(qO, JSON.stringify(e));
 	} catch {}
 }
-var GO;
-function KO() {
-	let e = GO;
-	e && (GO = void 0, e.classList.remove("show"), window.setTimeout(() => e.remove(), 240));
+var XO;
+function ZO() {
+	let e = XO;
+	e && (XO = void 0, e.classList.remove("show"), window.setTimeout(() => e.remove(), 240));
 }
-function qO() {
-	return !!GO;
+function QO() {
+	return !!XO;
 }
-function JO(e, t, n, r) {
-	KO();
+function $O(e, t, n, r) {
+	ZO();
 	let i = $("div", "sf-overlay");
 	i.id = r;
 	let a = $("div", "sf-panel");
@@ -24898,10 +25624,10 @@ function JO(e, t, n, r) {
 		t.type = "button", t.onclick = () => e.run(), o.appendChild(t);
 	}
 	return a.appendChild(o), i.appendChild(a), i.addEventListener("pointerdown", (e) => {
-		e.target === i && KO();
-	}), VO().appendChild(i), requestAnimationFrame(() => i.classList.add("show")), GO = i, o.querySelector("button")?.focus(), i;
+		e.target === i && ZO();
+	}), KO().appendChild(i), requestAnimationFrame(() => i.classList.add("show")), XO = i, o.querySelector("button")?.focus(), i;
 }
-function YO(e, t, n = []) {
+function ek(e, t, n = []) {
 	let r = $("div"), i = (n, r) => {
 		let i = $("div", "sf-row"), a = $("input");
 		return a.type = "range", a.min = "0", a.max = "1", a.step = "0.05", a.value = String(e[r]), a.setAttribute("aria-label", n), a.oninput = () => {
@@ -24913,24 +25639,24 @@ function YO(e, t, n = []) {
 			e[r] = a.checked, t(e);
 		}, i.append($("label", "", n), a), i;
 	};
-	r.append(i("Music", "music"), i("Sound effects", "sfx"), a("Mute all", "muted"), a("Turbo (shorter shows)", "turbo"), a("Reduced motion", "reduced")), r.appendChild($("div", "sf-note", "Keys: Space fire (hold) · ←/→ power · L lock · P push · M mute · Esc menu")), JO("SETTINGS", r, [...n, {
+	r.append(i("Music", "music"), i("Sound effects", "sfx"), a("Mute all", "muted"), a("Turbo (shorter shows)", "turbo"), a("Reduced motion", "reduced")), r.appendChild($("div", "sf-note", "Keys: Space fire (hold) · ←/→ power · L lock · P push · M mute · Esc menu")), $O("SETTINGS", r, [...n, {
 		label: "DONE",
-		run: () => KO()
+		run: () => ZO()
 	}], "sf-settings");
 }
-function XO(e) {
+function tk(e) {
 	let t = $("div", "sf-rules"), n = (e, t, n) => {
 		let r = $("div", "sf-rule"), i = $("img");
 		e && (i.src = e), i.alt = "";
 		let a = $("div");
 		return a.append($("b", "", t), $("p", "", n)), r.append(i, a), r;
 	};
-	t.append(n(e.url("dial"), "LAUNCH", "Hold the power dial (or Space) to fire a steady stream. Turn it to set power. LOCK keeps it firing hands-free. The Starlift carries balls back up, so there is no tray to empty."), n(e.url("dock"), "DOCKING PORT", "A ball in the Docking Port spins the Star Reel and lights a Docking Light. Up to four spins wait in line. Satellite catchers pay a few balls too."), n(e.url("sy7"), "STAR REEL", "Reels stop left, right, then centre. Left and right matching is a REACH: Quick, Step-Up or the long Mission Reach. Three of a kind is LIFT-OFF!"), n(e.url("hatchFrame"), "STARLIFT FEVER", "Each fever round opens the Dock Hatch until the timer runs out or ten balls drop in. Shoot right to reach it. A GET tally follows every round."), n(e.url("push"), "PUSH", "PUSH always fires a booster pulse. When a prompt appears, press it, and mash it to fill the Thrust Gauge. It never changes a result: every outcome is decided before the show starts.")), t.appendChild($("div", "sf-note", "Demo play: balls are play credits only. No money, no wallet.")), JO("HOW TO PLAY", t, [{
+	t.append(n(e.url("dial"), "LAUNCH", "Hold the power dial (or Space) to fire a steady stream. Turn it to set power. LOCK keeps it firing hands-free. The Starlift carries balls back up, so there is no tray to empty."), n(e.url("dock"), "DOCKING PORT", "A ball in the Docking Port spins the Star Reel and lights a Docking Light. Up to four spins wait in line. Satellite catchers pay a few balls too."), n(e.url("sy7"), "STAR REEL", "Reels stop left, right, then centre. Left and right matching is a REACH: Quick, Step-Up or the long Mission Reach. Three of a kind is LIFT-OFF!"), n(e.url("hatch"), "STARLIFT FEVER", "Each fever round opens the Dock Hatch until the timer runs out or ten balls drop in. Shoot right to reach it. A GET tally follows every round."), n(e.url("push"), "PUSH", "PUSH always fires a booster pulse. When a prompt appears, press it, and mash it to fill the Thrust Gauge. It never changes a result: every outcome is decided before the show starts.")), t.appendChild($("div", "sf-note", "Demo play: balls are play credits only. No money, no wallet.")), $O("HOW TO PLAY", t, [{
 		label: "GOT IT",
-		run: () => KO()
+		run: () => ZO()
 	}], "sf-rules");
 }
-function ZO(e, t, n) {
+function nk(e, t, n) {
 	let r = $("div", "sf-results"), i = (e, t) => {
 		let n = $("div", "sf-stat");
 		return n.append($("span", "", e), $("span", "", t)), n;
@@ -24940,17 +25666,17 @@ function ZO(e, t, n) {
 	e.perRound.forEach((e, t) => {
 		let n = $("div", "sf-bar");
 		n.style.height = `${Math.max(6, e / s * 100)}%`, n.style.animationDelay = `${t * 70}ms`, n.title = `Round ${t + 1}: ${e}`, n.appendChild($("i", "", String(t + 1))), o.appendChild(n);
-	}), r.appendChild(o), JO("RESULTS", r, [{
+	}), r.appendChild(o), $O("RESULTS", r, [{
 		label: "PLAY AGAIN",
-		run: () => (KO(), t())
+		run: () => (ZO(), t())
 	}, {
 		label: "LOBBY",
 		cls: "ghost",
-		run: () => (KO(), t(), n())
+		run: () => (ZO(), t(), n())
 	}], "sf-results");
 }
-var QO = 0;
-function $O(e, t) {
+var rk = 0;
+function ik(e, t) {
 	document.getElementById("sf-toast")?.remove();
 	let n = $("div", "sf-error");
 	if (n.id = "sf-toast", n.textContent = e, t) {
@@ -24959,34 +25685,34 @@ function $O(e, t) {
 			t.run(), n.remove();
 		}, n.appendChild(e);
 	}
-	VO().appendChild(n), window.clearTimeout(QO), QO = window.setTimeout(() => n.remove(), 4200);
+	KO().appendChild(n), window.clearTimeout(rk), rk = window.setTimeout(() => n.remove(), 4200);
 }
-var ek = {
+var ak = {
 	menu: "<svg viewBox=\"0 0 24 24\" width=\"26\" height=\"26\"><path d=\"M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm8.6 4.9-1.9-.3a6.9 6.9 0 0 1-.7 1.7l1.1 1.6-1.6 1.6-1.6-1.1c-.5.3-1.1.6-1.7.7l-.3 1.9h-2.2l-.3-1.9a6.9 6.9 0 0 1-1.7-.7l-1.6 1.1-1.6-1.6 1.1-1.6a6.9 6.9 0 0 1-.7-1.7l-1.9-.3v-2.2l1.9-.3c.1-.6.4-1.2.7-1.7L4.6 6.9l1.6-1.6 1.6 1.1c.5-.3 1.1-.6 1.7-.7l.3-1.9h2.2l.3 1.9c.6.1 1.2.4 1.7.7l1.6-1.1 1.6 1.6-1.1 1.6c.3.5.6 1.1.7 1.7l1.9.3v2.2Z\" fill=\"currentColor\"/></svg>",
 	help: "<svg viewBox=\"0 0 24 24\" width=\"26\" height=\"26\"><path d=\"M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20Zm1 16h-2v-2h2v2Zm2.1-7.7-.9.9c-.7.7-1.2 1.3-1.2 2.8h-2v-.5c0-1.1.5-2.1 1.2-2.8l1.2-1.3a1.9 1.9 0 0 0-1.4-3.2c-1.1 0-2 .9-2 2H8a4 4 0 1 1 7.1 2.1Z\" fill=\"currentColor\"/></svg>",
 	sound: "<svg viewBox=\"0 0 24 24\" width=\"26\" height=\"26\"><path d=\"M3 10v4h4l5 5V5L7 10H3Zm13.5 2A4.5 4.5 0 0 0 14 8v8a4.5 4.5 0 0 0 2.5-4ZM14 3.2v2.1a7 7 0 0 1 0 13.4v2.1a9 9 0 0 0 0-17.6Z\" fill=\"currentColor\"/></svg>",
 	mute: "<svg viewBox=\"0 0 24 24\" width=\"26\" height=\"26\"><path d=\"M3 10v4h4l5 5V5L7 10H3Zm16.6 2 2.1-2.1-1.4-1.4-2.1 2.1-2.1-2.1-1.4 1.4 2.1 2.1-2.1 2.1 1.4 1.4 2.1-2.1 2.1 2.1 1.4-1.4L19.6 12Z\" fill=\"currentColor\"/></svg>",
 	lobby: "<svg viewBox=\"0 0 24 24\" width=\"26\" height=\"26\"><path d=\"M10 19v-5h4v5h5v-7h3L12 3 2 12h3v7z\" fill=\"currentColor\"/></svg>"
 };
-function tk(e) {
+function ok(e) {
 	let t = $("div");
 	t.id = "sf-top", t.style.cssText = "position:absolute;left:12px;right:12px;top:12px;display:flex;gap:10px;pointer-events:none";
 	let n = (e, n, r) => {
 		let i = $("button", "sf-btn icon", e);
 		return i.type = "button", i.setAttribute("aria-label", n), i.title = n, i.style.pointerEvents = "auto", i.onclick = () => r(i), t.appendChild(i), i;
 	};
-	n(ek.lobby, "Lobby", () => e.lobby()), n(ek.help, "How to play", () => e.rules());
+	n(ak.lobby, "Lobby", () => e.lobby()), n(ak.help, "How to play", () => e.rules());
 	let r = $("div");
 	r.style.flex = "1", t.appendChild(r);
-	let i = n(ek.sound, "Mute", (t) => t.innerHTML = e.mute() ? ek.mute : ek.sound);
-	return i.dataset.role = "mute", n(ek.menu, "Settings", () => e.settings()), VO().appendChild(t), t;
+	let i = n(ak.sound, "Mute", (t) => t.innerHTML = e.mute() ? ak.mute : ak.sound);
+	return i.dataset.role = "mute", n(ak.menu, "Settings", () => e.settings()), KO().appendChild(t), t;
 }
-function nk(e) {
+function sk(e) {
 	let t = document.querySelector("#sf-top [data-role=\"mute\"]");
-	t && (t.innerHTML = e ? ek.mute : ek.sound);
+	t && (t.innerHTML = e ? ak.mute : ak.sound);
 }
 // src/ui/title.ts
-var rk = class {
+var ck = class {
 	fxt;
 	fx;
 	root = new H();
@@ -24999,25 +25725,25 @@ var rk = class {
 	t = 0;
 	dom;
 	constructor(e, t, n) {
-		this.fxt = t, this.fx = n, this.bg = CD(Z(e.tex("lobby")), qE, JE), this.bg.position.set(qE / 2, JE / 2), this.beam = Z(t.streak), this.beam.rotation = -Math.PI / 2, this.beam.blendMode = "add", this.beam.tint = Q.cyan, this.beam.scale.set(16, 5), this.beam.position.set(qE / 2, JE * .48), this.beam2 = Z(t.streak), this.beam2.rotation = -Math.PI / 2, this.beam2.blendMode = "add", this.beam2.scale.set(16, 1.4), this.beam2.position.copyFrom(this.beam.position), this.words = new H(), this.words.position.set(qE / 2, 430);
-		let r = FD("STARLIFT", 150, Q.cyan);
+		this.fxt = t, this.fx = n, this.bg = TD(X(e.tex("lobby")), JE, YE), this.bg.position.set(JE / 2, YE / 2), this.beam = X(t.streak), this.beam.rotation = -Math.PI / 2, this.beam.blendMode = "add", this.beam.tint = Q.cyan, this.beam.scale.set(16, 5), this.beam.position.set(JE / 2, YE * .48), this.beam2 = X(t.streak), this.beam2.rotation = -Math.PI / 2, this.beam2.blendMode = "add", this.beam2.scale.set(16, 1.4), this.beam2.position.copyFrom(this.beam.position), this.words = new H(), this.words.position.set(JE / 2, 430);
+		let r = ID("STARLIFT", 150, Q.cyan);
 		r.y = -90;
-		let i = FD("FEVER", 190, Q.magenta, MD);
+		let i = ID("FEVER", 190, Q.magenta, ND);
 		i.y = 90;
-		let a = PD("A NEON ORBITAL PACHINKO", 34, 14678271, "800");
+		let a = FD("A NEON ORBITAL PACHINKO", 34, 14678271, "800");
 		if (a.y = 230, e.frames("titleLogo", "shine").length > 1) {
-			let t = ED(e.frames("titleLogo", "shine"), 12);
+			let t = DD(e.frames("titleLogo", "shine"), 12);
 			t.anchor.set(.5), t.scale.set(900 / (t.texture.width || 900)), t.y = -10, a.y = 250, this.words.addChild(t, a);
 		} else this.words.addChild(r, i, a);
-		this.nova = wD(Z(e.tex("nova")), 380, 380), this.nova.position.set(qE / 2 - 120, 1250);
+		this.nova = Z(X(e.tex("nova")), 380, 380), this.nova.position.set(JE / 2 - 120, 1250);
 		let o = e.frames("orbi", "float");
-		this.orbi = o.length > 1 ? ED(o, 16) : Z(e.tex("orbi")), wD(this.orbi, 190, 190), this.orbi.position.set(qE / 2 + 230, 1150), this.root.addChild(this.bg, this.beam, this.beam2, this.words, this.nova, this.orbi);
+		this.orbi = o.length > 1 ? DD(o, 16) : X(e.tex("orbi")), Z(this.orbi, 190, 190), this.orbi.position.set(JE / 2 + 230, 1150), this.root.addChild(this.bg, this.beam, this.beam2, this.words, this.nova, this.orbi);
 	}
 	show(e) {
-		this.root.visible = !0, this.root.alpha = 0, q.to(this.root, { alpha: 1 }, 500), this.words.scale.set(.6), q.to(this.words.scale, {
+		this.root.visible = !0, this.root.alpha = 0, BE.to(this.root, { alpha: 1 }, 500), this.words.scale.set(.6), BE.to(this.words.scale, {
 			x: 1,
 			y: 1
-		}, 700, zE), this.nova.alpha = 0, q.to(this.nova, { alpha: 1 }, 800, RE);
+		}, 700, zE), this.nova.alpha = 0, BE.to(this.nova, { alpha: 1 }, 800, RE);
 		let t = document.createElement("div");
 		t.id = "sf-title", t.style.cssText = "position:absolute;left:0;right:0;bottom:7%;display:flex;flex-direction:column;align-items:center;gap:14px;pointer-events:auto";
 		let n = document.createElement("button");
@@ -25034,13 +25760,13 @@ var rk = class {
 		s.className = "sf-note", s.style.cssText = "opacity:.85;font:600 16px 'Exo 2';text-shadow:0 1px 4px #000", s.textContent = `${e.balance.toLocaleString("en-US")} demo balls · play credits only, no money`, t.append(n, r, s), document.getElementById("ui").appendChild(t), this.dom = t, n.focus();
 	}
 	async hide() {
-		this.dom?.remove(), this.dom = void 0, await q.to(this.root, { alpha: 0 }, 400), this.root.visible = !1;
+		this.dom?.remove(), this.dom = void 0, await BE.to(this.root, { alpha: 0 }, 400), this.root.visible = !1;
 	}
 	update(e) {
 		this.root.visible && (this.t += e, this.bg.rotation = Math.sin(this.t * .05) * .015, this.bg.scale.set(this.bg.scale.x), this.beam.alpha = .5 + .2 * Math.sin(this.t * 3), this.beam2.alpha = .8 + .2 * Math.sin(this.t * 7), this.nova.y = 1250 + Math.sin(this.t * 1.4) * 18, this.nova.rotation = Math.sin(this.t * .9) * .05, this.orbi.y = 1150 + Math.sin(this.t * 2.1 + 1) * 24, this.words.y = 430 + Math.sin(this.t * .8) * 6, Math.random() < .5 && this.fx.emit({
 			tex: this.fxt.glow,
-			x: qE / 2 + (Math.random() - .5) * 50,
-			y: JE * .95,
+			x: JE / 2 + (Math.random() - .5) * 50,
+			y: YE * .95,
 			n: 1,
 			speed: [600, 1e3],
 			angle: [-Math.PI / 2, -Math.PI / 2],
@@ -25051,9 +25777,9 @@ var rk = class {
 			alpha: .7
 		}));
 	}
-}, ik;
+}, lk;
 OE(() => {
-	let e = ik;
+	let e = lk;
 	return e ? [
 		{
 			label: "Quick Reach",
@@ -25117,33 +25843,33 @@ OE(() => {
 		}
 	] : [];
 }, "#2ef2ff");
-function ak(e) {
-	let t = window.innerWidth, n = window.innerHeight, r = Math.min(t / qE, n / JE), i = e.canvas;
-	i.style.position = "absolute", i.style.width = `${qE * r}px`, i.style.height = `${JE * r}px`, i.style.left = `${(t - qE * r) / 2}px`, i.style.top = `${(n - JE * r) / 2}px`;
+function uk(e) {
+	let t = window.innerWidth, n = window.innerHeight, r = Math.min(t / JE, n / YE), i = e.canvas;
+	i.style.position = "absolute", i.style.width = `${JE * r}px`, i.style.height = `${YE * r}px`, i.style.left = `${(t - JE * r) / 2}px`, i.style.top = `${(n - YE * r) / 2}px`;
 	let a = document.getElementById("ui");
 	a.style.left = i.style.left, a.style.top = i.style.top, a.style.width = i.style.width, a.style.height = i.style.height, a.style.fontSize = `${Math.max(10, 16 * r * 1.6)}px`;
 }
-async function ok() {
-	let e = new kC(), t = Math.min(2, window.devicePixelRatio || 1), n = Math.min(window.innerWidth / qE, window.innerHeight / JE) * t;
+async function dk() {
+	let e = new kC(), t = Math.min(2, window.devicePixelRatio || 1), n = Math.min(window.innerWidth / JE, window.innerHeight / YE) * t;
 	await e.init({
-		width: qE,
-		height: JE,
+		width: JE,
+		height: YE,
 		background: Q.navy,
 		antialias: !0,
 		resolution: Math.min(1, Math.max(.5, n)),
 		autoDensity: !1,
 		preference: "webgl"
-	}), document.getElementById("game").appendChild(e.canvas), ak(e), window.addEventListener("resize", () => ak(e)), await Promise.all([
+	}), document.getElementById("game").appendChild(e.canvas), uk(e), window.addEventListener("resize", () => uk(e)), await Promise.all([
 		document.fonts.load("900 64px \"Orbitron\""),
 		document.fonts.load("700 28px \"Exo 2\""),
 		document.fonts.load("700 28px \"Rajdhani\"")
 	]).catch(() => void 0);
-	let r = FD("STARLIFT FEVER", 76, Q.cyan);
-	r.position.set(qE / 2, JE / 2 - 40);
-	let i = PD("LOADING 0%", 30, 12577279);
-	i.position.set(qE / 2, JE / 2 + 60), e.stage.addChild(r, i);
+	let r = ID("STARLIFT FEVER", 76, Q.cyan);
+	r.position.set(JE / 2, YE / 2 - 40);
+	let i = FD("LOADING 0%", 30, 12577279);
+	i.position.set(JE / 2, YE / 2 + 60), e.stage.addChild(r, i);
 	let a = new jE(), [o] = await Promise.all([
-		KE(),
+		qE(),
 		a.load((e) => i.text = `LOADING ${Math.round(e * 100)}%`),
 		PE.load()
 	]);
@@ -25160,50 +25886,50 @@ async function ok() {
 		n && document.documentElement.style.setProperty(t, `url("${new URL(n, document.baseURI).href}")`);
 	}
 	r.destroy(), i.destroy();
-	let s = new URLSearchParams(location.search), c = s.has("test") && s.get("tune") ? GE(JSON.parse(s.get("tune")), o) : o, l = UO(), u = (e) => {
-		PE.setVolumes(e.music, e.sfx), PE.setMuted(e.muted), nk(e.muted), q.speed = e.turbo ? .5 : 1, q.reduced = e.reduced, ik && (ik.shake.enabled = !e.reduced), WO(e);
-	}, d = IO(c), f = new jO(e, a, c, d, PE, {
-		toast: (e, t) => $O(e, t),
-		results: (e, t) => ZO(e, t, () => b()),
+	let s = new URLSearchParams(location.search), c = s.has("test") && s.get("tune") ? KE(JSON.parse(s.get("tune")), o) : o, l = JO(), u = (e) => {
+		PE.setVolumes(e.music, e.sfx), PE.setMuted(e.muted), sk(e.muted), BE.speed = e.turbo ? .5 : 1, BE.reduced = e.reduced, lk && (lk.shake.enabled = !e.reduced), YO(e);
+	}, d = VO(c), f = new IO(e, a, c, d, PE, {
+		toast: (e, t) => ik(e, t),
+		results: (e, t) => nk(e, t, () => b()),
 		balance: () => void 0
 	});
-	ik = f, await f.start(), u(l);
-	let p = new rk(a, f.fxt, f.fx), m = new H();
+	lk = f, await f.start(), u(l);
+	let p = new ck(a, f.fxt, f.fx), m = new H();
 	m.addChild(f.root, p.root), e.stage.addChild(m);
 	let h = () => {
 		if (d.refill) {
 			let e = d.refill();
-			f.setBalance(e), $O("Demo balls refilled.");
+			f.setBalance(e), ik("Demo balls refilled.");
 		}
-	}, g = () => YO(l, u, d.refill ? [{
+	}, g = () => ek(l, u, d.refill ? [{
 		label: "REFILL DEMO BALLS",
 		cls: "ghost",
 		run: () => h()
 	}] : []), _ = () => (l.muted = !l.muted, u(l), l.muted), v, y = async () => {
-		PE.unlock(), PE.play("sfx_ui_click"), await p.hide(), p.root.parent?.removeChild(f.fx.root), f.root.addChildAt(f.fx.root, f.root.children.length), f.world.addChild(f.fx.root), f.enter(), v ??= tk({
+		PE.unlock(), PE.play("sfx_ui_click"), await p.hide(), p.root.parent?.removeChild(f.fx.root), f.root.addChildAt(f.fx.root, f.root.children.length), f.world.addChild(f.fx.root), f.enter(), v ??= ok({
 			settings: g,
-			rules: () => XO(a),
+			rules: () => tk(a),
 			mute: _,
-			lobby: () => BO(b)
+			lobby: () => GO(b)
 		}), v.style.display = "flex";
 	}, b = () => {
-		f.machine.mode === "fever" || f.machine.lcd !== "idle" ? $O("Finish the current show first.") : (f.machine.mode !== "title" && f.machine.toTitle(), f.firing = !1, f.locked && f.toggleLock(), v && (v.style.display = "none"), p.root.addChild(f.fx.root), PE.setMusic("lobby"), p.show({
+		f.machine.mode === "fever" || f.machine.lcd !== "idle" ? ik("Finish the current show first.") : (f.machine.mode !== "title" && f.machine.toTitle(), f.firing = !1, f.locked && f.toggleLock(), v && (v.style.display = "none"), p.root.addChild(f.fx.root), PE.setMusic("lobby"), p.show({
 			play: () => void y(),
-			rules: () => XO(a),
+			rules: () => tk(a),
 			sound: _,
 			balance: f.balance
 		}));
 	};
 	p.root.addChild(f.fx.root), p.show({
 		play: () => void y(),
-		rules: () => XO(a),
+		rules: () => tk(a),
 		sound: _,
 		balance: f.balance
 	}), PE.setMusic("lobby"), e.ticker.add((e) => {
 		let t = Math.min(50, e.deltaMS);
-		p.root.visible ? (p.update(t * f.timeScale / 1e3), q.update(t), f.fx.update(t / 1e3)) : f.update(t);
+		p.root.visible ? (p.update(t * f.timeScale / 1e3), BE.update(t), f.fx.update(t / 1e3)) : f.update(t);
 	}), window.addEventListener("keydown", (e) => {
-		PE.unlock(), e.code === "Escape" ? (qO() ? KO() : p.root.visible || g(), e.preventDefault()) : e.code === "KeyM" && !e.repeat ? _() : !qO() && !p.root.visible && f.key(e, !0) && e.preventDefault();
+		PE.unlock(), e.code === "Escape" ? (QO() ? ZO() : p.root.visible || g(), e.preventDefault()) : e.code === "KeyM" && !e.repeat ? _() : !QO() && !p.root.visible && f.key(e, !0) && e.preventDefault();
 	}), window.addEventListener("keyup", (e) => {
 		p.root.visible || f.key(e, !1);
 	}), window.addEventListener("wheel", (e) => !p.root.visible && f.wheel(e.deltaY), { passive: !0 }), window.addEventListener("pointerdown", () => PE.unlock(), { once: !0 }), (new URLSearchParams(location.search).has("test") || DE()) && (window.__sf = {
@@ -25232,7 +25958,7 @@ async function ok() {
 		audio: () => PE.debug()
 	}), window.__sfReady = !0;
 }
-ok().catch((e) => {
+dk().catch((e) => {
 	console.error(e);
 	let t = document.createElement("pre");
 	t.style.cssText = "position:fixed;left:16px;top:16px;color:#ffd6f5;font:16px sans-serif;white-space:pre-wrap", t.textContent = e instanceof Error ? e.message : String(e), document.body.appendChild(t);
