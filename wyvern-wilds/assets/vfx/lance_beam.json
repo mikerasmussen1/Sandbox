@@ -1,0 +1,318 @@
+{
+ "frames": {
+  "lance_beam_00": {
+   "frame": {
+    "x": 1,
+    "y": 1,
+    "w": 1024,
+    "h": 128
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 1024,
+    "h": 128
+   },
+   "sourceSize": {
+    "w": 1024,
+    "h": 128
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "lance_beam_01": {
+   "frame": {
+    "x": 1027,
+    "y": 1,
+    "w": 1024,
+    "h": 128
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 1024,
+    "h": 128
+   },
+   "sourceSize": {
+    "w": 1024,
+    "h": 128
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "lance_beam_02": {
+   "frame": {
+    "x": 2053,
+    "y": 1,
+    "w": 1024,
+    "h": 128
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 1024,
+    "h": 128
+   },
+   "sourceSize": {
+    "w": 1024,
+    "h": 128
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "lance_beam_03": {
+   "frame": {
+    "x": 1,
+    "y": 131,
+    "w": 1024,
+    "h": 128
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 1024,
+    "h": 128
+   },
+   "sourceSize": {
+    "w": 1024,
+    "h": 128
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "lance_beam_04": {
+   "frame": {
+    "x": 1027,
+    "y": 131,
+    "w": 1024,
+    "h": 128
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 1024,
+    "h": 128
+   },
+   "sourceSize": {
+    "w": 1024,
+    "h": 128
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "lance_beam_05": {
+   "frame": {
+    "x": 2053,
+    "y": 131,
+    "w": 1024,
+    "h": 128
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 1024,
+    "h": 128
+   },
+   "sourceSize": {
+    "w": 1024,
+    "h": 128
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "lance_beam_06": {
+   "frame": {
+    "x": 1,
+    "y": 261,
+    "w": 1024,
+    "h": 128
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 1024,
+    "h": 128
+   },
+   "sourceSize": {
+    "w": 1024,
+    "h": 128
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "lance_beam_07": {
+   "frame": {
+    "x": 1027,
+    "y": 261,
+    "w": 1024,
+    "h": 128
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 1024,
+    "h": 128
+   },
+   "sourceSize": {
+    "w": 1024,
+    "h": 128
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "lance_beam_08": {
+   "frame": {
+    "x": 2053,
+    "y": 261,
+    "w": 1024,
+    "h": 128
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 1024,
+    "h": 128
+   },
+   "sourceSize": {
+    "w": 1024,
+    "h": 128
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "lance_beam_09": {
+   "frame": {
+    "x": 1,
+    "y": 391,
+    "w": 1024,
+    "h": 128
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 1024,
+    "h": 128
+   },
+   "sourceSize": {
+    "w": 1024,
+    "h": 128
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "lance_beam_10": {
+   "frame": {
+    "x": 1027,
+    "y": 391,
+    "w": 1024,
+    "h": 128
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 1024,
+    "h": 128
+   },
+   "sourceSize": {
+    "w": 1024,
+    "h": 128
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "lance_beam_11": {
+   "frame": {
+    "x": 2053,
+    "y": 391,
+    "w": 1024,
+    "h": 128
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 1024,
+    "h": 128
+   },
+   "sourceSize": {
+    "w": 1024,
+    "h": 128
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  }
+ },
+ "animations": {
+  "lance_beam": [
+   "lance_beam_00",
+   "lance_beam_01",
+   "lance_beam_02",
+   "lance_beam_03",
+   "lance_beam_04",
+   "lance_beam_05",
+   "lance_beam_06",
+   "lance_beam_07",
+   "lance_beam_08",
+   "lance_beam_09",
+   "lance_beam_10",
+   "lance_beam_11"
+  ]
+ },
+ "meta": {
+  "image": "lance_beam.webp",
+  "size": {
+   "w": 3078,
+   "h": 520
+  },
+  "scale": "1",
+  "blend": "add",
+  "fps": 24
+ }
+}

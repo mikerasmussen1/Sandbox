@@ -1,0 +1,44 @@
+{
+ "frames": {
+  "hunters_mark_00": {
+   "frame": {
+    "x": 1,
+    "y": 1,
+    "w": 256,
+    "h": 256
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 256,
+    "h": 256
+   },
+   "sourceSize": {
+    "w": 256,
+    "h": 256
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  }
+ },
+ "animations": {
+  "hunters_mark": [
+   "hunters_mark_00"
+  ]
+ },
+ "meta": {
+  "image": "hunters_mark.webp",
+  "size": {
+   "w": 258,
+   "h": 258
+  },
+  "scale": "1",
+  "blend": "add",
+  "fps": 0,
+  "engine_motion": "rotate 360 deg per 1.2 s, alpha pulse 0.75..1.0"
+ }
+}

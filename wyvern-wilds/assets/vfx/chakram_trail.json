@@ -1,0 +1,218 @@
+{
+ "frames": {
+  "chakram_trail_00": {
+   "frame": {
+    "x": 1,
+    "y": 1,
+    "w": 256,
+    "h": 64
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 256,
+    "h": 64
+   },
+   "sourceSize": {
+    "w": 256,
+    "h": 64
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "chakram_trail_01": {
+   "frame": {
+    "x": 259,
+    "y": 1,
+    "w": 256,
+    "h": 64
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 256,
+    "h": 64
+   },
+   "sourceSize": {
+    "w": 256,
+    "h": 64
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "chakram_trail_02": {
+   "frame": {
+    "x": 517,
+    "y": 1,
+    "w": 256,
+    "h": 64
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 256,
+    "h": 64
+   },
+   "sourceSize": {
+    "w": 256,
+    "h": 64
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "chakram_trail_03": {
+   "frame": {
+    "x": 775,
+    "y": 1,
+    "w": 256,
+    "h": 64
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 256,
+    "h": 64
+   },
+   "sourceSize": {
+    "w": 256,
+    "h": 64
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "chakram_trail_04": {
+   "frame": {
+    "x": 1033,
+    "y": 1,
+    "w": 256,
+    "h": 64
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 256,
+    "h": 64
+   },
+   "sourceSize": {
+    "w": 256,
+    "h": 64
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "chakram_trail_05": {
+   "frame": {
+    "x": 1291,
+    "y": 1,
+    "w": 256,
+    "h": 64
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 256,
+    "h": 64
+   },
+   "sourceSize": {
+    "w": 256,
+    "h": 64
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "chakram_trail_06": {
+   "frame": {
+    "x": 1549,
+    "y": 1,
+    "w": 256,
+    "h": 64
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 256,
+    "h": 64
+   },
+   "sourceSize": {
+    "w": 256,
+    "h": 64
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "chakram_trail_07": {
+   "frame": {
+    "x": 1807,
+    "y": 1,
+    "w": 256,
+    "h": 64
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 256,
+    "h": 64
+   },
+   "sourceSize": {
+    "w": 256,
+    "h": 64
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  }
+ },
+ "animations": {
+  "chakram_trail": [
+   "chakram_trail_00",
+   "chakram_trail_01",
+   "chakram_trail_02",
+   "chakram_trail_03",
+   "chakram_trail_04",
+   "chakram_trail_05",
+   "chakram_trail_06",
+   "chakram_trail_07"
+  ]
+ },
+ "meta": {
+  "image": "chakram_trail.webp",
+  "size": {
+   "w": 2064,
+   "h": 66
+  },
+  "scale": "1",
+  "blend": "add",
+  "fps": 24
+ }
+}

@@ -1,0 +1,618 @@
+{
+ "frames": {
+  "vortex_00": {
+   "frame": {
+    "x": 1,
+    "y": 1,
+    "w": 384,
+    "h": 384
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 384,
+    "h": 384
+   },
+   "sourceSize": {
+    "w": 384,
+    "h": 384
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "vortex_01": {
+   "frame": {
+    "x": 387,
+    "y": 1,
+    "w": 384,
+    "h": 384
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 384,
+    "h": 384
+   },
+   "sourceSize": {
+    "w": 384,
+    "h": 384
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "vortex_02": {
+   "frame": {
+    "x": 773,
+    "y": 1,
+    "w": 384,
+    "h": 384
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 384,
+    "h": 384
+   },
+   "sourceSize": {
+    "w": 384,
+    "h": 384
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "vortex_03": {
+   "frame": {
+    "x": 1159,
+    "y": 1,
+    "w": 384,
+    "h": 384
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 384,
+    "h": 384
+   },
+   "sourceSize": {
+    "w": 384,
+    "h": 384
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "vortex_04": {
+   "frame": {
+    "x": 1545,
+    "y": 1,
+    "w": 384,
+    "h": 384
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 384,
+    "h": 384
+   },
+   "sourceSize": {
+    "w": 384,
+    "h": 384
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "vortex_05": {
+   "frame": {
+    "x": 1931,
+    "y": 1,
+    "w": 384,
+    "h": 384
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 384,
+    "h": 384
+   },
+   "sourceSize": {
+    "w": 384,
+    "h": 384
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "vortex_06": {
+   "frame": {
+    "x": 2317,
+    "y": 1,
+    "w": 384,
+    "h": 384
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 384,
+    "h": 384
+   },
+   "sourceSize": {
+    "w": 384,
+    "h": 384
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "vortex_07": {
+   "frame": {
+    "x": 2703,
+    "y": 1,
+    "w": 384,
+    "h": 384
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 384,
+    "h": 384
+   },
+   "sourceSize": {
+    "w": 384,
+    "h": 384
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "vortex_08": {
+   "frame": {
+    "x": 3089,
+    "y": 1,
+    "w": 384,
+    "h": 384
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 384,
+    "h": 384
+   },
+   "sourceSize": {
+    "w": 384,
+    "h": 384
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "vortex_09": {
+   "frame": {
+    "x": 3475,
+    "y": 1,
+    "w": 384,
+    "h": 384
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 384,
+    "h": 384
+   },
+   "sourceSize": {
+    "w": 384,
+    "h": 384
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "vortex_10": {
+   "frame": {
+    "x": 1,
+    "y": 387,
+    "w": 384,
+    "h": 384
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 384,
+    "h": 384
+   },
+   "sourceSize": {
+    "w": 384,
+    "h": 384
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "vortex_11": {
+   "frame": {
+    "x": 387,
+    "y": 387,
+    "w": 384,
+    "h": 384
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 384,
+    "h": 384
+   },
+   "sourceSize": {
+    "w": 384,
+    "h": 384
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "vortex_12": {
+   "frame": {
+    "x": 773,
+    "y": 387,
+    "w": 384,
+    "h": 384
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 384,
+    "h": 384
+   },
+   "sourceSize": {
+    "w": 384,
+    "h": 384
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "vortex_13": {
+   "frame": {
+    "x": 1159,
+    "y": 387,
+    "w": 384,
+    "h": 384
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 384,
+    "h": 384
+   },
+   "sourceSize": {
+    "w": 384,
+    "h": 384
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "vortex_14": {
+   "frame": {
+    "x": 1545,
+    "y": 387,
+    "w": 384,
+    "h": 384
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 384,
+    "h": 384
+   },
+   "sourceSize": {
+    "w": 384,
+    "h": 384
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "vortex_15": {
+   "frame": {
+    "x": 1931,
+    "y": 387,
+    "w": 384,
+    "h": 384
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 384,
+    "h": 384
+   },
+   "sourceSize": {
+    "w": 384,
+    "h": 384
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "vortex_16": {
+   "frame": {
+    "x": 2317,
+    "y": 387,
+    "w": 384,
+    "h": 384
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 384,
+    "h": 384
+   },
+   "sourceSize": {
+    "w": 384,
+    "h": 384
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "vortex_17": {
+   "frame": {
+    "x": 2703,
+    "y": 387,
+    "w": 384,
+    "h": 384
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 384,
+    "h": 384
+   },
+   "sourceSize": {
+    "w": 384,
+    "h": 384
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "vortex_18": {
+   "frame": {
+    "x": 3089,
+    "y": 387,
+    "w": 384,
+    "h": 384
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 384,
+    "h": 384
+   },
+   "sourceSize": {
+    "w": 384,
+    "h": 384
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "vortex_19": {
+   "frame": {
+    "x": 3475,
+    "y": 387,
+    "w": 384,
+    "h": 384
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 384,
+    "h": 384
+   },
+   "sourceSize": {
+    "w": 384,
+    "h": 384
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "vortex_20": {
+   "frame": {
+    "x": 1,
+    "y": 773,
+    "w": 384,
+    "h": 384
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 384,
+    "h": 384
+   },
+   "sourceSize": {
+    "w": 384,
+    "h": 384
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "vortex_21": {
+   "frame": {
+    "x": 387,
+    "y": 773,
+    "w": 384,
+    "h": 384
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 384,
+    "h": 384
+   },
+   "sourceSize": {
+    "w": 384,
+    "h": 384
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "vortex_22": {
+   "frame": {
+    "x": 773,
+    "y": 773,
+    "w": 384,
+    "h": 384
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 384,
+    "h": 384
+   },
+   "sourceSize": {
+    "w": 384,
+    "h": 384
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  },
+  "vortex_23": {
+   "frame": {
+    "x": 1159,
+    "y": 773,
+    "w": 384,
+    "h": 384
+   },
+   "rotated": false,
+   "trimmed": false,
+   "spriteSourceSize": {
+    "x": 0,
+    "y": 0,
+    "w": 384,
+    "h": 384
+   },
+   "sourceSize": {
+    "w": 384,
+    "h": 384
+   },
+   "anchor": {
+    "x": 0.5,
+    "y": 0.5
+   }
+  }
+ },
+ "animations": {
+  "vortex": [
+   "vortex_00",
+   "vortex_01",
+   "vortex_02",
+   "vortex_03",
+   "vortex_04",
+   "vortex_05",
+   "vortex_06",
+   "vortex_07",
+   "vortex_08",
+   "vortex_09",
+   "vortex_10",
+   "vortex_11",
+   "vortex_12",
+   "vortex_13",
+   "vortex_14",
+   "vortex_15",
+   "vortex_16",
+   "vortex_17",
+   "vortex_18",
+   "vortex_19",
+   "vortex_20",
+   "vortex_21",
+   "vortex_22",
+   "vortex_23"
+  ]
+ },
+ "meta": {
+  "image": "vortex.webp",
+  "size": {
+   "w": 3860,
+   "h": 1158
+  },
+  "scale": "1",
+  "blend": "add",
+  "fps": 20
+ }
+}

@@ -31,6 +31,7 @@ jobs:
         run: |
           cp -a auric-dynamo sunstone-siege/dist/auric-dynamo
           cp -a lantern-tide sunstone-siege/dist/lantern-tide
+          cp -a wyvern-wilds sunstone-siege/dist/wyvern-wilds
       - uses: actions/upload-pages-artifact@v3
         with:
           path: sunstone-siege/dist

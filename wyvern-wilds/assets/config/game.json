@@ -1,0 +1,45 @@
+{
+  "title": "Wyvern Wilds",
+  "tagline": "The isles are waking",
+  "visitMs": 150000,
+  "riftMs": 2500,
+  "reducedRiftMs": 400,
+  "bossMs": 36000,
+  "turretTiers": ["T0", "T1", "T2"],
+  "lanceTurret": "T5",
+  "weapons": [
+    { "id": "ballista", "label": "Ballista", "bolt": "muzzle_flash" },
+    { "id": "chakram", "label": "Razorwing Chakram", "bolt": "P1" },
+    { "id": "thunderseed", "label": "Thunderseed Mortar", "bolt": "P2" }
+  ],
+  "biomes": [
+    { "id": "canopy", "name": "Glowcap Canopy", "plate": "bg_canopy", "music": "mus_canopy", "boss": "B1" },
+    { "id": "rimefall", "name": "Rimefall Steppe", "plate": "bg_rimefall", "music": "mus_rimefall", "boss": "B2" },
+    { "id": "saltglass", "name": "Saltglass Flats", "plate": "bg_saltglass", "music": "mus_saltglass", "boss": "B1" },
+    { "id": "cinderforge", "name": "Cinderforge Caldera", "plate": "bg_cinderforge", "music": "mus_cinderforge", "boss": "B2" }
+  ],
+  "species": [
+    { "id": "S1", "name": "Glimmerskink", "size": "S", "weight": 22, "biomes": ["canopy", "rimefall", "saltglass", "cinderforge"], "art": { "rimefall": "S1F", "cinderforge": "S1C" } },
+    { "id": "S2", "name": "Puffquill", "size": "S", "weight": 16, "biomes": ["canopy", "rimefall", "saltglass", "cinderforge"], "art": { "rimefall": "S2F" } },
+    { "id": "S3", "name": "Mossnub", "size": "S", "weight": 14, "biomes": ["canopy", "saltglass"] },
+    { "id": "S4", "name": "Cinderkite", "size": "S", "weight": 12, "biomes": ["canopy", "rimefall", "saltglass", "cinderforge"] },
+    { "id": "S5", "name": "Pebbleback", "size": "S", "weight": 12, "biomes": ["canopy", "saltglass", "cinderforge"], "art": { "cinderforge": "S5C" } },
+    { "id": "M1", "name": "Thornplate Grazer", "size": "M", "weight": 8, "biomes": ["canopy", "saltglass"] },
+    { "id": "M2", "name": "Tricrown Ram", "size": "M", "weight": 7, "biomes": ["canopy", "cinderforge"] },
+    { "id": "M3", "name": "Mirefin Crawler", "size": "M", "weight": 6, "biomes": ["canopy", "saltglass"] },
+    { "id": "M4", "name": "Frostmane Stalker", "size": "M", "weight": 8, "biomes": ["rimefall"] },
+    { "id": "M5", "name": "Geodeclub Bastion", "size": "M", "weight": 6, "biomes": ["canopy", "cinderforge"] },
+    { "id": "M1G", "name": "Sunsealed Thornplate Grazer", "size": "M", "weight": 2, "biomes": ["canopy", "saltglass"] },
+    { "id": "M2G", "name": "Sunsealed Tricrown Ram", "size": "M", "weight": 2, "biomes": ["canopy"] },
+    { "id": "M3G", "name": "Sunsealed Mirefin Crawler", "size": "M", "weight": 2, "biomes": ["saltglass"] },
+    { "id": "M5G", "name": "Sunsealed Geodeclub Bastion", "size": "M", "weight": 2, "biomes": ["cinderforge"] },
+    { "id": "L1", "name": "Drumhorn", "size": "L", "weight": 3, "biomes": ["rimefall"] },
+    { "id": "L2", "name": "Skyneck Colossus", "size": "L", "weight": 3, "biomes": ["canopy", "saltglass"] },
+    { "id": "X1", "name": "Lanternback Tortoise", "size": "X", "weight": 2, "biomes": ["canopy", "rimefall", "saltglass", "cinderforge"] },
+    { "id": "K2", "name": "Riftseed", "size": "K", "weight": 2, "biomes": ["canopy", "rimefall", "saltglass", "cinderforge"] },
+    { "id": "B1", "name": "Aurorath, the Gyre Wyvern", "size": "B", "weight": 0, "biomes": ["canopy", "saltglass"] },
+    { "id": "B2", "name": "Basaltjaw, the Cinder Tyrant", "size": "B", "weight": 0, "biomes": ["rimefall", "cinderforge"] },
+    { "id": "K1", "name": "Ember Cache", "size": "K", "weight": 0, "biomes": [] },
+    { "id": "E1", "name": "Sunstone Egg", "size": "E", "weight": 0, "biomes": [] }
+  ]
+}
