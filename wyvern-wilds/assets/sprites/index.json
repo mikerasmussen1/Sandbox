@@ -1,0 +1,386 @@
+{
+ "sprites": {
+  "B1": {
+   "pages": {
+    "single": "B1.json"
+   },
+   "mirror": {}
+  },
+  "B2": {
+   "pages": {
+    "e": "B2_e.json",
+    "ne": "B2_ne.json",
+    "se": "B2_se.json"
+   },
+   "mirror": {
+    "e": "w",
+    "ne": "nw",
+    "se": "sw"
+   }
+  },
+  "COIN": {
+   "pages": {
+    "single": "COIN.json"
+   },
+   "mirror": {}
+  },
+  "E1": {
+   "pages": {
+    "single": "E1.json"
+   },
+   "mirror": {}
+  },
+  "K1": {
+   "pages": {
+    "single": "K1.json"
+   },
+   "mirror": {}
+  },
+  "K2": {
+   "pages": {
+    "single": "K2.json"
+   },
+   "mirror": {}
+  },
+  "L1": {
+   "pages": {
+    "e": "L1_e.json",
+    "n": "L1_n.json",
+    "ne": "L1_ne.json",
+    "s": "L1_s.json",
+    "se": "L1_se.json"
+   },
+   "mirror": {
+    "e": "w",
+    "ne": "nw",
+    "se": "sw"
+   }
+  },
+  "L2": {
+   "pages": {
+    "e": "L2_e.json",
+    "n": "L2_n.json",
+    "ne": "L2_ne.json",
+    "s": "L2_s.json",
+    "se": "L2_se.json"
+   },
+   "mirror": {
+    "e": "w",
+    "ne": "nw",
+    "se": "sw"
+   }
+  },
+  "M1G": {
+   "pages": {
+    "e": "M1G_e.json",
+    "n": "M1G_n.json",
+    "ne": "M1G_ne.json",
+    "s": "M1G_s.json",
+    "se": "M1G_se.json"
+   },
+   "mirror": {
+    "e": "w",
+    "ne": "nw",
+    "se": "sw"
+   }
+  },
+  "M1": {
+   "pages": {
+    "e": "M1_e.json",
+    "n": "M1_n.json",
+    "ne": "M1_ne.json",
+    "s": "M1_s.json",
+    "se": "M1_se.json"
+   },
+   "mirror": {
+    "e": "w",
+    "ne": "nw",
+    "se": "sw"
+   }
+  },
+  "M2G": {
+   "pages": {
+    "e": "M2G_e.json",
+    "n": "M2G_n.json",
+    "ne": "M2G_ne.json",
+    "s": "M2G_s.json",
+    "se": "M2G_se.json"
+   },
+   "mirror": {
+    "e": "w",
+    "ne": "nw",
+    "se": "sw"
+   }
+  },
+  "M2": {
+   "pages": {
+    "e": "M2_e.json",
+    "n": "M2_n.json",
+    "ne": "M2_ne.json",
+    "s": "M2_s.json",
+    "se": "M2_se.json"
+   },
+   "mirror": {
+    "e": "w",
+    "ne": "nw",
+    "se": "sw"
+   }
+  },
+  "M3G": {
+   "pages": {
+    "e": "M3G_e.json",
+    "n": "M3G_n.json",
+    "ne": "M3G_ne.json",
+    "s": "M3G_s.json",
+    "se": "M3G_se.json"
+   },
+   "mirror": {
+    "e": "w",
+    "ne": "nw",
+    "se": "sw"
+   }
+  },
+  "M3": {
+   "pages": {
+    "e": "M3_e.json",
+    "n": "M3_n.json",
+    "ne": "M3_ne.json",
+    "s": "M3_s.json",
+    "se": "M3_se.json"
+   },
+   "mirror": {
+    "e": "w",
+    "ne": "nw",
+    "se": "sw"
+   }
+  },
+  "M4": {
+   "pages": {
+    "e": "M4_e.json",
+    "n": "M4_n.json",
+    "ne": "M4_ne.json",
+    "s": "M4_s.json",
+    "se": "M4_se.json"
+   },
+   "mirror": {
+    "e": "w",
+    "ne": "nw",
+    "se": "sw"
+   }
+  },
+  "M5G": {
+   "pages": {
+    "e": "M5G_e.json",
+    "n": "M5G_n.json",
+    "ne": "M5G_ne.json",
+    "s": "M5G_s.json",
+    "se": "M5G_se.json"
+   },
+   "mirror": {
+    "e": "w",
+    "ne": "nw",
+    "se": "sw"
+   }
+  },
+  "M5": {
+   "pages": {
+    "e": "M5_e.json",
+    "n": "M5_n.json",
+    "ne": "M5_ne.json",
+    "s": "M5_s.json",
+    "se": "M5_se.json"
+   },
+   "mirror": {
+    "e": "w",
+    "ne": "nw",
+    "se": "sw"
+   }
+  },
+  "NEST": {
+   "pages": {
+    "single": "NEST.json"
+   },
+   "mirror": {}
+  },
+  "P1": {
+   "pages": {
+    "single": "P1.json"
+   },
+   "mirror": {}
+  },
+  "P2": {
+   "pages": {
+    "single": "P2.json"
+   },
+   "mirror": {}
+  },
+  "P3": {
+   "pages": {
+    "single": "P3.json"
+   },
+   "mirror": {}
+  },
+  "S1C": {
+   "pages": {
+    "e": "S1C_e.json",
+    "n": "S1C_n.json",
+    "ne": "S1C_ne.json",
+    "s": "S1C_s.json",
+    "se": "S1C_se.json"
+   },
+   "mirror": {
+    "e": "w",
+    "ne": "nw",
+    "se": "sw"
+   }
+  },
+  "S1F": {
+   "pages": {
+    "e": "S1F_e.json",
+    "n": "S1F_n.json",
+    "ne": "S1F_ne.json",
+    "s": "S1F_s.json",
+    "se": "S1F_se.json"
+   },
+   "mirror": {
+    "e": "w",
+    "ne": "nw",
+    "se": "sw"
+   }
+  },
+  "S1": {
+   "pages": {
+    "e": "S1_e.json",
+    "n": "S1_n.json",
+    "ne": "S1_ne.json",
+    "s": "S1_s.json",
+    "se": "S1_se.json"
+   },
+   "mirror": {
+    "e": "w",
+    "ne": "nw",
+    "se": "sw"
+   }
+  },
+  "S2F": {
+   "pages": {
+    "e": "S2F_e.json",
+    "n": "S2F_n.json",
+    "ne": "S2F_ne.json",
+    "s": "S2F_s.json",
+    "se": "S2F_se.json"
+   },
+   "mirror": {
+    "e": "w",
+    "ne": "nw",
+    "se": "sw"
+   }
+  },
+  "S2": {
+   "pages": {
+    "e": "S2_e.json",
+    "n": "S2_n.json",
+    "ne": "S2_ne.json",
+    "s": "S2_s.json",
+    "se": "S2_se.json"
+   },
+   "mirror": {
+    "e": "w",
+    "ne": "nw",
+    "se": "sw"
+   }
+  },
+  "S3": {
+   "pages": {
+    "e": "S3_e.json",
+    "n": "S3_n.json",
+    "ne": "S3_ne.json",
+    "s": "S3_s.json",
+    "se": "S3_se.json"
+   },
+   "mirror": {
+    "e": "w",
+    "ne": "nw",
+    "se": "sw"
+   }
+  },
+  "S4": {
+   "pages": {
+    "single": "S4.json"
+   },
+   "mirror": {}
+  },
+  "S5C": {
+   "pages": {
+    "e": "S5C_e.json",
+    "n": "S5C_n.json",
+    "ne": "S5C_ne.json",
+    "s": "S5C_s.json",
+    "se": "S5C_se.json"
+   },
+   "mirror": {
+    "e": "w",
+    "ne": "nw",
+    "se": "sw"
+   }
+  },
+  "S5": {
+   "pages": {
+    "e": "S5_e.json",
+    "n": "S5_n.json",
+    "ne": "S5_ne.json",
+    "s": "S5_s.json",
+    "se": "S5_se.json"
+   },
+   "mirror": {
+    "e": "w",
+    "ne": "nw",
+    "se": "sw"
+   }
+  },
+  "SEAL": {
+   "pages": {
+    "single": "SEAL.json"
+   },
+   "mirror": {}
+  },
+  "T0": {
+   "pages": {
+    "single": "T0.json"
+   },
+   "mirror": {}
+  },
+  "T1": {
+   "pages": {
+    "single": "T1.json"
+   },
+   "mirror": {}
+  },
+  "T2": {
+   "pages": {
+    "single": "T2.json"
+   },
+   "mirror": {}
+  },
+  "T5": {
+   "pages": {
+    "single": "T5.json"
+   },
+   "mirror": {}
+  },
+  "X1": {
+   "pages": {
+    "e": "X1_e.json",
+    "n": "X1_n.json",
+    "ne": "X1_ne.json",
+    "s": "X1_s.json",
+    "se": "X1_se.json"
+   },
+   "mirror": {
+    "e": "w",
+    "ne": "nw",
+    "se": "sw"
+   }
+  }
+ }
+}

@@ -1,0 +1,345 @@
+{
+  "rtp": "96.20",
+  "levels": [
+    6,
+    10,
+    16,
+    25,
+    40,
+    60,
+    90,
+    140,
+    220,
+    360,
+    560,
+    800
+  ],
+  "defaultLevel": 25,
+  "capMultiplier": 750,
+  "capCents": 450000,
+  "weapons": {
+    "ballista": {
+      "costFactor": 1,
+      "maxHits": 1,
+      "label": "Ballista"
+    },
+    "chakram": {
+      "costFactor": 4,
+      "maxHits": 5,
+      "label": "Razorwing Chakram"
+    },
+    "thunderseed": {
+      "costFactor": 7,
+      "maxHits": 6,
+      "label": "Thunderseed Mortar"
+    }
+  },
+  "species": [
+    {
+      "id": "S1",
+      "name": "Glimmerskink",
+      "pay": "4x"
+    },
+    {
+      "id": "S2",
+      "name": "Puffquill",
+      "pay": "6x"
+    },
+    {
+      "id": "S3",
+      "name": "Mossnub",
+      "pay": "9x"
+    },
+    {
+      "id": "S4",
+      "name": "Cinderkite",
+      "pay": "11x"
+    },
+    {
+      "id": "S5",
+      "name": "Pebbleback",
+      "pay": "13x"
+    },
+    {
+      "id": "M1",
+      "name": "Thornplate Grazer",
+      "pay": "18x"
+    },
+    {
+      "id": "M2",
+      "name": "Tricrown Ram",
+      "pay": "24x"
+    },
+    {
+      "id": "M3",
+      "name": "Mirefin Crawler",
+      "pay": "32x"
+    },
+    {
+      "id": "M4",
+      "name": "Frostmane Stalker",
+      "pay": "42x"
+    },
+    {
+      "id": "M5",
+      "name": "Geodeclub Bastion",
+      "pay": "55x"
+    },
+    {
+      "id": "M1G",
+      "name": "Sunsealed Thornplate Grazer",
+      "pay": "70x"
+    },
+    {
+      "id": "M2G",
+      "name": "Sunsealed Tricrown Ram",
+      "pay": "88x"
+    },
+    {
+      "id": "M3G",
+      "name": "Sunsealed Mirefin Crawler",
+      "pay": "110x"
+    },
+    {
+      "id": "M5G",
+      "name": "Sunsealed Geodeclub Bastion",
+      "pay": "140x"
+    },
+    {
+      "id": "L1",
+      "name": "Drumhorn",
+      "pay": "Bounty Ring, drumhorn"
+    },
+    {
+      "id": "L2",
+      "name": "Skyneck Colossus",
+      "pay": "Bounty Ring, colossus"
+    },
+    {
+      "id": "X1",
+      "name": "Lanternback Tortoise",
+      "pay": "Lantern Pick"
+    },
+    {
+      "id": "B1",
+      "name": "Aurorath, the Gyre Wyvern",
+      "pay": "Gyre Combo"
+    },
+    {
+      "id": "B2",
+      "name": "Basaltjaw, the Cinder Tyrant",
+      "pay": "180x"
+    },
+    {
+      "id": "K1",
+      "name": "Ember Cache",
+      "pay": "15x"
+    },
+    {
+      "id": "K2",
+      "name": "Riftseed",
+      "pay": "Riftwell"
+    },
+    {
+      "id": "E1",
+      "name": "Sunstone Egg",
+      "pay": "Sunstone Egg"
+    }
+  ],
+  "rings": [
+    {
+      "id": "L1",
+      "faces": [
+        22,
+        36,
+        54,
+        80,
+        130,
+        280
+      ]
+    },
+    {
+      "id": "L2",
+      "faces": [
+        40,
+        64,
+        96,
+        150,
+        240,
+        480
+      ]
+    },
+    {
+      "id": "nest",
+      "faces": [
+        12,
+        22,
+        36,
+        58,
+        96,
+        180
+      ]
+    },
+    {
+      "id": "hatch",
+      "faces": [
+        9,
+        16,
+        28,
+        48,
+        84,
+        150
+      ]
+    },
+    {
+      "id": "lantern",
+      "faces": [
+        28,
+        46,
+        72,
+        120,
+        210,
+        420
+      ]
+    },
+    {
+      "id": "rift",
+      "faces": [
+        14,
+        26,
+        44,
+        78,
+        140,
+        260
+      ]
+    },
+    {
+      "id": "gyre",
+      "faces": [
+        16,
+        28,
+        44,
+        72,
+        120,
+        200
+      ]
+    }
+  ],
+  "lanceClasses": [
+    3,
+    8,
+    18
+  ],
+  "spawn": [
+    {
+      "id": "S1",
+      "weight": 22,
+      "size": "S"
+    },
+    {
+      "id": "S2",
+      "weight": 16,
+      "size": "S"
+    },
+    {
+      "id": "S3",
+      "weight": 14,
+      "size": "S"
+    },
+    {
+      "id": "S4",
+      "weight": 12,
+      "size": "S"
+    },
+    {
+      "id": "S5",
+      "weight": 12,
+      "size": "S"
+    },
+    {
+      "id": "M1",
+      "weight": 8,
+      "size": "M"
+    },
+    {
+      "id": "M2",
+      "weight": 7,
+      "size": "M"
+    },
+    {
+      "id": "M3",
+      "weight": 6,
+      "size": "M"
+    },
+    {
+      "id": "M4",
+      "weight": 8,
+      "size": "M"
+    },
+    {
+      "id": "M5",
+      "weight": 6,
+      "size": "M"
+    },
+    {
+      "id": "M1G",
+      "weight": 2,
+      "size": "M"
+    },
+    {
+      "id": "M2G",
+      "weight": 2,
+      "size": "M"
+    },
+    {
+      "id": "M3G",
+      "weight": 2,
+      "size": "M"
+    },
+    {
+      "id": "M5G",
+      "weight": 2,
+      "size": "M"
+    },
+    {
+      "id": "L1",
+      "weight": 3,
+      "size": "L"
+    },
+    {
+      "id": "L2",
+      "weight": 3,
+      "size": "L"
+    },
+    {
+      "id": "X1",
+      "weight": 2,
+      "size": "X"
+    },
+    {
+      "id": "K2",
+      "weight": 2,
+      "size": "K"
+    },
+    {
+      "id": "B1",
+      "weight": 0,
+      "size": "B"
+    },
+    {
+      "id": "B2",
+      "weight": 0,
+      "size": "B"
+    },
+    {
+      "id": "K1",
+      "weight": 0,
+      "size": "K"
+    },
+    {
+      "id": "E1",
+      "weight": 0,
+      "size": "E"
+    }
+  ]
+}

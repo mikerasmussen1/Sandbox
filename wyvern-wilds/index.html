@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<script>
+if (!location.search) location.replace(location.pathname + "?demo=1" + location.hash);
+</script>
+<link rel="icon" href="data:," />
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Wyvern Wilds" />
+<meta name="theme-color" content="#140c08" />
+<title>Wyvern Wilds</title>
+<link rel="stylesheet" href="css/game.css" />
+</head>
+<body>
+<div id="boot">
+  <div class="boot-veil"></div>
+  <div class="boot-copy">
+    <p class="boot-kicker">A shooting arcade</p>
+    <h1>WYVERN WILDS</h1>
+    <p id="boot-note">The isles are waking</p>
+  </div>
+</div>
+<div id="game"></div>
+<div id="help" hidden></div>
+<script type="module" src="js/game.js"></script>
+</body>
+</html>
