@@ -4,7 +4,7 @@
  */
 import { BALANCE, TOWER_HUE, towerCost, towerRange, type RelicDef } from "./balance";
 import { poseAt, type Route } from "./geom";
-import { MAP_H, MAP_W, mapDef, type MapDef } from "./maps";
+import { clearStationGaps, MAP_H, MAP_W, mapDef, type MapDef } from "./maps";
 import type { EnemyKind, Phase, RelicId, TowerKind, Vec } from "./types";
 
 export type StationKind = TowerKind | "wall" | "barracks";
@@ -168,7 +168,10 @@ export interface Spear {
   alive: boolean;
 }
 
-export type FxKind = "impact" | "death" | "jade" | "drum" | "chain" | "crack" | "flare" | "slam" | "boss" | "place" | "streak" | "relic" | "aegis" | "rally" | "banner" | "multi" | "callout" | "collect" | "num" | "rubble";
+export type FxKind = "impact" | "death" | "jade" | "drum" | "chain" | "crack" | "flare" | "slam" | "boss" | "place" | "streak" | "relic" | "aegis" | "rally" | "banner" | "multi" | "callout" | "collect" | "num" | "rubble" | "pay" | "tick";
+
+/** How long a carried gem takes to arc from the hero onto a pad. */
+export const PAY_FLIGHT = 0.34;
 
 export interface Fx {
   kind: FxKind;
@@ -180,6 +183,9 @@ export interface Fx {
   enemy?: EnemyKind;
   /** Impact burst color. Hits also flash the raider white. */
   color?: number;
+  /** Where a carried gem is flying. */
+  tx?: number;
+  ty?: number;
 }
 
 interface QueuedSpawn {
@@ -278,6 +284,9 @@ export class Siege {
   private readonly occupied = new Set<number>();
   private readonly freeEnemies: Enemy[] = [];
   private shotCursor = 0;
+  private goal: { x: number; y: number } | null = null;
+  private fundBank = 0;
+  private readonly pours: { index: number; left: number; tier: number }[] = [];
 
   constructor(world: number) {
     this.world = world;
@@ -429,6 +438,22 @@ export class Siege {
   setSteer(x: number, y: number): void {
     this.steerX = x;
     this.steerY = y;
+  }
+
+  /** Walk in a straight line to a tapped point. A stick or key press cancels it. */
+  setGoal(x: number, y: number): void {
+    this.goal = {
+      x: Math.max(28, Math.min(MAP_W - 28, x)),
+      y: Math.max(28, Math.min(MAP_H - 28, y)),
+    };
+  }
+
+  clearGoal(): void {
+    this.goal = null;
+  }
+
+  get goalAt(): { x: number; y: number } | null {
+    return this.goal;
   }
 
   /** Price of the next tier on this station, or 0 when it is finished. */
@@ -1266,7 +1291,26 @@ export class Siege {
   private heroAct(dt: number): void {
     this.guardianCast = Math.max(0, this.guardianCast - dt);
     const len = Math.hypot(this.steerX, this.steerY);
-    if (len > 0.12) {
+    if (len > 0.2) this.goal = null;
+    let stepped = false;
+    if (this.goal) {
+      const dx = this.goal.x - this.heroX;
+      const dy = this.goal.y - this.heroY;
+      const dist = Math.hypot(dx, dy);
+      if (dist <= 5) {
+        this.heroX = this.goal.x;
+        this.heroY = this.goal.y;
+        this.goal = null;
+        this.heroMoving = false;
+      } else {
+        const step = Math.min(dist, BALANCE.hero.speed * dt);
+        this.heroX += (dx / dist) * step;
+        this.heroY += (dy / dist) * step;
+        this.guardianAim = Math.atan2(dy, dx);
+        this.heroMoving = true;
+        stepped = step > 0.4;
+      }
+    } else if (len > 0.12) {
       const nx = this.steerX / len;
       const ny = this.steerY / len;
       const step = BALANCE.hero.speed * Math.min(1, len) * dt;
@@ -1274,10 +1318,11 @@ export class Siege {
       this.heroY = Math.max(28, Math.min(MAP_H - 28, this.heroY + ny * step));
       this.guardianAim = Math.atan2(ny, nx);
       this.heroMoving = true;
-      if (step > 0.4) this.heroMoved = true;
+      stepped = step > 0.4;
     } else {
       this.heroMoving = false;
     }
+    if (stepped) this.heroMoved = true;
     this.gemAct(dt);
     this.fundAct(dt);
     this.heroFire(dt);
@@ -1380,6 +1425,25 @@ export class Siege {
   }
 
   private fundAct(dt: number): void {
+    for (let i = this.pours.length - 1; i >= 0; i--) {
+      const pour = this.pours[i];
+      pour.left -= dt;
+      if (pour.left > 0) continue;
+      this.pours.splice(i, 1);
+      const station = this.stations[pour.index];
+      const cost = station && station.tier === pour.tier ? this.stationCost(station) : 0;
+      if (!station || station.tier !== pour.tier || cost <= 0 || station.paid >= cost) {
+        this.jade += 1;
+        continue;
+      }
+      station.paid += 1;
+      this.fx.push({ kind: "tick", x: station.x, y: station.y - 24 });
+      if (station.paid >= cost - 0.001) {
+        const spent = station.paid;
+        station.paid = 0;
+        this.finishStation(station, spent);
+      }
+    }
     let best = -1;
     let bestD: number = BALANCE.fund.radius;
     for (let i = 0; i < this.stations.length; i++) {
@@ -1392,19 +1456,22 @@ export class Siege {
         best = i;
       }
     }
-    const standing = Math.hypot(this.steerX, this.steerY) <= 0.35;
-    this.funding = standing ? best : -1;
-    if (!standing || best < 0 || this.jade <= 0) return;
+    const moving = this.goal !== null || Math.hypot(this.steerX, this.steerY) > 0.35;
+    this.funding = moving ? -1 : best;
+    if (moving || best < 0 || this.jade < 1) return;
     const station = this.stations[best];
-    const left = this.stationCost(station) - station.paid;
-    const pay = Math.min(this.jade, left, BALANCE.fund.rate * dt);
-    if (pay <= 0) return;
-    this.jade -= pay;
-    station.paid += pay;
-    if (station.paid >= this.stationCost(station) - 0.001) {
-      const spent = station.paid;
-      station.paid = 0;
-      this.finishStation(station, spent);
+    const cost = this.stationCost(station);
+    this.fundBank += BALANCE.fund.rate * dt;
+    let inFlight = 0;
+    for (const pour of this.pours) if (pour.index === best) inFlight += 1;
+    while (this.fundBank >= 1 && this.jade >= 1 && cost - station.paid - inFlight >= 1) {
+      this.fundBank -= 1;
+      this.jade -= 1;
+      inFlight += 1;
+      const visible = Math.min(24, Math.floor(this.jade + 1));
+      const top = this.heroY - 40 - Math.max(0, visible - 1) * 6;
+      this.pours.push({ index: best, left: PAY_FLIGHT, tier: station.tier });
+      this.fx.push({ kind: "pay", x: this.heroX, y: top, tx: station.x, ty: station.y });
     }
   }
 
@@ -1597,6 +1664,17 @@ export class Siege {
         maxHp: 0,
         alive: false,
       });
+    });
+    const spots = stations.map((station) => ({
+      x: station.x,
+      y: station.y,
+      fixed: station.kind === "wall",
+      wall: station.kind === "wall",
+    }));
+    clearStationGaps(spots, this.map.sun, this.map.plaza);
+    stations.forEach((station, i) => {
+      station.x = spots[i].x;
+      station.y = spots[i].y;
     });
     return stations;
   }
