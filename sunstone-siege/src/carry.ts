@@ -20,10 +20,10 @@ const PITCH_Y = 5;
  * Bottom-course center above the guardian's feet. His head tops out near 37px,
  * so the lowest gems rest on the head.
  */
-const BASE_Y = -42;
+const BASE_Y = -34;
 
 /** Jade texture is 128px. This lands near a 17px gem. */
-export const CARRY_SCALE = 0.13;
+export const CARRY_SCALE = 0.09;
 
 export interface CarrySlot {
   /** Hero-local, +x right, +y down. */

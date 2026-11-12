@@ -21,11 +21,11 @@ const PLAY: Record<string, number> = {
 };
 
 const ELITE: ReadonlySet<EnemyKind> = new Set(["shield", "golem", "boss"]);
-/** Sheets are authored at 2× and were drawn at half size. Use the full frame. */
-const ENEMY_DRAW = 0.92;
-/** About 1.5× the previous guardian, so he reads as the largest person on the road. */
-const HERO_DRAW = 0.48;
-const TOWER_DRAW = 1.15;
+/** Sheets are authored large. This lands a swarmer at a few percent of a phone screen. */
+const ENEMY_DRAW = 0.48;
+/** About 7% of a portrait screen once the camera shows a third of the valley, and still taller than a swarmer. */
+const HERO_DRAW = 0.25;
+const TOWER_DRAW = 0.34;
 /** Screen-pixel radius of the build cards. The menu is scaled by 1/zoom so this stays constant. */
 const MENU_REACH = 220;
 /** Clear the Jade vault and the top bar, and the Flare button along the bottom. */
@@ -58,21 +58,21 @@ function bodyScale(kind: EnemyKind, clipDraw: number): number {
   else if (kind === "skitter") scale *= 0.58;
   else if (kind === "sapper") scale *= 0.7;
   else if (kind === "runner") scale *= 0.72;
-  else if (kind === "giant") scale *= 2.61;
+  else if (kind === "giant") scale *= 1.08;
   else if (ELITE.has(kind)) scale *= 1.1;
   return scale;
 }
 
 function towerLook(kind: TowerKind, tier: number, spec: Spec): { asset: string; tint: number; mul: number } {
-  if (spec === "rain") return { asset: "tower_dart_t3", tint: 0xffd76a, mul: 1.5 };
-  if (spec === "volley") return { asset: "tower_dart_t2", tint: 0xfff6df, mul: 1.22 };
-  if (spec === "ballista") return { asset: "tower_lens_t3", tint: 0xffe2a8, mul: 1.38 };
-  if (spec === "catapult") return { asset: "tower_lens_t2", tint: 0xd7c4a4, mul: 1.42 };
-  if (spec === "snare") return { asset: "tower_drum_t3", tint: 0xc8b6ff, mul: 1.28 };
-  if (spec === "beam") return { asset: "tower_lens_t1", tint: 0xfff1a8, mul: 1.24 };
-  if (spec === "spears") return { asset: "tower_dart_t2", tint: 0x9ecbff, mul: 1.1 };
-  if (spec === "knights") return { asset: "tower_dart_t3", tint: 0xf0d7a2, mul: 1.16 };
-  return { asset: towerAsset(kind, tier), tint: 0xffffff, mul: 1 + tier * 0.42 };
+  if (spec === "rain") return { asset: "tower_dart_t3", tint: 0xffd76a, mul: 1.16 };
+  if (spec === "volley") return { asset: "tower_dart_t2", tint: 0xfff6df, mul: 1.08 };
+  if (spec === "ballista") return { asset: "tower_lens_t3", tint: 0xffe2a8, mul: 1.14 };
+  if (spec === "catapult") return { asset: "tower_lens_t2", tint: 0xd7c4a4, mul: 1.14 };
+  if (spec === "snare") return { asset: "tower_drum_t3", tint: 0xc8b6ff, mul: 1.1 };
+  if (spec === "beam") return { asset: "tower_lens_t1", tint: 0xfff1a8, mul: 1.1 };
+  if (spec === "spears") return { asset: "tower_dart_t2", tint: 0x9ecbff, mul: 1.06 };
+  if (spec === "knights") return { asset: "tower_dart_t3", tint: 0xf0d7a2, mul: 1.08 };
+  return { asset: towerAsset(kind, tier), tint: 0xffffff, mul: 1 + tier * 0.1 };
 }
 
 interface Actor {
@@ -160,6 +160,7 @@ export class WorldView {
   private readonly mapSprite = new Sprite();
   private readonly ground = new Graphics();
   private readonly pads = new Graphics();
+  private readonly chevronGfx = new Graphics();
   private readonly range = new Graphics();
   private readonly link = new Graphics();
   private readonly bars = new Graphics();
@@ -244,13 +245,15 @@ export class WorldView {
     py: number;
     fx: number;
     fy: number;
-    phase: "rise" | "hang" | "fall" | "stuck";
+    phase: "wait" | "fall" | "stuck";
     t: number;
-    rise: number;
+    /** Seconds to wait before this arrow starts its fall, so the shower staggers. */
+    delay: number;
     dusted: boolean;
   }[] = [];
+  private readonly rainPool: Sprite[] = [];
   private readonly marks: { x: number; y: number; r: number; life: number; hot: boolean }[] = [];
-  private readonly flings: { body: Sprite; outline: Sprite; vx: number; vy: number; life: number }[] = [];
+  private readonly flings: { body: Sprite; outline: Sprite; vx: number; vy: number; life: number; hold: number }[] = [];
   private readonly shotBolts: Sprite[] = [];
   private shotUsed = 0;
   private readonly dropSprites: Sprite[] = [];
@@ -296,7 +299,7 @@ export class WorldView {
     this.mark.eventMode = "none";
     this.picker.eventMode = "passive";
     this.picker.visible = false;
-    this.world.addChild(this.ground, this.mapSprite, this.pads, this.shadowLayer, this.range, this.actors, this.link, this.bars, this.mark, this.fxLayer, this.labels, this.picker, this.tag, this.menu);
+    this.world.addChild(this.ground, this.mapSprite, this.chevronGfx, this.pads, this.shadowLayer, this.range, this.actors, this.link, this.bars, this.mark, this.fxLayer, this.labels, this.picker, this.tag, this.menu);
     this.actors.addChild(this.sun);
     this.flashRect.eventMode = "none";
     this.flashRect.blendMode = "add";
@@ -305,7 +308,7 @@ export class WorldView {
       text: "",
       style: {
         fontFamily: SANS,
-        fontSize: 40,
+        fontSize: 20,
         fill: 0xfff1c2,
         fontWeight: "bold",
         align: "center",
@@ -332,6 +335,7 @@ export class WorldView {
     this.mapSprite.texture = texture;
     this.mapSprite.width = MAP_W;
     this.mapSprite.height = MAP_H;
+    this.paintChevrons(map);
     this.plaza = map.plaza;
     this.sunAt = map.sun;
     this.sun.position.set(map.sun.x, map.sun.y);
@@ -622,7 +626,7 @@ export class WorldView {
         this.burst(event.x, event.y, color, saved ? 10 : 7);
         this.ringFx(event.x, event.y, saved ? 70 : event.n === 4 ? 48 : 28, 0xfffdf8);
         if (event.text) this.floatText(event.x, event.y - 40, event.text, 0xfff6df, 26);
-        if (saved) this.floatText(event.x, event.y - 86, "SAVED!", 0xffe08a, 36);
+        if (saved) this.floatText(event.x, event.y - 40, "SAVED!", 0xffe08a, 16);
       } else if (event.kind === "collect" && event.n) this.onCollect?.(event.n);
       else if (event.kind === "pay") this.launchPay(event.x, event.y, event.tx ?? event.x, event.ty ?? event.y);
       else if (event.kind === "num" && event.text) this.popNumber(event.x, event.y, event.text);
@@ -631,14 +635,14 @@ export class WorldView {
         this.burst(event.x, event.y, 0xb08968, 8);
       }
       else if (event.kind === "death") this.onDeath(event);
-      else if (event.kind === "loom") this.loom(event.x, event.y, event.tx ?? event.x, event.ty ?? event.y, event.n ?? BALANCE.shower.radius, event.color === 0xffd24a);
+      else if (event.kind === "loom") this.loom(event.x, event.y, event.n ?? BALANCE.shower.radius, event.color === 0xffd24a);
       else if (event.kind === "volley") {
         this.dive(event.x, event.y, event.n ?? BALANCE.shower.radius);
         this.bump(0.06);
       }
       else if (event.kind === "jade" && event.n) this.onJade(event.x, event.y, event.n);
       else if (event.kind === "multi" && event.text) {
-        this.floatText(event.x, event.y - 78, event.text, 0xfff1c2, event.n && event.n >= 10 ? 42 : 32);
+        this.floatText(event.x, event.y - 36, event.text, 0xfff1c2, event.n && event.n >= 10 ? 18 : 15);
         this.bump(event.n && event.n >= 8 ? 0.2 : 0.08);
       } else if (event.kind === "callout" && event.text) {
         this.showCallout(event.text);
@@ -695,7 +699,7 @@ export class WorldView {
   private shadowSprite(): Sprite {
     const s = new Sprite(this.art.shadow);
     s.anchor.set(0.5, 0.5);
-    s.alpha = 0.35;
+    s.alpha = 0.22;
     s.blendMode = "multiply";
     s.tint = 0x1a120c;
     s.eventMode = "none";
@@ -1012,30 +1016,29 @@ export class WorldView {
 
   private drawPads(sim: Siege): void {
     this.pads.clear();
-    this.drawChevrons(sim);
     for (const e of sim.enemies) {
       if (!e.alive) continue;
       if (e.kind === "giant") {
-        const cx = e.x + Math.cos(e.angle + 1.1) * 34;
-        const cy = e.y - 48;
-        this.pads.roundRect(cx - 5, cy, 10, 54, 3).fill({ color: 0x6b4a2a });
-        this.pads.circle(cx, cy - 4, 14).fill({ color: 0x3a2a1c });
+        const cx = e.x + Math.cos(e.angle + 1.1) * 14;
+        const cy = e.y - 18;
+        this.pads.roundRect(cx - 2, cy, 4, 16, 2).fill({ color: 0x6b4a2a });
+        this.pads.circle(cx, cy - 2, 5).fill({ color: 0x3a2a1c });
       }
       if (e.kind === "roller") {
-        const x = e.x + Math.cos(e.angle) * 36;
-        const y = e.y + Math.sin(e.angle) * 36;
-        this.pads.ellipse(x + 14, y + 28, 150, 86).fill({ color: 0x1a120c, alpha: 0.5 });
-        this.pads.circle(x, y - 8, 102).fill({ color: 0x6e6258 });
-        this.pads.circle(x - 10, y - 20, 102).fill({ color: 0x9a8b7c });
-        this.pads.circle(x - 30, y - 40, 44).fill({ color: 0xd5c7b6 });
-        this.pads.circle(x - 10, y - 20, 102).stroke({ width: 7, color: 0x3a3028, alpha: 1 });
+        const x = e.x + Math.cos(e.angle) * 18;
+        const y = e.y + Math.sin(e.angle) * 18;
+        this.pads.ellipse(x + 8, y + 14, 70, 28).fill({ color: 0x1a120c, alpha: 0.2 });
+        this.pads.circle(x, y - 6, 48).fill({ color: 0x6e6258 });
+        this.pads.circle(x - 8, y - 14, 48).fill({ color: 0x9a8b7c });
+        this.pads.circle(x - 18, y - 22, 18).fill({ color: 0xd5c7b6 });
+        this.pads.circle(x - 8, y - 14, 48).stroke({ width: 3, color: 0x3a3028, alpha: 0.9 });
         for (let k = 0; k < 4; k++) {
-          const back = 78 + (k % 2) * 26;
-          const side = (k - 1.5) * 26;
+          const back = 34 + (k % 2) * 12;
+          const side = (k - 1.5) * 12;
           const px = e.x - Math.cos(e.angle) * back + Math.cos(e.angle + Math.PI / 2) * side;
           const py = e.y - Math.sin(e.angle) * back + Math.sin(e.angle + Math.PI / 2) * side;
-          this.pads.circle(px, py + 6, 18).fill({ color: 0x1a120c, alpha: 0.4 });
-          this.pads.circle(px, py, 16).fill({ color: 0xe23b3b });
+          this.pads.circle(px, py + 3, 8).fill({ color: 0x1a120c, alpha: 0.22 });
+          this.pads.circle(px, py, 7).fill({ color: 0xe23b3b });
         }
         continue;
       }
@@ -1067,7 +1070,7 @@ export class WorldView {
       const color = padHue(station.kind);
       const hot = i === near;
       if (station.kind === "wall") this.drawWall(sim, station);
-      else if (station.tier === 0) this.brackets(station.x, station.y, hot ? 74 : 66);
+      else if (station.tier === 0) this.brackets(station.x, station.y, hot ? 46 : 40);
       const next = station.tier < 3 ? sim.stationCost(station) : 0;
       const remain = next > 0 ? Math.max(0, Math.ceil(next - station.paid)) : 0;
       const broke = sim.funding === i && sim.jade < 1 && remain > 0;
@@ -1090,7 +1093,7 @@ export class WorldView {
       const glyph = station.kind === "wall" ? "▮" : station.kind === "barracks" || station.kind === "recruit" ? "⚑" : station.kind === "base" ? "☀" : TOWER_ICON[station.kind];
       const icon = this.stationLabel(i);
       icon.text = glyph;
-      icon.style.fontSize = 28;
+      icon.style.fontSize = 16;
       icon.style.fill = 0xfff8e8;
       icon.visible = station.chosen && station.kind !== "wall" && close;
       icon.anchor.set(0.5);
@@ -1098,9 +1101,11 @@ export class WorldView {
       icon.zIndex = station.y + 4;
       const cost = this.stationCostLabel(i);
       cost.text = open ? String(shown) : next > 0 ? String(remain) : "MAX";
-      cost.style.fontSize = 36;
+      cost.style.fontSize = 18;
       cost.style.fill = broke ? 0xffb089 : 0xfff6df;
-      cost.visible = true;
+      const covered = Math.hypot(station.x - hero.x, station.y - hero.y) < 48;
+      cost.visible = !covered;
+      if (covered) icon.visible = false;
       const shake = broke && !this.reduced ? Math.sin(this.time * 48) * 3.5 : 0;
       cost.position.set(station.x + shake, station.y - 16);
       cost.zIndex = station.y + 5;
@@ -1113,7 +1118,7 @@ export class WorldView {
         if (clip) {
           ghost.texture = clip.frames[0]?.[0] ?? Texture.EMPTY;
           ghost.anchor.set(clip.anchorX, clip.anchorY);
-          ghost.scale.set(clip.draw * TOWER_DRAW * 1.45);
+          ghost.scale.set(clip.draw * TOWER_DRAW);
         }
         ghost.tint = color;
         ghost.alpha = 0.72;
@@ -1127,7 +1132,7 @@ export class WorldView {
       }
       const hint = this.stationHint(i);
       hint.text = empty && close && station.chosen && station.kind !== "wall" ? ROLE_HINT[station.kind] : "";
-      hint.visible = hint.text.length > 0;
+      hint.visible = hint.text.length > 0 && Math.hypot(station.x - hero.x, station.y - hero.y) > 100;
       hint.position.set(station.x, station.y - 62);
       hint.zIndex = station.y + 6;
       if (hot && isTower(station.kind) && station.tier < 3) {
@@ -1216,8 +1221,9 @@ export class WorldView {
     this.pads.stroke({ width: 5, color: 0xfff6ea, alpha: 0.95 });
   }
 
-  private drawChevrons(sim: Siege): void {
-    for (const route of sim.map.routes) {
+  private paintChevrons(map: MapDef): void {
+    this.chevronGfx.clear();
+    for (const route of map.routes) {
       let walked = 0;
       let next = 150;
       for (let i = 1; i < route.pts.length; i++) {
@@ -1229,18 +1235,18 @@ export class WorldView {
           const x = a.x + (b.x - a.x) * t;
           const y = a.y + (b.y - a.y) * t;
           const ang = Math.atan2(b.y - a.y, b.x - a.x);
-          const tip = 22;
-          const back = 16;
-          const wide = 14;
+          const tip = 14;
+          const back = 9;
+          const wide = 8;
           const nx = Math.cos(ang);
           const ny = Math.sin(ang);
           const px = -ny;
           const py = nx;
-          this.pads.poly([
+          this.chevronGfx.poly([
             x + nx * tip, y + ny * tip,
             x - nx * back + px * wide, y - ny * back + py * wide,
             x - nx * back - px * wide, y - ny * back - py * wide,
-          ]).fill({ color: 0xfff3d2, alpha: 0.72 });
+          ]).fill({ color: 0xfff6df, alpha: 0.9 });
           next += 210;
         }
         walked += sl;
@@ -1267,11 +1273,12 @@ export class WorldView {
       this.pads.roundRect(x - 5, y - 16, 10, broken ? 8 : 28, 2).fill({ color, alpha: broken ? 0.45 : 0.95 });
       if (tier >= 2 && alive) this.pads.poly([x, y - 22, x - 7, y - 12, x + 7, y - 12]).fill({ color: 0xd7dde6, alpha: 0.9 });
     }
-    if (alive && station.hurt > 0 && station.maxHp > 0) {
+    const heroOn = Math.hypot(pose.x - sim.heroX, pose.y - sim.heroY) < 56;
+    if (alive && station.hurt > 0 && station.maxHp > 0 && !heroOn) {
       const w = span * 1.6;
       const u = Math.max(0, station.hp / station.maxHp);
       const bx = pose.x - w / 2;
-      const by = pose.y - 36;
+      const by = pose.y - 52;
       this.pads.roundRect(bx, by, w, 8, 3).fill({ color: 0x102033, alpha: 0.9 });
       this.pads.roundRect(bx, by, w * u, 8, 3).fill({ color: 0x4aa3ff, alpha: 0.95 });
     }
@@ -1370,7 +1377,7 @@ export class WorldView {
           text: "",
           style: {
             fontFamily: SANS,
-            fontSize: 15,
+            fontSize: 11,
             fill: 0xf4ffe8,
             fontWeight: "bold",
             stroke: { color: 0x14301c, width: 4 },
@@ -1383,7 +1390,7 @@ export class WorldView {
       const top = slots[slots.length - 1];
       this.carryBadge.visible = true;
       this.carryBadge.text = `x${total}`;
-      this.carryBadge.position.set(hero.x + lean, hero.y + top.y - 11);
+      this.carryBadge.position.set(hero.x + lean, hero.y + top.y - 20);
       this.carryBadge.zIndex = hero.y + 48;
     } else if (this.carryBadge) this.carryBadge.visible = false;
     const dt = step > 0 ? step : 0.016;
@@ -1424,7 +1431,7 @@ export class WorldView {
       sprite.position.set(gem.x, gem.y);
       const bob = Math.sin(this.time * 6 + gem.id) * 3;
       sprite.y = gem.y + bob;
-      sprite.scale.set(0.46);
+      sprite.scale.set(0.11);
       sprite.alpha = gem.life < 1.6 ? 0.35 + Math.sin(this.time * 14) * 0.35 : 1;
       n += 1;
     }
@@ -1436,7 +1443,8 @@ export class WorldView {
     for (const shot of sim.shots) {
       if (!shot.alive) continue;
       const color = shot.family === "hero" ? 0xffe08a : TOWER_HUE[shot.family];
-      const fans = shot.family === "dart" ? 6 : 1;
+      if (shot.rain) continue;
+      const fans = shot.family === "dart" ? 1 : 1;
       const dx = shot.x - shot.px;
       const dy = shot.y - shot.py;
       const len = Math.hypot(dx, dy) || 1;
@@ -1457,10 +1465,10 @@ export class WorldView {
     bolt.rotation = Math.atan2(shot.y - shot.py, shot.x - shot.px);
     const fat = shot.family === "lens" ? 2.4 : shot.family === "spire" ? 0.7 + shot.tier * 0.22 : 0.85 + shot.tier * 0.12;
     if (shot.family === "dart") {
-      bolt.scale.set(head ? 1.25 : 0.9, 0.28);
+      bolt.scale.set(head ? 0.22 : 0.16, 0.08);
       bolt.tint = 0xfffdf6;
     } else if (shot.family === "lens") {
-      bolt.scale.set(2.6, 0.38);
+      bolt.scale.set(0.48, 0.16);
       bolt.tint = 0xfffaf0;
     } else {
       bolt.scale.set(head ? fat : fat * 0.72);
@@ -1472,7 +1480,7 @@ export class WorldView {
     const span = 18 + shot.tier * 10;
     trail.position.set(shot.x + ox - ((shot.x - shot.px) / (Math.hypot(shot.x - shot.px, shot.y - shot.py) || 1)) * span, shot.y + oy);
     trail.rotation = bolt.rotation;
-    trail.scale.set(0.35 + shot.tier * 0.08, 1.4 + shot.tier * 0.45);
+    trail.scale.set(shot.family === "dart" ? 0.14 : 0.22, shot.family === "dart" ? 0.1 : 0.22);
     trail.tint = color;
     trail.alpha = 0.75;
     trail.blendMode = "add";
@@ -1652,7 +1660,7 @@ export class WorldView {
         this.heroLine.texture = tex;
         this.heroBody.scale.set(HERO_DRAW);
         this.heroLine.scale.set(HERO_DRAW * 1.18);
-        const bob = sim.heroMoving ? Math.abs(Math.sin(this.heroTime * 11)) * -7 : Math.sin(this.time * 2.2) * -2;
+        const bob = sim.heroMoving ? Math.abs(Math.sin(this.heroTime * 11)) * -3 : Math.sin(this.time * 2.2) * -1;
         const lean = throwing ? Math.cos(sim.guardianAim) * 6 : 0;
         this.heroBody.position.set(lean, bob);
         this.heroLine.position.set(1 + lean, 2 + bob);
@@ -1660,16 +1668,16 @@ export class WorldView {
     }
     this.heroRing.clear();
     const pulse = sim.heroMoving ? 1 + Math.abs(Math.sin(this.heroTime * 11)) * 0.28 : 1;
-    this.heroRing.ellipse(0, 10, 28 * pulse, 12).fill({ color: 0x0c1a10, alpha: 0.62 });
-    this.heroRing.ellipse(0, 6, 20, 9).stroke({ width: 3, color: 0xffe08a, alpha: 0.95 });
+    this.heroRing.ellipse(0, 3, 14 * pulse, 5).fill({ color: 0x1a2418, alpha: 0.22 });
+    this.heroRing.ellipse(0, 2, 10, 4).stroke({ width: 1.5, color: 0xffe08a, alpha: 0.55 });
     if (sim.guardianCast > 0) {
       const sweep = 1 - sim.guardianCast / Math.max(0.05, BALANCE.hero.cast);
-      this.heroRing.arc(0, -6, 54, sim.guardianAim - 1.05, sim.guardianAim - 1.05 + sweep * 2.1).stroke({ width: 8, color: 0xfff6df, alpha: 0.9 });
+      this.heroRing.arc(0, -4, 22, sim.guardianAim - 0.8, sim.guardianAim - 0.8 + sweep * 1.6).stroke({ width: 3, color: 0xfff6df, alpha: 0.85 });
     }
     const onPad = sim.stations.some((station) => station.tier < 3 && Math.hypot(station.x - at.x, station.y - at.y) < BALANCE.fund.radius + 8);
     if (onPad && !sim.heroMoving) {
-      const bob = Math.sin(this.time * 7) * 8;
-      this.heroRing.poly([0, -78 + bob, -12, -58 + bob, 12, -58 + bob]).fill({ color: 0xfff3c4, alpha: 0.95 });
+      const bob = Math.sin(this.time * 7) * 3;
+      this.heroRing.poly([0, -46 + bob, -5, -38 + bob, 5, -38 + bob]).fill({ color: 0xfff3c4, alpha: 0.9 });
     }
   }
 
@@ -1814,7 +1822,7 @@ export class WorldView {
         this.puffs.splice(i, 1);
         continue;
       }
-      this.pads.circle(puff.x, puff.y - 6, 8 + u * 26).fill({ color: 0xfff8f4, alpha: (1 - u) * 0.9 });
+      this.pads.circle(puff.x, puff.y - 4, 4 + u * 8).fill({ color: 0xfff8f4, alpha: (1 - u) * 0.85 });
     }
   }
 
@@ -1897,14 +1905,14 @@ export class WorldView {
 
   private onDeath(event: Fx): void {
     const small = event.enemy === "skitter" || event.enemy === "runner" || event.enemy === "shard" || event.enemy === "glider" || event.enemy === "jaguar";
-    this.burst(event.x, event.y, 0xffffff, small ? 14 : 10);
-    this.puffs.push({ x: event.x, y: event.y, life: 0, max: small ? 0.2 : 0.32 });
-    if (small) this.flingNearest(event.x, event.y);
+    this.burst(event.x, event.y, 0xffffff, small ? 4 : 8);
+    if (this.puffs.length < 28) this.puffs.push({ x: event.x, y: event.y, life: 0, max: small ? 0.16 : 0.28 });
+    if (small) this.flingNearest(event.x, event.y, Math.random() * 0.16);
     else this.bump(0.2);
   }
 
   /** Pop the body off the road so a swarm death reads as a fling, not a fade. */
-  private flingNearest(x: number, y: number): void {
+  private flingNearest(x: number, y: number, hold = 0): void {
     let id = 0;
     let actor: Actor | null = null;
     let best = 72;
@@ -1922,54 +1930,76 @@ export class WorldView {
     this.flings.push({
       body: actor.body,
       outline: actor.outline,
-      vx: (Math.random() - 0.5) * 260,
-      vy: -280 - Math.random() * 90,
-      life: 0.42,
+      vx: (Math.random() - 0.5) * 140,
+      vy: -120 - Math.random() * 50,
+      life: 0.36,
+      hold,
     });
   }
 
-  /** A cloud of arrows climbs over the spot the volley has chosen. */
-  private loom(x: number, y: number, fromX: number, fromY: number, radius: number, golden = false): void {
+  private takeRain(): Sprite {
+    const s = this.rainPool.pop();
+    if (s) {
+      s.visible = true;
+      s.alpha = 1;
+      return s;
+    }
+    const made = new Sprite(this.art.frame("fx-dart"));
+    made.anchor.set(0.5, 0.85);
+    made.eventMode = "none";
+    this.fxLayer.addChild(made);
+    return made;
+  }
+
+  private dropRain(s: Sprite): void {
+    s.visible = false;
+    this.rainPool.push(s);
+  }
+
+  /** A dense cloud of small arrows hangs over the spot the volley has chosen. */
+  private loom(x: number, y: number, radius: number, golden = false): void {
     this.marks.push({ x, y, r: radius, life: 0, hot: false });
-    const count = this.reduced ? 16 : golden ? 48 + Math.floor(Math.random() * 18) : 26 + Math.floor(Math.random() * 12);
+    const count = this.reduced ? 24 : golden ? 96 : 64;
+    while (this.rains.length + count > 140) {
+      const old = this.rains.findIndex((rain) => rain.phase === "stuck");
+      if (old < 0) break;
+      const gone = this.rains.splice(old, 1)[0];
+      this.dropRain(gone.s);
+    }
     for (let i = 0; i < count; i++) {
       const ang = Math.random() * Math.PI * 2;
-      const dist = Math.sqrt(Math.random()) * radius * 0.95;
+      const dist = Math.sqrt(Math.random()) * radius * 0.92;
       const gx = x + Math.cos(ang) * dist;
       const gy = y + Math.sin(ang) * dist * 0.86;
-      const s = new Sprite(this.art.frame("fx-dart"));
-      s.anchor.set(0.5, 0.85);
-      s.eventMode = "none";
-      s.tint = golden ? 0xffd24a : 0xfff8ee;
-      s.rotation = -Math.PI / 2 + (Math.random() - 0.5) * 0.5;
-      s.scale.set(golden ? 0.55 + Math.random() * 0.3 : 0.85 + Math.random() * 0.35, golden ? 0.4 : 0.55);
-      s.position.set(fromX, fromY - 24);
-      this.fxLayer.addChild(s);
+      const s = this.takeRain();
+      s.tint = golden ? 0xffd24a : 0xfff6e0;
+      s.rotation = Math.PI / 2 + (Math.random() - 0.5) * 0.25;
+      s.scale.set(0.1 + Math.random() * 0.03, 0.11 + Math.random() * 0.03);
+      const hy = gy - 64 - Math.random() * 48;
+      s.position.set(gx + (Math.random() - 0.5) * 6, hy);
       this.rains.push({
         s,
         x: gx,
         y: gy,
-        hx: gx + (Math.random() - 0.5) * 16,
-        hy: gy - 168 - Math.random() * 80,
-        px: fromX + (Math.random() - 0.5) * 18,
-        py: fromY - 24,
-        fx: fromX,
-        fy: fromY,
-        phase: "rise",
-        t: Math.random() * 0.04,
-        rise: 0.18 + Math.random() * 0.08,
+        hx: gx,
+        hy,
+        px: gx,
+        py: hy,
+        fx: gx,
+        fy: hy,
+        phase: "wait",
+        t: 0,
+        delay: 0.04 + Math.random() * 0.4,
         dusted: false,
       });
     }
   }
 
-  /** The hanging cloud dives together onto the telegraph. */
+  /** The cloud falls onto the telegraph. Each arrow keeps its own delay. */
   private dive(x: number, y: number, radius: number): void {
     for (const rain of this.rains) {
-      if (rain.phase === "stuck") continue;
-      if (Math.hypot(rain.x - x, rain.y - y) > radius * 1.35) continue;
-      rain.fx = rain.px;
-      rain.fy = rain.py;
+      if (rain.phase !== "wait") continue;
+      if (Math.hypot(rain.x - x, rain.y - y) > radius * 1.45) continue;
       rain.phase = "fall";
       rain.t = 0;
     }
@@ -2062,10 +2092,10 @@ export class WorldView {
     gem.y = y - 10;
     gem.vx = (Math.random() - 0.5) * 70;
     gem.vy = -90 - Math.random() * 50;
-    gem.life = 0;
+    gem.life = -Math.random() * 0.16;
     gem.s.visible = true;
-    gem.s.alpha = 1;
-    gem.s.scale.set(0.55);
+    gem.s.alpha = 0;
+    gem.s.scale.set(0.11);
     gem.s.position.set(gem.x, gem.y);
     this.gems.push(gem);
   }
@@ -2073,7 +2103,7 @@ export class WorldView {
   private makeGem(): Gem {
     const s = new Sprite(this.art.frame("jade"));
     s.anchor.set(0.5);
-    s.scale.set(0.55);
+    s.scale.set(0.11);
     s.eventMode = "none";
     this.fxLayer.addChild(s);
     return { s, x: 0, y: 0, vx: 0, vy: 0, life: 0, n: 0 };
@@ -2094,12 +2124,18 @@ export class WorldView {
     for (let i = this.gems.length - 1; i >= 0; i--) {
       const gem = this.gems[i];
       gem.life += dt;
+      if (gem.life < 0) {
+        gem.s.alpha = 0;
+        gem.s.position.set(gem.x, gem.y);
+        continue;
+      }
+      gem.s.alpha = 1;
       if (gem.life < 0.14) {
         gem.x += gem.vx * dt;
         gem.y += gem.vy * dt;
         gem.s.position.set(gem.x, gem.y);
         const pop = 0.85 + Math.sin(Math.min(1, gem.life / 0.14) * Math.PI) * 0.35;
-        gem.s.scale.set(0.55 * pop);
+        gem.s.scale.set(0.11 * pop);
       } else {
         const t = Math.min(1, (gem.life - 0.14) / 0.7);
         const e = t * t;
@@ -2108,7 +2144,7 @@ export class WorldView {
           gem.x + (this.gemGoal.x - gem.x) * e,
           gem.y + (this.gemGoal.y - gem.y) * e + arc,
         );
-        gem.s.scale.set(0.55 * (1 - t * 0.25));
+        gem.s.scale.set(0.11 * (1 - t * 0.25));
         gem.s.alpha = 1 - t * 0.15;
         if (t >= 1) {
           this.onCollect?.(gem.n);
@@ -2123,7 +2159,7 @@ export class WorldView {
   private burst(x: number, y: number, color: number, count: number): void {
     const n = this.reduced ? Math.min(4, count) : count;
     for (let i = 0; i < n; i++) {
-      if (this.bits.length > 300) {
+      if (this.bits.length > 80) {
         const old = this.bits.shift();
         if (old) {
           old.s.visible = false;
@@ -2170,47 +2206,38 @@ export class WorldView {
     for (let i = this.rains.length - 1; i >= 0; i--) {
       const rain = this.rains[i];
       rain.t += step;
-      if (rain.phase === "rise") {
-        const u = Math.min(1, rain.t / rain.rise);
-        const arc = Math.sin(u * Math.PI) * -36;
-        rain.px = rain.fx + (rain.hx - rain.fx) * u;
-        rain.py = rain.fy + (rain.hy - rain.fy) * u + arc;
-        rain.s.rotation = -Math.PI / 2 + (rain.hx - rain.px) * 0.01;
-        if (u >= 1) {
-          rain.phase = "hang";
-          rain.t = 0;
-        }
-      } else if (rain.phase === "hang") {
-        rain.px = rain.hx + Math.sin(rain.t * 6 + rain.x) * 3;
-        rain.py = rain.hy + Math.sin(rain.t * 8) * 4;
-        rain.s.rotation = -Math.PI / 2 + Math.sin(rain.t * 5) * 0.15;
-        if (rain.t > 0.85) {
-          rain.fx = rain.px;
-          rain.fy = rain.py;
+      if (rain.phase === "wait") {
+        rain.s.position.set(rain.hx, rain.hy + Math.sin(rain.t * 5 + rain.x) * 1.5);
+        rain.s.rotation = Math.PI / 2;
+        if (rain.t > 0.7) {
           rain.phase = "fall";
           rain.t = 0;
         }
       } else if (rain.phase === "fall") {
-        const u = Math.min(1, rain.t / 0.07);
-        const e = u * u;
-        rain.px = rain.fx + (rain.x - rain.fx) * e;
-        rain.py = rain.fy + (rain.y - rain.fy) * e;
-        rain.s.rotation = Math.PI / 2 + (rain.x - rain.px) * 0.002;
-        if (u >= 1) {
-          rain.phase = "stuck";
-          rain.t = 0;
-          rain.s.position.set(rain.x, rain.y);
-          rain.s.rotation = Math.PI / 2 + (Math.random() - 0.5) * 0.35;
-          rain.s.scale.set(0.7, 0.45);
-          if (!rain.dusted && Math.random() < 0.45) {
-            rain.dusted = true;
-            this.puffs.push({ x: rain.x, y: rain.y, life: 0, max: 0.2 });
+        if (rain.t < rain.delay) {
+          rain.s.position.set(rain.hx, rain.hy);
+          rain.s.rotation = Math.PI / 2;
+        } else {
+          const u = Math.min(1, (rain.t - rain.delay) / 0.22);
+          const e = u * u;
+          rain.py = rain.hy + (rain.y - rain.hy) * e;
+          rain.s.position.set(rain.hx, rain.py);
+          rain.s.rotation = Math.PI / 2;
+          if (u >= 1) {
+            rain.phase = "stuck";
+            rain.t = 0;
+            rain.s.position.set(rain.x, rain.y);
+            rain.s.rotation = Math.PI / 2 + (Math.random() - 0.5) * 0.4;
+            if (!rain.dusted && this.puffs.length < 24 && Math.random() < 0.35) {
+              rain.dusted = true;
+              this.puffs.push({ x: rain.x, y: rain.y, life: 0, max: 0.16 });
+            }
           }
         }
       } else {
-        rain.s.alpha = rain.t < 0.45 ? 1 : Math.max(0, 1 - (rain.t - 0.45) / 0.35);
-        if (rain.t > 0.8) {
-          rain.s.destroy();
+        rain.s.alpha = rain.t < 0.35 ? 1 : Math.max(0, 1 - (rain.t - 0.35) / 0.4);
+        if (rain.t > 0.75) {
+          this.dropRain(rain.s);
           this.rains.splice(i, 1);
           continue;
         }
@@ -2223,8 +2250,12 @@ export class WorldView {
   private drawFlings(step: number): void {
     for (let i = this.flings.length - 1; i >= 0; i--) {
       const fling = this.flings[i];
+      if (fling.hold > 0) {
+        fling.hold -= step;
+        continue;
+      }
       fling.life -= step;
-      fling.vy += 900 * step;
+      fling.vy += 700 * step;
       fling.body.x += fling.vx * step;
       fling.body.y += fling.vy * step;
       fling.outline.position.set(fling.body.x, fling.body.y + 2);
@@ -2324,6 +2355,7 @@ export class WorldView {
 
   /** A small white number that hops off a hit. Each hit keeps its own so a pack stays readable. */
   private popNumber(x: number, y: number, text: string): void {
+    if (this.floats.length > 10) return;
     if (this.floats.length > 72) {
       const oldest = this.floats.shift();
       if (oldest) {

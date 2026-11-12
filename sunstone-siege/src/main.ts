@@ -167,8 +167,9 @@ async function boot(): Promise<void> {
   setMode("title");
   layout();
 
-  const fpsOn = params.get("fps") === "1";
-  const fpsNode = fpsOn ? document.createElement("div") : null;
+  const debugOn = params.get("debug") === "1";
+  const fpsOn = debugOn || params.get("fps") === "1";
+  const fpsNode = debugOn ? document.createElement("div") : null;
   if (fpsNode) {
     fpsNode.style.cssText = "position:fixed;left:8px;bottom:8px;color:#f6e7c1;font:12px sans-serif;pointer-events:none;opacity:0.8";
     host.appendChild(fpsNode);
@@ -220,6 +221,12 @@ async function boot(): Promise<void> {
       __hero?: (x: number, y: number) => void;
       __skip?: () => void;
       __choose?: (index: number, kind: string) => boolean;
+      __spec?: (index: number, spec: string) => boolean;
+    };
+    act.__spec = (index: number, spec: string) => {
+      if (!sim) return false;
+      const at = sim.stations.findIndex((s) => s.index === index);
+      return at >= 0 ? sim.chooseSpec(at, spec as never) : false;
     };
     act.__choose = (index: number, kind: string) => {
       if (!sim) return false;
@@ -503,7 +510,8 @@ async function boot(): Promise<void> {
   function zoomLimits(w: number, h: number): { min: number; max: number; start: number } {
     const fitted = Math.min(w / MAP_W, h / MAP_H);
     const tall = h > w * 1.05;
-    const start = tall ? w / 230 : Math.max(fitted * 1.45, w / 520);
+    // Portrait shows about a third of the valley. The hero stays a small figure in that frame.
+    const start = tall ? h / (MAP_H / 3) : Math.max(fitted * 1.2, w / (MAP_W * 0.55));
     return { min: start, max: start, start: Math.max(fitted, start) };
   }
 
@@ -626,7 +634,7 @@ async function boot(): Promise<void> {
       else view.hideRange();
     }
     hud.setCard(null);
-    hud.setTeach(lesson(live));
+    hud.setTeach("");
     const goal = nextSpend(live);
     hud.setGoal(goal.text, goal.cost, goal.lit, goal.kind);
     hud.setVaultTip(world === 0 && save.taught === 0 && live.phase === "build" && !live.pendingOffer && view.menuPad < 0);
@@ -656,7 +664,7 @@ async function boot(): Promise<void> {
       flareReady: live.flare >= BALANCE.flare.need && live.time >= live.flareLock,
       guardian: live.guardianReady,
       buildLeft: live.buildLeft,
-      hint: hintFor(save, live),
+      hint: lesson(live) || hintFor(save, live),
       offer: live.pendingOffer?.map((id) => ({ id, name: BALANCE.relics[id].name, blurb: BALANCE.relics[id].blurb })) ?? null,
       offerLeft: live.offerLeft,
       streak: live.streak,

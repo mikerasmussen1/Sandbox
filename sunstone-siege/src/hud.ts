@@ -173,10 +173,6 @@ export class Hud {
   private vaultBump = 0;
   private jadeCatch = 0;
   private jadePrimed = false;
-  private goalCost = 50;
-  private goalLabel = "Arrow Shower  50";
-  private vaultLit = false;
-  private goalKind: TowerKind = "dart";
   private showTip = false;
   private vaultW = 340;
   private vaultH = 86;
@@ -188,6 +184,10 @@ export class Hud {
   private gearButton!: Container;
   private reduced = false;
   private bannerLife = 0;
+  private hintLife = 0;
+  private hintShown = "";
+  private hintPlate: Graphics | null = null;
+  private treeDetail!: Text;
   private introLife = 0;
   private safeTop = 0;
   private safeBottom = 0;
@@ -311,7 +311,7 @@ export class Hud {
     this.placePlay(w, h);
     this.pauseLayer.position.set(w / 2, h / 2);
     this.treeLayer.position.set(w / 2, h / 2);
-    this.treeLayer.scale.set(Math.min(1, (w - 12) / 372, (h - 16) / 700));
+    this.treeLayer.scale.set(Math.min(1, (w - 8) / 360, (h - 8) / 640));
     this.settingsLayer.position.set(w / 2, h / 2);
     this.endLayer.position.set(w / 2, h / 2);
     this.fitModal(this.pauseLayer, w, h);
@@ -363,8 +363,16 @@ export class Hud {
       const secs = Math.max(0, Math.ceil(state.buildLeft));
       this.callText.text = state.buildLeft > 0.3 ? `Call early +${BALANCE.earlyCall}  ·  ${secs}s` : "Call wave";
     }
-    this.hint.text = state.hint;
-    this.hint.visible = state.hint.length > 0 && !state.offer && this.bannerLife <= 0;
+    if (state.hint !== this.hintShown) {
+      this.hintShown = state.hint;
+      this.hint.text = state.hint;
+      if (state.hint.length > 0) {
+        this.hintLife = 2.8;
+        this.hint.alpha = 1;
+      }
+    }
+    this.hint.visible = this.hintLife > 0 && this.hintShown.length > 0 && !state.offer && this.bannerLife <= 0;
+    if (this.hintPlate) this.hintPlate.visible = this.hint.visible;
     this.syncOffer(state);
     if (state.offer) this.card.visible = false;
     const charge = state.flare / BALANCE.flare.need;
@@ -430,26 +438,8 @@ export class Hud {
   private stickGfx: Graphics | null = null;
 
   setTeach(text: string): void {
-    if (!this.teachText) {
-      this.teachText = new Text({
-        text: "",
-        style: {
-          fontFamily: SANS,
-          fontSize: 40,
-          fill: 0xfff6df,
-          fontWeight: "bold",
-          align: "center",
-          stroke: { color: 0x140e0a, width: 6 },
-        },
-      });
-      this.teachText.anchor.set(0.5, 0);
-      this.teachText.eventMode = "none";
-      this.play.addChild(this.teachText);
-    }
-    this.teachText.text = text;
-    this.teachText.visible = text.length > 0;
-    const below = this.vault.y + this.vaultH;
-    this.teachText.position.set(this.w / 2, below + 112);
+    void text;
+    if (this.teachText) this.teachText.visible = false;
   }
 
   setStick(on: boolean, ox: number, oy: number, x: number, y: number): void {
@@ -475,10 +465,10 @@ export class Hud {
   }
 
   setGoal(text: string, cost: number, lit: boolean, kind: TowerKind): void {
-    this.goalLabel = text;
-    this.goalCost = Math.max(1, cost);
-    this.vaultLit = lit;
-    this.goalKind = kind;
+    void text;
+    void cost;
+    void lit;
+    void kind;
   }
 
   setVaultTip(show: boolean): void {
@@ -535,6 +525,16 @@ export class Hud {
       this.introLife -= dt;
       this.intro.alpha = this.introLife < 0.4 ? Math.max(0, this.introLife / 0.4) : 1;
       if (this.introLife <= 0) this.intro.visible = false;
+    }
+    if (this.hintLife > 0) {
+      this.hintLife -= dt;
+      const fade = this.hintLife < 0.4 ? Math.max(0, this.hintLife / 0.4) : 1;
+      this.hint.alpha = fade;
+      if (this.hintPlate) this.hintPlate.alpha = fade;
+      if (this.hintLife <= 0) {
+        this.hint.visible = false;
+        if (this.hintPlate) this.hintPlate.visible = false;
+      }
     }
     if (this.bannerLife <= 0) return;
     this.bannerLife -= dt;
@@ -744,7 +744,10 @@ export class Hud {
     this.introBody.position.set(0, 0);
     this.introBody.eventMode = "none";
     this.intro.addChild(introPlate, this.introTitle, this.introBody);
-    this.play.addChild(bar, this.integrityText, this.integrityFill, this.waveText, this.streakText, this.bossText, speed, pause, gear, this.vault, this.purseText, this.laneLayer, this.laneTip, this.callButton, this.guardianButton, this.flareButton, this.hint, this.banner, this.intro, this.card, this.offerLayer);
+    this.hintPlate = new Graphics();
+    this.hintPlate.eventMode = "none";
+    this.hintPlate.visible = false;
+    this.play.addChild(bar, this.integrityText, this.integrityFill, this.waveText, this.streakText, this.bossText, speed, pause, gear, this.vault, this.purseText, this.laneLayer, this.laneTip, this.callButton, this.guardianButton, this.flareButton, this.hintPlate, this.hint, this.banner, this.intro, this.card, this.offerLayer);
     this.hits.push(speed, pause, gear, this.callButton, this.guardianButton, this.flareButton, this.card, bar, this.vault, this.laneTip);
     this.banner.visible = false;
   }
@@ -759,55 +762,65 @@ export class Hud {
     const top = this.safeTop;
     const bottom = this.safeBottom;
     const narrow = w < 760;
-    const barH = narrow ? 48 : 56;
+    const row = narrow ? 34 : 48;
     bar.clear();
     bar.position.set(0, top);
-    bar.rect(0, 0, w, barH).fill({ color: 0x140e0a, alpha: 0.84 });
-    bar.hitArea = new Rectangle(0, 0, w, barH);
-    this.integrityText.position.set(12, top + 4);
-    this.hpW = Math.max(120, w - 24);
-    this.integrityFill.position.set(12, top + barH + 4);
-    this.vaultW = narrow ? Math.max(200, w - 16) : 360;
-    this.vaultH = narrow ? 44 : 88;
-    this.vault.position.set(narrow ? 8 : (w - this.vaultW) / 2, top + barH + 28);
+    bar.roundRect(0, 0, w, row, 0).fill({ color: 0x140e0a, alpha: 0.88 });
+    bar.hitArea = new Rectangle(0, 0, w, row);
+    this.integrityText.style.fontSize = narrow ? 13 : 16;
+    this.integrityText.position.set(8, top + (narrow ? 8 : 6));
+    const pauseW = narrow ? 72 : 118;
+    const pillW = narrow ? 102 : 160;
+    const barX = narrow ? 70 : 120;
+    const barRight = w - pauseW - pillW - 16;
+    this.hpW = Math.max(48, barRight - barX);
+    this.integrityFill.position.set(barX, top + (row - 10) / 2);
+    this.vaultW = pillW;
+    this.vaultH = narrow ? 26 : 36;
+    this.vault.position.set(w - pauseW - pillW - 6, top + (row - this.vaultH) / 2);
     this.layoutVault(narrow);
-    this.waveText.anchor.set(narrow ? 1 : 0.5, 0);
-    this.waveText.position.set(narrow ? w - 16 : w / 2, narrow ? this.vault.y + 6 : top + 8);
-    this.streakText.anchor.set(narrow ? 1 : 0, 0);
-    this.streakText.position.set(narrow ? w - 16 : w / 2 + 90, narrow ? this.vault.y + 26 : top + 16);
-    speed.scale.set(narrow ? 0.58 : 1);
-    pause.scale.set(narrow ? 0.58 : 1);
-    gear.scale.set(narrow ? 0.58 : 1);
-    if (narrow) {
-      gear.position.set(w - 46, top + 24);
-      pause.position.set(w - 118, top + 24);
-      speed.position.set(w - 178, top + 24);
-    } else {
-      gear.position.set(w - 78, top + 28);
-      pause.position.set(w - 214, top + 28);
-      speed.position.set(w - 326, top + 28);
-    }
-    this.flareButton.scale.set(narrow ? 0.72 : 1);
-    this.guardianButton.scale.set(narrow ? 0.62 : 1);
-    this.flareButton.position.set(w - (narrow ? 46 : 64), h - (narrow ? 52 : 64) - bottom);
-    this.guardianButton.position.set(narrow ? 46 : w - 156, (narrow ? h - 52 : h - 64) - bottom);
-    this.callButton.scale.set(narrow ? 0.62 : 1);
-    this.callButton.position.set(w / 2, h - (narrow ? 36 : 48) - bottom);
-    const belowVault = this.vault.y + this.vaultH;
+    this.waveText.visible = !narrow;
+    this.streakText.visible = !narrow;
+    this.waveText.anchor.set(0.5, 0);
+    this.waveText.position.set(w / 2, top + 6);
+    this.streakText.position.set(w / 2 + 90, top + 8);
+    pause.scale.set(narrow ? 0.52 : 0.85);
+    pause.position.set(w - (narrow ? 40 : 70), top + row / 2);
+    gear.visible = false;
+    speed.scale.set(0.85);
+    speed.position.set(0, -158);
+    this.flareButton.scale.set(narrow ? 0.62 : 1);
+    this.guardianButton.visible = false;
+    this.flareButton.position.set(w - (narrow ? 40 : 64), h - (narrow ? 48 : 64) - bottom);
+    this.callButton.scale.set(narrow ? 0.58 : 1);
+    this.callButton.position.set(w / 2, h - (narrow ? 32 : 48) - bottom);
+    this.hint.style.fontSize = 14;
     this.hint.style.wordWrap = true;
-    this.hint.style.wordWrapWidth = Math.max(160, w - 28);
+    this.hint.style.wordWrapWidth = Math.max(140, w - 120);
+    this.hint.anchor.set(0.5);
+    this.hint.style.align = "center";
+    const toastY = h - (narrow ? 78 : 96) - bottom;
+    this.hint.position.set(w / 2, toastY);
+    if (this.hintPlate) {
+      const tw = Math.min(w - 96, 280);
+      this.hintPlate.clear();
+      this.hintPlate.roundRect(-tw / 2, -16, tw, 32, 12).fill({ color: 0x140e0a, alpha: 0.88 });
+      this.hintPlate.position.set(w / 2, toastY);
+    }
+    this.banner.style.fontSize = narrow ? 16 : 28;
     this.banner.style.wordWrap = true;
-    this.banner.style.wordWrapWidth = Math.max(200, w - 48);
+    this.banner.style.wordWrapWidth = Math.max(160, w - 80);
     this.banner.style.align = "center";
-    this.hint.position.set(w / 2, narrow ? h - 78 - bottom : belowVault + 28);
-    this.banner.position.set(w / 2, narrow ? belowVault + 8 : belowVault + 64);
+    this.banner.position.set(w / 2, toastY);
     const cardScale = Math.min(1, (w - 8) / 600, Math.max(0.62, (h * 0.5) / 400));
     this.card.scale.set(cardScale);
     this.card.position.set(8, h - 400 * cardScale - 8 - bottom);
-    this.intro.position.set(w / 2, Math.min(h * 0.42, belowVault + 150));
+    this.intro.scale.set(narrow ? 0.55 : 0.8);
+    this.intro.position.set(w / 2, top + row + (narrow ? 64 : 90));
+    this.bossText.style.fontSize = 12;
     this.bossText.anchor.set(0.5, 0);
-    this.bossText.position.set(w / 2, belowVault + (narrow ? 8 : 4));
-    this.purseText.position.set(this.vault.x + 16, this.vault.y + this.vaultH + 4);
+    this.bossText.position.set(w / 2, top + row + 4);
+    this.purseText.position.set(8, top + row + 4);
     this.offerLayer.position.set(w / 2, h / 2 + 10);
   }
 
@@ -885,9 +898,9 @@ export class Hud {
     const pulse = low ? 0.55 + Math.abs(Math.sin(this.laneTime * 7)) * 0.45 : 1;
     const w = this.hpW;
     this.integrityFill.clear();
-    this.integrityFill.roundRect(0, 0, w, 16, 6).fill({ color: 0x1a120c, alpha: 0.92 });
-    this.integrityFill.roundRect(2, 2, (w - 4) * lag, 12, 5).fill({ color: 0x8e1c14, alpha: 0.85 });
-    this.integrityFill.roundRect(2, 2, (w - 4) * shown, 12, 5).fill({ color: low ? 0xff3b30 : 0xf0c14a, alpha: pulse });
+    this.integrityFill.roundRect(0, 0, w, 10, 5).fill({ color: 0x1a120c, alpha: 0.92 });
+    this.integrityFill.roundRect(1, 1, Math.max(0, w - 2) * lag, 8, 4).fill({ color: 0x8e1c14, alpha: 0.85 });
+    this.integrityFill.roundRect(1, 1, Math.max(0, w - 2) * shown, 8, 4).fill({ color: low ? 0xff3b30 : 0xf0c14a, alpha: pulse });
     this.integrityText.style.fill = low ? 0xffb0a4 : 0xfff6df;
   }
 
@@ -897,45 +910,121 @@ export class Hud {
       e.stopPropagation();
       this.treeLayer.visible = false;
     });
-    const plate = this.panel(360, 680);
-    const title = new Text({ text: "Tech tree", style: { fontFamily: SERIF, fontSize: 28, fill: 0xfff1c8, fontWeight: "bold" } });
+    const plate = this.panel(348, 620);
+    const title = new Text({ text: "Tech tree", style: { fontFamily: SERIF, fontSize: 22, fill: 0xfff1c8, fontWeight: "bold" } });
     title.anchor.set(0.5);
-    title.position.set(0, -314);
-    const close = this.button(label("Close", 16, INK), 140, 40, () => {
+    title.position.set(0, -286);
+    title.eventMode = "none";
+    const close = this.button(label("Close", 15, INK), 120, 36, () => {
       this.treeLayer.visible = false;
     });
-    close.position.set(0, 308);
-    this.treeLayer.addChild(dim, plate, title, close);
-    this.hits.push(dim, close);
-    TECH.forEach((node, i) => {
-      const open = node.unlock === 0 ? "open" : (BALANCE.worlds[node.unlock]?.name ?? `valley ${node.unlock + 1}`);
-      const y = -292 + i * 36;
-      const title = new Text({
-        text: `${node.icon}  ${node.name}    ${node.cost}    ${open}`,
-        style: { fontFamily: SANS, fontSize: 13, fill: node.unlock === 0 ? 0xfff6df : 0xe7d7bc, fontWeight: "bold" },
-      });
-      title.anchor.set(0, 0);
-      title.position.set(-160, y);
-      title.eventMode = "none";
-      const detail = `Strong: ${node.strong}.  Weak: ${node.weak}.`;
-      const line = new Text({
-        text: detail.length > 54 ? `${detail.slice(0, 52)}…` : detail,
-        style: { fontFamily: SANS, fontSize: 11, fill: 0xcbbfa8 },
-      });
-      line.anchor.set(0, 0);
-      line.position.set(-148, y + 16);
-      line.eventMode = "none";
-      this.treeLayer.addChild(title, line);
+    close.position.set(0, 276);
+    const wires = new Graphics();
+    wires.eventMode = "none";
+    this.treeDetail = new Text({
+      text: "Tap a node. Strong and weak show here.",
+      style: { fontFamily: SANS, fontSize: 12, fill: 0xfff6df, align: "center", wordWrap: true, wordWrapWidth: 310 },
     });
+    this.treeDetail.anchor.set(0.5, 0);
+    this.treeDetail.position.set(0, 168);
+    this.treeDetail.eventMode = "none";
+    this.treeLayer.addChild(dim, plate, wires, title, this.treeDetail, close);
+    this.hits.push(dim, close);
+    const byId = new Map(TECH.map((node) => [node.id, node]));
+    const cols = [
+      { name: "Archer", x: -126, base: "archer", a: "volley", b: "rain", max: "100" },
+      { name: "Siege", x: -42, base: "siege", a: "ballista", b: "catapult", max: "180" },
+      { name: "Mystic", x: 42, base: "totem", a: "snare", b: "beam", max: "140" },
+      { name: "Barracks", x: 126, base: "squad", a: "spears", b: "knights", max: "" },
+    ];
+    for (const col of cols) {
+      const cap = new Text({ text: col.name, style: { fontFamily: SANS, fontSize: 11, fill: 0xe7c98a, fontWeight: "bold" } });
+      cap.anchor.set(0.5);
+      cap.position.set(col.x, -258);
+      cap.eventMode = "none";
+      this.treeLayer.addChild(cap);
+      const base = byId.get(col.base);
+      const left = byId.get(col.a);
+      const right = byId.get(col.b);
+      if (!base || !left || !right) continue;
+      this.techNode(col.x, -210, base, base.cost);
+      this.techNode(col.x - 20, -128, left, left.cost);
+      this.techNode(col.x + 20, -128, right, right.cost);
+      const maxLine = (node: (typeof TECH)[number]) => col.max
+        ? `${node.name} max · ${col.max} Jade. Strong: ${node.strong}. Weak: ${node.weak}.`
+        : `${node.name} is the top of this line. No further upgrade. Strong: ${node.strong}. Weak: ${node.weak}.`;
+      this.techNode(col.x - 20, -52, left, col.max || "Top", maxLine(left));
+      this.techNode(col.x + 20, -52, right, col.max || "Top", maxLine(right));
+      wires.moveTo(col.x, -196);
+      wires.lineTo(col.x - 20, -144);
+      wires.moveTo(col.x, -196);
+      wires.lineTo(col.x + 20, -144);
+      wires.moveTo(col.x - 20, -112);
+      wires.lineTo(col.x - 20, -66);
+      wires.moveTo(col.x + 20, -112);
+      wires.lineTo(col.x + 20, -66);
+    }
+    wires.stroke({ width: 2, color: 0xe7c98a, alpha: 0.7 });
+    const util = new Text({ text: "Utility", style: { fontFamily: SANS, fontSize: 11, fill: 0xe7c98a, fontWeight: "bold" } });
+    util.anchor.set(0.5);
+    util.position.set(0, 8);
+    util.eventMode = "none";
+    this.treeLayer.addChild(util);
+    for (const [id, x] of [["wall", -110], ["recruit", 0], ["heart", 110]] as const) {
+      const node = byId.get(id);
+      if (node) this.techNode(x, 58, node, node.cost.split(" ")[0]);
+    }
     this.treeLayer.visible = false;
+  }
+
+  private techNode(x: number, y: number, node: (typeof TECH)[number], cost: string, override = ""): void {
+    const locked = node.unlock > 0;
+    const valley = locked ? (BALANCE.worlds[node.unlock]?.name ?? "") : "";
+    const box = new Container();
+    box.position.set(x, y);
+    const g = new Graphics();
+    g.circle(0, 0, 13).fill({ color: locked ? 0x2a241c : 0x3e3428 });
+    g.circle(0, 0, 13).stroke({ width: 2, color: locked ? 0x8a7a62 : 0xe7c98a });
+    g.eventMode = "none";
+    const icon = new Text({ text: node.icon, style: { fontFamily: SANS, fontSize: 12, fill: 0xfff6df } });
+    icon.anchor.set(0.5);
+    icon.eventMode = "none";
+    const price = new Text({ text: cost, style: { fontFamily: SANS, fontSize: 10, fill: 0xe7c98a, fontWeight: "bold" } });
+    price.anchor.set(0.5, 0);
+    price.position.set(0, 15);
+    price.eventMode = "none";
+    box.addChild(g, icon, price);
+    if (locked && valley) {
+      const tag = new Text({
+        text: valley.split(" ").slice(-1)[0] ?? valley,
+        style: { fontFamily: SANS, fontSize: 9, fill: 0xcbbfa8 },
+      });
+      tag.anchor.set(0.5, 0);
+      tag.position.set(0, 26);
+      tag.eventMode = "none";
+      box.addChild(tag);
+    }
+    const where = locked ? `Opens in ${valley}.` : "Open from the start.";
+    const line = override || `${node.name} · ${node.cost} Jade. ${where} Strong: ${node.strong}. Weak: ${node.weak}.`;
+    box.eventMode = "static";
+    box.cursor = "pointer";
+    box.hitArea = new Rectangle(-26, -16, 52, 46);
+    box.on("pointertap", (e) => {
+      e.stopPropagation();
+      this.treeDetail.text = line;
+    });
+    this.treeLayer.addChild(box);
+    this.hits.push(box);
   }
 
   private buildPause(): void {
     const dim = fullDim();
-    const plate = this.panel(340, 500);
-    const title = new Text({ text: "Paused", style: { fontFamily: SERIF, fontSize: 40, fill: 0xfff1c8, fontWeight: "bold" } });
+    const plate = this.panel(340, 540);
+    const title = new Text({ text: "Paused", style: { fontFamily: SERIF, fontSize: 36, fill: 0xfff1c8, fontWeight: "bold" } });
     title.anchor.set(0.5);
-    title.position.set(0, -180);
+    title.position.set(0, -220);
+    this.speedButton.removeFromParent();
+    this.speedButton.position.set(0, -158);
     const resume = this.button(label("Resume", 18, INK), 240, 50, () => this.hooks.resume());
     resume.position.set(0, -100);
     const restart = this.button(label("Restart valley", 16, INK), 240, 48, () => this.hooks.restart());
@@ -946,7 +1035,7 @@ export class Hud {
     settings.position.set(0, 80);
     const quit = this.button(label("Valley select", 16, INK), 240, 48, () => this.hooks.quit());
     quit.position.set(0, 140);
-    this.pauseLayer.addChild(dim, plate, title, resume, restart, tree, settings, quit);
+    this.pauseLayer.addChild(dim, plate, title, this.speedButton, resume, restart, tree, settings, quit);
     this.hits.push(dim, resume, restart, tree, settings, quit);
     this.pauseLayer.visible = false;
   }
@@ -1052,24 +1141,22 @@ export class Hud {
   private layoutVault(narrow: boolean): void {
     const w = this.vaultW;
     const h = this.vaultH;
+    const pill = h < 40;
     this.vaultPlate.clear();
-    this.vaultPlate.roundRect(0, 0, w, h, 20).fill({ color: 0x102018, alpha: 0.94 });
-    this.vaultPlate.roundRect(0, 0, w, h, 20).stroke({ width: 5, color: 0x3d8f62 });
-    const squat = h < 56;
-    const icon = squat ? 26 : narrow ? 46 : 64;
+    this.vaultPlate.roundRect(0, 0, w, h, pill ? 13 : 20).fill({ color: 0x102018, alpha: 0.94 });
+    this.vaultPlate.roundRect(0, 0, w, h, pill ? 13 : 20).stroke({ width: pill ? 2 : 5, color: 0x3d8f62 });
+    const icon = pill ? 18 : h < 56 ? 26 : narrow ? 46 : 64;
     this.iconBase = icon / Math.max(1, this.jadeIcon.texture.width);
     this.jadeIcon.scale.set(this.iconBase);
-    this.jadeIcon.position.set(14 + icon / 2, h * 0.42);
-    this.jadeText.style.fontSize = squat ? 24 : narrow ? 36 : 50;
-    this.jadeText.position.set(14 + icon + 8, squat ? 2 : narrow ? 4 : 2);
-    this.vaultPlus.position.set(14 + icon + 10, h * 0.42 + (narrow ? 18 : 22));
-    this.vaultGoal.position.set(Math.min(w - 150, 14 + icon + 108), h - 22);
-    this.vaultGoal.alpha = squat ? 0 : 1;
-    this.vaultTower.alpha = squat ? 0 : 1;
-    this.vaultTower.position.set(w - 28, h - 10);
-    this.vaultTip.position.set(w / 2, h + 6);
-    this.vaultTip.style.wordWrapWidth = Math.min(360, Math.max(180, w - 8));
-    this.vault.hitArea = new Rectangle(-6, -6, w + 12, h + 8);
+    this.jadeIcon.position.set(6 + icon / 2, h / 2);
+    this.jadeText.style.fontSize = pill ? 16 : h < 56 ? 24 : narrow ? 36 : 50;
+    this.jadeText.position.set(8 + icon, pill ? 3 : h < 56 ? 2 : 4);
+    this.vaultPlus.position.set(8 + icon, h * 0.7);
+    this.vaultGoal.alpha = 0;
+    this.vaultTower.alpha = 0;
+    this.vaultTip.visible = false;
+    this.vaultTipPlate.visible = false;
+    this.vault.hitArea = new Rectangle(0, 0, w, h);
   }
 
   private drawVault(dt: number): void {
@@ -1100,57 +1187,10 @@ export class Hud {
     this.vaultPlus.text = `+${Math.round(this.plusShown)}`;
     this.vaultPlus.position.set(this.jadeText.x + this.jadeText.width + 10, this.jadeText.y + 8 - (1 - Math.max(0, this.plusLife)) * 8);
     if (this.plusLife <= 0) this.plusShown = 0;
-    const progress = Math.max(0, Math.min(1, this.shownJade / this.goalCost));
-    const barW = Math.max(40, this.vaultW - 86);
     this.vaultBar.clear();
-    this.vaultBar.roundRect(16, this.vaultH - 16, barW, 9, 4).fill({ color: 0x1a120c });
-    this.vaultBar.roundRect(16, this.vaultH - 16, barW * progress, 9, 4).fill({ color: this.vaultLit ? 0xc8ffd8 : 0x3d8f62 });
-    this.vaultGoal.text = this.goalLabel;
-    this.paintGoalTower();
-    this.vaultTip.visible = this.showTip;
-    this.vaultTipPlate.visible = this.showTip;
-    this.vaultTipPlate.clear();
-    if (this.showTip) {
-      const tw = Math.min(this.vaultW - 8, 360);
-      const tx = (this.vaultW - tw) / 2;
-      const ty = this.vaultH + 10;
-      this.vaultTipPlate.roundRect(tx, ty, tw, 54, 12).fill({ color: 0x140e0a, alpha: 0.94 });
-      this.vaultTipPlate.roundRect(tx, ty, tw, 54, 12).stroke({ width: 3, color: 0xffe08a });
-      const cx = this.vaultW / 2;
-      this.vaultTipPlate.poly([cx - 9, ty, cx + 9, ty, cx, ty - 10], true).fill({ color: 0xffe08a });
-      this.vaultTip.position.set(this.vaultW / 2, ty + 8);
-    }
-    const extra = this.showTip ? 68 : 0;
-    const underVault = this.vault.y + this.vaultH + extra;
-    // Hint and the map title never show together. On a phone the hint sits
-    // in the bottom-left grass, clear of the counter, the title, and Flare.
-    if (this.w < 760) {
-      this.hint.anchor.set(0, 1);
-      this.hint.style.align = "left";
-      this.hint.position.set(12, this.h - 18);
-      this.hint.style.wordWrapWidth = Math.max(140, this.w - 160);
-    } else {
-      this.hint.anchor.set(0.5);
-      this.hint.style.align = "center";
-      this.hint.y = underVault + 14;
-    }
-    this.banner.y = underVault + (this.w < 760 ? 8 : 32);
-    if (this.vaultLit) {
-      this.vaultGlow.circle(this.vaultW - 28, this.vaultH - 28, 22).stroke({ width: 3, color: 0xffe08a, alpha: 0.9 });
-    }
-  }
-
-  private paintGoalTower(): void {
-    const name = this.goalKind === "spire" ? "serpent" : this.goalKind;
-    const clip = this.art.clip(`tower_${name}_t1`, "idle");
-    if (!clip) return;
-    const frame = clip.frames[0][0];
-    this.vaultTower.texture = frame;
-    this.vaultTower.anchor.set(clip.anchorX, clip.anchorY);
-    const target = this.w < 760 ? 34 : 42;
-    this.vaultTower.scale.set(target / Math.max(1, frame.width));
-    this.vaultTower.tint = this.vaultLit ? 0xffffff : 0x6e6860;
-    this.vaultTower.alpha = this.vaultLit ? 1 : 0.45;
+    this.vaultGoal.text = "";
+    this.vaultTip.visible = false;
+    this.vaultTipPlate.visible = false;
   }
 
   private ensureLanes(count: number): void {
@@ -1360,7 +1400,7 @@ export class Hud {
   /** Screen rects an arrow must not cover: the top bar, the vault, the tower panel, and the corner buttons. */
   private arrowBlocks(includeCall = true): { x: number; y: number; w: number; h: number }[] {
     const blocks: { x: number; y: number; w: number; h: number }[] = [];
-    blocks.push({ x: 0, y: 0, w: this.w, h: this.w < 760 ? 112 : 56 });
+    blocks.push({ x: 0, y: 0, w: this.w, h: this.safeTop + (this.w < 760 ? 40 : 56) });
     const tip = this.showTip ? 36 : 2;
     blocks.push({ x: this.vault.x - 6, y: this.vault.y - 2, w: this.vaultW + 12, h: this.vaultH + tip });
     if (this.card.visible) {
