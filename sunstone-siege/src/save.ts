@@ -1,9 +1,10 @@
 /** Stars, unlocks and the two volume knobs. Jade never leaves this browser. */
+import { worldCount } from "./balance";
 
 const KEY = "sunstone-siege.v1";
 
 export interface SaveData {
-  stars: [number, number, number];
+  stars: number[];
   music: number;
   sfx: number;
   reduced: boolean;
@@ -11,8 +12,12 @@ export interface SaveData {
   taught: number;
 }
 
+function blankStars(): number[] {
+  return Array.from({ length: worldCount() }, () => 0);
+}
+
 export const DEFAULT_SAVE: SaveData = {
-  stars: [0, 0, 0],
+  stars: blankStars(),
   music: 0.55,
   sfx: 0.8,
   reduced: false,
@@ -42,7 +47,7 @@ export function prefersReducedMotion(): boolean {
 
 export function loadSave(): SaveData {
   const fresh = new URLSearchParams(globalThis.location?.search ?? "").get("fresh") === "1";
-  const base: SaveData = { ...DEFAULT_SAVE, stars: [0, 0, 0], reduced: prefersReducedMotion() };
+  const base: SaveData = { ...DEFAULT_SAVE, stars: blankStars(), reduced: prefersReducedMotion() };
   if (fresh) {
     storage()?.removeItem(KEY);
     return base;
@@ -51,10 +56,10 @@ export function loadSave(): SaveData {
   if (!raw) return base;
   try {
     const parsed = JSON.parse(raw) as Partial<SaveData>;
-    const stars = [0, 1, 2].map((i) => {
-      const n = parsed.stars?.[i] ?? 0;
+    const stars = blankStars().map((zero, i) => {
+      const n = parsed.stars?.[i] ?? zero;
       return n === 1 || n === 2 || n === 3 ? n : 0;
-    }) as [number, number, number];
+    });
     const taughtRaw = (parsed as { taught?: number }).taught;
     const taught = taughtRaw === 0 || taughtRaw === 1 || taughtRaw === 2 || taughtRaw === 3 || taughtRaw === 4
       ? taughtRaw
@@ -86,8 +91,12 @@ export function isUnlocked(stars: readonly number[], index: number): boolean {
 }
 
 export function recordStars(data: SaveData, world: number, stars: 1 | 2 | 3): SaveData {
-  const next: SaveData = { ...data, stars: [...data.stars] as [number, number, number] };
-  if (stars > next.stars[world]) next.stars[world] = stars;
+  const nextStars = blankStars();
+  data.stars.forEach((n, i) => {
+    if (i < nextStars.length) nextStars[i] = n;
+  });
+  const next: SaveData = { ...data, stars: nextStars };
+  if (world >= 0 && world < next.stars.length && stars > next.stars[world]) next.stars[world] = stars;
   writeSave(next);
   return next;
 }

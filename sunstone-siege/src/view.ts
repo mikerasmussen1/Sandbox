@@ -4,10 +4,10 @@
  */
 import { Container, Graphics, Sprite, Text, Texture } from "pixi.js";
 import type { ArtSet, Clip } from "./art";
-import { BALANCE, TOWER_HUE, TOWER_ICON, sharedScales, towerCost, towerFacts, towerRange, towerReadout } from "./balance";
+import { BALANCE, ROLE_HINT, TOWER_HUE, TOWER_ICON, sharedScales, towerCost, towerFacts, towerRange, towerReadout } from "./balance";
 import { CARRY_CAP, CARRY_SCALE, carrySlots } from "./carry";
 import { poseAt } from "./geom";
-import type { MapDef } from "./maps";
+import { MAP_H, MAP_W, type MapDef } from "./maps";
 import { PAY_FLIGHT, type Enemy, type Fx, type Siege, type Shot } from "./sim";
 import { TOWER_KINDS, type EnemyKind, type TowerKind, type Vec } from "./types";
 
@@ -22,9 +22,9 @@ const PLAY: Record<string, number> = {
 
 const ELITE: ReadonlySet<EnemyKind> = new Set(["shield", "golem", "boss"]);
 /** Sheets are authored at 2× and were drawn at half size. Use the full frame. */
-const ENEMY_DRAW = 1.05;
-/** Opaque guardian height lands near 1.5× an opaque Skitter. */
-const HERO_DRAW = 0.22;
+const ENEMY_DRAW = 0.72;
+/** About 1.5× the previous guardian, so he reads as the largest person on the road. */
+const HERO_DRAW = 0.33;
 const TOWER_DRAW = 1.15;
 /** Screen-pixel radius of the build cards. The menu is scaled by 1/zoom so this stays constant. */
 const MENU_REACH = 220;
@@ -34,7 +34,8 @@ const MENU_BOTTOM = 96;
 
 function bodyScale(kind: EnemyKind, clipDraw: number): number {
   let scale = clipDraw * ENEMY_DRAW;
-  if (kind === "shard") scale *= 0.5;
+  if (kind === "shard" || kind === "roller") scale *= 0.42;
+  else if (kind === "skitter" || kind === "runner") scale *= 0.82;
   else if (ELITE.has(kind)) scale *= 1.1;
   return scale;
 }
@@ -75,7 +76,7 @@ function towerAsset(kind: TowerKind, tier: number): string {
 
 function enemyAsset(kind: EnemyKind): string {
   if (kind === "shield") return "enemy_shieldbearer";
-  if (kind === "shard") return "enemy_golem";
+  if (kind === "shard" || kind === "roller") return "enemy_golem";
   return `enemy_${kind}`;
 }
 
@@ -188,6 +189,10 @@ export class WorldView {
   private readonly labels = new Container();
   private readonly stationLabels: Text[] = [];
   private readonly stationCosts: Text[] = [];
+  private readonly stationHints: Text[] = [];
+  private readonly padGhosts: Sprite[] = [];
+  private readonly rains: { s: Sprite; x: number; y: number; vy: number; life: number }[] = [];
+  private readonly flings: { body: Sprite; outline: Sprite; vx: number; vy: number; life: number }[] = [];
   private readonly shotBolts: Sprite[] = [];
   private shotUsed = 0;
   private readonly dropSprites: Sprite[] = [];
@@ -263,15 +268,15 @@ export class WorldView {
   setMap(texture: Texture, map: MapDef): void {
     const field = map.biome === "crater" ? 0x4d7a38 : map.biome === "ruins" ? 0x3aaa48 : 0x2f9a3a;
     this.ground.clear();
-    this.ground.rect(-1200, -1200, 1920 + 2400, 1080 + 2400).fill({ color: field });
+    this.ground.rect(-400, -400, MAP_W + 800, MAP_H + 800).fill({ color: field });
     this.mapSprite.texture = texture;
-    this.mapSprite.width = 1920;
-    this.mapSprite.height = 1080;
+    this.mapSprite.width = MAP_W;
+    this.mapSprite.height = MAP_H;
     this.plaza = map.plaza;
     this.sunAt = map.sun;
     this.sun.position.set(map.sun.x, map.sun.y);
     this.sun.zIndex = map.sun.y;
-    const disk = map.plaza * 1.72;
+    const disk = map.plaza * 1.15;
     const scale = disk / Math.max(1, this.disk.texture.width);
     this.disk.scale.set(scale);
     this.inner.scale.set(scale);
@@ -510,6 +515,8 @@ export class WorldView {
     this.drawSpears(sim);
     this.drawGhosts(step);
     this.drawBits(step);
+    this.drawRains(step > 0 ? step : 0.016);
+    this.drawFlings(step > 0 ? step : 0.016);
     this.drawRings(step);
     this.drawGems(step);
     this.drawFloats(step);
@@ -548,6 +555,10 @@ export class WorldView {
         this.burst(event.x, event.y, 0xb08968, 8);
       }
       else if (event.kind === "death") this.onDeath(event);
+      else if (event.kind === "volley") {
+        this.rainAt(event.x, event.y, event.n ?? BALANCE.shower.radius);
+        this.bump(0.22);
+      }
       else if (event.kind === "jade" && event.n) this.onJade(event.x, event.y, event.n);
       else if (event.kind === "multi" && event.text) {
         this.floatText(event.x, event.y - 78, event.text, 0xfff1c2, event.n && event.n >= 10 ? 42 : 32);
@@ -908,7 +919,22 @@ export class WorldView {
   private drawPads(sim: Siege): void {
     this.pads.clear();
     for (const e of sim.enemies) {
-      if (!e.alive || e.boulder <= 0) continue;
+      if (!e.alive) continue;
+      if (e.kind === "roller") {
+        const x = e.x + Math.cos(e.angle) * 36;
+        const y = e.y + Math.sin(e.angle) * 36;
+        this.pads.ellipse(x + 8, y + 16, 108, 64).fill({ color: 0x1a120c, alpha: 0.4 });
+        this.pads.ellipse(x, y, 102, 74).fill({ color: 0x8d7360, alpha: 1 });
+        this.pads.ellipse(x - 24, y - 18, 36, 22).fill({ color: 0xd2c0aa, alpha: 0.95 });
+        this.pads.ellipse(x, y, 102, 74).stroke({ width: 7, color: 0x3e2c22, alpha: 1 });
+        for (let k = 0; k < 3; k++) {
+          const px = e.x - Math.cos(e.angle) * (10 + k * 16) + Math.cos(e.angle + Math.PI / 2) * ((k - 1) * 14);
+          const py = e.y - Math.sin(e.angle) * (10 + k * 16);
+          this.pads.circle(px, py, 8).fill({ color: 0xff5a62, alpha: 1 });
+        }
+        continue;
+      }
+      if (e.boulder <= 0) continue;
       const reach = 34 + e.boulder * 0.12;
       const x = e.x + Math.cos(e.angle) * 28;
       const y = e.y + Math.sin(e.angle) * 28;
@@ -969,6 +995,32 @@ export class WorldView {
       this.pads.roundRect(station.x - pillW / 2 + shake, pillY, pillW, 36, 18).fill({ color: 0x140e0a, alpha: 0.94 });
       cost.position.set(station.x + shake, pillY + 3);
       cost.zIndex = station.y + 5;
+      const empty = station.tier === 0 && station.kind !== "wall";
+      const ghost = this.padGhost(i);
+      if (empty && station.kind !== "wall") {
+        const kind = station.kind;
+        const asset = kind === "barracks" ? "enemy_runner" : towerAsset(kind, 0);
+        const clip = this.art.clip(asset, "idle") ?? this.art.clip(asset, "walk");
+        if (clip) {
+          ghost.texture = clip.frames[0]?.[0] ?? Texture.EMPTY;
+          ghost.anchor.set(clip.anchorX, clip.anchorY);
+          ghost.scale.set(kind === "barracks" ? 0.5 : clip.draw * TOWER_DRAW * 1.45);
+        }
+        ghost.tint = color;
+        ghost.alpha = 0.72;
+        ghost.position.set(station.x, station.y + 8);
+        ghost.zIndex = station.y - 1;
+        ghost.visible = true;
+        const radius = (kind === "barracks" ? 120 : towerRange(kind, 0)) * sim.rangeScale;
+        this.pads.circle(station.x, station.y, radius).stroke({ width: 2, color, alpha: 0.28 });
+      } else {
+        ghost.visible = false;
+      }
+      const hint = this.stationHint(i);
+      hint.text = empty && station.kind !== "wall" ? ROLE_HINT[station.kind] : "";
+      hint.visible = empty && hint.text.length > 0;
+      hint.position.set(station.x, station.y - 62);
+      hint.zIndex = station.y + 6;
       if (hot && station.kind !== "wall" && station.kind !== "barracks" && station.tier < 3) {
         const radius = towerRange(station.kind, station.tier) * sim.rangeScale;
         this.pads.circle(station.x, station.y, radius).stroke({ width: 3, color, alpha: 0.7 });
@@ -976,6 +1028,36 @@ export class WorldView {
     });
     for (let i = sim.stations.length; i < this.stationLabels.length; i++) this.stationLabels[i].visible = false;
     for (let i = sim.stations.length; i < this.stationCosts.length; i++) this.stationCosts[i].visible = false;
+    for (let i = sim.stations.length; i < this.stationHints.length; i++) this.stationHints[i].visible = false;
+    for (let i = sim.stations.length; i < this.padGhosts.length; i++) this.padGhosts[i].visible = false;
+  }
+
+  private padGhost(i: number): Sprite {
+    let ghost = this.padGhosts[i];
+    if (!ghost) {
+      ghost = new Sprite(Texture.EMPTY);
+      ghost.anchor.set(0.5, 0.85);
+      ghost.alpha = 0.4;
+      ghost.eventMode = "none";
+      this.actors.addChild(ghost);
+      this.padGhosts[i] = ghost;
+    }
+    return ghost;
+  }
+
+  private stationHint(i: number): Text {
+    let label = this.stationHints[i];
+    if (!label) {
+      label = new Text({
+        text: "",
+        style: { fontFamily: SANS, fontSize: 15, fill: 0xfff6df, fontWeight: "bold", align: "center", stroke: { color: 0x140e0a, width: 4 } },
+      });
+      label.anchor.set(0.5, 1);
+      label.eventMode = "none";
+      this.labels.addChild(label);
+      this.stationHints[i] = label;
+    }
+    return label;
   }
 
   private stationLabel(i: number): Text {
@@ -1213,7 +1295,7 @@ export class WorldView {
     for (const shot of sim.shots) {
       if (!shot.alive) continue;
       const color = shot.family === "hero" ? 0xffe08a : TOWER_HUE[shot.family];
-      const fans = shot.family === "dart" ? shot.tier + 1 : 1;
+      const fans = shot.family === "dart" ? 6 : 1;
       const dx = shot.x - shot.px;
       const dy = shot.y - shot.py;
       const len = Math.hypot(dx, dy) || 1;
@@ -1228,11 +1310,11 @@ export class WorldView {
   }
 
   private paintBolt(shot: Shot, color: number, ox: number, oy: number, head: boolean): void {
-    const tex = shot.family === "spire" ? "fx-orb" : shot.family === "hero" ? "fx-spear" : "fx-dart";
+    const tex = shot.family === "spire" ? "fx-orb" : shot.family === "lens" || shot.family === "hero" ? "fx-spear" : "fx-dart";
     const bolt = this.takeShot(this.art.frame(tex));
     bolt.position.set(shot.x + ox, shot.y + oy);
     bolt.rotation = Math.atan2(shot.y - shot.py, shot.x - shot.px);
-    const fat = shot.family === "spire" ? 0.7 + shot.tier * 0.22 : 0.85 + shot.tier * 0.12;
+    const fat = shot.family === "lens" ? 2.4 : shot.family === "spire" ? 0.7 + shot.tier * 0.22 : 0.85 + shot.tier * 0.12;
     bolt.scale.set(head ? fat : fat * 0.72);
     bolt.tint = color;
     bolt.alpha = head ? 1 : 0.55;
@@ -1398,19 +1480,23 @@ export class WorldView {
           index = Math.min(frames.length - 1, Math.max(0, Math.floor(u * frames.length)));
         } else {
           this.heroTime += step > 0 ? step : 0.016;
-          index = Math.floor(this.heroTime * clip.fps) % frames.length;
+          index = Math.floor(this.heroTime * (sim.heroMoving ? 14 : clip.fps)) % frames.length;
         }
         const tex = frames[index];
         this.heroBody.texture = tex;
         this.heroLine.texture = tex;
         this.heroBody.scale.set(HERO_DRAW);
         this.heroLine.scale.set(HERO_DRAW * 1.18);
-        this.heroLine.position.set(1, 2);
+        const bob = sim.heroMoving ? Math.abs(Math.sin(this.heroTime * 11)) * -7 : Math.sin(this.time * 2.2) * -2;
+        const lean = throwing ? Math.cos(sim.guardianAim) * 6 : 0;
+        this.heroBody.position.set(lean, bob);
+        this.heroLine.position.set(1 + lean, 2 + bob);
       }
     }
     this.heroRing.clear();
-    this.heroRing.ellipse(0, 6, 14, 7).fill({ color: 0x0c1a10, alpha: 0.55 });
-    this.heroRing.ellipse(0, 4, 13, 6).stroke({ width: 3, color: 0xffe08a, alpha: 0.95 });
+    const pulse = sim.heroMoving ? 1 + Math.abs(Math.sin(this.heroTime * 11)) * 0.28 : 1;
+    this.heroRing.ellipse(0, 8, 22 * pulse, 10).fill({ color: 0x0c1a10, alpha: 0.55 });
+    this.heroRing.ellipse(0, 6, 20, 9).stroke({ width: 3, color: 0xffe08a, alpha: 0.95 });
     this.heroRing.circle(0, 6, BALANCE.hero.range).stroke({ width: 2, color: 0xffe08a, alpha: 0.16 });
   }
 
@@ -1461,7 +1547,7 @@ export class WorldView {
   private drawBeams(sim: Siege): void {
     this.beamCursor = 0;
     for (const tower of sim.towers) {
-      if (tower.kind !== "lens" || !tower.targetId) continue;
+      if (tower.kind !== "lens" || tower.ramp <= 0 || !tower.targetId) continue;
       const target = sim.enemies.find((e) => e.id === tower.targetId && e.alive);
       if (!target) continue;
       let beam = this.beams[this.beamCursor];
@@ -1492,8 +1578,54 @@ export class WorldView {
   }
 
   private onDeath(event: Fx): void {
-    this.burst(event.x, event.y, 0xffffff, 8);
-    this.burst(event.x, event.y - 6, 0xffe08a, 5);
+    const small = event.enemy === "skitter" || event.enemy === "runner" || event.enemy === "shard" || event.enemy === "glider" || event.enemy === "jaguar";
+    this.burst(event.x, event.y, 0xffffff, small ? 12 : 8);
+    this.burst(event.x, event.y - 6, 0xffe08a, small ? 8 : 5);
+    if (small) this.flingNearest(event.x, event.y);
+    else this.bump(0.2);
+  }
+
+  /** Pop the body off the road so a swarm death reads as a fling, not a fade. */
+  private flingNearest(x: number, y: number): void {
+    let id = 0;
+    let actor: Actor | null = null;
+    let best = 42;
+    for (const [key, body] of this.enemies) {
+      const d = Math.hypot(body.body.x - x, body.body.y - y);
+      if (d < best) {
+        best = d;
+        id = key;
+        actor = body;
+      }
+    }
+    if (!actor) return;
+    this.enemies.delete(id);
+    actor.shadow.visible = false;
+    this.flings.push({
+      body: actor.body,
+      outline: actor.outline,
+      vx: (Math.random() - 0.5) * 260,
+      vy: -280 - Math.random() * 90,
+      life: 0.42,
+    });
+  }
+
+  private rainAt(x: number, y: number, radius: number): void {
+    const count = this.reduced ? 8 : 18;
+    for (let i = 0; i < count; i++) {
+      const s = new Sprite(this.art.frame("fx-dart"));
+      s.anchor.set(0.5, 0.85);
+      s.eventMode = "none";
+      s.tint = 0xfff6df;
+      s.rotation = Math.PI / 2 + (Math.random() - 0.5) * 0.4;
+      s.scale.set(0.7 + Math.random() * 0.35);
+      const ox = (Math.random() - 0.5) * radius * 1.6;
+      const oy = (Math.random() - 0.5) * radius * 1.2;
+      s.position.set(x + ox, y + oy - 70 - Math.random() * 40);
+      this.fxLayer.addChild(s);
+      this.rains.push({ s, x: x + ox, y: y + oy, vy: 360 + Math.random() * 140, life: 0.48 + Math.random() * 0.16 });
+    }
+    this.ringFx(x, y, radius, 0xfff1c2);
   }
 
   private spawnGhost(actor: Actor, name: string, fodder: boolean): void {
@@ -1672,6 +1804,40 @@ export class WorldView {
     return { s, vx: 0, vy: 0, life: 0, max: 0.3 };
   }
 
+  private drawRains(step: number): void {
+    for (let i = this.rains.length - 1; i >= 0; i--) {
+      const rain = this.rains[i];
+      rain.life -= step;
+      rain.s.y += rain.vy * step;
+      rain.s.alpha = Math.max(0, rain.life / 0.35);
+      if (rain.life <= 0 || rain.s.y > rain.y + 8) {
+        rain.s.destroy();
+        this.rains.splice(i, 1);
+      }
+    }
+  }
+
+  private drawFlings(step: number): void {
+    for (let i = this.flings.length - 1; i >= 0; i--) {
+      const fling = this.flings[i];
+      fling.life -= step;
+      fling.vy += 900 * step;
+      fling.body.x += fling.vx * step;
+      fling.body.y += fling.vy * step;
+      fling.outline.position.set(fling.body.x, fling.body.y + 2);
+      fling.body.rotation += fling.vx * step * 0.01;
+      fling.outline.rotation = fling.body.rotation;
+      const fade = Math.max(0, fling.life / 0.42);
+      fling.body.alpha = fade;
+      fling.outline.alpha = fade * 0.8;
+      if (fling.life <= 0) {
+        fling.body.destroy();
+        fling.outline.destroy();
+        this.flings.splice(i, 1);
+      }
+    }
+  }
+
   private drawBits(step: number): void {
     const dt = step > 0 ? step : 0;
     if (dt <= 0) return;
@@ -1765,7 +1931,8 @@ export class WorldView {
     }
     const floater = this.floatPool.pop() ?? this.makeFloat();
     floater.t.text = text;
-    floater.t.style.fontSize = 15;
+    const big = Number(text) >= 80;
+    floater.t.style.fontSize = big ? 26 : 16;
     floater.t.style.fill = 0xffffff;
     floater.t.position.set(x + ((this.floats.length % 5) - 2) * 4, y);
     floater.t.alpha = 1;

@@ -255,6 +255,10 @@ async function boot(): Promise<void> {
             const n = event.n ?? 3;
             hitStop = Math.max(hitStop, n >= 10 ? 0.08 : 0.045);
           }
+          if (event.kind === "volley") hitStop = Math.max(hitStop, 0.035);
+          if (event.kind === "intro" && event.text && event.enemy) {
+            hud.showIntro(event.text, BALANCE.enemies[event.enemy].weak);
+          }
         }
       }
       view.update(running && !freeze ? dt : 0, sim, freeze);
@@ -289,7 +293,6 @@ async function boot(): Promise<void> {
   let originY = 0;
   let knobX = 0;
   let knobY = 0;
-  let pinch = 0;
   let hover = { x: 0, y: 0 };
   let hold: { x: number; y: number } | null = null;
   let press: { id: number; x: number; y: number; moved: boolean } | null = null;
@@ -308,7 +311,6 @@ async function boot(): Promise<void> {
     if (hud.blocks(p.x, p.y) || view.blocks(p.x, p.y)) return;
     if (mode !== "play" || paused || settingsOpen || finished || !sim) return;
     if (pointers.size >= 2) {
-      pinch = span();
       dragId = -1;
       press = null;
       stickOn = false;
@@ -323,15 +325,7 @@ async function boot(): Promise<void> {
     hover = p;
     if (!pointers.has(e.pointerId)) return;
     pointers.set(e.pointerId, p);
-    if (pointers.size >= 2 && mode === "play") {
-      const next = span();
-      if (pinch > 0) {
-        const mid = centerOfPointers();
-        zoomAt(mid.x, mid.y, next / pinch);
-      }
-      pinch = next;
-      return;
-    }
+    if (pointers.size >= 2 && mode === "play") return;
     if (press && e.pointerId === press.id && Math.hypot(p.x - press.x, p.y - press.y) > 16) {
       press.moved = true;
       if (!stickOn) {
@@ -355,7 +349,6 @@ async function boot(): Promise<void> {
     const at = pointers.get(e.pointerId) ?? point(e);
     const tapped = press && e.pointerId === press.id && !press.moved && !stickOn;
     pointers.delete(e.pointerId);
-    if (pointers.size < 2) pinch = 0;
     if (e.pointerId !== dragId) return;
     dragId = -1;
     stickOn = false;
@@ -371,8 +364,10 @@ async function boot(): Promise<void> {
       press = null;
       hud.setStick(false, 0, 0, 0, 0);
     }
-    pinch = 0;
   });
+
+  window.addEventListener("gesturestart", (e) => e.preventDefault());
+  window.addEventListener("touchstart", () => audio.unlock(), { passive: true });
 
   app.canvas.addEventListener("wheel", (e) => {
     if (mode !== "play") return;
@@ -462,7 +457,7 @@ async function boot(): Promise<void> {
     seenWave = -1;
     view.closeMenu();
     view.hideRange();
-    view.setMap(art.map(sim.map.biome), sim.map);
+    view.setMap(art.level(index), sim.map);
     view.setReduced(save.reduced);
     hud.showSettings(false);
     hud.showPause(false);
@@ -478,6 +473,11 @@ async function boot(): Promise<void> {
     const w = app.screen.width;
     const h = app.screen.height;
     app.stage.hitArea = new Rectangle(0, 0, w, h);
+    const root = getComputedStyle(document.documentElement);
+    const sat = Number.parseFloat(root.getPropertyValue("--sat")) || 0;
+    const sab = Number.parseFloat(root.getPropertyValue("--sab")) || 0;
+    const portrait = h > w;
+    hud.setSafe(sat + (portrait ? 8 : 0), sab + (portrait ? 10 : 0));
     hud.layout(w, h);
     view.layout(w, h);
     const limits = zoomLimits(w, h);
@@ -489,9 +489,9 @@ async function boot(): Promise<void> {
 
   function zoomLimits(w: number, h: number): { min: number; max: number; start: number } {
     const fitted = Math.min(w / MAP_W, h / MAP_H);
-    const tall = h > w * 1.15;
-    const max = Math.min(1.85, Math.max(fitted * 2.6, fitted + 0.25, tall ? (h / MAP_H) * 0.92 : 0));
-    const start = Math.min(max, tall ? Math.min((h / MAP_H) * 0.92, w / 620) : fitted * 1.42);
+    const tall = h > w * 1.05;
+    const max = Math.min(1.85, Math.max(fitted * 2.8, tall ? w / 420 : fitted + 0.35));
+    const start = Math.min(max, tall ? w / 460 : fitted * 1.2);
     return { min: fitted, max, start: Math.max(fitted, start) };
   }
 
@@ -502,9 +502,10 @@ async function boot(): Promise<void> {
     zoomMin = limits.min;
     zoomMax = limits.max;
     zoom = limits.start;
-    const sun = sim?.map.sun ?? { x: MAP_W / 2, y: MAP_H / 2 };
-    camX = w / 2 - sun.x * zoom;
-    camY = h / 2 - sun.y * zoom;
+    const focus = sim?.heroAt() ?? sim?.map.sun ?? { x: MAP_W / 2, y: MAP_H / 2 };
+    const anchorY = h > w ? h * 0.68 : h / 2;
+    camX = w / 2 - focus.x * zoom;
+    camY = anchorY - focus.y * zoom;
     clamp();
   }
 
@@ -573,8 +574,9 @@ async function boot(): Promise<void> {
         y = hero.y * 0.75 + e.y * 0.25;
       }
     }
+    const anchorY = h > w ? h * 0.66 : h / 2;
     const tx = w / 2 - x * zoom;
-    const ty = h / 2 - y * zoom;
+    const ty = anchorY - y * zoom;
     const k = 1 - Math.exp(-dt * 2.4);
     camX += (tx - camX) * k;
     camY += (ty - camY) * k;
@@ -597,17 +599,6 @@ async function boot(): Promise<void> {
     camX = sx - beforeX * zoom;
     camY = sy - beforeY * zoom;
     clamp();
-  }
-
-  function span(): number {
-    const pts = [...pointers.values()];
-    if (pts.length < 2) return 0;
-    return Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
-  }
-
-  function centerOfPointers(): { x: number; y: number } {
-    const pts = [...pointers.values()];
-    return { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
   }
 
   function aimPlacement(): void {
@@ -762,16 +753,17 @@ async function boot(): Promise<void> {
 
 function hintFor(save: SaveData, live: Siege): string {
   if (live.pendingOffer) return "";
-  if (live.world === 1 && live.wave === 0 && live.phase === "build") return "Three trails feed this crater. Cover each one.";
-  if (live.world === 2 && live.wave === 0 && live.phase === "build") return "Night Crater is the hard valley. Upgrade before the colossus.";
+  if (live.world === 1 && live.wave === 0 && live.phase === "build") return "Runners are fast. Frost stalls them. A heavy bolt is wasted here.";
+  if (live.world === 3 && live.wave === 0 && live.phase === "build") return "Brutes shrug off arrows. Fund a Heavy Bolt.";
+  if (live.world === 5 && live.wave === 0 && live.phase === "build") return "The boulder crushes troops. It wants a Heavy Bolt.";
   if (live.world !== 0) return "";
   if (live.phase === "wave" && live.wave === 0) return "Tap to move. Stand on a station to fund the next tower.";
   if (!live.stations.some((s) => s.tier > 0) && live.phase === "build") {
-    return "Tap to move. Stand on a dashed station. The nearest Dart is 50 Jade.";
+    return "Tap to move. Fund an Arrow Shower. It wipes the swarm.";
   }
   if (save.taught < 3 && live.phase === "wave") return "Walk over the Jade gems before they fade.";
   if (save.taught <= 1 && live.phase === "build") return `Call early +${BALANCE.earlyCall} Jade, or wait out the timer.`;
-  if (live.wave === 1 && live.phase === "build") return "Quake Drums splash a ring. Serpents leave a slowing puddle.";
+  if (live.wave === 1 && live.phase === "build") return "A Frost Snare stalls runners. A Heavy Bolt melts brutes.";
   if (save.taught <= 3) return "Stand on a built station to fund the next tier.";
   return "";
 }
@@ -816,9 +808,9 @@ function nextSpend(live: Siege): { text: string; cost: number; lit: boolean; kin
 }
 
 function shortTower(kind: TowerKind): string {
-  if (kind === "dart") return "Dart";
-  if (kind === "lens") return "Lens";
-  if (kind === "drum") return "Drum";
+  if (kind === "dart") return "Arrows";
+  if (kind === "lens") return "Bolt";
+  if (kind === "drum") return "Frost";
   return "Spire";
 }
 

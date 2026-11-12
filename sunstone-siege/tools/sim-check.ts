@@ -2,10 +2,10 @@
  * Headless proof that the valley can be lost and won, and that the special
  * rules behave. Combat numbers are the invented placeholders in balance.ts.
  */
-import { BALANCE, starsFor, towerCost } from "../src/balance";
+import { BALANCE, starsFor, towerCost, worldCount } from "../src/balance";
 import { SUN } from "../src/maps";
 import { Siege, stealthed, type Station } from "../src/sim";
-import type { RelicId } from "../src/types";
+import type { RelicId, TowerKind } from "../src/types";
 
 function fail(msg: string): never {
   throw new Error(msg);
@@ -51,9 +51,9 @@ function cover(sim: Siege): boolean {
     if (station) covered.add(station.path);
   }
   if (covered.size >= sim.map.routes.length) return false;
-  const open = sim.stations.filter((s) => s.kind !== "wall" && s.tier === 0 && !covered.has(s.path));
+  const open = sim.stations.filter((s) => (s.kind === "dart" || s.kind === "lens") && s.tier === 0 && !covered.has(s.path));
   if (!open.length) return false;
-  open.sort((a, b) => sim.stationCost(a) - sim.stationCost(b) || dist(a) - dist(b));
+  open.sort((a, b) => (a.kind === "dart" ? 0 : 1) - (b.kind === "dart" ? 0 : 1) || dist(a) - dist(b));
   const pick = open[0];
   if (sim.jade >= sim.stationCost(pick)) sim.fundNow(sim.stations.indexOf(pick));
   return true;
@@ -61,18 +61,21 @@ function cover(sim: Siege): boolean {
 
 function spend(sim: Siege): void {
   if (cover(sim)) return;
+  if (buy(sim, (s) => s.kind === "lens" && s.tier === 0)) return;
   if (buy(sim, (s) => s.kind === "dart" && s.tier === 0)) return;
   if (buy(sim, (s) => s.kind === "drum" && s.tier === 0)) return;
-  if (buy(sim, (s) => s.kind === "lens" && s.tier === 0)) return;
-  if (buy(sim, (s) => s.kind === "dart" && s.tier === 1)) return;
-  if (buy(sim, (s) => s.kind === "drum" && s.tier === 1)) return;
-  if (buy(sim, (s) => s.kind === "dart" && s.tier === 2)) return;
-  if (buy(sim, (s) => s.kind === "lens" && s.tier === 1)) return;
-  if (buy(sim, (s) => s.kind === "wall" && s.tier === 0)) return;
-  if (buy(sim, (s) => s.kind === "spire" && s.tier === 0)) return;
   if (buy(sim, (s) => s.kind === "barracks" && s.tier === 0)) return;
-  if (buy(sim, (s) => s.kind === "barracks" && s.tier === 1)) return;
-  buy(sim, (s) => s.kind !== "wall" && s.tier > 0 && s.tier < 3);
+  if (buy(sim, (s) => s.kind === "lens" && s.tier === 1)) return;
+  if (buy(sim, (s) => s.kind === "dart" && s.tier === 1)) return;
+  if (buy(sim, (s) => s.kind === "wall" && s.tier === 0)) return;
+  if (buy(sim, (s) => s.kind === "drum" && s.tier === 1)) return;
+  buy(sim, (s) => (s.kind === "dart" || s.kind === "lens" || s.kind === "drum") && s.tier > 0 && s.tier < 3);
+}
+
+/** Funds a single role and nothing else, so a countered level can show the gap. */
+function spendOnly(sim: Siege, kind: TowerKind | "barracks"): void {
+  if (buy(sim, (s) => s.kind === kind && s.tier === 0)) return;
+  buy(sim, (s) => s.kind === kind && s.tier > 0 && s.tier < 3);
 }
 
 function chase(sim: Siege): void {
@@ -261,7 +264,7 @@ function heroLoop(): void {
   if (!bug.alive) fail("a lone skitter should still be chewing the wall");
   if (bug.dist > wall.dist - 10) fail(`skitter walked through the wall at ${bug.dist.toFixed(1)} vs ${wall.dist.toFixed(1)}`);
 
-  for (const world of [0, 1, 2]) {
+  for (let world = 0; world < worldCount(); world++) {
     const idle = play(world, "idle");
     const kite = play(world, "kite");
     if (idle.phase !== "defeat") fail(`world ${world} idle should lose, got ${idle.phase}`);
@@ -313,10 +316,38 @@ function play(world: number, style: "idle" | "kite"): { phase: string; kills: nu
   return { phase: sim.phase, kills: sim.guardianKills, t };
 }
 
+function mono(world: number, kind: TowerKind | "barracks"): { phase: string; integrity: number; t: number } {
+  const sim = new Siege(world);
+  const dt = 1 / 20;
+  let t = 0;
+  while (sim.phase !== "victory" && sim.phase !== "defeat" && t < 180) {
+    if (sim.pendingOffer?.length) sim.chooseRelic(sim.pendingOffer[0]);
+    if (sim.phase === "build") {
+      spendOnly(sim, kind);
+      sim.callWave();
+    } else spendOnly(sim, kind);
+    sim.tick(dt);
+    sim.fx.length = 0;
+    t += dt;
+  }
+  const phase = sim.phase === "victory" ? "victory" : "defeat";
+  console.log(`mono ${kind} world ${world}: ${phase} integrity ${sim.integrity.toFixed(1)} in ${t.toFixed(1)}s`);
+  return { phase, integrity: sim.integrity, t };
+}
+
 afk();
 rules();
 heroLoop();
-bot(0);
-bot(1);
-bot(2);
+for (let world = 0; world < worldCount(); world++) bot(world);
+const heavySwarm = mono(0, "lens");
+const arrowBrute = mono(3, "dart");
+const arrowBoulder = mono(5, "dart");
+const troopsBoulder = mono(5, "barracks");
+const heavyRunners = mono(1, "lens");
+if (heavySwarm.phase === "victory") fail("heavy-only should lose the swarm valley");
+if (arrowBrute.phase === "victory") fail("arrow-only should lose the brute valley");
+if (arrowBoulder.phase === "victory") fail("arrow-only should lose the boulder valley");
+if (troopsBoulder.phase === "victory") fail("barracks-only should lose the boulder valley");
+if (heavyRunners.phase === "victory") fail("heavy-only should lose the runner ridge");
+console.log("counters: mixed wins every valley; one-role funding loses the valley that answers it");
 console.log("sim-check ok");

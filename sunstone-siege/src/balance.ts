@@ -52,6 +52,8 @@ export interface EnemyStat {
   /** Solar Flare charge gained when this unit breaks. */
   charge: number;
   flying: boolean;
+  /** One line for the first-sight card: which tower answers this unit. */
+  weak: string;
 }
 
 export interface WorldBalance {
@@ -80,13 +82,22 @@ export const BALANCE = {
   /** Fraction of Jade spent on a totem returned when it is sold. */
   sellRefund: 0.6,
   /** Seconds of free building before a wave walks in on its own. */
-  prewave: 9,
+  prewave: 11,
   /** Jade granted for calling a wave before the timer finishes. */
   earlyCall: 22,
   /** Movement multiplier while a drum's slow lasts. */
   slowMul: 0.48,
   /** A hit never drops below this after armor, so a shielded unit still chips. */
   minHit: 1,
+  /**
+   * Arrow Shower. One volley, then every unarmored raider in the ring pops.
+   * Armor at or above the gate shrugs the arrows off. A boulder only chips.
+   */
+  shower: { radius: 108, armorGate: 6, boulderChip: 8 },
+  /** Heavy Bolt. Slow, huge, and the armor it ignores is most of the plate. */
+  heavy: { interval: [1.28, 1.12, 0.96] as const, speed: 900, armorMul: 0.25 },
+  /** Frost Snare. Runners and boulder crews lock up harder than a normal slow. */
+  snare: { dur: 3.4, mul: 0.22 },
   /** Continuous beams keep at least this much dps after armor. */
   minDps: 2,
   stars: { two: 0.45, three: 0.72 },
@@ -185,19 +196,19 @@ export const BALANCE = {
     focus: { name: "Long Sight", blurb: "Every totem reaches a little farther.", range: 1.12 },
   } satisfies Record<RelicId, RelicDef>,
   dart: [
-    { cost: 50, damage: 24, range: 186, interval: 0.3, shotSpeed: 720 },
-    { cost: 70, damage: 40, range: 210, interval: 0.24, shotSpeed: 800 },
-    { cost: 100, damage: 58, range: 236, interval: 0.18, shotSpeed: 880 },
+    { cost: 50, damage: 64, range: 200, interval: 0.85, shotSpeed: 640 },
+    { cost: 70, damage: 78, range: 220, interval: 0.74, shotSpeed: 700 },
+    { cost: 100, damage: 96, range: 240, interval: 0.64, shotSpeed: 760 },
   ] as const satisfies readonly DartTier[],
   lens: [
-    { cost: 100, dps: 54, ramp: 20, rampMax: 80, range: 190 },
-    { cost: 130, dps: 78, ramp: 28, rampMax: 120, range: 216 },
-    { cost: 210, dps: 110, ramp: 36, rampMax: 170, range: 248 },
+    { cost: 95, dps: 240, ramp: 0, rampMax: 0, range: 210 },
+    { cost: 130, dps: 340, ramp: 0, rampMax: 0, range: 230 },
+    { cost: 180, dps: 460, ramp: 0, rampMax: 0, range: 250 },
   ] as const satisfies readonly LensTier[],
   drum: [
-    { cost: 85, damage: 16, radius: 132, stun: 0.45, slow: 1.4, interval: 1.35 },
-    { cost: 120, damage: 26, radius: 156, stun: 0.58, slow: 1.6, interval: 1.15 },
-    { cost: 190, damage: 40, radius: 184, stun: 0.72, slow: 1.85, interval: 0.98 },
+    { cost: 70, damage: 5, radius: 150, stun: 0.28, slow: 3.2, interval: 1.45 },
+    { cost: 100, damage: 7, radius: 170, stun: 0.34, slow: 3.6, interval: 1.25 },
+    { cost: 140, damage: 9, radius: 190, stun: 0.4, slow: 4, interval: 1.1 },
   ] as const satisfies readonly DrumTier[],
   spire: [
     { cost: 130, damage: 18, jumps: 3, falloff: 0.72, range: 160, chain: 136, interval: 0.92 },
@@ -205,15 +216,15 @@ export const BALANCE = {
     { cost: 260, damage: 50, jumps: 5, falloff: 0.8, range: 220, chain: 170, interval: 0.64 },
   ] as const satisfies readonly SpireTier[],
   towerName: {
-    dart: "Dart Totem",
-    lens: "Sun Lens",
-    drum: "Quake Drum",
+    dart: "Arrow Shower",
+    lens: "Heavy Bolt",
+    drum: "Frost Snare",
     spire: "Serpent Spire",
   } as const satisfies Record<TowerKind, string>,
   towerBlurb: {
-    dart: "Fast carved darts. They loose quicker into a slowed raider.",
-    lens: "Sunlight that burns hotter on one target. A stunned raider takes much more.",
-    drum: "A shock ring. It hurts, slows, and stuns. Stunned raiders feed a Sun Lens.",
+    dart: "A rain of arrows. It mows a swarm of small raiders and bounces off armor.",
+    lens: "One huge hit. It melts a brute or a boulder and is wasted on a swarm.",
+    drum: "Vines of frost. It stalls runners and the crew pushing a boulder.",
     spire: "Jade arcs that leap across a crowd. A stunned target takes the heavier arc.",
   } as const satisfies Record<TowerKind, string>,
   enemies: {
@@ -223,14 +234,15 @@ export const BALANCE = {
     // HP 60 means a tier-1 Dart (24) needs three hits and a tier-2 Dart (58)
     // needs two. Reward 4 and leak 0.4 keep bounty and leak pressure near the
     // old one-shot swarm.
-    skitter: { name: "Skitter", hp: 60, speed: 108, armor: 0, reward: 4, leak: 0.4, charge: 4, flying: false },
-    runner: { name: "Runner", hp: 30, speed: 104, armor: 0, reward: 7, leak: 1, charge: 9, flying: false },
-    shield: { name: "Shieldbearer", hp: 96, speed: 52, armor: 6, reward: 12, leak: 2, charge: 12, flying: false },
-    jaguar: { name: "Jaguar Stalker", hp: 48, speed: 92, armor: 0, reward: 11, leak: 1, charge: 11, flying: false },
-    golem: { name: "Stone Golem", hp: 260, speed: 34, armor: 4, reward: 22, leak: 3, charge: 18, flying: false },
-    shard: { name: "Golem Shard", hp: 48, speed: 70, armor: 0, reward: 5, leak: 1, charge: 6, flying: false },
-    glider: { name: "Glider", hp: 60, speed: 90, armor: 0, reward: 11, leak: 1, charge: 10, flying: true },
-    boss: { name: "Obsidian Colossus", hp: 1500, speed: 26, armor: 8, reward: 100, leak: 8, charge: 40, flying: false },
+    skitter: { name: "Skitter", hp: 58, speed: 96, armor: 0, reward: 4, leak: 0.4, charge: 4, flying: false, weak: "Weak to Arrow Shower" },
+    runner: { name: "Runner", hp: 32, speed: 168, armor: 0, reward: 7, leak: 1, charge: 9, flying: false, weak: "Stall with Frost" },
+    shield: { name: "Shieldbearer", hp: 160, speed: 48, armor: 10, reward: 12, leak: 2, charge: 12, flying: false, weak: "Needs a Heavy Bolt" },
+    jaguar: { name: "Jaguar Stalker", hp: 44, speed: 120, armor: 0, reward: 11, leak: 1, charge: 11, flying: false, weak: "Weak to Arrow Shower" },
+    golem: { name: "Stone Golem", hp: 200, speed: 32, armor: 10, reward: 22, leak: 3, charge: 18, flying: false, weak: "Needs a Heavy Bolt" },
+    shard: { name: "Golem Shard", hp: 40, speed: 78, armor: 0, reward: 5, leak: 1, charge: 6, flying: false, weak: "Weak to Arrow Shower" },
+    glider: { name: "Glider", hp: 44, speed: 132, armor: 0, reward: 11, leak: 1, charge: 10, flying: true, weak: "Weak to Arrow Shower" },
+    roller: { name: "Boulder Crew", hp: 640, speed: 40, armor: 12, reward: 28, leak: 6, charge: 20, flying: false, weak: "Heavy Bolt. Crushes troops" },
+    boss: { name: "Obsidian Colossus", hp: 1200, speed: 28, armor: 10, reward: 100, leak: 8, charge: 40, flying: false, weak: "Needs a Heavy Bolt" },
   } as const satisfies Record<EnemyKind, EnemyStat>,
   jaguar: { cycle: 4.6, dur: 1.45 },
   boss: {
@@ -250,45 +262,107 @@ export const BALANCE = {
   golemShards: 2,
   worlds: [
     {
-      name: "Jungle Valley",
-      jade: 230,
+      name: "Green Cut",
+      jade: 190,
       hp: 1,
       speed: 1,
       waves: [
-        { bonus: 28, groups: [skitter(16, 0)] },
-        { bonus: 34, groups: [skitter(14, 0), skitter(14, 2, 1.1)] },
-        { bonus: 40, groups: [group("shield", 5, 0.95, 1), group("jaguar", 4, 0.8, 3, 0.4), skitter(14, 0, 2)] },
-        { bonus: 48, groups: [group("glider", 5, 0.72, 2), group("shield", 4, 1, 3, 0.5), group("golem", 2, 2.4, 0, 1.2), skitter(36, 0, 0.3), skitter(36, 2), skitter(18, 1), skitter(18, 3)] },
-        { bonus: 70, groups: [skitter(14, 0), group("boss", 1, 0.2, 2, 0.8), group("shield", 4, 0.9, 1, 1.4), group("jaguar", 3, 0.75, 3, 1.6), skitter(32, 0, 0.2), skitter(32, 2), skitter(16, 1), skitter(16, 3)] },
+        { bonus: 24, groups: [skitter(32, 0)] },
+        { bonus: 28, groups: [skitter(28, 0), skitter(18, 0, 1.4)] },
+        { bonus: 32, groups: [skitter(36, 0)] },
+        { bonus: 36, groups: [skitter(22, 0), group("runner", 8, 0.32, 0, 1.2)] },
+        { bonus: 40, groups: [skitter(40, 0)] },
       ],
     },
     {
-      name: "River Ruins",
-      jade: 300,
-      hp: 1.32,
-      speed: 1.04,
+      name: "Runner Ridge",
+      jade: 210,
+      hp: 1,
+      speed: 1,
       waves: [
-        { bonus: 32, groups: [skitter(14, 0), skitter(12, 1, 1)] },
-        { bonus: 38, groups: [group("shield", 4, 0.95, 0), skitter(12, 3, 1.2)] },
-        { bonus: 44, groups: [group("jaguar", 5, 0.7, 1), group("glider", 5, 0.65, 0, 0.6)] },
-        { bonus: 50, groups: [group("golem", 3, 2.1, 2), group("shield", 5, 0.9, 1, 0.8)] },
-        { bonus: 56, groups: [group("glider", 7, 0.55, 0), group("jaguar", 5, 0.7, 1, 0.4), group("shield", 4, 0.85, 2, 1.2), skitter(22, 0, 0.3), skitter(18, 1), skitter(12, 2), skitter(12, 3)] },
-        { bonus: 80, groups: [group("shield", 5, 0.8, 0), group("boss", 1, 0.2, 1, 0.6), group("glider", 5, 0.6, 2, 1), group("golem", 2, 2.2, 0, 1.5), skitter(26, 0, 0.2), skitter(22, 1), skitter(14, 2), skitter(12, 3)] },
+        { bonus: 26, groups: [skitter(18, 0)] },
+        { bonus: 30, groups: [group("runner", 36, 0.18, 0)] },
+        { bonus: 34, groups: [group("runner", 28, 0.16, 0), skitter(12, 0, 0.8)] },
+        { bonus: 38, groups: [group("runner", 40, 0.16, 0)] },
+        { bonus: 42, groups: [group("runner", 32, 0.16, 0), group("runner", 16, 0.16, 0, 0.4)] },
       ],
     },
     {
-      name: "Night Crater",
-      jade: 320,
-      hp: 1.85,
-      speed: 1.1,
+      name: "Twin Canyon",
+      jade: 360,
+      hp: 1.02,
+      speed: 1,
       waves: [
-        { bonus: 36, groups: [skitter(22, 0)] },
-        { bonus: 42, groups: [skitter(18, 0), skitter(18, 1, 0.6)] },
-        { bonus: 48, groups: [group("shield", 6, 0.75, 2), group("jaguar", 6, 0.62, 0, 0.4)] },
-        { bonus: 54, groups: [group("glider", 6, 0.5, 1), group("golem", 3, 1.8, 3, 0.8)] },
-        { bonus: 60, groups: [group("shield", 8, 0.62, 2), group("glider", 7, 0.42, 1, 0.3), group("jaguar", 6, 0.5, 0, 0.8)] },
-        { bonus: 66, groups: [group("golem", 4, 1.5, 0), group("golem", 3, 1.5, 2, 0.4), skitter(16, 1, 0.6), skitter(24, 0, 0.2), skitter(22, 2), skitter(12, 3)] },
-        { bonus: 90, groups: [group("shield", 7, 0.55, 0), group("boss", 1, 0.2, 1, 0.3), group("glider", 8, 0.4, 2, 0.5), group("jaguar", 6, 0.48, 0, 0.8), skitter(28, 0, 0.2), skitter(24, 1), skitter(16, 2), skitter(14, 3)] },
+        { bonus: 30, groups: [skitter(16, 0), skitter(16, 1, 0.4)] },
+        { bonus: 36, groups: [group("shield", 3, 1.1, 0), skitter(10, 1, 0.6)] },
+        { bonus: 40, groups: [group("shield", 3, 1.05, 0), group("shield", 3, 1.05, 1, 0.3)] },
+        { bonus: 44, groups: [group("shield", 3, 1, 0), group("runner", 8, 0.3, 1, 0.5)] },
+        { bonus: 48, groups: [group("shield", 4, 0.95, 0), group("shield", 3, 1, 1, 0.4), skitter(10, 0, 1)] },
+      ],
+    },
+    {
+      name: "Brute Steps",
+      jade: 380,
+      hp: 1.04,
+      speed: 1,
+      waves: [
+        { bonus: 30, groups: [skitter(14, 0), skitter(12, 1, 0.5)] },
+        { bonus: 36, groups: [group("golem", 2, 2.4, 0), skitter(10, 1, 0.8)] },
+        { bonus: 42, groups: [group("golem", 2, 2.2, 0), group("golem", 2, 2.2, 1, 0.6)] },
+        { bonus: 46, groups: [group("golem", 3, 2, 0), group("shield", 3, 0.9, 1, 0.5)] },
+        { bonus: 52, groups: [group("golem", 2, 2, 0), group("golem", 2, 2, 1, 0.4), skitter(14, 0, 1)] },
+      ],
+    },
+    {
+      name: "High Wind",
+      jade: 340,
+      hp: 1.04,
+      speed: 1.02,
+      waves: [
+        { bonus: 28, groups: [skitter(14, 0), skitter(12, 1, 0.4)] },
+        { bonus: 34, groups: [group("glider", 16, 0.22, 0), group("glider", 14, 0.22, 1, 0.3)] },
+        { bonus: 38, groups: [group("glider", 18, 0.2, 0), group("glider", 16, 0.2, 1, 0.2)] },
+        { bonus: 42, groups: [group("glider", 14, 0.2, 1), group("runner", 16, 0.2, 0, 0.3)] },
+        { bonus: 48, groups: [group("glider", 20, 0.18, 0), group("glider", 16, 0.18, 1, 0.2)] },
+      ],
+    },
+    {
+      name: "Boulder Bend",
+      jade: 340,
+      hp: 1.05,
+      speed: 1,
+      waves: [
+        { bonus: 30, groups: [skitter(22, 0)] },
+        { bonus: 40, groups: [group("roller", 1, 0.2, 0)] },
+        { bonus: 46, groups: [group("roller", 2, 3.2, 0)] },
+        { bonus: 50, groups: [group("roller", 2, 2.8, 0), skitter(12, 0, 1.2)] },
+        { bonus: 56, groups: [group("roller", 3, 2.6, 0)] },
+      ],
+    },
+    {
+      name: "Three Gates",
+      jade: 520,
+      hp: 1.08,
+      speed: 1.02,
+      waves: [
+        { bonus: 32, groups: [skitter(14, 0), skitter(12, 1, 0.3), skitter(12, 2, 0.5)] },
+        { bonus: 38, groups: [group("runner", 8, 0.3, 0), group("shield", 3, 0.9, 1, 0.4), skitter(8, 2, 0.6)] },
+        { bonus: 44, groups: [group("glider", 8, 0.3, 2), group("golem", 2, 2.2, 0, 0.5)] },
+        { bonus: 50, groups: [group("roller", 1, 0.2, 1), skitter(12, 0, 0.8), group("runner", 6, 0.3, 2, 0.6)] },
+        { bonus: 58, groups: [group("golem", 2, 2,1, 0), group("shield", 3, 0.85, 1, 0.4), group("glider", 6, 0.3, 2, 0.5)] },
+      ],
+    },
+    {
+      name: "Colossus Stair",
+      jade: 460,
+      hp: 1.1,
+      speed: 1,
+      waves: [
+        { bonus: 32, groups: [skitter(16, 0), skitter(12, 1, 0.4)] },
+        { bonus: 38, groups: [group("shield", 4, 0.85, 0), group("runner", 8, 0.28, 1, 0.4)] },
+        { bonus: 44, groups: [group("golem", 2, 2.2, 0), skitter(10, 1, 0.6)] },
+        { bonus: 50, groups: [group("roller", 1, 0.2, 1), group("shield", 3, 0.9, 0, 0.8)] },
+        { bonus: 80, groups: [group("boss", 1, 0.2, 0), skitter(12, 1, 1.2)] },
       ],
     },
   ] as const satisfies readonly WorldBalance[],
@@ -345,9 +419,19 @@ export const TOWER_HUE: Record<TowerKind, number> = {
 
 export const TOWER_ICON: Record<TowerKind, string> = {
   dart: "➤",
-  lens: "☀",
-  drum: "◎",
+  lens: "◆",
+  drum: "❄",
   spire: "⚡",
+};
+
+/** One line on an empty pad: what funding it is for. */
+export const ROLE_HINT: Record<TowerKind | "barracks" | "wall", string> = {
+  dart: "Wipes swarms",
+  lens: "Melts brutes",
+  drum: "Stalls runners",
+  spire: "Chains a crowd",
+  barracks: "Crushed by boulder",
+  wall: "",
 };
 
 export interface TowerReadout {
@@ -372,17 +456,17 @@ export function towerReadout(kind: TowerKind, tier: number): TowerReadout {
   if (kind === "dart") {
     const s = BALANCE.dart[tier];
     const value = s.damage / s.interval;
-    return { tag: "DPS", stat: `DPS ${Math.round(value)}`, role: "Single target", targets: "First raider", value, pips: pips(value, 322), range: s.range };
+    return { tag: "VOLLEY", stat: `VOLLEY ${s.damage}`, role: "Arrow shower", targets: "A swarm of small raiders", value, pips: pips(value, 160), range: s.range };
   }
   if (kind === "lens") {
     const s = BALANCE.lens[tier];
-    const top = s.dps + s.rampMax;
-    return { tag: "BEAM", stat: `BEAM ${s.dps} to ${top}`, role: "Ramping beam", targets: "One raider", value: top, pips: pips(top, 322), range: s.range };
+    const gap = BALANCE.heavy.interval[tier];
+    return { tag: "HIT", stat: `HIT ${s.dps}`, role: "Heavy bolt", targets: "Brutes and the boulder", value: s.dps / gap, pips: pips(s.dps, 460), range: s.range };
   }
   if (kind === "drum") {
     const s = BALANCE.drum[tier];
-    const value = s.damage / s.interval;
-    return { tag: "AREA", stat: `AREA ${value.toFixed(1)} per enemy`, role: "Area stun", targets: "Every raider in the ring", value, pips: pips(value, 40.8), range: s.radius };
+    const value = s.slow;
+    return { tag: "SLOW", stat: `SLOW ${s.slow.toFixed(1)}s`, role: "Frost snare", targets: "Runners and boulder crews", value, pips: pips(value, 4), range: s.radius };
   }
   const s = BALANCE.spire[tier];
   return { tag: "CHAIN", stat: `CHAIN ${s.jumps} targets`, role: "Chain", targets: "A crowd", value: s.jumps, pips: pips(s.jumps, 5), range: s.range };
@@ -422,23 +506,24 @@ export function towerFacts(kind: TowerKind, tier: number): TowerFacts {
   if (kind === "dart") {
     const s = BALANCE.dart[tier];
     const dps = s.damage / s.interval;
-    return { dps, dpsText: dpsText(dps), range: s.range, role: "Single", targets: "First raider", chip: "fast" };
+    return { dps, dpsText: dpsText(dps), range: s.range, role: "Volley", targets: "Small swarms", chip: "shower" };
   }
   if (kind === "lens") {
     const s = BALANCE.lens[tier];
+    const gap = BALANCE.heavy.interval[tier];
     return {
-      dps: s.dps,
-      dpsText: `${s.dps}–${s.dps + s.rampMax}`,
+      dps: s.dps / gap,
+      dpsText: String(s.dps),
       range: s.range,
-      role: "Beam",
-      targets: "One raider",
-      chip: "burn",
+      role: "Heavy",
+      targets: "Brutes and the boulder",
+      chip: "hit",
     };
   }
   if (kind === "drum") {
     const s = BALANCE.drum[tier];
     const dps = s.damage / s.interval;
-    return { dps, dpsText: dpsText(dps), range: s.radius, role: "Area", targets: "Every raider in the ring", chip: "stun" };
+    return { dps, dpsText: dpsText(dps), range: s.radius, role: "Slow", targets: "Runners and boulder crews", chip: "slow" };
   }
   const s = BALANCE.spire[tier];
   const dps = s.damage / s.interval;

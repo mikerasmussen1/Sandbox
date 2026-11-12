@@ -18,6 +18,7 @@ export interface ArtSet {
   frame(name: string): Texture;
   clip(id: string, name: string): Clip | null;
   map(biome: "valley" | "ruins" | "crater"): Texture;
+  level(world: number): Texture;
   title: Texture;
   valley: Texture;
   logo: Texture;
@@ -62,6 +63,7 @@ export async function loadArt(onProgress?: (progress: number) => void): Promise<
     for (const clip of Object.values(unit.clips)) urls.push(clip.file);
   }
   urls.push(...manifest.ui, ...manifest.maps, ...manifest.plates);
+  for (let i = 0; i < 8; i++) urls.push(`art/map-l${i}.webp`);
   const loaded = await Assets.load<Texture>(urls, onProgress);
   const tex = (url: string): Texture => loaded[url];
 
@@ -102,7 +104,9 @@ export async function loadArt(onProgress?: (progress: number) => void): Promise<
     ruins: tex("art/map-river.webp"),
     crater: tex("art/map-night.webp"),
   };
-  for (const map of Object.values(maps)) {
+  const levels: Texture[] = [];
+  for (let i = 0; i < 8; i++) levels.push(tex(`art/map-l${i}.webp`));
+  for (const map of [...Object.values(maps), ...levels]) {
     map.source.scaleMode = "linear";
     map.source.autoGenerateMipmaps = true;
   }
@@ -111,6 +115,7 @@ export async function loadArt(onProgress?: (progress: number) => void): Promise<
     frame: (name) => frames.get(name) ?? Texture.EMPTY,
     clip: (id, name) => clips.get(`${id}:${name}`) ?? null,
     map: (biome) => maps[biome],
+    level: (world) => levels[Math.max(0, Math.min(levels.length - 1, world))] ?? maps.valley,
     title: tex("art/title.webp"),
     valley: tex("art/valley.webp"),
     logo: tex("art/logo.webp"),

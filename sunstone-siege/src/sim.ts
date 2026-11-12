@@ -94,6 +94,8 @@ export interface Enemy {
   emote: number;
   /** Shots left in the boulder a Golem is pushing. Zero means the rock is gone. */
   boulder: number;
+  /** Frost has the legs pinned. Runners and boulder crews take the hard snare. */
+  snareUntil: number;
 }
 
 export interface Ally {
@@ -169,7 +171,7 @@ export interface Spear {
   alive: boolean;
 }
 
-export type FxKind = "impact" | "death" | "jade" | "drum" | "chain" | "crack" | "flare" | "slam" | "boss" | "place" | "streak" | "relic" | "aegis" | "rally" | "banner" | "multi" | "callout" | "collect" | "num" | "rubble" | "pay" | "tick";
+export type FxKind = "impact" | "death" | "jade" | "drum" | "chain" | "crack" | "flare" | "slam" | "boss" | "place" | "streak" | "relic" | "aegis" | "rally" | "banner" | "multi" | "callout" | "collect" | "num" | "rubble" | "pay" | "tick" | "volley" | "intro";
 
 /** How long a carried gem takes to arc from the hero onto a pad. */
 export const PAY_FLIGHT = 0.34;
@@ -215,6 +217,7 @@ export function stealthed(kind: EnemyKind, age: number): boolean {
 /** How much trail a body wants. Bigger sprites need a wider crowd. */
 function girth(kind: EnemyKind): number {
   if (kind === "boss") return 86;
+  if (kind === "roller") return 96;
   if (kind === "golem") return 72;
   if (kind === "shield" || kind === "glider") return 58;
   return 62;
@@ -261,6 +264,7 @@ export class Siege {
   pendingOffer: RelicId[] | null = null;
   offerLeft = 0;
   readonly relics: RelicId[] = [];
+  private readonly seen = new Set<EnemyKind>();
   private dartMul = 1;
   private lensDpsMul = 1;
   private lensRampMul = 1;
@@ -657,12 +661,17 @@ export class Siege {
     e.hop = 0;
     e.emote = 0;
     e.boulder = kind === "golem" ? BALANCE.boulder.hp : 0;
+    e.snareUntil = 0;
     const pose = poseAt(e.flying ? this.map.flights[path] : this.map.routes[path], dist);
     e.x = pose.x;
     e.y = pose.y;
     e.angle = pose.angle;
     this.enemies.push(e);
     if (kind === "boss") this.fx.push({ kind: "boss", x: e.x, y: e.y, text: stat.name });
+    if (!this.seen.has(kind)) {
+      this.seen.add(kind);
+      this.fx.push({ kind: "intro", x: e.x, y: e.y, text: stat.name, enemy: kind });
+    }
     return e;
   }
 
@@ -671,7 +680,7 @@ export class Siege {
       id: 0, kind: "runner", path: 0, dist: 0, x: 0, y: 0, angle: 0, hp: 1, maxHp: 1,
       armor: 0, speed: 0, reward: 0, leak: 1, charge: 0, flying: false, boss: false,
       age: 0, slowUntil: 0, stunUntil: 0, slam: 0, aegis: 0, aegisUntil: 0, rally: 0, rushUntil: 0, flash: 0, alive: false,
-      lane: 0, striking: false, strikeLeft: 0, guard: 0, react: "", reactLeft: 0, knockX: 0, knockY: 0, hop: 0, emote: 0, boulder: 0,
+      lane: 0, striking: false, strikeLeft: 0, guard: 0, react: "", reactLeft: 0, knockX: 0, knockY: 0, hop: 0, emote: 0, boulder: 0, snareUntil: 0,
     };
   }
 
@@ -683,6 +692,7 @@ export class Siege {
       e.age += dt;
       let mul = 1;
       if (e.stunUntil > this.time) mul = 0;
+      else if (e.snareUntil > this.time) mul = BALANCE.snare.mul;
       else if (e.slowUntil > this.time) mul = BALANCE.slowMul;
       if (mul > 0 && e.rushUntil > this.time) mul *= BALANCE.boss.rallySpeed;
       e.reactLeft = Math.max(0, e.reactLeft - dt);
@@ -694,7 +704,7 @@ export class Siege {
       e.knockX *= knock;
       e.knockY *= knock;
       const route = e.flying ? this.map.flights[e.path] : this.map.routes[e.path];
-      const blocked = this.pressWall(e, dt);
+      const blocked = this.pressWall(e, dt) || this.pressAlly(e);
       if (blocked) e.striking = true;
       else if (e.dist < route.len) e.striking = false;
       if (!e.striking) e.dist += e.speed * mul * dt;
@@ -758,15 +768,13 @@ export class Siege {
   private towersAct(dt: number): void {
     for (const tower of this.towers) {
       if (tower.stunnedUntil > this.time) continue;
-      if (tower.kind === "lens") this.lens(tower, dt);
-      else {
-        tower.cooldown -= dt;
-        if (tower.cooldown > 0) continue;
-        if (tower.kind === "dart") this.dart(tower);
-        else if (tower.kind === "drum") this.drum(tower);
-        else this.spire(tower);
-        if (tower.cooldown < 0) tower.cooldown = 0;
-      }
+      tower.cooldown -= dt;
+      if (tower.cooldown > 0) continue;
+      if (tower.kind === "dart") this.dart(tower);
+      else if (tower.kind === "lens") this.lens(tower);
+      else if (tower.kind === "drum") this.drum(tower);
+      else this.spire(tower);
+      if (tower.cooldown < 0) tower.cooldown = 0;
     }
   }
 
@@ -824,30 +832,35 @@ export class Siege {
     shot.alive = true;
   }
 
-  private lens(tower: Tower, dt: number): void {
+  /** One slow bolt. The number on the lens tier is the hit, not a beam. */
+  private lens(tower: Tower): void {
     const target = this.acquire(tower, tower.targetId);
     if (!target) {
       tower.targetId = 0;
-      tower.ramp = 0;
       return;
     }
-    if (target.id !== tower.targetId) {
-      tower.targetId = target.id;
-      tower.ramp = 0;
-    }
     const tier = BALANCE.lens[tower.tier];
-    tower.ramp = Math.min(tier.rampMax, tower.ramp + tier.ramp * this.lensRampMul * dt);
+    tower.cooldown += BALANCE.heavy.interval[tower.tier];
+    tower.targetId = target.id;
     tower.angle = Math.atan2(target.y - tower.y, target.x - tower.x);
-    let dps = tier.dps * this.lensDpsMul + tower.ramp;
-    if (target.stunUntil > this.time) dps *= BALANCE.synergy.stunnedLens;
-    dps = Math.max(BALANCE.minDps, dps - target.armor);
-    tower.cooldown -= dt;
-    if (tower.cooldown <= 0) {
-      target.flash = 0.07;
-      tower.cooldown = 0.22;
-      this.fx.push({ kind: "impact", x: target.x, y: target.y, color: TOWER_HUE.lens });
-    }
-    this.hurt(target, dps * dt, false, tower);
+    const shot = this.shots[this.shotCursor];
+    this.shotCursor = (this.shotCursor + 1) % this.shots.length;
+    shot.id = this.nextId();
+    shot.x = tower.x;
+    shot.y = tower.y - 18;
+    shot.px = shot.x;
+    shot.py = shot.y;
+    shot.tx = target.x;
+    shot.ty = target.y;
+    shot.targetId = target.id;
+    let damage = tier.dps * this.lensDpsMul * (this.lensRampMul > 1 ? 1.08 : 1);
+    if (target.stunUntil > this.time) damage *= BALANCE.synergy.stunnedLens;
+    shot.damage = damage;
+    shot.speed = BALANCE.heavy.speed;
+    shot.towerId = tower.id;
+    shot.family = "lens";
+    shot.tier = tower.tier;
+    shot.alive = true;
   }
 
   private drum(tower: Tower): void {
@@ -868,6 +881,9 @@ export class Siege {
       const stun = (e.boss ? tier.stun * 0.35 : tier.stun) * this.drumStunMul;
       e.stunUntil = Math.max(e.stunUntil, this.time + stun);
       e.slowUntil = Math.max(e.slowUntil, this.time + tier.slow);
+      if (e.kind === "runner" || e.kind === "roller") {
+        e.snareUntil = Math.max(e.snareUntil, this.time + BALANCE.snare.dur);
+      }
       if (e.kind === "skitter") {
         const d = Math.hypot(dx, dy) || 1;
         e.knockX += (dx / d) * 9;
@@ -1047,12 +1063,15 @@ export class Siege {
           const owner = this.towers.find((t) => t.id === shot.towerId);
           if (owner && target) this.venom(owner, target, shot.x, shot.y);
           else this.spill(shot.x, shot.y, BALANCE.venom.radius[shot.tier] ?? 56, BALANCE.venom.life, "spire");
+        } else if (shot.family === "dart") {
+          this.shower(shot);
         } else if (target) {
           const owner = shot.towerId > 0 ? this.towers.find((t) => t.id === shot.towerId) : undefined;
-          const killed = this.hurt(target, shot.damage, true, owner, shot.px, shot.py);
+          const heavy = shot.family === "lens";
+          const killed = this.hurt(target, shot.damage, !heavy, owner, shot.px, shot.py, heavy);
           if (killed && shot.towerId < 0) this.guardianKills += 1;
           const color = shot.family === "hero" ? 0xffe08a : TOWER_HUE[shot.family];
-          this.fx.push({ kind: "impact", x: target.x, y: target.y, color, n: shot.family === "hero" ? 2 : 0 });
+          this.fx.push({ kind: "impact", x: target.x, y: target.y, color, n: heavy ? 4 : shot.family === "hero" ? 2 : 0 });
         }
       } else {
         shot.x += (dx / dist) * step;
@@ -1061,11 +1080,42 @@ export class Siege {
     }
   }
 
-  /** `mitigate` subtracts armor. Beams pass false because they already did. Returns true when the hit kills. */
-  private hurt(e: Enemy, raw: number, mitigate: boolean, tower?: Tower, fromX?: number, fromY?: number): boolean {
+  /**
+   * Arrow Shower. One logical shot blankets the circle. Armor at the gate
+   * takes nothing. A golem's boulder only chips, so the soak test still holds.
+   */
+  private shower(shot: Shot): void {
+    const owner = shot.towerId > 0 ? this.towers.find((t) => t.id === shot.towerId) : undefined;
+    const radius = BALANCE.shower.radius;
+    const r2 = radius * radius;
+    const caught = this.enemies.filter((e) => e.alive && (e.x - shot.x) ** 2 + (e.y - shot.y) ** 2 <= r2);
+    let killed = 0;
+    for (const e of caught) {
+      if (this.hurt(e, shot.damage, true, owner, shot.px, shot.py, false, true)) killed += 1;
+    }
+    this.fx.push({ kind: "volley", x: shot.x, y: shot.y, n: radius });
+    this.noteMulti(shot.x, shot.y, killed);
+  }
+
+  /**
+   * `mitigate` subtracts armor. A heavy bolt passes false and only shaves a
+   * fraction of the plate. `shower` is the arrow volley. Returns true on a kill.
+   */
+  private hurt(
+    e: Enemy,
+    raw: number,
+    mitigate: boolean,
+    tower?: Tower,
+    fromX?: number,
+    fromY?: number,
+    heavy = false,
+    shower = false,
+  ): boolean {
     if (!e.alive || raw <= 0) return false;
     if (e.boulder > 0) {
-      const chip = Math.min(e.boulder, Math.max(BALANCE.minHit, raw));
+      const chip = shower
+        ? Math.min(e.boulder, BALANCE.shower.boulderChip)
+        : Math.min(e.boulder, Math.max(BALANCE.minHit, raw));
       e.boulder -= chip;
       e.flash = 0.12;
       this.fx.push({ kind: "num", x: e.x + 18, y: e.y - 36, text: String(Math.round(chip)) });
@@ -1075,8 +1125,20 @@ export class Siege {
       }
       return false;
     }
-    let dealt = mitigate ? Math.max(BALANCE.minHit, raw - e.armor) : raw;
+    let dealt = heavy
+      ? Math.max(BALANCE.minHit, raw - e.armor * BALANCE.heavy.armorMul)
+      : mitigate
+        ? Math.max(BALANCE.minHit, raw - e.armor)
+        : raw;
+    if (shower && e.armor >= BALANCE.shower.armorGate) dealt = BALANCE.minHit;
     if (e.boss && e.aegisUntil > this.time) dealt *= BALANCE.boss.aegisMul;
+    if (dealt <= 0) {
+      e.flash = 0.08;
+      e.react = "block";
+      e.reactLeft = 0.32;
+      e.guard = 0.32;
+      return false;
+    }
     const applied = Math.min(e.hp, dealt);
     e.hp -= applied;
     if (tower) tower.dealt += applied;
@@ -1560,11 +1622,17 @@ export class Siege {
         foe = e;
       }
       if (foe) {
+        if (foe.kind === "roller") {
+          ally.alive = false;
+          this.fx.push({ kind: "rubble", x: ally.x, y: ally.y });
+          continue;
+        }
         if (ally.cool <= 0) {
           ally.cool = spec.interval;
           this.hurt(foe, spec.damage, true, undefined, ally.x, ally.y);
         }
-        ally.hp -= (foe.boss ? 22 : foe.kind === "golem" ? 12 : 7) * dt;
+        const bite = foe.boss ? 22 : foe.kind === "golem" ? 12 : foe.kind === "runner" ? 16 : 7;
+        ally.hp -= bite * dt;
         if (ally.hp <= 0) {
           ally.alive = false;
           this.fx.push({ kind: "rubble", x: ally.x, y: ally.y });
@@ -1577,6 +1645,24 @@ export class Siege {
       ally.y = pose.y;
       ally.angle = pose.angle + Math.PI;
     }
+  }
+
+  /**
+   * Barracks troops stand in the lane. Ordinary raiders stop and fight.
+   * A boulder crew rolls through them. Gliders fly over.
+   */
+  private pressAlly(e: Enemy): boolean {
+    if (e.flying || e.kind === "roller") return false;
+    let held = false;
+    for (const ally of this.allies) {
+      if (!ally.alive || ally.path !== e.path) continue;
+      const ahead = ally.dist - e.dist;
+      if (ahead < -12 || ahead > 36) continue;
+      const stop = ally.dist - 22;
+      if (e.dist > stop) e.dist = stop;
+      held = true;
+    }
+    return held;
   }
 
   /** Ground raiders chew a barricade instead of walking through it. */
@@ -1608,9 +1694,9 @@ export class Siege {
     const stations: Station[] = this.map.pads.map((pad, index) => {
       const near = this.nearestProgress(pad.x, pad.y);
       let kind: StationKind = "dart";
-      if (near.frac < 0.34) kind = index % 3 === 2 ? "drum" : "dart";
-      else if (near.frac < 0.64) kind = index % 2 === 0 ? "lens" : "drum";
-      else kind = index % 2 === 0 ? "spire" : "lens";
+      if (near.frac < 0.38) kind = "dart";
+      else if (near.frac < 0.68) kind = index % 2 === 0 ? "drum" : "dart";
+      else kind = "lens";
       return {
         index, x: pad.x, y: pad.y, kind, path: near.path, dist: near.dist,
         paid: 0, tier: 0, hp: 0, maxHp: 0, alive: false,
@@ -1631,6 +1717,16 @@ export class Siege {
       if (onPath.some((s) => s.kind === "dart")) continue;
       const entrance = onPath.slice().sort((a, b) => a.dist - b.dist)[0];
       if (entrance) entrance.kind = "dart";
+    }
+    for (let path = 0; path < this.map.routes.length; path++) {
+      const onPath = stations.filter((s) => s.path === path);
+      if (onPath.some((s) => s.kind === "lens")) continue;
+      const last = onPath.slice().sort((a, b) => b.dist - a.dist)[0];
+      if (last && last.kind !== "dart") last.kind = "lens";
+      else if (onPath.length > 1) {
+        const other = onPath.filter((s) => s.kind !== "dart").sort((a, b) => b.dist - a.dist)[0];
+        if (other) other.kind = "lens";
+      }
     }
     const musterRoute = this.map.routes[0];
     const musterDist = musterRoute.len * 0.62;

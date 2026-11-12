@@ -167,7 +167,7 @@ export class Hud {
   private jadeCatch = 0;
   private jadePrimed = false;
   private goalCost = 50;
-  private goalLabel = "Dart Totem  50";
+  private goalLabel = "Arrow Shower  50";
   private vaultLit = false;
   private goalKind: TowerKind = "dart";
   private showTip = false;
@@ -181,6 +181,12 @@ export class Hud {
   private gearButton!: Container;
   private reduced = false;
   private bannerLife = 0;
+  private introLife = 0;
+  private safeTop = 0;
+  private safeBottom = 0;
+  private intro!: Container;
+  private introTitle!: Text;
+  private introBody!: Text;
   private screen: "title" | "levels" | "play" = "title";
   private w = 800;
   private h = 450;
@@ -274,18 +280,23 @@ export class Hud {
     }
     this.title.position.set(w / 2, h / 2);
     this.title.scale.set(Math.max(0.62, Math.min(1, Math.min(w / 980, h / 640))));
-    const narrowLevels = w < 700;
+    const cols = w < 800 ? 2 : 4;
+    const gapX = 184;
+    const gapY = 168;
+    const rows = Math.max(1, Math.ceil(this.levelCards.length / cols));
+    this.levelCards.forEach((card, i) => {
+      const col = i % cols;
+      const row = Math.floor(i / cols);
+      card.position.set((col - (cols - 1) / 2) * gapX, (row - (rows - 1) / 2) * gapY);
+    });
+    const gridW = (cols - 1) * gapX + 176;
+    const gridH = (rows - 1) * gapY + 160 + 220;
     this.levels.position.set(w / 2, h / 2);
-    this.levels.scale.set(narrowLevels
-      ? Math.min(1, w / 340, (h - 24) / 860)
-      : Math.max(0.58, Math.min(1, Math.min(w / 1040, h / 620))));
+    this.levels.scale.set(Math.min(1, (w - 12) / gridW, (h - 16) / gridH));
     const heading = this.levels.children[0] as Container | undefined;
     const back = this.levels.children[1] as Container | undefined;
-    if (heading) heading.position.y = narrowLevels ? -430 : -210;
-    if (back) back.position.y = narrowLevels ? 400 : 230;
-    this.levelCards.forEach((card, i) => {
-      card.position.set(narrowLevels ? 0 : (i - 1) * 300, narrowLevels ? (i - 1) * 230 - 20 : 10);
-    });
+    if (heading) heading.position.y = -((rows - 1) / 2) * gapY - 108;
+    if (back) back.position.y = ((rows - 1) / 2) * gapY + 108;
     this.placePlay(w, h);
     this.pauseLayer.position.set(w / 2, h / 2);
     this.settingsLayer.position.set(w / 2, h / 2);
@@ -485,10 +496,31 @@ export class Hud {
     this.banner.visible = true;
   }
 
+  /** Notch and home-indicator insets, in screen pixels. */
+  setSafe(top: number, bottom: number): void {
+    this.safeTop = top;
+    this.safeBottom = bottom;
+  }
+
+  /** First time a raider appears. The second line is which tower answers it. */
+  showIntro(name: string, weak: string): void {
+    if (!this.intro) return;
+    this.introTitle.text = name;
+    this.introBody.text = weak;
+    this.introLife = 3.1;
+    this.intro.alpha = 1;
+    this.intro.visible = true;
+  }
+
   tick(dt: number): void {
     this.laneTime += dt;
     this.drawVault(dt);
     this.drawLanes(dt);
+    if (this.introLife > 0) {
+      this.introLife -= dt;
+      this.intro.alpha = this.introLife < 0.4 ? Math.max(0, this.introLife / 0.4) : 1;
+      if (this.introLife <= 0) this.intro.visible = false;
+    }
     if (this.bannerLife <= 0) return;
     this.bannerLife -= dt;
     this.banner.alpha = Math.max(0, this.bannerLife / 0.4);
@@ -548,29 +580,28 @@ export class Hud {
     this.hits.push(back);
     for (let i = 0; i < worldCount(); i++) {
       const card = new Container();
-      card.position.set((i - 1) * 300, 10);
-      const plate = this.panel(280, 320);
+      const plate = this.panel(168, 150);
       plate.position.set(0, 0);
-      const name = new Text({ text: BALANCE.worlds[i].name, style: { fontFamily: SERIF, fontSize: 22, fill: 0xfff1c8, fontWeight: "bold", wordWrap: true, wordWrapWidth: 220, align: "center" } });
+      const name = new Text({ text: BALANCE.worlds[i].name, style: { fontFamily: SERIF, fontSize: 16, fill: 0xfff1c8, fontWeight: "bold", wordWrap: true, wordWrapWidth: 148, align: "center" } });
       name.anchor.set(0.5, 0);
-      name.position.set(0, -110);
-      const waves = label(`${BALANCE.worlds[i].waves.length} waves`, 15, 0xd9cbb0);
+      name.position.set(0, -58);
+      const waves = label(`${BALANCE.worlds[i].waves.length} waves`, 13, 0xd9cbb0);
       waves.anchor.set(0.5);
-      waves.position.set(0, -40);
+      waves.position.set(0, -6);
       const stars: Text[] = [];
       for (let s = 0; s < 3; s++) {
-        const star = label("★", 28, 0xffe08a);
+        const star = label("★", 20, 0xffe08a);
         star.anchor.set(0.5);
-        star.position.set(-40 + s * 40, 16);
+        star.position.set(-28 + s * 28, 24);
         star.eventMode = "none";
         stars.push(star);
       }
-      const lock = label("Locked", 16, 0xfff1c8);
+      const lock = label("Locked", 14, 0xfff1c8);
       lock.anchor.set(0.5);
-      lock.position.set(0, 78);
+      lock.position.set(0, 52);
       lock.eventMode = "none";
       card.addChild(plate, name, waves, ...stars, lock);
-      card.hitArea = new Rectangle(-140, -160, 280, 320);
+      card.hitArea = new Rectangle(-84, -75, 168, 150);
       card.eventMode = "static";
       card.cursor = "pointer";
       card.on("pointertap", (e) => {
@@ -681,7 +712,22 @@ export class Hud {
     this.laneTip.visible = false;
     this.laneTip.eventMode = "static";
     this.laneLayer.eventMode = "passive";
-    this.play.addChild(bar, this.integrityText, this.integrityFill, this.waveText, this.streakText, this.bossText, speed, pause, gear, this.vault, this.purseText, this.laneLayer, this.laneTip, this.callButton, this.guardianButton, this.flareButton, this.hint, this.banner, this.card, this.offerLayer);
+    this.intro = new Container();
+    this.intro.visible = false;
+    this.intro.eventMode = "none";
+    const introPlate = this.panel(280, 108);
+    introPlate.position.set(0, 0);
+    introPlate.eventMode = "none";
+    this.introTitle = new Text({ text: "", style: { fontFamily: SERIF, fontSize: 22, fill: 0xfff6df, fontWeight: "bold", align: "center" } });
+    this.introTitle.anchor.set(0.5, 0);
+    this.introTitle.position.set(0, -36);
+    this.introTitle.eventMode = "none";
+    this.introBody = new Text({ text: "", style: { fontFamily: SANS, fontSize: 16, fill: 0xffe08a, fontWeight: "bold", align: "center", wordWrap: true, wordWrapWidth: 250 } });
+    this.introBody.anchor.set(0.5, 0);
+    this.introBody.position.set(0, 0);
+    this.introBody.eventMode = "none";
+    this.intro.addChild(introPlate, this.introTitle, this.introBody);
+    this.play.addChild(bar, this.integrityText, this.integrityFill, this.waveText, this.streakText, this.bossText, speed, pause, gear, this.vault, this.purseText, this.laneLayer, this.laneTip, this.callButton, this.guardianButton, this.flareButton, this.hint, this.banner, this.intro, this.card, this.offerLayer);
     this.hits.push(speed, pause, gear, this.callButton, this.guardianButton, this.flareButton, this.card, bar, this.vault, this.laneTip);
     this.banner.visible = false;
   }
@@ -693,36 +739,39 @@ export class Hud {
     const pause = this.pauseButton;
     const gear = this.gearButton;
     if (!bar || !jadeIcon || !speed || !pause || !gear) return;
+    const top = this.safeTop;
+    const bottom = this.safeBottom;
     const barH = w < 760 ? 112 : 56;
     bar.clear();
+    bar.position.set(0, top);
     bar.rect(0, 0, w, barH).fill({ color: 0x140e0a, alpha: 0.84 });
     bar.hitArea = new Rectangle(0, 0, w, barH);
-    this.integrityText.position.set(16, 8);
-    this.integrityFill.position.set(16, 34);
+    this.integrityText.position.set(16, top + 8);
+    this.integrityFill.position.set(16, top + 34);
     const narrow = w < 760;
     this.vaultW = narrow ? Math.max(220, w - 16) : 360;
     this.vaultH = narrow ? 72 : 88;
-    this.vault.position.set(narrow ? 8 : (w - this.vaultW) / 2, narrow ? barH + 6 : barH + 6);
+    this.vault.position.set(narrow ? 8 : (w - this.vaultW) / 2, top + barH + 6);
     this.layoutVault(narrow);
     this.waveText.anchor.set(narrow ? 1 : 0.5, 0);
-    this.waveText.position.set(narrow ? w - 12 : w / 2, 8);
+    this.waveText.position.set(narrow ? w - 12 : w / 2, top + 8);
     this.streakText.anchor.set(narrow ? 1 : 0, 0);
-    this.streakText.position.set(narrow ? w - 12 : w / 2 + 90, narrow ? 30 : 16);
+    this.streakText.position.set(narrow ? w - 12 : w / 2 + 90, top + (narrow ? 30 : 16));
     if (narrow) {
       const gap = 8;
       const right = w - 10;
-      gear.position.set(right - 66, 84);
-      pause.position.set(right - 132 - gap - 59, 84);
-      speed.position.set(right - 132 - gap - 118 - gap - 43, 84);
+      gear.position.set(right - 66, top + 84);
+      pause.position.set(right - 132 - gap - 59, top + 84);
+      speed.position.set(right - 132 - gap - 118 - gap - 43, top + 84);
     } else {
-      gear.position.set(w - 78, 28);
-      pause.position.set(w - 214, 28);
-      speed.position.set(w - 326, 28);
+      gear.position.set(w - 78, top + 28);
+      pause.position.set(w - 214, top + 28);
+      speed.position.set(w - 326, top + 28);
     }
-    this.flareButton.position.set(w - 64, h - 64);
-    this.guardianButton.position.set(w < 760 ? w - 64 : w - 156, w < 760 ? h - 168 : h - 64);
+    this.flareButton.position.set(w - 64, h - 64 - bottom);
+    this.guardianButton.position.set(w < 760 ? w - 64 : w - 156, (w < 760 ? h - 168 : h - 64) - bottom);
     this.callButton.scale.set(1);
-    this.callButton.position.set(narrow ? Math.max(150, w / 2 - 70) : w / 2, h - 48);
+    this.callButton.position.set(narrow ? Math.max(150, w / 2 - 70) : w / 2, h - 48 - bottom);
     const belowVault = this.vault.y + this.vaultH;
     this.hint.style.wordWrap = true;
     this.hint.style.wordWrapWidth = Math.max(160, w - 28);
@@ -733,7 +782,8 @@ export class Hud {
     this.banner.position.set(w / 2, belowVault + (narrow ? 58 : 64));
     const cardScale = Math.min(1, (w - 8) / 600, Math.max(0.62, (h * 0.5) / 400));
     this.card.scale.set(cardScale);
-    this.card.position.set(8, h - 400 * cardScale - 8);
+    this.card.position.set(8, h - 400 * cardScale - 8 - bottom);
+    this.intro.position.set(w / 2, Math.min(h * 0.42, belowVault + 150));
     this.bossText.anchor.set(0.5, 0);
     this.bossText.position.set(w / 2, belowVault + (narrow ? 8 : 4));
     this.purseText.position.set(this.vault.x + 16, this.vault.y + this.vaultH + 4);
@@ -1489,7 +1539,7 @@ function fullDim(): Graphics {
 }
 
 function enemyIcon(art: ArtSet, kind: EnemyKind, px = 84): { texture: Texture; scale: number; anchorX: number; anchorY: number } {
-  const asset = kind === "shield" ? "enemy_shieldbearer" : kind === "shard" ? "enemy_golem" : `enemy_${kind}`;
+  const asset = kind === "shield" ? "enemy_shieldbearer" : kind === "shard" || kind === "roller" ? "enemy_golem" : `enemy_${kind}`;
   const loco = kind === "skitter" || kind === "jaguar" ? "run" : kind === "glider" ? "fly" : "walk";
   const clip = art.clip(asset, loco) ?? art.clip(asset, "idle");
   if (!clip) return { texture: Texture.EMPTY, scale: 0.2, anchorX: 0.5, anchorY: 0.5 };
