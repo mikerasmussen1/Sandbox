@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<base href="./" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#070b10" />
+<link rel="icon" href="art/icon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" href="art/icon-180.png" />
+<link rel="manifest" href="manifest.webmanifest" />
+<title>Auric Dynamo</title>
+<link rel="stylesheet" href="css/game.css" />
+</head>
+  <body>
+<p id="demo-note">Demo preview, no real money</p>
+    <div id="boot" aria-hidden="true"><img src="art/icon-180.png" alt="" /></div>
+    <div id="viewport">
+    <div id="cabinet" data-energy="idle" data-motion="allow">
+  <div id="rivets" aria-hidden="true"></div>
+  <div id="bulb-rim" aria-hidden="true"></div>
+  <header class="marquee">
+    <h1><img id="wordmark" alt="Auric Dynamo" /></h1>
+    <div class="leds">
+      <div class="led"><span id="balance-label">Credits</span><strong id="balance">100,000</strong></div>
+      <div class="led"><span>Session</span><strong id="session">0</strong></div>
+      <div class="led"><span>Time</span><strong id="time">0:00</strong></div>
+    </div>
+    <div id="currency" hidden>
+      <button type="button" id="cur-gc" aria-pressed="false" aria-label="Gold Coins">GC</button>
+      <button type="button" id="cur-sc" aria-pressed="true" aria-label="Sweeps Coins">SC</button>
+    </div>
+  </header>
+  <p id="account-line" hidden></p>
+  <p id="banner" class="banner" hidden></p>
+  <main id="play-surface">
+    <div class="window">
+      <div id="build" aria-hidden="true">
+        <p id="feature-banner"></p>
+        <p id="build-digits"></p>
+        <div id="sparks" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+      </div>
+      <div id="stage" role="img" aria-label="Auric Dynamo clockwork reels"></div>
+      <div id="reel-sweep" aria-hidden="true"></div>
+      <div id="wheel-host" aria-hidden="true"></div>
+      <span id="fly" hidden></span>
+    </div>
+    <section class="deck" aria-label="Machine deck">
+      <div class="meters">
+        <div class="led win">
+          <span id="total-label">Total</span>
+          <strong id="hero"></strong>
+          <span id="net">Net pending</span>
+        </div>
+        <div class="led"><span>Cost</span><strong id="cost-read">10</strong></div>
+        <div class="led"><span>Energy</span><strong id="meter">0/10</strong></div>
+      </div>
+      <div id="lines"></div>
+      <div class="spin-row">
+        <button type="button" id="cost-down" aria-label="Lower cost">−</button>
+        <button type="button" id="spin">Spin</button>
+        <button type="button" id="cost-up" aria-label="Raise cost">+</button>
+      </div>
+      <div class="cost cost-radios" role="radiogroup" aria-label="Play cost">
+        <label><input type="radio" name="cost" value="10" checked /> 10</label>
+        <label><input type="radio" name="cost" value="20" /> 20</label>
+        <label><input type="radio" name="cost" value="50" /> 50</label>
+        <label><input type="radio" name="cost" value="100" /> 100</label>
+      </div>
+      <div class="icon-row">
+        <button type="button" id="reveal" aria-label="Skip">▸</button>
+        <button type="button" id="turbo-btn" aria-pressed="false" aria-label="Turbo">⚡</button>
+        <button type="button" id="start-auto" aria-label="Autoplay">↻</button>
+        <button type="button" id="stop-auto" aria-label="Stop autoplay">■</button>
+        <button type="button" id="sound-btn" aria-pressed="true" aria-label="Sound">♪</button>
+        <button type="button" id="music-btn" aria-pressed="true" aria-label="Music">♫</button>
+        <button type="button" id="settings-open" aria-label="Settings" aria-haspopup="dialog">⚙</button>
+        <button type="button" id="help-open" aria-label="Help">?</button>
+        <button type="button" id="board-open" aria-label="Standings">★</button>
+      </div>
+      <p id="auto-status">Autoplay off</p>
+      <p id="short" class="short" hidden><span id="short-text">Not enough for this cost.</span> <button type="button" id="short-reset">Reset demo credits</button></p>
+      <p id="note"></p>
+    </section>
+  </main>
+</div>
+</div>
+<div id="overlay"></div>
+<p id="live" aria-live="polite"></p>
+<dialog id="settings-dialog" aria-labelledby="settings-title">
+  <h2 id="settings-title">Settings</h2>
+  <label class="panel-row">Motion
+    <select id="reduced">
+      <option value="device">Device</option>
+      <option value="reduce">Reduce</option>
+      <option value="allow">Allow</option>
+    </select>
+  </label>
+  <label class="panel-row">Effects <input type="checkbox" id="effects" checked /></label>
+  <label class="panel-row">Autoplay count
+    <select id="auto-count">
+      <option value="10">10</option>
+      <option value="25">25</option>
+      <option value="50">50</option>
+    </select>
+  </label>
+  <label class="panel-row">Mute <input type="checkbox" id="muted" /></label>
+  <label class="panel-row">Music <input type="checkbox" id="music" checked /></label>
+  <label class="panel-row">Turbo <input type="checkbox" id="turbo" /></label>
+  <div class="dialog-actions">
+    <button type="button" id="reset">Reset demo credits</button>
+    <button type="button" id="exit">Exit</button>
+    <button type="button" id="settings-close">Close</button>
+  </div>
+</dialog>
+<dialog id="board-dialog" aria-labelledby="board-title">
+  <h2 id="board-title">Standings</h2>
+  <label>Handle <input id="handle" maxlength="16" autocomplete="nickname" /></label>
+  <p id="board-level"></p>
+  <p id="board-note">Standings stay on this device. They are a record of results, not a balance you can spend.</p>
+  <div id="board-body"></div>
+  <div class="dialog-actions"><button type="button" id="board-close">Close</button></div>
+</dialog>
+<dialog id="help-dialog" aria-labelledby="help-title">
+  <div id="help-head">
+    <img id="help-logo" alt="" />
+    <img id="help-wheel" alt="" />
+  </div>
+  <h2 id="help-title" tabindex="-1">Help</h2>
+  <div id="help-body"></div>
+  <div class="dialog-actions"><button type="button" id="help-close">Close</button></div>
+</dialog>
+<dialog id="onboard-dialog" aria-labelledby="onboard-title">
+  <img id="onboard-logo" alt="" />
+  <h2 id="onboard-title">Auric Dynamo</h2>
+  <p>Choose a cost, then spin. The three number tokens are read as one number unless any of them is blank, which makes that number zero. A modifier can multiply, replace, bank and add, or open a wheel. Opened from the lobby, each spin uses your Gold Coins or Sweeps Coins and the server decides the result.</p>
+  <div class="dialog-actions">
+    <button type="button" id="onboard-help">Open Help</button>
+    <button type="button" id="onboard-start">Start</button>
+  </div>
+</dialog>
+<dialog id="reset-dialog" aria-labelledby="reset-title">
+  <h2 id="reset-title">Reset demo credits</h2>
+  <p>This restores 100,000 demo credits and clears the session net. It does not add the restored amount to session net.</p>
+  <div class="dialog-actions">
+    <button type="button" id="reset-confirm">Reset demo credits</button>
+    <button type="button" id="reset-cancel">Cancel</button>
+  </div>
+</dialog>
+<noscript><p>Auric Dynamo needs JavaScript to run this demo.</p></noscript>
+<script type="module" src="js/game.js"></script>
+</body>
+</html>

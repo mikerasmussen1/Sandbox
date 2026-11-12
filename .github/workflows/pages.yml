@@ -27,6 +27,8 @@ jobs:
       - name: Install and build
         working-directory: sunstone-siege
         run: npm ci && npm run build
+      - name: Include static demo previews
+        run: cp -a auric-dynamo sunstone-siege/dist/auric-dynamo
       - uses: actions/upload-pages-artifact@v3
         with:
           path: sunstone-siege/dist
