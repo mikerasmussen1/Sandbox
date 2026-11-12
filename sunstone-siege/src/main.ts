@@ -22,7 +22,7 @@ async function boot(): Promise<void> {
   const app = new Application();
   await app.init({
     resizeTo: host,
-    background: 0x07110c,
+    background: 0x2f9a3a,
     antialias: false,
     autoDensity: true,
     resolution: Math.min(window.devicePixelRatio || 1, 1.5),

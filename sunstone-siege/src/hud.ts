@@ -425,7 +425,8 @@ export class Hud {
     }
     this.teachText.text = text;
     this.teachText.visible = text.length > 0;
-    this.teachText.position.set(this.w / 2, Math.max(150, this.h * 0.18));
+    const below = this.vault.y + this.vaultH;
+    this.teachText.position.set(this.w / 2, below + 112);
   }
 
   setStick(on: boolean, ox: number, oy: number, x: number, y: number): void {
@@ -978,8 +979,20 @@ export class Hud {
       this.vaultTip.position.set(this.vaultW / 2, ty + 8);
     }
     const extra = this.showTip ? 68 : 0;
-    this.hint.y = this.w < 760 ? this.h - 128 : this.vault.y + this.vaultH + extra + 14;
-    this.banner.y = this.w < 760 ? this.vault.y + this.vaultH + extra + 6 : this.hint.y + 32;
+    const underVault = this.vault.y + this.vaultH + extra;
+    // Hint and the map title never show together. On a phone the hint sits
+    // in the bottom-left grass, clear of the counter, the title, and Flare.
+    if (this.w < 760) {
+      this.hint.anchor.set(0, 1);
+      this.hint.style.align = "left";
+      this.hint.position.set(12, this.h - 18);
+      this.hint.style.wordWrapWidth = Math.max(140, this.w - 160);
+    } else {
+      this.hint.anchor.set(0.5);
+      this.hint.style.align = "center";
+      this.hint.y = underVault + 14;
+    }
+    this.banner.y = underVault + (this.w < 760 ? 8 : 32);
     if (this.vaultLit) {
       this.vaultGlow.circle(this.vaultW - 28, this.vaultH - 28, 22).stroke({ width: 3, color: 0xffe08a, alpha: 0.9 });
     }
@@ -1035,7 +1048,8 @@ export class Hud {
   }
 
   private drawLanes(dt: number): void {
-    const show = this.screen === "play" && !this.laneOffer && (this.laneBuilding || this.lanePlans.some((p) => p.state !== "gone"));
+    const underway = this.lanePlans.some((p) => p.state === "gone" && (this.laneFade.get(p.path) ?? 1) > 0.04);
+    const show = this.screen === "play" && !this.laneOffer && (this.laneBuilding || this.lanePlans.some((p) => p.state !== "gone") || underway);
     this.laneLayer.visible = show;
     if (!show) {
       this.laneTip.visible = false;
@@ -1045,7 +1059,7 @@ export class Hud {
     this.ensureLanes(plans.length);
     for (let i = plans.length; i < this.laneNodes.length; i++) this.laneNodes[i].root.visible = false;
     const short = Math.min(this.w, this.h);
-    const k = short < 480 ? 2.15 : short < 680 ? 2.3 : 2.55;
+    const k = (short * 0.12) / 176;
     const vaultBottom = this.vault.y + this.vaultH + 8;
     const occupied = this.arrowBlocks();
     const placed: { x: number; y: number; ext: { minX: number; minY: number; maxX: number; maxY: number } }[] = [];
@@ -1085,13 +1099,13 @@ export class Hud {
         w: fit.ext.maxX - fit.ext.minX + 20,
         h: fit.ext.maxY - fit.ext.minY + 20,
       });
-      const bobAmp = this.reduced ? 0 : plan.state === "gone" ? 4 : 16 + k * 2;
+      const bobAmp = this.reduced ? 0 : plan.state === "gone" ? 2 : 5;
       const bob = Math.sin(this.laneTime * 5.2 + plan.path * 1.3) * bobAmp;
       node.root.position.set(px - Math.cos(point) * bob, py - Math.sin(point) * bob);
       const pulse = this.reduced ? 1 : 1 + Math.sin(this.laneTime * (plan.state === "soon" ? 8.5 : 4.1) + plan.path) * (plan.state === "soon" ? 0.11 : 0.055);
       const shrink = plan.state === "gone" ? 0.78 : 1;
       node.root.scale.set(pulse * shrink);
-      node.root.alpha = plan.state === "gone" ? Math.max(0.25, fade) : 1;
+      node.root.alpha = plan.state === "gone" ? fade : 1;
       const wobble = this.reduced ? 0 : Math.sin(this.laneTime * 3.4 + plan.path) * 0.08;
       this.paintArrow(node.arrow, point, drawK, wobble);
       const tail = -46 * drawK;
@@ -1108,7 +1122,7 @@ export class Hud {
       node.badge.scale.set(icon.scale);
       node.badge.position.set(bx, by + badgeR * 0.08);
       const leadName = BALANCE.enemies[plan.lead].name;
-      node.title.style.fontSize = Math.round(18 * drawK);
+      node.title.style.fontSize = Math.max(14, Math.round(20 * drawK));
       node.title.text = `${leadName}  x${plan.leadCount}`;
       while (node.title.width > this.w - 28 && node.title.style.fontSize > 18) node.title.style.fontSize = Number(node.title.style.fontSize) - 2;
       const chipW = Math.min(this.w - 16, Math.max(badgeR * 2.1, node.title.width + 28));
@@ -1188,10 +1202,6 @@ export class Hud {
   private arrowBlocks(): { x: number; y: number; w: number; h: number }[] {
     const blocks: { x: number; y: number; w: number; h: number }[] = [];
     blocks.push({ x: 0, y: 0, w: this.w, h: this.w < 760 ? 112 : 56 });
-    const sun = 125 * this.laneCam.zoom;
-    const sunX = this.laneCam.camX + 960 * this.laneCam.zoom;
-    const sunY = this.laneCam.camY + 540 * this.laneCam.zoom;
-    blocks.push({ x: sunX - sun, y: sunY - sun, w: sun * 2, h: sun * 2 });
     const tip = this.showTip ? 36 : 2;
     blocks.push({ x: this.vault.x - 6, y: this.vault.y - 2, w: this.vaultW + 12, h: this.vaultH + tip });
     if (this.card.visible) {
@@ -1260,11 +1270,11 @@ export class Hud {
       }
       // Stay on the entrance side when a slightly smaller arrow can. A clear spot
       // on the far side of the map is only kept when nothing nearer fits.
-      if (Math.hypot(spot.x - x, spot.y - y) <= 260) return placed;
+      if (Math.hypot(spot.x - x, spot.y - y) <= 72) return placed;
       beside ??= placed;
     }
-    const ext = this.arrowExtent(angle, 1.55);
-    return beside ?? fallback ?? { x, y, k: 1.55, ext };
+    const ext = this.arrowExtent(angle, k);
+    return beside ?? fallback ?? { x, y, k, ext };
   }
 
   private screenBounds(ext: { minX: number; minY: number; maxX: number; maxY: number }): { left: number; top: number; right: number; bottom: number } {
@@ -1344,7 +1354,7 @@ export class Hud {
     g.clear();
     g.rotation = angle + wobble;
     const ink = 0x2a1608;
-    const outline = Math.max(9, 7 * k);
+    const outline = Math.max(2, 3.2 * k);
     const shaftH = 34 * k;
     const shaftX = -86 * k;
     const shaftW = 98 * k;

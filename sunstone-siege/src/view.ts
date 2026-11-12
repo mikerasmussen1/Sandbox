@@ -22,6 +22,8 @@ const PLAY: Record<string, number> = {
 const ELITE: ReadonlySet<EnemyKind> = new Set(["shield", "golem", "boss"]);
 /** Sheets are authored at 2× and were drawn at half size. Use the full frame. */
 const ENEMY_DRAW = 1.05;
+/** Opaque guardian height lands near 1.5× an opaque Skitter. */
+const HERO_DRAW = 0.22;
 const TOWER_DRAW = 1.15;
 /** Screen-pixel radius of the build cards. The menu is scaled by 1/zoom so this stays constant. */
 const MENU_REACH = 220;
@@ -118,6 +120,7 @@ export class WorldView {
   private zoom = 1;
   private readonly art: ArtSet;
   private readonly mapSprite = new Sprite();
+  private readonly ground = new Graphics();
   private readonly pads = new Graphics();
   private readonly range = new Graphics();
   private readonly link = new Graphics();
@@ -183,6 +186,7 @@ export class WorldView {
   private spearUsed = 0;
   private readonly labels = new Container();
   private readonly stationLabels: Text[] = [];
+  private readonly stationCosts: Text[] = [];
   private readonly coinSprites: Sprite[] = [];
   private readonly shotBolts: Sprite[] = [];
   private shotUsed = 0;
@@ -191,6 +195,8 @@ export class WorldView {
   constructor(art: ArtSet) {
     this.art = art;
     this.mapSprite.eventMode = "none";
+    this.ground.eventMode = "none";
+    this.ground.rect(-1200, -1200, 1920 + 2400, 1080 + 2400).fill({ color: 0x2f9a3a });
     this.pads.eventMode = "none";
     this.range.eventMode = "none";
     this.link.eventMode = "none";
@@ -213,7 +219,7 @@ export class WorldView {
     this.tag.anchor.set(0.5, 1);
     this.tag.eventMode = "none";
     this.labels.eventMode = "none";
-    this.world.addChild(this.mapSprite, this.pads, this.shadowLayer, this.range, this.actors, this.link, this.bars, this.fxLayer, this.labels, this.tag, this.menu);
+    this.world.addChild(this.ground, this.mapSprite, this.pads, this.shadowLayer, this.range, this.actors, this.link, this.bars, this.fxLayer, this.labels, this.tag, this.menu);
     this.actors.addChild(this.sun);
     this.flashRect.eventMode = "none";
     this.flashRect.blendMode = "add";
@@ -243,6 +249,9 @@ export class WorldView {
   }
 
   setMap(texture: Texture, map: MapDef): void {
+    const field = map.biome === "crater" ? 0x4d7a38 : map.biome === "ruins" ? 0x3aaa48 : 0x2f9a3a;
+    this.ground.clear();
+    this.ground.rect(-1200, -1200, 1920 + 2400, 1080 + 2400).fill({ color: field });
     this.mapSprite.texture = texture;
     this.mapSprite.width = 1920;
     this.mapSprite.height = 1080;
@@ -264,7 +273,7 @@ export class WorldView {
   layout(w: number, h: number): void {
     this.viewW = w;
     this.viewH = h;
-    this.callout.position.set(w / 2, w < 760 ? 248 : 168);
+    this.callout.position.set(w / 2, w < 760 ? 320 : 248);
     this.flashRect.clear();
     this.flashRect.rect(0, 0, w, h).fill({ color: 0xffe0a0 });
   }
@@ -813,9 +822,10 @@ export class WorldView {
       actor.outline.zIndex = e.y - 0.2;
       actor.body.blendMode = e.flash > 0 ? "add" : "normal";
       actor.body.tint = e.flash > 0 ? 0xffffff : 0xff5a62;
-      actor.outline.tint = e.flash > 0 ? 0xffffff : 0x14080c;
+      actor.outline.scale.set(draw * punch * 1.22);
+      actor.outline.tint = e.flash > 0 ? 0xffffff : 0x0c0608;
       actor.body.alpha = stealthedFade(e);
-      actor.outline.alpha = e.flash > 0 ? 1 : e.kind === "skitter" ? 0.7 : 0.9;
+      actor.outline.alpha = 1;
       actor.shadow.position.set(e.x, e.y + (e.flying ? 14 : 6));
       const shadow = e.kind === "boss" ? 2.2 : e.kind === "golem" ? 1.7 : e.kind === "skitter" ? 0.85 : 1.15;
       actor.shadow.scale.set(shadow, e.flying ? 0.42 : 0.58);
@@ -900,11 +910,10 @@ export class WorldView {
       }
     });
     sim.stations.forEach((station, i) => {
-      const built = station.tier > 0;
       const color = station.kind === "wall" ? 0xc46a3a : station.kind === "barracks" ? 0x3d7dff : TOWER_HUE[station.kind];
       const hot = i === near;
       if (station.kind === "wall") this.drawWall(sim, station.index - sim.pads.length, station.tier, station.alive, station.hp, station.maxHp);
-      else this.dashSquare(station.x, station.y, hot ? 78 : 68, color, built ? 0.55 : 1);
+      else this.dashSquare(station.x, station.y, hot ? 92 : 84, color);
       if (sim.funding === i) {
         const cost = sim.stationCost(station);
         const u = cost > 0 ? station.paid / cost : 1;
@@ -912,22 +921,33 @@ export class WorldView {
         this.pads.arc(station.x, station.y, 46, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * u).stroke({ width: 8, color: 0xffe08a, alpha: 1 });
         this.streamCoins(hero.x, hero.y - 30, station.x, station.y);
       }
-      const label = this.stationLabel(i);
       const next = station.tier < 3 ? sim.stationCost(station) : 0;
-      const name = station.kind === "wall" ? "Wall" : station.kind === "barracks" ? (station.tier === 0 ? "Squad" : "Tower") : TOWER_ICON[station.kind];
-      label.text = next > 0 ? `${name}  ${next}` : "MAX";
-      label.style.fill = color;
-      label.visible = true;
-      label.position.set(station.x, station.y + (built && station.kind !== "wall" ? 28 : 40));
-      label.zIndex = station.y + 4;
+      const glyph = station.kind === "wall" ? "▮" : station.kind === "barracks" ? "⚑" : TOWER_ICON[station.kind];
+      const icon = this.stationLabel(i);
+      icon.text = glyph;
+      icon.style.fontSize = 34;
+      icon.style.fill = 0xfff8e8;
+      icon.visible = station.kind !== "wall";
+      icon.anchor.set(0.5);
+      icon.position.set(station.x, station.y);
+      icon.zIndex = station.y + 4;
+      const cost = this.stationCostLabel(i);
+      cost.text = next > 0 ? String(next) : "MAX";
+      cost.style.fontSize = 28;
+      cost.style.fill = 0xfff6df;
+      cost.visible = true;
+      const pillW = Math.max(72, cost.text.length * 18 + 28);
+      const pillY = station.kind === "wall" ? station.y + 18 : station.y + 50;
+      this.pads.roundRect(station.x - pillW / 2, pillY, pillW, 36, 18).fill({ color: 0x140e0a, alpha: 0.94 });
+      cost.position.set(station.x, pillY + 3);
+      cost.zIndex = station.y + 5;
       if (hot && station.kind !== "wall" && station.kind !== "barracks" && station.tier < 3) {
         const radius = towerRange(station.kind, station.tier) * sim.rangeScale;
-        this.pads.circle(station.x, station.y, radius).stroke({ width: 2, color, alpha: 0.45 });
-        const read = towerReadout(station.kind, Math.min(2, station.tier));
-        label.text = `${name}  ${next}\n${read.stat}`;
+        this.pads.circle(station.x, station.y, radius).stroke({ width: 3, color, alpha: 0.7 });
       }
     });
     for (let i = sim.stations.length; i < this.stationLabels.length; i++) this.stationLabels[i].visible = false;
+    for (let i = sim.stations.length; i < this.stationCosts.length; i++) this.stationCosts[i].visible = false;
     if (sim.funding < 0) for (const coin of this.coinSprites) coin.visible = false;
   }
 
@@ -936,9 +956,9 @@ export class WorldView {
     if (!label) {
       label = new Text({
         text: "",
-        style: { fontFamily: SANS, fontSize: 22, fill: 0xfff6df, fontWeight: "bold", align: "center", stroke: { color: 0x140e0a, width: 4 } },
+        style: { fontFamily: SANS, fontSize: 34, fill: 0xfff8e8, fontWeight: "bold", align: "center", stroke: { color: 0x140e0a, width: 5 } },
       });
-      label.anchor.set(0.5, 0);
+      label.anchor.set(0.5);
       label.eventMode = "none";
       this.labels.addChild(label);
       this.stationLabels[i] = label;
@@ -946,17 +966,39 @@ export class WorldView {
     return label;
   }
 
-  private dashSquare(x: number, y: number, size: number, color: number, alpha: number): void {
-    const h = size / 2;
-    const corners: [number, number][] = [[-h, -h], [h, -h], [h, h], [-h, h]];
-    this.pads.rect(x - h, y - h, size, size).fill({ color, alpha: 0.1 * alpha });
-    for (let i = 0; i < 4; i++) {
-      const a = corners[i];
-      const b = corners[(i + 1) % 4];
-      this.pads.moveTo(x + a[0], y + a[1]);
-      this.pads.lineTo(x + a[0] * 0.2 + b[0] * 0.8, y + a[1] * 0.2 + b[1] * 0.8);
+  private stationCostLabel(i: number): Text {
+    let label = this.stationCosts[i];
+    if (!label) {
+      label = new Text({
+        text: "",
+        style: { fontFamily: SANS, fontSize: 28, fill: 0xfff6df, fontWeight: "bold", align: "center" },
+      });
+      label.anchor.set(0.5, 0);
+      label.eventMode = "none";
+      this.labels.addChild(label);
+      this.stationCosts[i] = label;
     }
-    this.pads.stroke({ width: 4, color, alpha });
+    return label;
+  }
+
+  private dashSquare(x: number, y: number, size: number, color: number): void {
+    const h = size / 2;
+    this.pads.roundRect(x - h, y - h, size, size, 12).fill({ color, alpha: 0.42 });
+    const edges: [number, number, number, number][] = [
+      [x - h, y - h, x + h, y - h],
+      [x + h, y - h, x + h, y + h],
+      [x + h, y + h, x - h, y + h],
+      [x - h, y + h, x - h, y - h],
+    ];
+    for (const [x0, y0, x1, y1] of edges) {
+      for (let s = 0; s < 3; s++) {
+        const a = (s + 0.06) / 3;
+        const b = (s + 0.78) / 3;
+        this.pads.moveTo(x0 + (x1 - x0) * a, y0 + (y1 - y0) * a);
+        this.pads.lineTo(x0 + (x1 - x0) * b, y0 + (y1 - y0) * b);
+      }
+    }
+    this.pads.stroke({ width: 7, color, alpha: 1 });
   }
 
   private drawWall(sim: Siege, path: number, tier: number, alive: boolean, hp: number, maxHp: number): void {
@@ -1222,14 +1264,15 @@ export class WorldView {
         const tex = frames[index];
         this.heroBody.texture = tex;
         this.heroLine.texture = tex;
-        this.heroBody.scale.set(1.22);
-        this.heroLine.scale.set(1.28);
-        this.heroLine.position.set(1, 3);
+        this.heroBody.scale.set(HERO_DRAW);
+        this.heroLine.scale.set(HERO_DRAW * 1.18);
+        this.heroLine.position.set(1, 2);
       }
     }
     this.heroRing.clear();
-    this.heroRing.circle(0, 8, BALANCE.hero.range).stroke({ width: 3, color: 0xffe08a, alpha: 0.28 });
-    this.heroRing.circle(0, 6, 22).fill({ color: 0xffe08a, alpha: 0.18 });
+    this.heroRing.ellipse(0, 6, 14, 7).fill({ color: 0x0c1a10, alpha: 0.55 });
+    this.heroRing.ellipse(0, 4, 13, 6).stroke({ width: 3, color: 0xffe08a, alpha: 0.95 });
+    this.heroRing.circle(0, 6, BALANCE.hero.range).stroke({ width: 2, color: 0xffe08a, alpha: 0.16 });
   }
 
   private drawSpears(sim: Siege): void {
