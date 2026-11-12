@@ -1,0 +1,38 @@
+{
+  "slug": "lantern-tide",
+  "note": "Display and pacing only. Capture, pay and feature partitions are decided in apps/api/src/games.ts. The shot ladder the table offers comes from the brand payload, not from this file.",
+  "species": [
+    { "id": "S1", "name": "Wickfry", "tier": "S", "multiplier": 4, "feature": null },
+    { "id": "S2", "name": "Paperfin Tang", "tier": "S", "multiplier": 5, "feature": null },
+    { "id": "S3", "name": "Lampbell Jelly", "tier": "S", "multiplier": 8, "feature": null },
+    { "id": "S4", "name": "Tassel Seahorse", "tier": "S", "multiplier": 10, "feature": null },
+    { "id": "S5", "name": "Bubblejade Puffer", "tier": "S", "multiplier": 20, "feature": null },
+    { "id": "M1", "name": "Ember Koi", "tier": "M", "multiplier": 25, "feature": null },
+    { "id": "M2", "name": "Jadeback Turtle", "tier": "M", "multiplier": 40, "feature": null },
+    { "id": "M3", "name": "Inkbrush Octopus", "tier": "M", "multiplier": 50, "feature": null },
+    { "id": "M4", "name": "Moonfan Ray", "tier": "M", "multiplier": 100, "feature": "mark" },
+    { "id": "L1", "name": "Lacquerfin Shark", "tier": "L", "multiplier": 125, "feature": null },
+    { "id": "L2", "name": "Drumback Dolphin", "tier": "L", "multiplier": 200, "feature": null },
+    { "id": "L3", "name": "Ingot Toad", "tier": "L", "multiplier": 250, "feature": null },
+    { "id": "L4", "name": "Pearl Keeper", "tier": "L", "multiplier": 500, "feature": null },
+    { "id": "X1", "name": "Spiralshell Crab", "tier": "X", "multiplier": 100, "feature": "auger" },
+    { "id": "X2", "name": "Ember Imp", "tier": "X", "multiplier": 200, "feature": "kiln" },
+    { "id": "X3", "name": "Firewheel Crab", "tier": "X", "multiplier": 250, "feature": "firewheel" },
+    { "id": "X4", "name": "Weaver Shrimp", "tier": "X", "multiplier": 50, "feature": "net" },
+    { "id": "X5", "name": "Sparkwick Angler", "tier": "X", "multiplier": 40, "feature": "chain" },
+    { "id": "X6", "name": "Gongshell Nautilus", "tier": "X", "multiplier": 25, "feature": "shockwave" },
+    { "id": "X7", "name": "Whirligig Crab", "tier": "X", "multiplier": 20, "feature": "top" },
+    { "id": "X8", "name": "Lanternbearer Crab", "tier": "X", "multiplier": 100, "feature": "moonpool" },
+    { "id": "B1", "name": "Marigold Mane", "tier": "B", "multiplier": 1000, "feature": "fountain" }
+  ],
+  "weapons": {
+    "lantern": { "costFactor": 1, "maxHits": 1 }
+  },
+  "fireIntervalMs": 180,
+  "steadyIntervalMs": 220,
+  "swiftIntervalMs": 110,
+  "maxBounces": 4,
+  "bulletSpeed": 980,
+  "tideSeconds": 48,
+  "formationSeconds": 22
+}

@@ -9,3 +9,7 @@ Jade is a demo token spent inside a valley. It stays in this browser and has no 
 Auric Dynamo lives in `auric-dynamo/`. It is a static demo-play preview. Credits stay in this browser. There is no wallet and no real money.
 
 Play: https://mikerasmussen1.github.io/Sandbox/auric-dynamo/
+
+Lantern Tide lives in `lantern-tide/`. It is a static demo-play preview. The balance is labeled Demo and stays in this browser. There is no wallet and no real money.
+
+Play: https://mikerasmussen1.github.io/Sandbox/lantern-tide/

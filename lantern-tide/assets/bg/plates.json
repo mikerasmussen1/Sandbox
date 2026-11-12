@@ -1,0 +1,47 @@
+{
+ "master": [
+  2400,
+  1080
+ ],
+ "landscape_crop": {
+  "x": 240,
+  "y": 0,
+  "w": 1920,
+  "h": 1080
+ },
+ "portrait": {
+  "file_suffix": "_p",
+  "size": [
+   1080,
+   2400
+  ],
+  "safe_area": {
+   "x": 0,
+   "y": 240,
+   "w": 1080,
+   "h": 1920
+  },
+  "note": "field is rotated 90 deg in portrait (doc 4.3); the centre 1080 x 1920 is always visible, the ends show on taller phones"
+ },
+ "scenes": {
+  "T1": "koi_courtyard",
+  "T2": "lanternfall_shoals",
+  "T3": "moon_gate_temple",
+  "bonus": "moonpool"
+ },
+ "format": "webp",
+ "files": [
+  "bg_koi_courtyard_l.webp",
+  "bg_koi_courtyard_p.webp",
+  "bg_koi_courtyard_w.webp",
+  "bg_lanternfall_shoals_l.webp",
+  "bg_lanternfall_shoals_p.webp",
+  "bg_lanternfall_shoals_w.webp",
+  "bg_moon_gate_temple_l.webp",
+  "bg_moon_gate_temple_p.webp",
+  "bg_moon_gate_temple_w.webp",
+  "bg_moonpool_l.webp",
+  "bg_moonpool_p.webp",
+  "bg_moonpool_w.webp"
+ ]
+}

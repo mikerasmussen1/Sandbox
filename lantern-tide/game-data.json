@@ -1,0 +1,333 @@
+{
+  "slug": "lantern-tide",
+  "name": "Lantern Tide",
+  "returnPercent": "96.50",
+  "entryLevelsCents": [
+    1,
+    2,
+    5,
+    10,
+    20,
+    50,
+    100
+  ],
+  "defaultLevelIndex": 2,
+  "stakeCents": 1,
+  "maxWinMultiplier": 1000,
+  "maxPayoutCents": 400000,
+  "brightMultiple": 20,
+  "grandMultiple": 100,
+  "festivalMultiple": 250,
+  "cannonByIndex": [
+    "C1",
+    "C1",
+    "C2",
+    "C2",
+    "C2",
+    "C3",
+    "C3"
+  ],
+  "helperMs": {
+    "steady": 220,
+    "swift": 110
+  },
+  "fireIntervalMs": 180,
+  "tideSeconds": 48,
+  "formationSeconds": 22,
+  "moonpoolPicks": [
+    3,
+    4,
+    5
+  ],
+  "species": [
+    {
+      "id": "S1",
+      "name": "Wickfry",
+      "tier": "S",
+      "multiplier": 4,
+      "feature": null,
+      "thresholdPpm": 241250
+    },
+    {
+      "id": "S2",
+      "name": "Paperfin Tang",
+      "tier": "S",
+      "multiplier": 5,
+      "feature": null,
+      "thresholdPpm": 193000
+    },
+    {
+      "id": "S3",
+      "name": "Lampbell Jelly",
+      "tier": "S",
+      "multiplier": 8,
+      "feature": null,
+      "thresholdPpm": 120625
+    },
+    {
+      "id": "S4",
+      "name": "Tassel Seahorse",
+      "tier": "S",
+      "multiplier": 10,
+      "feature": null,
+      "thresholdPpm": 96500
+    },
+    {
+      "id": "S5",
+      "name": "Bubblejade Puffer",
+      "tier": "S",
+      "multiplier": 20,
+      "feature": null,
+      "thresholdPpm": 48250
+    },
+    {
+      "id": "M1",
+      "name": "Ember Koi",
+      "tier": "M",
+      "multiplier": 25,
+      "feature": null,
+      "thresholdPpm": 38600
+    },
+    {
+      "id": "M2",
+      "name": "Jadeback Turtle",
+      "tier": "M",
+      "multiplier": 40,
+      "feature": null,
+      "thresholdPpm": 24125
+    },
+    {
+      "id": "M3",
+      "name": "Inkbrush Octopus",
+      "tier": "M",
+      "multiplier": 50,
+      "feature": null,
+      "thresholdPpm": 19300
+    },
+    {
+      "id": "M4",
+      "name": "Moonfan Ray",
+      "tier": "M",
+      "multiplier": 100,
+      "feature": "mark",
+      "thresholdPpm": 9650
+    },
+    {
+      "id": "L1",
+      "name": "Lacquerfin Shark",
+      "tier": "L",
+      "multiplier": 125,
+      "feature": null,
+      "thresholdPpm": 7720
+    },
+    {
+      "id": "L2",
+      "name": "Drumback Dolphin",
+      "tier": "L",
+      "multiplier": 200,
+      "feature": null,
+      "thresholdPpm": 4825
+    },
+    {
+      "id": "L3",
+      "name": "Ingot Toad",
+      "tier": "L",
+      "multiplier": 250,
+      "feature": null,
+      "thresholdPpm": 3860
+    },
+    {
+      "id": "L4",
+      "name": "Pearl Keeper",
+      "tier": "L",
+      "multiplier": 500,
+      "feature": null,
+      "thresholdPpm": 1930
+    },
+    {
+      "id": "X1",
+      "name": "Spiralshell Crab",
+      "tier": "X",
+      "multiplier": 100,
+      "feature": "auger",
+      "thresholdPpm": 9650
+    },
+    {
+      "id": "X2",
+      "name": "Ember Imp",
+      "tier": "X",
+      "multiplier": 200,
+      "feature": "kiln",
+      "thresholdPpm": 4825
+    },
+    {
+      "id": "X3",
+      "name": "Firewheel Crab",
+      "tier": "X",
+      "multiplier": 250,
+      "feature": "firewheel",
+      "thresholdPpm": 3860
+    },
+    {
+      "id": "X4",
+      "name": "Weaver Shrimp",
+      "tier": "X",
+      "multiplier": 50,
+      "feature": "net",
+      "thresholdPpm": 19300
+    },
+    {
+      "id": "X5",
+      "name": "Sparkwick Angler",
+      "tier": "X",
+      "multiplier": 40,
+      "feature": "chain",
+      "thresholdPpm": 24125
+    },
+    {
+      "id": "X6",
+      "name": "Gongshell Nautilus",
+      "tier": "X",
+      "multiplier": 25,
+      "feature": "shockwave",
+      "thresholdPpm": 38600
+    },
+    {
+      "id": "X7",
+      "name": "Whirligig Crab",
+      "tier": "X",
+      "multiplier": 20,
+      "feature": "top",
+      "thresholdPpm": 48250
+    },
+    {
+      "id": "X8",
+      "name": "Lanternbearer Crab",
+      "tier": "X",
+      "multiplier": 100,
+      "feature": "moonpool",
+      "thresholdPpm": 9650
+    },
+    {
+      "id": "B1",
+      "name": "Marigold Mane",
+      "tier": "B",
+      "multiplier": 1000,
+      "feature": "fountain",
+      "thresholdPpm": 965
+    }
+  ],
+  "features": {
+    "auger": {
+      "counter": 18,
+      "shares": [
+        10,
+        12,
+        14,
+        16,
+        20,
+        28
+      ]
+    },
+    "kiln": {
+      "counter": 16,
+      "shares": [
+        30,
+        40,
+        50,
+        80
+      ]
+    },
+    "firewheel": {
+      "counter": null,
+      "shares": [
+        30,
+        40,
+        50,
+        60,
+        70
+      ]
+    },
+    "net": {
+      "counter": 10,
+      "shares": [
+        8,
+        10,
+        12,
+        20
+      ]
+    },
+    "chain": {
+      "counter": null,
+      "shares": [
+        6,
+        8,
+        10,
+        16
+      ]
+    },
+    "shockwave": {
+      "counter": null,
+      "shares": [
+        3,
+        4,
+        5,
+        6,
+        7
+      ]
+    },
+    "top": {
+      "counter": null,
+      "shares": [
+        2,
+        2,
+        2,
+        2,
+        3,
+        3,
+        3,
+        3
+      ]
+    },
+    "moonpool": {
+      "counter": null,
+      "shares": [
+        4,
+        6,
+        8,
+        8,
+        10,
+        12,
+        14,
+        16,
+        22
+      ]
+    },
+    "fountain": {
+      "counter": null,
+      "shares": [
+        40,
+        60,
+        80,
+        100,
+        120,
+        160,
+        180,
+        260
+      ]
+    },
+    "mark": {
+      "counter": 12,
+      "shares": [
+        8,
+        10,
+        10,
+        12,
+        12,
+        14,
+        16,
+        18
+      ]
+    }
+  }
+}
