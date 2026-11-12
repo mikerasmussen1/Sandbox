@@ -462,11 +462,20 @@ export class Hud {
     this.showTip = show;
   }
 
-  syncLanes(plans: LanePlan[], cam: { zoom: number; camX: number; camY: number }, building: boolean, offer: boolean): void {
+  private lanePads: { x: number; y: number }[] = [];
+
+  syncLanes(
+    plans: LanePlan[],
+    cam: { zoom: number; camX: number; camY: number },
+    building: boolean,
+    offer: boolean,
+    pads: { x: number; y: number }[] = [],
+  ): void {
     this.lanePlans = plans;
     this.laneCam = cam;
     this.laneBuilding = building;
     this.laneOffer = offer;
+    this.lanePads = pads;
   }
 
   announce(text: string): void {
@@ -1059,12 +1068,23 @@ export class Hud {
     this.ensureLanes(plans.length);
     for (let i = plans.length; i < this.laneNodes.length; i++) this.laneNodes[i].root.visible = false;
     const short = Math.min(this.w, this.h);
-    const k = (short * 0.12) / 176;
+    // Shaft, head, badge, and count span about 176*k. 0.19 keeps that near 19% of the short side.
+    const k = (short * 0.19) / 176;
     const vaultBottom = this.vault.y + this.vaultH + 8;
     const occupied = this.arrowBlocks();
+    const padBlocks: { x: number; y: number; w: number; h: number }[] = [];
+    const zoom = this.laneCam.zoom || 1;
+    for (const pad of this.lanePads) {
+      const block = {
+        x: this.laneCam.camX + (pad.x - 56) * zoom,
+        y: this.laneCam.camY + (pad.y - 54) * zoom,
+        w: 112 * zoom,
+        h: 156 * zoom,
+      };
+      padBlocks.push(block);
+      occupied.push(block);
+    }
     const placed: { x: number; y: number; ext: { minX: number; minY: number; maxX: number; maxY: number } }[] = [];
-    let callX = 0;
-    let callY = 0;
     let callN = 0;
     let tipAt: { x: number; y: number; plan: LanePlan } | null = null;
     for (let i = 0; i < plans.length; i++) {
@@ -1156,8 +1176,6 @@ export class Hud {
         sprite.visible = extras.length > 0 && node.extras.text.length < 42;
       });
       node.root.hitArea = new Rectangle(fit.ext.minX, fit.ext.minY, Math.max(40, fit.ext.maxX - fit.ext.minX), Math.max(40, fit.ext.maxY - fit.ext.minY));
-      callX += node.root.position.x;
-      callY += node.root.position.y;
       callN += 1;
       if (plan.path === this.openLane) tipAt = { x: node.root.position.x, y: node.root.position.y, plan };
     }
@@ -1165,15 +1183,23 @@ export class Hud {
       const compact = this.h < 480;
       this.callButton.scale.set(compact ? 0.78 : 1);
       const button = compact ? { minX: -100, maxX: 100, minY: -24, maxY: 24 } : { minX: -132, maxX: 132, minY: -30, maxY: 30 };
-      const low = placed.reduce((best, spot) => (spot.y + spot.ext.maxY > best.y + best.ext.maxY ? spot : best), placed[0]);
-      let x = callX / callN;
-      let y = low.y + low.ext.maxY + 46;
-      if (this.w < 760) {
-        x = Math.min(150, this.w * 0.38);
-        y = this.h - 64;
-      }
+      const narrow = this.w < 760;
+      const x = narrow ? Math.min(170, this.w * 0.42) : 176;
+      const y = narrow ? this.h * 0.555 : this.h - 56;
       const bounds = this.screenBounds(button);
-      const spot = this.clearOf(x, y, button, occupied, bounds, { x, y });
+      if (narrow) {
+        bounds.top = Math.max(bounds.top, this.h * 0.53);
+        bounds.bottom = Math.min(bounds.bottom, this.h * 0.575);
+      } else bounds.top = Math.max(bounds.top, this.h * 0.62);
+      const arrows = placed.map((spot) => ({
+        x: spot.x + spot.ext.minX - 8,
+        y: spot.y + spot.ext.minY - 8,
+        w: spot.ext.maxX - spot.ext.minX + 16,
+        h: spot.ext.maxY - spot.ext.minY + 16,
+      }));
+      const obstacles = [...this.arrowBlocks(false), ...arrows];
+      if (!narrow) obstacles.push(...padBlocks);
+      const spot = this.clearOf(x, y, button, obstacles, bounds, { x, y });
       this.callButton.position.set(spot.x, spot.y);
     }
     if (this.card.visible || !tipAt || !this.lanePlans.some((p) => p.path === this.openLane && p.state !== "gone")) {
@@ -1199,7 +1225,7 @@ export class Hud {
   }
 
   /** Screen rects an arrow must not cover: the top bar, the vault, the tower panel, and the corner buttons. */
-  private arrowBlocks(): { x: number; y: number; w: number; h: number }[] {
+  private arrowBlocks(includeCall = true): { x: number; y: number; w: number; h: number }[] {
     const blocks: { x: number; y: number; w: number; h: number }[] = [];
     blocks.push({ x: 0, y: 0, w: this.w, h: this.w < 760 ? 112 : 56 });
     const tip = this.showTip ? 36 : 2;
@@ -1212,6 +1238,16 @@ export class Hud {
       if (!btn.visible) continue;
       const p = btn.getGlobalPosition();
       blocks.push({ x: p.x - 58, y: p.y - 58, w: 116, h: 132 });
+    }
+    if (includeCall && this.callButton.visible) {
+      const p = this.callButton.getGlobalPosition();
+      const s = Math.abs(this.callButton.scale.x) || 1;
+      blocks.push({ x: p.x - 148 * s, y: p.y - 40 * s, w: 296 * s, h: 80 * s });
+    }
+    for (const text of [this.hint, this.banner]) {
+      if (!text.visible) continue;
+      const b = text.getBounds();
+      if (b.width > 8 && b.height > 8) blocks.push({ x: b.x - 8, y: b.y - 6, w: b.width + 16, h: b.height + 12 });
     }
     return blocks;
   }
@@ -1354,7 +1390,7 @@ export class Hud {
     g.clear();
     g.rotation = angle + wobble;
     const ink = 0x2a1608;
-    const outline = Math.max(2, 3.2 * k);
+    const outline = Math.max(4, 5.2 * k);
     const shaftH = 34 * k;
     const shaftX = -86 * k;
     const shaftW = 98 * k;

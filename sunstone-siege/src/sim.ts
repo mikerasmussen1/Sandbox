@@ -4,7 +4,7 @@
  */
 import { BALANCE, TOWER_HUE, towerCost, towerRange, type RelicDef } from "./balance";
 import { poseAt, type Route } from "./geom";
-import { MAP_H, MAP_W, mapDef, type MapDef } from "./maps";
+import { clearStationGaps, MAP_H, MAP_W, mapDef, type MapDef } from "./maps";
 import type { EnemyKind, Phase, RelicId, TowerKind, Vec } from "./types";
 
 export type StationKind = TowerKind | "wall" | "barracks";
@@ -1597,6 +1597,17 @@ export class Siege {
         maxHp: 0,
         alive: false,
       });
+    });
+    const spots = stations.map((station) => ({
+      x: station.x,
+      y: station.y,
+      fixed: station.kind === "wall",
+      wall: station.kind === "wall",
+    }));
+    clearStationGaps(spots, this.map.sun, this.map.plaza);
+    stations.forEach((station, i) => {
+      station.x = spots[i].x;
+      station.y = spots[i].y;
     });
     return stations;
   }

@@ -10,6 +10,12 @@ export const MAP_W = 1920;
 export const MAP_H = 1080;
 export const SUN: Vec = { x: 960, y: 540 };
 
+/**
+ * The Sunstone disc and the rim raiders strike. Half the old plaza, so the
+ * base stays readable next to a Skitter without covering the junction.
+ */
+export const SUN_SCALE = 0.5;
+
 export interface MapDef {
   biome: Biome;
   sun: Vec;
@@ -19,15 +25,121 @@ export interface MapDef {
   pads: Vec[];
 }
 
+/** Pull the last waypoint in to the smaller rim, along the same approach. */
+function arrive(route: Route, sun: Vec, rim: number): Route {
+  const pts = route.pts.map((p) => ({ x: p.x, y: p.y }));
+  const last = pts[pts.length - 1];
+  const dx = last.x - sun.x;
+  const dy = last.y - sun.y;
+  const dist = Math.hypot(dx, dy) || 1;
+  if (dist > rim + 1) {
+    pts[pts.length - 1] = { x: sun.x + (dx / dist) * rim, y: sun.y + (dy / dist) * rim };
+  }
+  return routeOf(pts);
+}
+
 function build(biome: Biome, sun: Vec, plaza: number, routes: Route[], pads: readonly Vec[]): MapDef {
+  const rim = plaza * SUN_SCALE;
+  const arrived = routes.map((route) => arrive(route, sun, rim));
   return {
     biome,
     sun,
-    plaza,
-    routes,
-    flights: routes.map((route) => flightOf(route, sun)),
+    plaza: rim,
+    routes: arrived,
+    flights: arrived.map((route) => flightOf(route, sun)),
     pads: pads.slice(),
   };
+}
+
+/**
+ * A pad's dashed square plus the cost pill under it.
+ * Walls only reserve the barricade and its short pill, so a pad can sit beside the trail.
+ * The gap is the air that has to stay clear between one label and the next.
+ */
+const PAD_BOX = { left: 52, right: 52, top: 50, bottom: 94 };
+const WALL_BOX = { left: 44, right: 44, top: 22, bottom: 58 };
+const PAD_GAP = 18;
+
+export interface GapSpot {
+  x: number;
+  y: number;
+  fixed: boolean;
+  wall?: boolean;
+}
+
+/**
+ * Nudge stations until no cost pill touches another pad, a wall label, or the
+ * Sunstone. Walls stay on the trail. Every pad is kept, only moved.
+ */
+function boxOf(spot: GapSpot): { left: number; right: number; top: number; bottom: number } {
+  return spot.wall ? WALL_BOX : PAD_BOX;
+}
+
+export function clearStationGaps(spots: GapSpot[], sun: Vec, plaza: number): void {
+  const home = spots.map((s) => ({ x: s.x, y: s.y }));
+  const reach = plaza + 56;
+  for (let n = 0; n < 16; n++) {
+    for (const spot of spots) {
+      if (spot.fixed) continue;
+      const dx = spot.x - sun.x;
+      const dy = spot.y - sun.y;
+      const dist = Math.hypot(dx, dy) || 1;
+      if (dist < reach) {
+        spot.x = sun.x + (dx / dist) * reach;
+        spot.y = sun.y + (dy / dist) * reach;
+      }
+      spot.x = Math.max(78, Math.min(MAP_W - 78, spot.x));
+      spot.y = Math.max(78, Math.min(MAP_H - 120, spot.y));
+    }
+    for (let i = 0; i < spots.length; i++) {
+      for (let j = i + 1; j < spots.length; j++) {
+        const a = spots[i];
+        const b = spots[j];
+        if (a.fixed && b.fixed) continue;
+        const ab = boxOf(a);
+        const bb = boxOf(b);
+        const ax0 = a.x - ab.left - PAD_GAP / 2;
+        const ax1 = a.x + ab.right + PAD_GAP / 2;
+        const ay0 = a.y - ab.top - PAD_GAP / 2;
+        const ay1 = a.y + ab.bottom + PAD_GAP / 2;
+        const bx0 = b.x - bb.left - PAD_GAP / 2;
+        const bx1 = b.x + bb.right + PAD_GAP / 2;
+        const by0 = b.y - bb.top - PAD_GAP / 2;
+        const by1 = b.y + bb.bottom + PAD_GAP / 2;
+        const ox = Math.min(ax1, bx1) - Math.max(ax0, bx0);
+        const oy = Math.min(ay1, by1) - Math.max(ay0, by0);
+        if (ox <= 0 || oy <= 0) continue;
+        const signX = a.x === b.x ? (i % 2 === 0 ? 1 : -1) : Math.sign(a.x - b.x);
+        const signY = a.y === b.y ? 1 : Math.sign(a.y - b.y);
+        const alongX = ox < oy;
+        const push = alongX ? ox : oy;
+        const sign = alongX ? signX : signY;
+        if (a.fixed) {
+          if (alongX) b.x -= sign * push;
+          else b.y -= sign * push;
+        } else if (b.fixed) {
+          if (alongX) a.x += sign * push;
+          else a.y += sign * push;
+        } else if (alongX) {
+          a.x += sign * push * 0.5;
+          b.x -= sign * push * 0.5;
+        } else {
+          a.y += sign * push * 0.5;
+          b.y -= sign * push * 0.5;
+        }
+      }
+    }
+    for (let i = 0; i < spots.length; i++) {
+      if (spots[i].fixed) continue;
+      const dx = spots[i].x - home[i].x;
+      const dy = spots[i].y - home[i].y;
+      const drift = Math.hypot(dx, dy);
+      if (drift > 88) {
+        spots[i].x = home[i].x + (dx / drift) * 88;
+        spots[i].y = home[i].y + (dy / drift) * 88;
+      }
+    }
+  }
 }
 
 const valley: MapDef = build("valley", { x: 960.0, y: 541.0 }, 162.0, [

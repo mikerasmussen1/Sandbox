@@ -618,7 +618,13 @@ async function boot(): Promise<void> {
     const goal = nextSpend(live);
     hud.setGoal(goal.text, goal.cost, goal.lit, goal.kind);
     hud.setVaultTip(world === 0 && save.taught === 0 && live.phase === "build" && !live.pendingOffer && view.menuPad < 0);
-    hud.syncLanes(live.lanePlan(), { zoom, camX, camY }, live.phase === "build", live.pendingOffer !== null);
+    hud.syncLanes(
+      live.lanePlan(),
+      { zoom, camX, camY },
+      live.phase === "build",
+      live.pendingOffer !== null,
+      live.stations.map((s) => ({ x: s.x, y: s.y })),
+    );
     const boss = live.enemies.find((e) => e.alive && e.boss);
     hud.sync({
       integrity: live.integrity,
