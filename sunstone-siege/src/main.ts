@@ -5,11 +5,11 @@
 import { Application, Rectangle } from "pixi.js";
 import { loadArt } from "./art";
 import { AudioBus } from "./audio";
-import { BALANCE, starsFor, towerCost, towerFacts, towerRange, worldCount } from "./balance";
-import { Hud, type TowerCard } from "./hud";
+import { BALANCE, TOWER_HUE, starsFor, towerCost, towerRange, worldCount } from "./balance";
+import { Hud } from "./hud";
 import { MAP_H, MAP_W } from "./maps";
 import { isUnlocked, loadSave, recordStars, writeSave, type SaveData } from "./save";
-import { Siege, type Fx, type Tower } from "./sim";
+import { Siege, type Fx } from "./sim";
 import { TOWER_KINDS, type TowerKind } from "./types";
 import { RANGE_COLOR, WorldView } from "./view";
 
@@ -22,7 +22,7 @@ async function boot(): Promise<void> {
   const app = new Application();
   await app.init({
     resizeTo: host,
-    background: 0x07110c,
+    background: 0x2f9a3a,
     antialias: false,
     autoDensity: true,
     resolution: Math.min(window.devicePixelRatio || 1, 1.5),
@@ -201,8 +201,29 @@ async function boot(): Promise<void> {
         ready: sim.guardianReady,
         leaker,
         hero: sim.heroAt(),
+        funding: sim.funding,
+        stations: sim.stations.map((s) => ({ i: s.index, kind: s.kind, tier: s.tier, x: s.x, y: s.y, paid: s.paid, alive: s.alive, hp: s.hp, path: s.path, dist: s.dist })),
+        towersAt: sim.towers.map((t) => ({ kind: t.kind, tier: t.tier, x: t.x, y: t.y, cool: t.cooldown })),
       };
     };
+    const act = window as unknown as {
+      __fund?: (index: number) => boolean;
+      __purse?: (n: number) => void;
+      __spawn?: (kind: string, path: number, dist: number) => { x: number; y: number };
+      __steer?: (x: number, y: number) => void;
+      __hero?: (x: number, y: number) => void;
+      __skip?: () => void;
+    };
+    act.__fund = (index) => (sim ? sim.fundNow(index) : false);
+    act.__purse = (n) => { if (sim) sim.jade += n; };
+    act.__spawn = (kind, path, dist) => {
+      if (!sim) return { x: 0, y: 0 };
+      const e = sim.forceEnemy(kind as never, path, dist);
+      return { x: e.x, y: e.y };
+    };
+    act.__steer = (x, y) => { hold = Math.hypot(x, y) < 0.05 ? null : { x, y }; };
+    act.__hero = (x, y) => { if (sim) { sim.heroX = x; sim.heroY = y; } };
+    act.__skip = () => { if (sim) sim.time = 30; };
   }
   let fpsFrames = 0;
   let fpsStamp = performance.now();
@@ -213,7 +234,10 @@ async function boot(): Promise<void> {
     const freeze = hitStop > 0;
     if (freeze) hitStop = Math.max(0, hitStop - dt);
     const running = mode === "play" && sim !== null && !paused && !settingsOpen && !finished;
-    if (sim && running && !freeze) sim.tick(dt * speed);
+    if (sim && running && !freeze) {
+      steerFromInput();
+      sim.tick(dt * speed);
+    } else if (sim) sim.setSteer(0, 0);
     if (sim && mode === "play") {
       const fx = sim.fx.splice(0, sim.fx.length);
       view.apply(fx);
@@ -258,12 +282,16 @@ async function boot(): Promise<void> {
   });
 
   const pointers = new Map<number, { x: number; y: number }>();
+  const keys = new Set<string>();
   let dragId = -1;
-  let dragX = 0;
-  let dragY = 0;
-  let moved = 0;
+  let stickOn = false;
+  let originX = 0;
+  let originY = 0;
+  let knobX = 0;
+  let knobY = 0;
   let pinch = 0;
   let hover = { x: 0, y: 0 };
+  let hold: { x: number; y: number } | null = null;
 
   const point = (e: PointerEvent): { x: number; y: number } => {
     const rect = app.canvas.getBoundingClientRect();
@@ -283,9 +311,11 @@ async function boot(): Promise<void> {
       return;
     }
     dragId = e.pointerId;
-    dragX = p.x;
-    dragY = p.y;
-    moved = 0;
+    stickOn = true;
+    originX = p.x;
+    originY = p.y;
+    knobX = p.x;
+    knobY = p.y;
   });
 
   window.addEventListener("pointermove", (e) => {
@@ -302,32 +332,30 @@ async function boot(): Promise<void> {
       pinch = next;
       return;
     }
-    if (e.pointerId !== dragId) return;
-    const dx = p.x - dragX;
-    const dy = p.y - dragY;
-    moved += Math.abs(dx) + Math.abs(dy);
-    if (moved > 6) {
-      camX += dx;
-      camY += dy;
-      userCam = 2.4;
-      clamp();
-    }
-    dragX = p.x;
-    dragY = p.y;
+    if (e.pointerId !== dragId || !stickOn) return;
+    const dx = p.x - originX;
+    const dy = p.y - originY;
+    const len = Math.hypot(dx, dy) || 1;
+    const mag = Math.min(70, len);
+    knobX = originX + (dx / len) * mag;
+    knobY = originY + (dy / len) * mag;
   });
 
   window.addEventListener("pointerup", (e) => {
-    const p = point(e);
     pointers.delete(e.pointerId);
     if (pointers.size < 2) pinch = 0;
     if (e.pointerId !== dragId) return;
-    const was = moved;
     dragId = -1;
-    if (was < 8 && sim && mode === "play" && !paused && !settingsOpen && !finished) tap(p.x, p.y);
+    stickOn = false;
+    hud.setStick(false, 0, 0, 0, 0);
   });
   window.addEventListener("pointercancel", (e) => {
     pointers.delete(e.pointerId);
-    if (e.pointerId === dragId) dragId = -1;
+    if (e.pointerId === dragId) {
+      dragId = -1;
+      stickOn = false;
+      hud.setStick(false, 0, 0, 0, 0);
+    }
     pinch = 0;
   });
 
@@ -339,6 +367,11 @@ async function boot(): Promise<void> {
   }, { passive: false });
 
   window.addEventListener("keydown", (e) => {
+    const key = e.key.toLowerCase();
+    if (key === "arrowleft" || key === "arrowright" || key === "arrowup" || key === "arrowdown" || key === "a" || key === "w" || key === "s" || key === "d") {
+      keys.add(key);
+      e.preventDefault();
+    }
     if (e.key === "Escape") {
       if (settingsOpen) {
         settingsOpen = false;
@@ -366,6 +399,9 @@ async function boot(): Promise<void> {
     } else if ((e.key === "f" || e.key === "F") && !paused && !settingsOpen) {
       if (!sim.fireFlare()) audio.play("deny");
     }
+  });
+  window.addEventListener("keyup", (e) => {
+    keys.delete(e.key.toLowerCase());
   });
 
   document.addEventListener("visibilitychange", () => {
@@ -436,8 +472,6 @@ async function boot(): Promise<void> {
     clamp();
   }
 
-  let userCam = 0;
-
   function zoomLimits(w: number, h: number): { min: number; max: number; start: number } {
     const fitted = Math.min(w / MAP_W, h / MAP_H);
     const tall = h > w * 1.15;
@@ -456,60 +490,56 @@ async function boot(): Promise<void> {
     const sun = sim?.map.sun ?? { x: MAP_W / 2, y: MAP_H / 2 };
     camX = w / 2 - sun.x * zoom;
     camY = h / 2 - sun.y * zoom;
-    userCam = 0;
     clamp();
+  }
+
+  function steerFromInput(): void {
+    if (!sim) return;
+    hud.setStick(stickOn, originX, originY, knobX, knobY);
+    if (stickOn) {
+      const dx = knobX - originX;
+      const dy = knobY - originY;
+      const len = Math.hypot(dx, dy) || 1;
+      const mag = Math.min(1, len / 70);
+      sim.setSteer((dx / len) * mag, (dy / len) * mag);
+      hold = null;
+      return;
+    }
+    let x = 0;
+    let y = 0;
+    if (keys.has("arrowleft") || keys.has("a")) x -= 1;
+    if (keys.has("arrowright") || keys.has("d")) x += 1;
+    if (keys.has("arrowup") || keys.has("w")) y -= 1;
+    if (keys.has("arrowdown") || keys.has("s")) y += 1;
+    if (x !== 0 || y !== 0) {
+      const len = Math.hypot(x, y);
+      sim.setSteer(x / len, y / len);
+      hold = null;
+      return;
+    }
+    if (hold) {
+      sim.setSteer(hold.x, hold.y);
+      return;
+    }
+    sim.setSteer(0, 0);
   }
 
   function frameFight(dt: number): void {
     if (!sim || mode !== "play" || paused || settingsOpen) return;
-    if (view.menuPad >= 0) userCam = Math.max(userCam, 0.35);
-    if (userCam > 0) {
-      userCam = Math.max(0, userCam - dt);
-      return;
-    }
     const w = app.screen.width;
     const h = app.screen.height;
-    let x = sim.map.sun.x;
-    let y = sim.map.sun.y;
-    if (sim.phase === "wave") {
-      const alive = sim.enemies.filter((e) => e.alive);
-      let bestX = 0;
-      let bestY = 0;
-      let bestN = 0;
-      for (const e of alive) {
-        let n = 0;
-        let sx = 0;
-        let sy = 0;
-        for (const other of alive) {
-          if (Math.hypot(other.x - e.x, other.y - e.y) > 260) continue;
-          n += 1;
-          sx += other.x;
-          sy += other.y;
-        }
-        if (n > bestN) {
-          bestN = n;
-          bestX = sx / n;
-          bestY = sy / n;
-        }
+    const hero = sim.heroAt();
+    let x = hero.x;
+    let y = hero.y;
+    let best = 240;
+    for (const e of sim.enemies) {
+      if (!e.alive) continue;
+      const d = Math.hypot(e.x - hero.x, e.y - hero.y);
+      if (d < best) {
+        best = d;
+        x = hero.x * 0.75 + e.x * 0.25;
+        y = hero.y * 0.75 + e.y * 0.25;
       }
-      if (bestN > 0) {
-        x = sim.map.sun.x * 0.2 + bestX * 0.8;
-        y = sim.map.sun.y * 0.2 + bestY * 0.8;
-      }
-    } else if (sim.towers.length === 0) {
-      let bestX = x;
-      let bestY = y;
-      let score = -1;
-      for (const pad of sim.pads) {
-        const along = sim.map.sun.x - pad.x;
-        if (along > score) {
-          score = along;
-          bestX = pad.x;
-          bestY = pad.y;
-        }
-      }
-      x = sim.map.sun.x * 0.62 + bestX * 0.38;
-      y = sim.map.sun.y * 0.62 + bestY * 0.38;
     }
     const tx = w / 2 - x * zoom;
     const ty = h / 2 - y * zoom;
@@ -534,7 +564,6 @@ async function boot(): Promise<void> {
     zoom = Math.max(zoomMin, Math.min(zoomMax, zoom * factor));
     camX = sx - beforeX * zoom;
     camY = sy - beforeY * zoom;
-    userCam = 2.4;
     clamp();
   }
 
@@ -547,67 +576,6 @@ async function boot(): Promise<void> {
   function centerOfPointers(): { x: number; y: number } {
     const pts = [...pointers.values()];
     return { x: (pts[0].x + pts[1].x) / 2, y: (pts[0].y + pts[1].y) / 2 };
-  }
-
-  function tap(sx: number, sy: number): void {
-    if (!sim) return;
-    const wx = (sx - camX - view.shakeX) / zoom;
-    const wy = (sy - camY - view.shakeY) / zoom;
-    if (view.menuPad >= 0) view.closeMenu();
-    const strike = sim.strikeAt(wx, wy);
-    if (strike === "hit") {
-      audio.play("dart");
-      return;
-    }
-    if (strike === "cool") {
-      audio.play("deny");
-      return;
-    }
-    let towerId = 0;
-    let best = 72;
-    for (const tower of sim.towers) {
-      const d = Math.hypot(tower.x - wx, tower.y - wy);
-      if (d < best) {
-        best = d;
-        towerId = tower.id;
-      }
-    }
-    if (towerId) {
-      selected = towerId;
-      return;
-    }
-    let pad = -1;
-    best = 80;
-    const pads = sim.pads;
-    for (let i = 0; i < pads.length; i++) {
-      if (sim.towers.some((t) => t.pad === i)) continue;
-      const d = Math.hypot(pads[i].x - wx, pads[i].y - wy);
-      if (d < best) {
-        best = d;
-        pad = i;
-      }
-    }
-    if (pad >= 0) {
-      selected = 0;
-      view.openMenu(pad, pads[pad], zoom, sim.jade, (kind) => tryPlace(kind, pad), (kind, need) => {
-        hud.announce(`Need ${need} more Jade for ${BALANCE.towerName[kind]}`);
-        audio.play("deny");
-      });
-      return;
-    }
-    selected = 0;
-    view.hideRange();
-  }
-
-  function tryPlace(kind: TowerKind, pad: number): void {
-    if (!sim) return;
-    if (!sim.place(pad, kind)) {
-      audio.play("deny");
-      return;
-    }
-    teach(1);
-    view.closeMenu();
-    selected = sim.towers[sim.towers.length - 1]?.id ?? 0;
   }
 
   function aimPlacement(): void {
@@ -645,7 +613,8 @@ async function boot(): Promise<void> {
       if (tower) view.showRange(tower.x, tower.y, towerRange(tower.kind, tower.tier) * live.rangeScale, RANGE_COLOR[tower.kind]);
       else view.hideRange();
     }
-    hud.setCard(tower ? describe(tower, live.jade, live.rangeScale) : null);
+    hud.setCard(null);
+    hud.setTeach(lesson(live));
     const goal = nextSpend(live);
     hud.setGoal(goal.text, goal.cost, goal.lit, goal.kind);
     hud.setVaultTip(world === 0 && save.taught === 0 && live.phase === "build" && !live.pendingOffer && view.menuPad < 0);
@@ -710,7 +679,7 @@ async function boot(): Promise<void> {
       else if (event.kind === "rally") audio.play("horn");
       else if (event.kind === "streak") audio.play("streak");
       else if (event.kind === "relic") audio.play("relic");
-      else if (event.kind === "impact") audio.play("dart");
+      else if (event.kind === "impact" && event.color === TOWER_HUE.dart && event.n !== 2) audio.play("dart");
     }
     if (sim?.towers.some((t) => t.kind === "lens" && t.targetId)) {
       beamAcc += 0.016;
@@ -726,7 +695,7 @@ async function boot(): Promise<void> {
       seenWave = live.wave;
       audio.play("horn");
       const firstStrike = live.world === 0 && live.wave === 0 && save.taught < 3;
-      hud.announce(firstStrike ? "Tap raiders that slip through to strike them yourself." : `Wave ${live.wave + 1}`);
+      hud.announce(firstStrike ? "Drag to move. Stand on a station to fund a tower." : `Wave ${live.wave + 1}`);
       teach(2);
     }
     if (finished) return;
@@ -751,41 +720,24 @@ function hintFor(save: SaveData, live: Siege): string {
   if (live.world === 1 && live.wave === 0 && live.phase === "build") return "Three trails feed this crater. Cover each one.";
   if (live.world === 2 && live.wave === 0 && live.phase === "build") return "Night Crater is the hard valley. Upgrade before the colossus.";
   if (live.world !== 0) return "";
-  if (live.phase === "wave" && live.wave === 0) return "Tap raiders that slip through to strike them yourself.";
-  if (live.towers.length === 0 && live.phase === "build") {
-    return "Protect the Sunstone. Tap the glowing pad. Darts hit one raider. 50 Jade.";
+  if (live.phase === "wave" && live.wave === 0) return "Walk the rail. Stand on a station to fund the next tower.";
+  if (!live.stations.some((s) => s.tier > 0) && live.phase === "build") {
+    return "Drag to move. Stand on a dashed station. The nearest Dart is 50 Jade.";
   }
-  if (save.taught < 3 && live.phase === "wave") return "Defeat raiders and clear waves to earn Jade.";
+  if (save.taught < 3 && live.phase === "wave") return "Walk over the Jade gems before they fade.";
   if (save.taught <= 1 && live.phase === "build") return `Call early +${BALANCE.earlyCall} Jade, or wait out the timer.`;
-  if (live.wave === 1 && live.phase === "build") return "Quake Drums hit every raider in the ring.";
-  if (save.taught <= 3) return "Tap a totem to see its DPS, then upgrade it. A drum's stun makes a Sun Lens hit harder.";
+  if (live.wave === 1 && live.phase === "build") return "Quake Drums splash a ring. Serpents leave a slowing puddle.";
+  if (save.taught <= 3) return "Stand on a built station to fund the next tier.";
   return "";
 }
 
-function describe(tower: Tower, jade: number, rangeScale: number): TowerCard {
-  const facts = towerFacts(tower.kind, tower.tier);
-  const next = tower.tier < 2 ? towerCost(tower.kind, tower.tier + 1) : null;
-  const rangeNow = Math.round(facts.range * rangeScale);
-  let delta = "Fully built";
-  if (tower.tier < 2) {
-    const up = towerFacts(tower.kind, tower.tier + 1);
-    const rangeNext = Math.round(up.range * rangeScale);
-    delta = `DPS ${facts.dpsText} → ${up.dpsText}    RANGE ${rangeNow} → ${rangeNext}`;
-  }
-  return {
-    name: BALANCE.towerName[tower.kind],
-    blurb: BALANCE.towerBlurb[tower.kind],
-    tier: `Tier ${tower.tier + 1}`,
-    dps: `DPS  ${facts.dpsText}`,
-    range: `RANGE  ${rangeNow}`,
-    targets: `Targets  ${facts.targets}`,
-    chip: facts.chip,
-    delta,
-    dealt: `Kills  ${Math.round(tower.dealt)}`,
-    upgrade: next === null ? null : `Upgrade  ${next}`,
-    sell: `Sell +${Math.floor(tower.spent * BALANCE.sellRefund)}`,
-    canUpgrade: next !== null && jade >= next,
-  };
+function lesson(live: Siege): string {
+  if (live.world !== 0 || live.time > 20) return "";
+  const funded = live.stations.some((s) => s.tier > 0);
+  if (live.time < 7 && !live.heroMoved) return "Drag anywhere to move\nWASD or arrows";
+  if (live.time < 14 && !live.heroCollected) return "Walk over the gems";
+  if (!funded) return "Stand on a station to fund it";
+  return "";
 }
 
 function nextSpend(live: Siege): { text: string; cost: number; lit: boolean; kind: TowerKind } {
