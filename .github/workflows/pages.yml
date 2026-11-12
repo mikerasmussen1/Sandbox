@@ -33,6 +33,7 @@ jobs:
           cp -a lantern-tide sunstone-siege/dist/lantern-tide
           cp -a wyvern-wilds sunstone-siege/dist/wyvern-wilds
           cp -a thunderscale-depths sunstone-siege/dist/thunderscale-depths
+          cp -a starlift-fever sunstone-siege/dist/starlift-fever
       - uses: actions/upload-pages-artifact@v3
         with:
           path: sunstone-siege/dist

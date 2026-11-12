@@ -1,0 +1,1197 @@
+{
+ "slots": {
+  "ball": {
+   "kind": "sheet",
+   "url": "art/packed/sprites/ball.json",
+   "source": "final",
+   "anims": {
+    "roll": 8,
+    "glint": 6,
+    "fever": 8
+   },
+   "frames": 22
+  },
+  "pin": {
+   "kind": "sheet",
+   "url": "art/packed/sprites/pin.json",
+   "source": "final",
+   "anims": {
+    "static": 1,
+    "glint": 6
+   },
+   "frames": 7
+  },
+  "starlift": {
+   "kind": "sheet",
+   "url": "art/packed/sprites/starlift.json",
+   "source": "final",
+   "anims": {
+    "static": 1,
+    "loop": 16,
+    "surge": 16
+   },
+   "frames": 33
+  },
+  "FUN": {
+   "kind": "image",
+   "url": "art/concept/FUN.png",
+   "source": "concept",
+   "w": 640,
+   "h": 447
+  },
+  "HATF": {
+   "kind": "image",
+   "url": "art/concept/HATF.png",
+   "source": "concept",
+   "w": 640,
+   "h": 379
+  },
+  "lcd_bezel": {
+   "kind": "sheet",
+   "url": "art/packed/sprites/lcd_bezel.json",
+   "source": "final",
+   "anims": {
+    "static": 1,
+    "pulse": 12
+   },
+   "frames": 12
+  },
+  "halo": {
+   "kind": "sheet",
+   "url": "art/packed/sprites/halo.json",
+   "source": "final",
+   "anims": {
+    "pulse": 12,
+    "chase": 16,
+    "burst": 6
+   },
+   "frames": 34
+  },
+  "dock": {
+   "kind": "sheet",
+   "url": "art/packed/sprites/dock.json",
+   "source": "final",
+   "anims": {
+    "idle": 1,
+    "open": 8,
+    "close": 8,
+    "entry": 8
+   },
+   "frames": 25,
+   "thumb": "art/thumbs/dock.png"
+  },
+  "power_dial": {
+   "kind": "sheet",
+   "url": "art/packed/sprites/power_dial.json",
+   "source": "final",
+   "anims": {
+    "angle": 32
+   },
+   "frames": 32,
+   "thumb": "art/thumbs/power_dial.png"
+  },
+  "push_button": {
+   "kind": "sheet",
+   "url": "art/packed/sprites/push_button.json",
+   "source": "final",
+   "anims": {
+    "idle": 1,
+    "pressed": 3,
+    "glow": 6
+   },
+   "frames": 10,
+   "thumb": "art/thumbs/push_button.png"
+  },
+  "CRN": {
+   "kind": "image",
+   "url": "art/concept/CRN.png",
+   "source": "concept",
+   "w": 640,
+   "h": 342
+  },
+  "mascot_nova": {
+   "kind": "sheet",
+   "url": "art/packed/lcd/mascot_nova.json",
+   "source": "final",
+   "anims": {
+    "cheer": 1,
+    "point": 1,
+    "startled": 1,
+    "wave": 1,
+    "thrust": 1,
+    "cutin": 8,
+    "wave_loop": 8
+   },
+   "frames": 21
+  },
+  "pilot_lyra": {
+   "kind": "sheet",
+   "url": "art/packed/lcd/pilot_lyra.json",
+   "source": "final",
+   "anims": {
+    "ready": 1,
+    "point": 1,
+    "salute": 1,
+    "triumph": 1,
+    "thrust": 1,
+    "fist": 1,
+    "cutin": 8
+   },
+   "frames": 14
+  },
+  "orbi": {
+   "kind": "sheet",
+   "url": "art/packed/lcd/orbi.json",
+   "source": "final",
+   "anims": {
+    "float": 16,
+    "spin": 12,
+    "panic": 8
+   },
+   "frames": 36
+  },
+  "satellite": {
+   "kind": "sheet",
+   "url": "art/packed/sprites/satellite.json",
+   "source": "final",
+   "anims": {
+    "idle": 1,
+    "hit": 8
+   },
+   "frames": 9
+  },
+  "gyro": {
+   "kind": "sheet",
+   "url": "art/packed/sprites/gyro.json",
+   "source": "final",
+   "anims": {
+    "spin": 16
+   },
+   "frames": 16
+  },
+  "PIL": {
+   "kind": "image",
+   "url": "art/concept/PIL.png",
+   "source": "concept",
+   "w": 149,
+   "h": 640
+  },
+  "BEACON": {
+   "kind": "image",
+   "url": "art/concept/BEACON.png",
+   "source": "concept",
+   "w": 337,
+   "h": 640
+  },
+  "asteroid": {
+   "kind": "sheet",
+   "url": "art/packed/lcd/asteroid.json",
+   "source": "final",
+   "anims": {
+    "tumble": 16
+   },
+   "frames": 16
+  },
+  "drone": {
+   "kind": "sheet",
+   "url": "art/packed/lcd/drone.json",
+   "source": "final",
+   "anims": {
+    "fly": 12
+   },
+   "frames": 12
+  },
+  "sym_planet": {
+   "kind": "sheet",
+   "url": "art/packed/lcd/sym_planet.json",
+   "source": "final",
+   "anims": {
+    "idle": 12,
+    "win": 8,
+    "blur": 3
+   },
+   "frames": 23
+  },
+  "sym_rocket": {
+   "kind": "sheet",
+   "url": "art/packed/lcd/sym_rocket.json",
+   "source": "final",
+   "anims": {
+    "idle": 12,
+    "win": 8,
+    "blur": 3
+   },
+   "frames": 23
+  },
+  "sym_comet": {
+   "kind": "sheet",
+   "url": "art/packed/lcd/sym_comet.json",
+   "source": "final",
+   "anims": {
+    "idle": 12,
+    "win": 8,
+    "blur": 3
+   },
+   "frames": 23
+  },
+  "sym_sat": {
+   "kind": "sheet",
+   "url": "art/packed/lcd/sym_sat.json",
+   "source": "final",
+   "anims": {
+    "idle": 12,
+    "win": 8,
+    "blur": 3
+   },
+   "frames": 23
+  },
+  "sym_ufo": {
+   "kind": "sheet",
+   "url": "art/packed/lcd/sym_ufo.json",
+   "source": "final",
+   "anims": {
+    "idle": 12,
+    "win": 8,
+    "blur": 3
+   },
+   "frames": 23
+  },
+  "sym_crystal": {
+   "kind": "sheet",
+   "url": "art/packed/lcd/sym_crystal.json",
+   "source": "final",
+   "anims": {
+    "idle": 12,
+    "win": 8,
+    "blur": 3
+   },
+   "frames": 23
+  },
+  "sym_helmet": {
+   "kind": "sheet",
+   "url": "art/packed/lcd/sym_helmet.json",
+   "source": "final",
+   "anims": {
+    "idle": 12,
+    "win": 8,
+    "blur": 3
+   },
+   "frames": 23
+  },
+  "sym_star": {
+   "kind": "sheet",
+   "url": "art/packed/lcd/sym_star.json",
+   "source": "final",
+   "anims": {
+    "idle": 12,
+    "win": 8,
+    "blur": 3
+   },
+   "frames": 23,
+   "thumb": "art/thumbs/sym_star.png"
+  },
+  "sym_bolt": {
+   "kind": "sheet",
+   "url": "art/packed/lcd/sym_bolt.json",
+   "source": "final",
+   "anims": {
+    "idle": 12,
+    "win": 8,
+    "blur": 3
+   },
+   "frames": 23
+  },
+  "capsule": {
+   "kind": "sheet",
+   "url": "art/packed/lcd/capsule.json",
+   "source": "final",
+   "anims": {
+    "intact": 8,
+    "crack": 16,
+    "shatter": 12
+   },
+   "frames": 36
+  },
+  "pending_lamp": {
+   "kind": "sheet",
+   "url": "art/packed/sprites/pending_lamp.json",
+   "source": "final",
+   "anims": {
+    "off": 1,
+    "on": 6
+   },
+   "frames": 7
+  },
+  "thrust_gauge": {
+   "kind": "sheet",
+   "url": "art/packed/lcd/thrust_gauge.json",
+   "source": "final",
+   "anims": {
+    "fill": 17
+   },
+   "frames": 17
+  },
+  "reel_card": {
+   "kind": "image",
+   "url": "art/packed/ui/reel_card.png",
+   "source": "final",
+   "w": 317,
+   "h": 440
+  },
+  "num_cyan": {
+   "kind": "sheet",
+   "url": "art/packed/lcd/num_cyan.json",
+   "source": "final",
+   "anims": {
+    "1": 1,
+    "2": 1,
+    "3": 1,
+    "4": 1,
+    "5": 1,
+    "6": 1,
+    "7": 1,
+    "8": 1,
+    "9": 1
+   },
+   "frames": 9
+  },
+  "backplate_normal": {
+   "kind": "image",
+   "url": "art/packed/bg/backplate_normal.jpg",
+   "source": "final",
+   "w": 1080,
+   "h": 1920
+  },
+  "backplate_fever": {
+   "kind": "image",
+   "url": "art/packed/bg/backplate_fever.jpg",
+   "source": "final",
+   "w": 1080,
+   "h": 1920
+  },
+  "bg_idle": {
+   "kind": "image",
+   "url": "art/packed/lcd/bg_idle.jpg",
+   "source": "final",
+   "w": 960,
+   "h": 720
+  },
+  "bg_reel": {
+   "kind": "image",
+   "url": "art/packed/lcd/bg_reel.jpg",
+   "source": "final",
+   "w": 960,
+   "h": 720
+  },
+  "bg_reach_magenta": {
+   "kind": "image",
+   "url": "art/packed/lcd/bg_reach_magenta.jpg",
+   "source": "final",
+   "w": 960,
+   "h": 720
+  },
+  "bg_reach_b": {
+   "kind": "image",
+   "url": "art/packed/lcd/bg_reach_b.jpg",
+   "source": "final",
+   "w": 960,
+   "h": 720
+  },
+  "bg_fever": {
+   "kind": "image",
+   "url": "art/packed/lcd/bg_fever.jpg",
+   "source": "final",
+   "w": 960,
+   "h": 720
+  },
+  "bg_get": {
+   "kind": "image",
+   "url": "art/packed/lcd/bg_get.jpg",
+   "source": "final",
+   "w": 960,
+   "h": 720
+  },
+  "bg_end": {
+   "kind": "image",
+   "url": "art/packed/lcd/bg_end.jpg",
+   "source": "final",
+   "w": 960,
+   "h": 720
+  },
+  "bg_cutin": {
+   "kind": "image",
+   "url": "art/packed/lcd/bg_cutin.jpg",
+   "source": "final",
+   "w": 1280,
+   "h": 720
+  },
+  "lobby_p": {
+   "kind": "image",
+   "url": "art/packed/bg/lobby_p.jpg",
+   "source": "final",
+   "w": 1080,
+   "h": 1920
+  },
+  "lobby_l": {
+   "kind": "image",
+   "url": "art/packed/bg/lobby_l.jpg",
+   "source": "final",
+   "w": 1920,
+   "h": 1080
+  },
+  "tile": {
+   "kind": "image",
+   "url": "art/packed/tile.jpg",
+   "source": "final",
+   "w": 900,
+   "h": 1200
+  },
+  "hatch": {
+   "kind": "sheet",
+   "url": "art/packed/sprites/hatch.json",
+   "source": "final",
+   "anims": {
+    "idle": 8,
+    "open": 12,
+    "close": 12,
+    "lit": 8
+   },
+   "frames": 40
+  },
+  "bg_reach_blue": {
+   "kind": "image",
+   "url": "art/packed/lcd/bg_reach_blue.jpg",
+   "source": "final",
+   "w": 960,
+   "h": 720
+  },
+  "bg_reach_green": {
+   "kind": "image",
+   "url": "art/packed/lcd/bg_reach_green.jpg",
+   "source": "final",
+   "w": 960,
+   "h": 720
+  },
+  "spark_impact": {
+   "kind": "sheet",
+   "url": "art/packed/vfx/spark_impact.json",
+   "source": "final",
+   "anims": {
+    "a": 10,
+    "b": 10,
+    "c": 10
+   },
+   "frames": 30
+  },
+  "gate_shockwave": {
+   "kind": "sheet",
+   "url": "art/packed/vfx/gate_shockwave.json",
+   "source": "final",
+   "anims": {
+    "open": 14
+   },
+   "frames": 14
+  },
+  "pocket_burst": {
+   "kind": "sheet",
+   "url": "art/packed/vfx/pocket_burst.json",
+   "source": "final",
+   "anims": {
+    "burst": 14
+   },
+   "frames": 14
+  },
+  "reach_glow": {
+   "kind": "sheet",
+   "url": "art/packed/vfx/reach_glow.json",
+   "source": "final",
+   "anims": {
+    "loop": 16
+   },
+   "frames": 16
+  },
+  "fever_explosion": {
+   "kind": "sheet",
+   "url": "art/packed/vfx/fever_explosion.json",
+   "source": "final",
+   "anims": {
+    "burst": 20
+   },
+   "frames": 20
+  },
+  "light_shower": {
+   "kind": "sheet",
+   "url": "art/packed/vfx/light_shower.json",
+   "source": "final",
+   "anims": {
+    "loop": 24
+   },
+   "frames": 24
+  },
+  "confetti_stars": {
+   "kind": "sheet",
+   "url": "art/packed/vfx/confetti_stars.json",
+   "source": "final",
+   "anims": {
+    "pop": 24,
+    "rain": 24
+   },
+   "frames": 48
+  },
+  "reach_banner": {
+   "kind": "sheet",
+   "url": "art/packed/lcd/reach_banner.json",
+   "source": "final",
+   "anims": {
+    "static": 1,
+    "pulse": 8
+   },
+   "frames": 9
+  },
+  "escalation_bolt": {
+   "kind": "sheet",
+   "url": "art/packed/vfx/escalation_bolt.json",
+   "source": "final",
+   "anims": {
+    "loop": 8
+   },
+   "frames": 8
+  },
+  "gauge_exhaust": {
+   "kind": "sheet",
+   "url": "art/packed/vfx/gauge_exhaust.json",
+   "source": "final",
+   "anims": {
+    "loop": 12
+   },
+   "frames": 12
+  },
+  "lifter_trail": {
+   "kind": "sheet",
+   "url": "art/packed/vfx/lifter_trail.json",
+   "source": "final",
+   "anims": {
+    "loop": 16
+   },
+   "frames": 16
+  },
+  "liftoff_burst": {
+   "kind": "sheet",
+   "url": "art/packed/vfx/liftoff_burst.json",
+   "source": "final",
+   "anims": {
+    "launch": 16
+   },
+   "frames": 16
+  },
+  "round_wipe": {
+   "kind": "sheet",
+   "url": "art/packed/vfx/round_wipe.json",
+   "source": "final",
+   "anims": {
+    "wipe": 20
+   },
+   "frames": 20
+  },
+  "PIN_HEAD": {
+   "kind": "image",
+   "url": "art/interim/PIN_HEAD.png",
+   "source": "interim",
+   "w": 26,
+   "h": 26
+  },
+  "btn_play": {
+   "kind": "image",
+   "url": "art/interim/btn_play.png",
+   "source": "interim",
+   "w": 600,
+   "h": 190
+  },
+  "btn_play_down": {
+   "kind": "image",
+   "url": "art/interim/btn_play_down.png",
+   "source": "interim",
+   "w": 600,
+   "h": 190
+  },
+  "btn_ghost": {
+   "kind": "image",
+   "url": "art/interim/btn_ghost.png",
+   "source": "interim",
+   "w": 480,
+   "h": 150
+  },
+  "btn_ghost_down": {
+   "kind": "image",
+   "url": "art/interim/btn_ghost_down.png",
+   "source": "interim",
+   "w": 480,
+   "h": 150
+  },
+  "btn_alt": {
+   "kind": "image",
+   "url": "art/interim/btn_alt.png",
+   "source": "interim",
+   "w": 480,
+   "h": 150
+  },
+  "btn_alt_down": {
+   "kind": "image",
+   "url": "art/interim/btn_alt_down.png",
+   "source": "interim",
+   "w": 480,
+   "h": 150
+  },
+  "btn_round": {
+   "kind": "image",
+   "url": "art/interim/btn_round.png",
+   "source": "interim",
+   "w": 200,
+   "h": 200
+  },
+  "liftoff_card": {
+   "kind": "sheet",
+   "url": "art/packed/lcd/liftoff_card.json",
+   "source": "final",
+   "anims": {
+    "static": 1,
+    "burst": 8
+   },
+   "frames": 9
+  },
+  "get_plate": {
+   "kind": "sheet",
+   "url": "art/packed/lcd/get_plate.json",
+   "source": "final",
+   "anims": {
+    "static": 1,
+    "shine": 8
+   },
+   "frames": 9
+  },
+  "ready_plate": {
+   "kind": "sheet",
+   "url": "art/packed/lcd/ready_plate.json",
+   "source": "final",
+   "anims": {
+    "static": 1,
+    "pulse": 8
+   },
+   "frames": 9
+  },
+  "push_prompt": {
+   "kind": "sheet",
+   "url": "art/packed/lcd/push_prompt.json",
+   "source": "final",
+   "anims": {
+    "pulse": 8
+   },
+   "frames": 8
+  },
+  "led_strip": {
+   "kind": "sheet",
+   "url": "art/packed/sprites/led_strip.json",
+   "source": "final",
+   "anims": {
+    "idle": 16,
+    "reach": 12,
+    "fever": 8
+   },
+   "frames": 36
+  },
+  "num_fever": {
+   "kind": "sheet",
+   "url": "art/packed/lcd/num_fever.json",
+   "source": "final",
+   "anims": {
+    "1": 1,
+    "1_shine": 6,
+    "2": 1,
+    "2_shine": 6,
+    "3": 1,
+    "3_shine": 6,
+    "4": 1,
+    "4_shine": 6,
+    "5": 1,
+    "5_shine": 6,
+    "6": 1,
+    "6_shine": 6,
+    "7": 1,
+    "7_shine": 6,
+    "8": 1,
+    "8_shine": 6,
+    "9": 1,
+    "9_shine": 6
+   },
+   "frames": 63
+  },
+  "round_plate": {
+   "kind": "sheet",
+   "url": "art/packed/lcd/round_plate.json",
+   "source": "final",
+   "anims": {
+    "static": 1
+   },
+   "frames": 1
+  },
+  "title_logo": {
+   "kind": "sheet",
+   "url": "art/packed/ui/title_logo.json",
+   "source": "final",
+   "anims": {
+    "static": 1,
+    "shine": 8
+   },
+   "frames": 9
+  },
+  "mission_complete": {
+   "kind": "sheet",
+   "url": "art/packed/lcd/mission_complete.json",
+   "source": "final",
+   "anims": {
+    "static": 1,
+    "shine": 8
+   },
+   "frames": 9
+  },
+  "HATD": {
+   "kind": "image",
+   "url": "art/concept/HATD.png",
+   "source": "concept",
+   "w": 640,
+   "h": 360
+  }
+ },
+ "report": {
+  "ball": {
+   "want": "ball",
+   "using": "ball",
+   "source": "final"
+  },
+  "pin": {
+   "want": "pin",
+   "using": "pin",
+   "source": "final"
+  },
+  "starlift": {
+   "want": "starlift",
+   "using": "starlift",
+   "source": "final"
+  },
+  "funnel": {
+   "want": "FUN",
+   "using": "FUN",
+   "source": "concept"
+  },
+  "hatchFrame": {
+   "want": "HATF",
+   "using": "HATF",
+   "source": "concept"
+  },
+  "lcdBezel": {
+   "want": "lcd_bezel",
+   "using": "lcd_bezel",
+   "source": "final"
+  },
+  "halo": {
+   "want": "halo",
+   "using": "halo",
+   "source": "final"
+  },
+  "dock": {
+   "want": "dock",
+   "using": "dock",
+   "source": "final"
+  },
+  "dial": {
+   "want": "power_dial",
+   "using": "power_dial",
+   "source": "final"
+  },
+  "push": {
+   "want": "push_button",
+   "using": "push_button",
+   "source": "final"
+  },
+  "crown": {
+   "want": "CRN",
+   "using": "CRN",
+   "source": "concept"
+  },
+  "nova": {
+   "want": "mascot_nova",
+   "using": "mascot_nova",
+   "source": "final"
+  },
+  "lyra": {
+   "want": "pilot_lyra",
+   "using": "pilot_lyra",
+   "source": "final"
+  },
+  "orbi": {
+   "want": "orbi",
+   "using": "orbi",
+   "source": "final"
+  },
+  "satellite": {
+   "want": "satellite",
+   "using": "satellite",
+   "source": "final"
+  },
+  "gyro": {
+   "want": "gyro",
+   "using": "gyro",
+   "source": "final"
+  },
+  "pillar": {
+   "want": "PIL",
+   "using": "PIL",
+   "source": "concept"
+  },
+  "beacon": {
+   "want": "BEACON",
+   "using": "BEACON",
+   "source": "concept"
+  },
+  "asteroid": {
+   "want": "asteroid",
+   "using": "asteroid",
+   "source": "final"
+  },
+  "drone": {
+   "want": "drone",
+   "using": "drone",
+   "source": "final"
+  },
+  "sy0": {
+   "want": "sym_planet",
+   "using": "sym_planet",
+   "source": "final"
+  },
+  "sy1": {
+   "want": "sym_rocket",
+   "using": "sym_rocket",
+   "source": "final"
+  },
+  "sy2": {
+   "want": "sym_comet",
+   "using": "sym_comet",
+   "source": "final"
+  },
+  "sy3": {
+   "want": "sym_sat",
+   "using": "sym_sat",
+   "source": "final"
+  },
+  "sy4": {
+   "want": "sym_ufo",
+   "using": "sym_ufo",
+   "source": "final"
+  },
+  "sy5": {
+   "want": "sym_crystal",
+   "using": "sym_crystal",
+   "source": "final"
+  },
+  "sy6": {
+   "want": "sym_helmet",
+   "using": "sym_helmet",
+   "source": "final"
+  },
+  "sy7": {
+   "want": "sym_star",
+   "using": "sym_star",
+   "source": "final"
+  },
+  "sy8": {
+   "want": "sym_bolt",
+   "using": "sym_bolt",
+   "source": "final"
+  },
+  "capsule": {
+   "want": "capsule",
+   "using": "capsule",
+   "source": "final"
+  },
+  "lamp": {
+   "want": "pending_lamp",
+   "using": "pending_lamp",
+   "source": "final"
+  },
+  "gauge": {
+   "want": "thrust_gauge",
+   "using": "thrust_gauge",
+   "source": "final"
+  },
+  "plateReach": {
+   "want": "UI31",
+   "using": null,
+   "source": null
+  },
+  "platePush": {
+   "want": "UI32",
+   "using": null,
+   "source": null
+  },
+  "plateLiftoff": {
+   "want": "UI33",
+   "using": null,
+   "source": null
+  },
+  "plateRound": {
+   "want": "UI34",
+   "using": null,
+   "source": null
+  },
+  "reelCard": {
+   "want": "reel_card",
+   "using": "reel_card",
+   "source": "final"
+  },
+  "plateReady": {
+   "want": "UI36",
+   "using": null,
+   "source": null
+  },
+  "numerals": {
+   "want": "num_cyan",
+   "using": "num_cyan",
+   "source": "final"
+  },
+  "bgField": {
+   "want": "backplate_normal",
+   "using": "backplate_normal",
+   "source": "final"
+  },
+  "bgFever": {
+   "want": "backplate_fever",
+   "using": "backplate_fever",
+   "source": "final"
+  },
+  "lcdIdle": {
+   "want": "bg_idle",
+   "using": "bg_idle",
+   "source": "final"
+  },
+  "lcdReel": {
+   "want": "bg_reel",
+   "using": "bg_reel",
+   "source": "final"
+  },
+  "lcdReachA": {
+   "want": "bg_reach_magenta",
+   "using": "bg_reach_magenta",
+   "source": "final"
+  },
+  "lcdReachB": {
+   "want": "bg_reach_b",
+   "using": "bg_reach_b",
+   "source": "final"
+  },
+  "lcdFever": {
+   "want": "bg_fever",
+   "using": "bg_fever",
+   "source": "final"
+  },
+  "lcdGet": {
+   "want": "bg_get",
+   "using": "bg_get",
+   "source": "final"
+  },
+  "lcdEnd": {
+   "want": "bg_end",
+   "using": "bg_end",
+   "source": "final"
+  },
+  "cutBg": {
+   "want": "bg_cutin",
+   "using": "bg_cutin",
+   "source": "final"
+  },
+  "lobby": {
+   "want": "lobby_p",
+   "using": "lobby_p",
+   "source": "final"
+  },
+  "lobbyWide": {
+   "want": "lobby_l",
+   "using": "lobby_l",
+   "source": "final"
+  },
+  "tile": {
+   "want": "tile",
+   "using": "tile",
+   "source": "final"
+  },
+  "hatch": {
+   "want": "hatch",
+   "using": "hatch",
+   "source": "final"
+  },
+  "lcdReachQuick": {
+   "want": "bg_reach_blue",
+   "using": "bg_reach_blue",
+   "source": "final"
+  },
+  "lcdReachStep": {
+   "want": "bg_reach_green",
+   "using": "bg_reach_green",
+   "source": "final"
+  },
+  "vfxSpark": {
+   "want": "spark_impact",
+   "using": "spark_impact",
+   "source": "final"
+  },
+  "vfxShock": {
+   "want": "gate_shockwave",
+   "using": "gate_shockwave",
+   "source": "final"
+  },
+  "vfxPocket": {
+   "want": "pocket_burst",
+   "using": "pocket_burst",
+   "source": "final"
+  },
+  "vfxReachGlow": {
+   "want": "reach_glow",
+   "using": "reach_glow",
+   "source": "final"
+  },
+  "vfxFeverBurst": {
+   "want": "fever_explosion",
+   "using": "fever_explosion",
+   "source": "final"
+  },
+  "vfxShower": {
+   "want": "light_shower",
+   "using": "light_shower",
+   "source": "final"
+  },
+  "vfxConfetti": {
+   "want": "confetti_stars",
+   "using": "confetti_stars",
+   "source": "final"
+  },
+  "reachBanner": {
+   "want": "reach_banner",
+   "using": "reach_banner",
+   "source": "final"
+  },
+  "vfxBolt": {
+   "want": "escalation_bolt",
+   "using": "escalation_bolt",
+   "source": "final"
+  },
+  "vfxExhaust": {
+   "want": "gauge_exhaust",
+   "using": "gauge_exhaust",
+   "source": "final"
+  },
+  "vfxTrail": {
+   "want": "lifter_trail",
+   "using": "lifter_trail",
+   "source": "final"
+  },
+  "vfxLiftoff": {
+   "want": "liftoff_burst",
+   "using": "liftoff_burst",
+   "source": "final"
+  },
+  "vfxWipe": {
+   "want": "round_wipe",
+   "using": "round_wipe",
+   "source": "final"
+  },
+  "pinHead": {
+   "want": "pin_head",
+   "using": "PIN_HEAD",
+   "source": "interim"
+  },
+  "btnPlay": {
+   "want": "btn_play",
+   "using": "btn_play",
+   "source": "interim"
+  },
+  "btnPlayDown": {
+   "want": "btn_play_down",
+   "using": "btn_play_down",
+   "source": "interim"
+  },
+  "btnGhost": {
+   "want": "btn_ghost",
+   "using": "btn_ghost",
+   "source": "interim"
+  },
+  "btnGhostDown": {
+   "want": "btn_ghost_down",
+   "using": "btn_ghost_down",
+   "source": "interim"
+  },
+  "btnAlt": {
+   "want": "btn_alt",
+   "using": "btn_alt",
+   "source": "interim"
+  },
+  "btnAltDown": {
+   "want": "btn_alt_down",
+   "using": "btn_alt_down",
+   "source": "interim"
+  },
+  "btnRound": {
+   "want": "btn_round",
+   "using": "btn_round",
+   "source": "interim"
+  },
+  "cardLiftoff": {
+   "want": "liftoff_card",
+   "using": "liftoff_card",
+   "source": "final"
+  },
+  "cardGet": {
+   "want": "get_plate",
+   "using": "get_plate",
+   "source": "final"
+  },
+  "cardReady": {
+   "want": "ready_plate",
+   "using": "ready_plate",
+   "source": "final"
+  },
+  "cardPush": {
+   "want": "push_prompt",
+   "using": "push_prompt",
+   "source": "final"
+  },
+  "ledStrip": {
+   "want": "led_strip",
+   "using": "led_strip",
+   "source": "final"
+  },
+  "numFever": {
+   "want": "num_fever",
+   "using": "num_fever",
+   "source": "final"
+  },
+  "roundCard": {
+   "want": "round_plate",
+   "using": "round_plate",
+   "source": "final"
+  },
+  "titleLogo": {
+   "want": "title_logo",
+   "using": "title_logo",
+   "source": "final"
+  },
+  "cardMission": {
+   "want": "mission_complete",
+   "using": "mission_complete",
+   "source": "final"
+  },
+  "hatchDoor": {
+   "want": "HATD",
+   "using": "HATD",
+   "source": "concept"
+  }
+ }
+}

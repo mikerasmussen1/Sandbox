@@ -1,0 +1,44 @@
+{
+ "_doc": "[TUNE] placeholders for Starlift Fever (design v0.2). Original values, not from any clip. Final values belong to the math sheet docs/compliance/game-math/starlift-fever.md; the BIAB server decides odds and awards.",
+ "demoStartBalls": 1000,
+ "fireRatePerMin": 100,
+ "feverFireRatePerMin": 200,
+ "maxLiveBalls": 300,
+ "pendingCap": 4,
+ "portAward": 3,
+ "satelliteAward": 5,
+ "hatchAwardPerBall": 15,
+ "feverRounds": 8,
+ "hatchOpenMs": 25000,
+ "hatchBallCap": 10,
+ "intervalMs": 4500,
+ "feverIntroMs": 3000,
+ "roundSlamMs": 1400,
+ "gaugeRound": 4,
+ "gaugeMs": 5000,
+ "gaugeBonusBalls": 50,
+ "reach": {
+  "quickMs": 7000,
+  "stepUpMs": 18000,
+  "missionMs": 40000
+ },
+ "odds": {
+  "hit": 0.06,
+  "reachOnMiss": 0.22,
+  "missTierWeights": [
+   0.62,
+   0.28,
+   0.1
+  ],
+  "hitTierWeights": [
+   0.12,
+   0.3,
+   0.58
+  ],
+  "surgeOnHit": 0.25,
+  "surgeOnMiss": 0.02,
+  "pushOnMissionMiss": 0.35,
+  "stepUpFakeOut": 0.6
+ },
+ "demoSeed": 0
+}

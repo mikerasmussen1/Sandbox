@@ -1,0 +1,1151 @@
+{
+ "formats": [
+  "ogg",
+  "mp3"
+ ],
+ "sounds": {
+  "sfx_pin_01": {
+   "file": "sfx_pin_01",
+   "src": [
+    "sfx_pin_01.ogg",
+    "sfx_pin_01.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.4,
+   "loop": false,
+   "duration": 0.16,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -19.1,
+    "seam": null
+   }
+  },
+  "sfx_pin_02": {
+   "file": "sfx_pin_02",
+   "src": [
+    "sfx_pin_02.ogg",
+    "sfx_pin_02.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.4,
+   "loop": false,
+   "duration": 0.16,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -20.5,
+    "seam": null
+   }
+  },
+  "sfx_pin_03": {
+   "file": "sfx_pin_03",
+   "src": [
+    "sfx_pin_03.ogg",
+    "sfx_pin_03.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.4,
+   "loop": false,
+   "duration": 0.16,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -19.2,
+    "seam": null
+   }
+  },
+  "sfx_pin_04": {
+   "file": "sfx_pin_04",
+   "src": [
+    "sfx_pin_04.ogg",
+    "sfx_pin_04.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.4,
+   "loop": false,
+   "duration": 0.16,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -19.7,
+    "seam": null
+   }
+  },
+  "sfx_pin_05": {
+   "file": "sfx_pin_05",
+   "src": [
+    "sfx_pin_05.ogg",
+    "sfx_pin_05.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.4,
+   "loop": false,
+   "duration": 0.16,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -19.6,
+    "seam": null
+   }
+  },
+  "sfx_pin_06": {
+   "file": "sfx_pin_06",
+   "src": [
+    "sfx_pin_06.ogg",
+    "sfx_pin_06.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.4,
+   "loop": false,
+   "duration": 0.16,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -20.2,
+    "seam": null
+   }
+  },
+  "sfx_pin_07": {
+   "file": "sfx_pin_07",
+   "src": [
+    "sfx_pin_07.ogg",
+    "sfx_pin_07.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.4,
+   "loop": false,
+   "duration": 0.16,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -20.9,
+    "seam": null
+   }
+  },
+  "sfx_pin_08": {
+   "file": "sfx_pin_08",
+   "src": [
+    "sfx_pin_08.ogg",
+    "sfx_pin_08.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.4,
+   "loop": false,
+   "duration": 0.16,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -19.7,
+    "seam": null
+   }
+  },
+  "sfx_pin_09": {
+   "file": "sfx_pin_09",
+   "src": [
+    "sfx_pin_09.ogg",
+    "sfx_pin_09.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.4,
+   "loop": false,
+   "duration": 0.16,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -20.4,
+    "seam": null
+   }
+  },
+  "sfx_pin_10": {
+   "file": "sfx_pin_10",
+   "src": [
+    "sfx_pin_10.ogg",
+    "sfx_pin_10.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.4,
+   "loop": false,
+   "duration": 0.16,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -20.1,
+    "seam": null
+   }
+  },
+  "sfx_pin_11": {
+   "file": "sfx_pin_11",
+   "src": [
+    "sfx_pin_11.ogg",
+    "sfx_pin_11.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.4,
+   "loop": false,
+   "duration": 0.16,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -20.1,
+    "seam": null
+   }
+  },
+  "sfx_pin_12": {
+   "file": "sfx_pin_12",
+   "src": [
+    "sfx_pin_12.ogg",
+    "sfx_pin_12.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.4,
+   "loop": false,
+   "duration": 0.16,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -21.0,
+    "seam": null
+   }
+  },
+  "sfx_clatter_light": {
+   "file": "sfx_clatter_light",
+   "src": [
+    "sfx_clatter_light.ogg",
+    "sfx_clatter_light.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.35,
+   "loop": true,
+   "duration": 4.0,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -17.1,
+    "seam": {
+     "jump": 0.0065,
+     "p99_step": 0.2372
+    }
+   }
+  },
+  "sfx_clatter_heavy": {
+   "file": "sfx_clatter_heavy",
+   "src": [
+    "sfx_clatter_heavy.ogg",
+    "sfx_clatter_heavy.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.45,
+   "loop": true,
+   "duration": 4.0,
+   "qa": {
+    "peak_dbfs": -4.7,
+    "clipped_samples": 0,
+    "lufs": -15.0,
+    "seam": {
+     "jump": 0.1119,
+     "p99_step": 0.2412
+    }
+   }
+  },
+  "sfx_launch_1": {
+   "file": "sfx_launch_1",
+   "src": [
+    "sfx_launch_1.ogg",
+    "sfx_launch_1.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.08,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -20.8,
+    "seam": null
+   }
+  },
+  "sfx_launch_2": {
+   "file": "sfx_launch_2",
+   "src": [
+    "sfx_launch_2.ogg",
+    "sfx_launch_2.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.08,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -22.0,
+    "seam": null
+   }
+  },
+  "sfx_launch_3": {
+   "file": "sfx_launch_3",
+   "src": [
+    "sfx_launch_3.ogg",
+    "sfx_launch_3.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.08,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -20.2,
+    "seam": null
+   }
+  },
+  "sfx_ball_roll": {
+   "file": "sfx_ball_roll",
+   "src": [
+    "sfx_ball_roll.ogg",
+    "sfx_ball_roll.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.3,
+   "loop": true,
+   "duration": 2.0,
+   "qa": {
+    "peak_dbfs": -3.12,
+    "clipped_samples": 0,
+    "lufs": -15.0,
+    "seam": {
+     "jump": 0.0188,
+     "p99_step": 0.1526
+    }
+   }
+  },
+  "sfx_pocket_chime": {
+   "file": "sfx_pocket_chime",
+   "src": [
+    "sfx_pocket_chime.ogg",
+    "sfx_pocket_chime.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 1.0,
+   "qa": {
+    "peak_dbfs": -2.94,
+    "clipped_samples": 0,
+    "lufs": -15.0,
+    "seam": null
+   }
+  },
+  "sfx_satellite_ping": {
+   "file": "sfx_satellite_ping",
+   "src": [
+    "sfx_satellite_ping.ogg",
+    "sfx_satellite_ping.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.5,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -15.1,
+    "seam": null
+   }
+  },
+  "sfx_gyro_whoosh": {
+   "file": "sfx_gyro_whoosh",
+   "src": [
+    "sfx_gyro_whoosh.ogg",
+    "sfx_gyro_whoosh.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.5,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -15.1,
+    "seam": null
+   }
+  },
+  "sfx_gate_open": {
+   "file": "sfx_gate_open",
+   "src": [
+    "sfx_gate_open.ogg",
+    "sfx_gate_open.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.9,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -18.3,
+    "seam": null
+   }
+  },
+  "sfx_gate_close": {
+   "file": "sfx_gate_close",
+   "src": [
+    "sfx_gate_close.ogg",
+    "sfx_gate_close.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.8,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -20.9,
+    "seam": null
+   }
+  },
+  "sfx_hatch_entry_1": {
+   "file": "sfx_hatch_entry_1",
+   "src": [
+    "sfx_hatch_entry_1.ogg",
+    "sfx_hatch_entry_1.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.3,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -16.9,
+    "seam": null
+   }
+  },
+  "sfx_hatch_entry_2": {
+   "file": "sfx_hatch_entry_2",
+   "src": [
+    "sfx_hatch_entry_2.ogg",
+    "sfx_hatch_entry_2.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.3,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -16.3,
+    "seam": null
+   }
+  },
+  "sfx_hatch_entry_3": {
+   "file": "sfx_hatch_entry_3",
+   "src": [
+    "sfx_hatch_entry_3.ogg",
+    "sfx_hatch_entry_3.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.3,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -16.3,
+    "seam": null
+   }
+  },
+  "sfx_hatch_entry_4": {
+   "file": "sfx_hatch_entry_4",
+   "src": [
+    "sfx_hatch_entry_4.ogg",
+    "sfx_hatch_entry_4.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.3,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -17.2,
+    "seam": null
+   }
+  },
+  "sfx_hatch_entry_5": {
+   "file": "sfx_hatch_entry_5",
+   "src": [
+    "sfx_hatch_entry_5.ogg",
+    "sfx_hatch_entry_5.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.3,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -16.3,
+    "seam": null
+   }
+  },
+  "sfx_get_tick": {
+   "file": "sfx_get_tick",
+   "src": [
+    "sfx_get_tick.ogg",
+    "sfx_get_tick.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.5,
+   "loop": false,
+   "duration": 0.04,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -21.6,
+    "seam": null
+   }
+  },
+  "sfx_get_total": {
+   "file": "sfx_get_total",
+   "src": [
+    "sfx_get_total.ogg",
+    "sfx_get_total.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 1.4,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -16.3,
+    "seam": null
+   }
+  },
+  "sfx_round_fanfare": {
+   "file": "sfx_round_fanfare",
+   "src": [
+    "sfx_round_fanfare.ogg",
+    "sfx_round_fanfare.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 4.265,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -15.5,
+    "seam": null
+   }
+  },
+  "sfx_end_stinger": {
+   "file": "sfx_end_stinger",
+   "src": [
+    "sfx_end_stinger.ogg",
+    "sfx_end_stinger.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 5.218,
+   "qa": {
+    "peak_dbfs": -1.22,
+    "clipped_samples": 0,
+    "lufs": -15.0,
+    "seam": null
+   }
+  },
+  "sfx_liftoff_fanfare": {
+   "file": "sfx_liftoff_fanfare",
+   "src": [
+    "sfx_liftoff_fanfare.ogg",
+    "sfx_liftoff_fanfare.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 5.4,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -16.4,
+    "seam": null
+   }
+  },
+  "sfx_round_slam": {
+   "file": "sfx_round_slam",
+   "src": [
+    "sfx_round_slam.ogg",
+    "sfx_round_slam.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.8,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -20.8,
+    "seam": null
+   }
+  },
+  "sfx_fever_siren": {
+   "file": "sfx_fever_siren",
+   "src": [
+    "sfx_fever_siren.ogg",
+    "sfx_fever_siren.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 1.8,
+   "qa": {
+    "peak_dbfs": -13.32,
+    "clipped_samples": 0,
+    "lufs": -15.0,
+    "seam": null
+   }
+  },
+  "sfx_ui_click": {
+   "file": "sfx_ui_click",
+   "src": [
+    "sfx_ui_click.ogg",
+    "sfx_ui_click.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.04,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -21.7,
+    "seam": null
+   }
+  },
+  "sfx_ui_hover": {
+   "file": "sfx_ui_hover",
+   "src": [
+    "sfx_ui_hover.ogg",
+    "sfx_ui_hover.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.4,
+   "loop": false,
+   "duration": 0.05,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -19.6,
+    "seam": null
+   }
+  },
+  "sfx_ui_back": {
+   "file": "sfx_ui_back",
+   "src": [
+    "sfx_ui_back.ogg",
+    "sfx_ui_back.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.09,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -17.1,
+    "seam": null
+   }
+  },
+  "sfx_ui_error": {
+   "file": "sfx_ui_error",
+   "src": [
+    "sfx_ui_error.ogg",
+    "sfx_ui_error.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.35,
+   "qa": {
+    "peak_dbfs": -2.98,
+    "clipped_samples": 0,
+    "lufs": -15.0,
+    "seam": null
+   }
+  },
+  "sfx_push_click": {
+   "file": "sfx_push_click",
+   "src": [
+    "sfx_push_click.ogg",
+    "sfx_push_click.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.08,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -20.6,
+    "seam": null
+   }
+  },
+  "sfx_thrust_burst": {
+   "file": "sfx_thrust_burst",
+   "src": [
+    "sfx_thrust_burst.ogg",
+    "sfx_thrust_burst.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.6,
+   "qa": {
+    "peak_dbfs": -4.54,
+    "clipped_samples": 0,
+    "lufs": -15.0,
+    "seam": null
+   }
+  },
+  "sfx_lifter_hum": {
+   "file": "sfx_lifter_hum",
+   "src": [
+    "sfx_lifter_hum.ogg",
+    "sfx_lifter_hum.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.35,
+   "loop": true,
+   "duration": 4.0,
+   "qa": {
+    "peak_dbfs": -3.72,
+    "clipped_samples": 0,
+    "lufs": -15.0,
+    "seam": {
+     "jump": 0.0085,
+     "p99_step": 0.0827
+    }
+   }
+  },
+  "sfx_lifter_surge": {
+   "file": "sfx_lifter_surge",
+   "src": [
+    "sfx_lifter_surge.ogg",
+    "sfx_lifter_surge.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 1.5,
+   "qa": {
+    "peak_dbfs": -6.28,
+    "clipped_samples": 0,
+    "lufs": -15.0,
+    "seam": null
+   }
+  },
+  "sfx_reel_spin": {
+   "file": "sfx_reel_spin",
+   "src": [
+    "sfx_reel_spin.ogg",
+    "sfx_reel_spin.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.45,
+   "loop": true,
+   "duration": 2.0,
+   "qa": {
+    "peak_dbfs": -3.57,
+    "clipped_samples": 0,
+    "lufs": -15.0,
+    "seam": {
+     "jump": 0.0,
+     "p99_step": 0.2617
+    }
+   }
+  },
+  "sfx_reel_stop_1": {
+   "file": "sfx_reel_stop_1",
+   "src": [
+    "sfx_reel_stop_1.ogg",
+    "sfx_reel_stop_1.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.2,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -17.1,
+    "seam": null
+   }
+  },
+  "sfx_reel_stop_2": {
+   "file": "sfx_reel_stop_2",
+   "src": [
+    "sfx_reel_stop_2.ogg",
+    "sfx_reel_stop_2.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.2,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -16.4,
+    "seam": null
+   }
+  },
+  "sfx_reel_stop_3": {
+   "file": "sfx_reel_stop_3",
+   "src": [
+    "sfx_reel_stop_3.ogg",
+    "sfx_reel_stop_3.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.2,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -16.9,
+    "seam": null
+   }
+  },
+  "sfx_reach_alert": {
+   "file": "sfx_reach_alert",
+   "src": [
+    "sfx_reach_alert.ogg",
+    "sfx_reach_alert.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.9,
+   "qa": {
+    "peak_dbfs": -8.07,
+    "clipped_samples": 0,
+    "lufs": -15.0,
+    "seam": null
+   }
+  },
+  "sfx_reach_sting_1": {
+   "file": "sfx_reach_sting_1",
+   "src": [
+    "sfx_reach_sting_1.ogg",
+    "sfx_reach_sting_1.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 4.9,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -16.1,
+    "seam": null
+   }
+  },
+  "sfx_reach_sting_2": {
+   "file": "sfx_reach_sting_2",
+   "src": [
+    "sfx_reach_sting_2.ogg",
+    "sfx_reach_sting_2.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 4.9,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -15.8,
+    "seam": null
+   }
+  },
+  "sfx_reach_sting_3": {
+   "file": "sfx_reach_sting_3",
+   "src": [
+    "sfx_reach_sting_3.ogg",
+    "sfx_reach_sting_3.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 4.9,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -15.6,
+    "seam": null
+   }
+  },
+  "sfx_reach_miss": {
+   "file": "sfx_reach_miss",
+   "src": [
+    "sfx_reach_miss.ogg",
+    "sfx_reach_miss.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.8,
+   "qa": {
+    "peak_dbfs": -4.69,
+    "clipped_samples": 0,
+    "lufs": -15.0,
+    "seam": null
+   }
+  },
+  "sfx_stepup_whoosh": {
+   "file": "sfx_stepup_whoosh",
+   "src": [
+    "sfx_stepup_whoosh.ogg",
+    "sfx_stepup_whoosh.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.9,
+   "qa": {
+    "peak_dbfs": -2.69,
+    "clipped_samples": 0,
+    "lufs": -15.0,
+    "seam": null
+   }
+  },
+  "sfx_crack_shatter": {
+   "file": "sfx_crack_shatter",
+   "src": [
+    "sfx_crack_shatter.ogg",
+    "sfx_crack_shatter.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 1.3,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -17.0,
+    "seam": null
+   }
+  },
+  "sfx_crack_creak": {
+   "file": "sfx_crack_creak",
+   "src": [
+    "sfx_crack_creak.ogg",
+    "sfx_crack_creak.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.6,
+   "qa": {
+    "peak_dbfs": -2.04,
+    "clipped_samples": 0,
+    "lufs": -15.0,
+    "seam": null
+   }
+  },
+  "sfx_mash_rev": {
+   "file": "sfx_mash_rev",
+   "src": [
+    "sfx_mash_rev.ogg",
+    "sfx_mash_rev.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.5,
+   "loop": true,
+   "duration": 4.0,
+   "qa": {
+    "peak_dbfs": -5.32,
+    "clipped_samples": 0,
+    "lufs": -15.0,
+    "seam": {
+     "jump": 0.004,
+     "p99_step": 0.0367
+    }
+   }
+  },
+  "sfx_mash_tap": {
+   "file": "sfx_mash_tap",
+   "src": [
+    "sfx_mash_tap.ogg",
+    "sfx_mash_tap.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.12,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -16.4,
+    "seam": null
+   }
+  },
+  "sfx_drain": {
+   "file": "sfx_drain",
+   "src": [
+    "sfx_drain.ogg",
+    "sfx_drain.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.75,
+   "loop": false,
+   "duration": 0.3,
+   "qa": {
+    "peak_dbfs": -1.0,
+    "clipped_samples": 0,
+    "lufs": -18.9,
+    "seam": null
+   }
+  },
+  "mus_fever": {
+   "file": "mus_fever",
+   "src": [
+    "mus_fever.ogg",
+    "mus_fever.mp3"
+   ],
+   "bus": "music",
+   "volume": 0.5,
+   "loop": true,
+   "duration": 49.231,
+   "bpm": 156,
+   "bars": 32,
+   "qa": {
+    "peak_dbfs": -4.28,
+    "clipped_samples": 0,
+    "lufs": -16.0,
+    "seam": {
+     "jump": 0.2734,
+     "p99_step": 0.2258
+    }
+   }
+  },
+  "mus_normal": {
+   "file": "mus_normal",
+   "src": [
+    "mus_normal.ogg",
+    "mus_normal.mp3"
+   ],
+   "bus": "music",
+   "volume": 0.5,
+   "loop": true,
+   "duration": 34.286,
+   "bpm": 112,
+   "bars": 16,
+   "qa": {
+    "peak_dbfs": -3.24,
+    "clipped_samples": 0,
+    "lufs": -16.0,
+    "seam": {
+     "jump": 0.1532,
+     "p99_step": 0.1877
+    }
+   }
+  },
+  "mus_lobby": {
+   "file": "mus_lobby",
+   "src": [
+    "mus_lobby.ogg",
+    "mus_lobby.mp3"
+   ],
+   "bus": "music",
+   "volume": 0.5,
+   "loop": true,
+   "duration": 21.333,
+   "bpm": 90,
+   "bars": 8,
+   "qa": {
+    "peak_dbfs": -7.52,
+    "clipped_samples": 0,
+    "lufs": -16.0,
+    "seam": {
+     "jump": 0.0267,
+     "p99_step": 0.0352
+    }
+   }
+  },
+  "mus_reach_1": {
+   "file": "mus_reach_1",
+   "src": [
+    "mus_reach_1.ogg",
+    "mus_reach_1.mp3"
+   ],
+   "bus": "music",
+   "volume": 0.5,
+   "loop": true,
+   "duration": 14.545,
+   "bpm": 132,
+   "bars": 8,
+   "qa": {
+    "peak_dbfs": -1.68,
+    "clipped_samples": 0,
+    "lufs": -16.0,
+    "seam": {
+     "jump": 0.1462,
+     "p99_step": 0.1065
+    }
+   }
+  },
+  "mus_reach_2": {
+   "file": "mus_reach_2",
+   "src": [
+    "mus_reach_2.ogg",
+    "mus_reach_2.mp3"
+   ],
+   "bus": "music",
+   "volume": 0.5,
+   "loop": true,
+   "duration": 13.333,
+   "bpm": 144,
+   "bars": 8,
+   "qa": {
+    "peak_dbfs": -3.56,
+    "clipped_samples": 0,
+    "lufs": -16.0,
+    "seam": {
+     "jump": 0.0227,
+     "p99_step": 0.1151
+    }
+   }
+  },
+  "mus_reach_3": {
+   "file": "mus_reach_3",
+   "src": [
+    "mus_reach_3.ogg",
+    "mus_reach_3.mp3"
+   ],
+   "bus": "music",
+   "volume": 0.5,
+   "loop": true,
+   "duration": 12.308,
+   "bpm": 156,
+   "bars": 8,
+   "qa": {
+    "peak_dbfs": -4.87,
+    "clipped_samples": 0,
+    "lufs": -16.0,
+    "seam": {
+     "jump": 0.0126,
+     "p99_step": 0.1125
+    }
+   }
+  }
+ },
+ "loudness": {
+  "music_lufs": -16.0,
+  "sfx_lufs": -15.0,
+  "ceiling_dbfs": -1.0,
+  "note": "music: BS.1770 integrated; short SFX: loudest 400 ms"
+ },
+ "howler": "new Howl({src: sounds[k].src, loop: sounds[k].loop, volume: sounds[k].volume}); ogg first (gapless loops), mp3 fallback"
+}

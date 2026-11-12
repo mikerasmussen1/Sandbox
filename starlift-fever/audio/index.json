@@ -1,0 +1,197 @@
+{
+ "slots": {
+  "mus_fever": [
+   "audio/mus_fever.mp3"
+  ],
+  "mus_lobby": [
+   "audio/mus_lobby.mp3"
+  ],
+  "mus_normal": [
+   "audio/mus_normal.mp3"
+  ],
+  "mus_reach_1": [
+   "audio/mus_reach_1.mp3"
+  ],
+  "mus_reach_2": [
+   "audio/mus_reach_2.mp3"
+  ],
+  "mus_reach_3": [
+   "audio/mus_reach_3.mp3"
+  ],
+  "sfx_ball_roll": [
+   "audio/sfx_ball_roll.mp3"
+  ],
+  "sfx_clatter_heavy": [
+   "audio/sfx_clatter_heavy.mp3"
+  ],
+  "sfx_clatter_light": [
+   "audio/sfx_clatter_light.mp3"
+  ],
+  "sfx_crack_creak": [
+   "audio/sfx_crack_creak.mp3"
+  ],
+  "sfx_crack_shatter": [
+   "audio/sfx_crack_shatter.mp3"
+  ],
+  "sfx_drain": [
+   "audio/sfx_drain.mp3"
+  ],
+  "sfx_end_stinger": [
+   "audio/sfx_end_stinger.mp3"
+  ],
+  "sfx_fever_siren": [
+   "audio/sfx_fever_siren.mp3"
+  ],
+  "sfx_gate_close": [
+   "audio/sfx_gate_close.mp3"
+  ],
+  "sfx_gate_open": [
+   "audio/sfx_gate_open.mp3"
+  ],
+  "sfx_get_tick": [
+   "audio/sfx_get_tick.mp3"
+  ],
+  "sfx_get_total": [
+   "audio/sfx_get_total.mp3"
+  ],
+  "sfx_gyro_whoosh": [
+   "audio/sfx_gyro_whoosh.mp3"
+  ],
+  "sfx_hatch_entry_1": [
+   "audio/sfx_hatch_entry_1.mp3"
+  ],
+  "sfx_hatch_entry_2": [
+   "audio/sfx_hatch_entry_2.mp3"
+  ],
+  "sfx_hatch_entry_3": [
+   "audio/sfx_hatch_entry_3.mp3"
+  ],
+  "sfx_hatch_entry_4": [
+   "audio/sfx_hatch_entry_4.mp3"
+  ],
+  "sfx_hatch_entry_5": [
+   "audio/sfx_hatch_entry_5.mp3"
+  ],
+  "sfx_launch_1": [
+   "audio/sfx_launch_1.mp3"
+  ],
+  "sfx_launch_2": [
+   "audio/sfx_launch_2.mp3"
+  ],
+  "sfx_launch_3": [
+   "audio/sfx_launch_3.mp3"
+  ],
+  "sfx_lifter_hum": [
+   "audio/sfx_lifter_hum.mp3"
+  ],
+  "sfx_lifter_surge": [
+   "audio/sfx_lifter_surge.mp3"
+  ],
+  "sfx_liftoff_fanfare": [
+   "audio/sfx_liftoff_fanfare.mp3"
+  ],
+  "sfx_mash_rev": [
+   "audio/sfx_mash_rev.mp3"
+  ],
+  "sfx_mash_tap": [
+   "audio/sfx_mash_tap.mp3"
+  ],
+  "sfx_pin_01": [
+   "audio/sfx_pin_01.mp3"
+  ],
+  "sfx_pin_02": [
+   "audio/sfx_pin_02.mp3"
+  ],
+  "sfx_pin_03": [
+   "audio/sfx_pin_03.mp3"
+  ],
+  "sfx_pin_04": [
+   "audio/sfx_pin_04.mp3"
+  ],
+  "sfx_pin_05": [
+   "audio/sfx_pin_05.mp3"
+  ],
+  "sfx_pin_06": [
+   "audio/sfx_pin_06.mp3"
+  ],
+  "sfx_pin_07": [
+   "audio/sfx_pin_07.mp3"
+  ],
+  "sfx_pin_08": [
+   "audio/sfx_pin_08.mp3"
+  ],
+  "sfx_pin_09": [
+   "audio/sfx_pin_09.mp3"
+  ],
+  "sfx_pin_10": [
+   "audio/sfx_pin_10.mp3"
+  ],
+  "sfx_pin_11": [
+   "audio/sfx_pin_11.mp3"
+  ],
+  "sfx_pin_12": [
+   "audio/sfx_pin_12.mp3"
+  ],
+  "sfx_pocket_chime": [
+   "audio/sfx_pocket_chime.mp3"
+  ],
+  "sfx_push_click": [
+   "audio/sfx_push_click.mp3"
+  ],
+  "sfx_reach_alert": [
+   "audio/sfx_reach_alert.mp3"
+  ],
+  "sfx_reach_miss": [
+   "audio/sfx_reach_miss.mp3"
+  ],
+  "sfx_reach_sting_1": [
+   "audio/sfx_reach_sting_1.mp3"
+  ],
+  "sfx_reach_sting_2": [
+   "audio/sfx_reach_sting_2.mp3"
+  ],
+  "sfx_reach_sting_3": [
+   "audio/sfx_reach_sting_3.mp3"
+  ],
+  "sfx_reel_spin": [
+   "audio/sfx_reel_spin.mp3"
+  ],
+  "sfx_reel_stop_1": [
+   "audio/sfx_reel_stop_1.mp3"
+  ],
+  "sfx_reel_stop_2": [
+   "audio/sfx_reel_stop_2.mp3"
+  ],
+  "sfx_reel_stop_3": [
+   "audio/sfx_reel_stop_3.mp3"
+  ],
+  "sfx_round_fanfare": [
+   "audio/sfx_round_fanfare.mp3"
+  ],
+  "sfx_round_slam": [
+   "audio/sfx_round_slam.mp3"
+  ],
+  "sfx_satellite_ping": [
+   "audio/sfx_satellite_ping.mp3"
+  ],
+  "sfx_stepup_whoosh": [
+   "audio/sfx_stepup_whoosh.mp3"
+  ],
+  "sfx_thrust_burst": [
+   "audio/sfx_thrust_burst.mp3"
+  ],
+  "sfx_ui_back": [
+   "audio/sfx_ui_back.mp3"
+  ],
+  "sfx_ui_click": [
+   "audio/sfx_ui_click.mp3"
+  ],
+  "sfx_ui_error": [
+   "audio/sfx_ui_error.mp3"
+  ],
+  "sfx_ui_hover": [
+   "audio/sfx_ui_hover.mp3"
+  ]
+ },
+ "missing": []
+}

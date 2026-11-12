@@ -21,3 +21,7 @@ Play: https://mikerasmussen1.github.io/Sandbox/wyvern-wilds/
 Thunderscale Depths lives in `thunderscale-depths/`. It is a static demo-play preview. Shots spend play credits that stay in this browser. There is no wallet and no real money.
 
 Play: https://mikerasmussen1.github.io/Sandbox/thunderscale-depths/
+
+Starlift Fever lives in `starlift-fever/`. It is a static demo-play preview. Balls are play credits that stay in this browser. There is no wallet and no real money.
+
+Play: https://mikerasmussen1.github.io/Sandbox/starlift-fever/
