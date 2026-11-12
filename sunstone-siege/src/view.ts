@@ -5,6 +5,7 @@
 import { Container, Graphics, Sprite, Text, Texture } from "pixi.js";
 import type { ArtSet, Clip } from "./art";
 import { BALANCE, TOWER_HUE, TOWER_ICON, sharedScales, towerCost, towerFacts, towerRange, towerReadout } from "./balance";
+import { CARRY_CAP, CARRY_SCALE, carrySlots } from "./carry";
 import { poseAt } from "./geom";
 import type { MapDef } from "./maps";
 import { PAY_FLIGHT, type Enemy, type Fx, type Siege, type Shot } from "./sim";
@@ -1080,7 +1081,7 @@ export class WorldView {
     const s = this.payPool.pop() ?? this.makePaySprite();
     s.visible = true;
     s.alpha = 1;
-    s.scale.set(0.36);
+    s.scale.set(CARRY_SCALE);
     s.position.set(x, y);
     this.fxLayer.addChild(s);
     this.payGems.push({ s, x, y, tx, ty, life: 0 });
@@ -1093,12 +1094,10 @@ export class WorldView {
     return s;
   }
 
-  /** Jade the hero is carrying, stacked above his head, then flung at a pad. */
+  /** Jade the hero is carrying: a short wide heap, then gems flung at a pad. */
   private drawCarry(sim: Siege, step: number): void {
-    const cap = 24;
-    const gap = 6;
     const total = Math.max(0, Math.floor(sim.jade + 1e-3));
-    const shown = Math.min(cap, total);
+    const shown = Math.min(CARRY_CAP, total);
     if (this.carryCount < 0) {
       this.carryCount = total;
       for (let i = 0; i < shown; i++) this.carryBorn.push(this.time - 1);
@@ -1106,8 +1105,8 @@ export class WorldView {
       const add = total - this.carryCount;
       this.carryCount = total;
       for (let i = 0; i < add; i++) {
-        if (this.carryBorn.length < cap) this.carryBorn.push(this.time);
-        else this.carryBorn[cap - 1] = this.time;
+        if (this.carryBorn.length < CARRY_CAP) this.carryBorn.push(this.time);
+        else this.carryBorn[CARRY_CAP - 1] = this.time;
       }
     } else if (total < this.carryCount) {
       this.carryCount = total;
@@ -1115,13 +1114,15 @@ export class WorldView {
     }
     const hero = sim.heroAt();
     const moving = sim.heroMoving;
+    const slots = carrySlots(shown);
     while (this.carrySprites.length < shown) {
       const s = new Sprite(this.art.frame("jade"));
-      s.anchor.set(0.5, 0.65);
+      s.anchor.set(0.5);
       s.eventMode = "none";
       this.actors.addChild(s);
       this.carrySprites.push(s);
     }
+    const lean = Math.sin(this.time * (moving ? 4.2 : 1.7)) * (moving ? 1.3 : 0.4);
     for (let i = 0; i < this.carrySprites.length; i++) {
       const s = this.carrySprites[i];
       if (i >= shown) {
@@ -1129,36 +1130,37 @@ export class WorldView {
         continue;
       }
       s.visible = true;
+      const slot = slots[i];
       const age = this.time - (this.carryBorn[i] ?? this.time - 1);
-      const bounce = age >= 0 && age < 0.18 ? Math.sin((age / 0.18) * Math.PI) * 8 : 0;
-      const pop = age >= 0 && age < 0.16 ? 0.72 + Math.sin((age / 0.16) * Math.PI) * 0.5 : 1;
-      const sway = Math.sin(this.time * (moving ? 7.2 : 2.2) + i * 0.4) * (moving ? 3.4 : 1.1) * (i / Math.max(1, shown - 1));
-      s.position.set(hero.x + sway, hero.y - 42 - i * gap - bounce);
-      s.zIndex = hero.y + 14 + i;
-      s.scale.set(0.2 * pop);
-      s.rotation = sway * 0.03;
+      const bounce = age >= 0 && age < 0.16 ? Math.sin((age / 0.16) * Math.PI) * 5 : 0;
+      const pop = age >= 0 && age < 0.14 ? 0.78 + Math.sin((age / 0.14) * Math.PI) * 0.32 : 1;
+      const wobble = Math.sin(this.time * 2.4 + i * 0.8) * 0.3;
+      const sway = lean * (1 + slot.row * 0.06) + wobble;
+      s.position.set(hero.x + slot.x + sway, hero.y + slot.y - bounce);
+      s.zIndex = hero.y + 40 - slot.row;
+      s.scale.set(CARRY_SCALE * pop);
+      s.rotation = wobble * 0.04;
     }
-    if (total > cap) {
+    if (total > CARRY_CAP) {
       if (!this.carryBadge) {
         this.carryBadge = new Text({
           text: "",
           style: {
             fontFamily: SANS,
-            fontSize: 16,
+            fontSize: 15,
             fill: 0xf4ffe8,
             fontWeight: "bold",
             stroke: { color: 0x14301c, width: 4 },
           },
         });
-        this.carryBadge.anchor.set(0, 1);
+        this.carryBadge.anchor.set(0.5, 1);
         this.carryBadge.eventMode = "none";
         this.actors.addChild(this.carryBadge);
       }
-      const top = Math.max(0, shown - 1);
-      const sway = Math.sin(this.time * (moving ? 7.2 : 2.2) + top * 0.4) * (moving ? 3.4 : 1.1);
+      const top = slots[slots.length - 1];
       this.carryBadge.visible = true;
       this.carryBadge.text = `x${total}`;
-      this.carryBadge.position.set(hero.x + sway + 12, hero.y - 46 - top * gap);
+      this.carryBadge.position.set(hero.x + lean, hero.y + top.y - 11);
       this.carryBadge.zIndex = hero.y + 48;
     } else if (this.carryBadge) this.carryBadge.visible = false;
     const dt = step > 0 ? step : 0.016;
@@ -1172,7 +1174,7 @@ export class WorldView {
         gem.x + (gem.tx - gem.x) * e + swing * 72,
         gem.y + (gem.ty - gem.y) * e - swing * 36,
       );
-      gem.s.scale.set(0.36 * (1 - t * 0.15));
+      gem.s.scale.set(CARRY_SCALE * (1 - t * 0.12));
       gem.s.alpha = 1;
       gem.s.zIndex = gem.ty + 6;
       if (t >= 1) {
