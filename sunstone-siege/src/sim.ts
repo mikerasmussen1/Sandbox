@@ -3,6 +3,7 @@
  * forward in a test without a browser.
  */
 import { BALANCE, TOWER_HUE, towerCost, towerRange, type RelicDef } from "./balance";
+import { carryLaunch } from "./carry";
 import { poseAt, type Route } from "./geom";
 import { clearStationGaps, MAP_H, MAP_W, mapDef, type MapDef } from "./maps";
 import type { EnemyKind, Phase, RelicId, TowerKind, Vec } from "./types";
@@ -1468,10 +1469,9 @@ export class Siege {
       this.fundBank -= 1;
       this.jade -= 1;
       inFlight += 1;
-      const visible = Math.min(24, Math.floor(this.jade + 1));
-      const top = this.heroY - 40 - Math.max(0, visible - 1) * 6;
+      const from = carryLaunch(this.jade + 1);
       this.pours.push({ index: best, left: PAY_FLIGHT, tier: station.tier });
-      this.fx.push({ kind: "pay", x: this.heroX, y: top, tx: station.x, ty: station.y });
+      this.fx.push({ kind: "pay", x: this.heroX + from.x, y: this.heroY + from.y, tx: station.x, ty: station.y });
     }
   }
 
