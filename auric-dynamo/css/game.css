@@ -271,9 +271,9 @@ h1, h2, h3, p { margin: 0; }
 #cabinet[data-phase="wheel"] #wheel-view { filter: brightness(1.35) drop-shadow(0 0 18px #fff1c9); }
 #cabinet[data-motion="reduce"] #wheel-view { filter: none; }
 
-#fly { position: absolute; z-index: 4; right: 22%; top: 46%; grid-column: 1 / -1; grid-row: 1 / -1; color: #fff6d8; font: 800 28px "Auric Serif", serif; pointer-events: none; }
+#fly { position: absolute; z-index: 6; color: #fff6d8; font: 800 28px "Auric Serif", serif; pointer-events: none; text-shadow: 0 2px 0 #3a2200, 0 0 12px #fff1c8; }
 #fly.go { animation: fly 0.7s ease-in forwards; }
-@keyframes fly { to { transform: translate(-18vw, 34vh) scale(0.6); opacity: 0; } }
+@keyframes fly { to { transform: translate(var(--dx, -18vw), var(--dy, 34vh)) scale(0.55); opacity: 0; } }
 
 .deck {
   position: absolute;
@@ -365,11 +365,23 @@ h1, h2, h3, p { margin: 0; }
   display: grid;
   place-items: center;
   background: radial-gradient(ellipse at 50% 42%, rgba(5, 7, 11, 0.62), rgba(5, 7, 11, 0.28) 52%, transparent 78%);
-  pointer-events: auto;
+  pointer-events: none;
   overflow: hidden;
 }
 #bigwin[hidden] { display: none !important; }
 #cabinet[data-energy="win"] #stage { animation: cabinet-shake 0.42s linear infinite; }
+#cabinet[data-shake="heavy"][data-motion="allow"] #play-surface { animation: heavy-shake 0.07s linear infinite; }
+@keyframes heavy-shake {
+  0% { transform: translate(0, 0); }
+  20% { transform: translate(-14px, 8px); }
+  40% { transform: translate(16px, -10px); }
+  60% { transform: translate(-12px, -8px); }
+  80% { transform: translate(10px, 12px); }
+  100% { transform: translate(-8px, 4px); }
+}
+#cabinet[data-motion="reduce"] #play-surface { animation: none; }
+#coin-burst { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
+#board-star { display: block; width: 72px; height: 72px; margin: 0 auto 8px; }
 @keyframes cabinet-shake {
   25% { transform: translate(1px, -1px); }
   50% { transform: translate(-2px, 1px); }
@@ -394,7 +406,7 @@ h1, h2, h3, p { margin: 0; }
   text-shadow: 0 6px 0 #3a2200, 0 0 22px #fff1c8;
   pointer-events: none;
 }
-#bigwin-skip { position: absolute; bottom: 18px; min-width: 72px; min-height: 44px; border-radius: 999px; border: 2px solid var(--brass); background: #120e0a; z-index: 8; }
+#bigwin-skip { position: absolute; bottom: 18px; min-width: 72px; min-height: 44px; border-radius: 999px; border: 2px solid var(--brass); background: #120e0a; z-index: 8; pointer-events: auto; }
 #cabinet[data-energy="win"][data-motion="allow"] #stage { animation: punch 0.48s ease-out; }
 @keyframes punch {
   0%, 100% { transform: translateX(0); }
@@ -502,7 +514,7 @@ dialog::backdrop { background: rgba(7, 11, 16, 0.72); }
 #state-overlay {
   position: fixed;
   left: 50%;
-  top: 16%;
+  top: 42%;
   z-index: 60;
   margin: 0;
   padding: 12px 22px;
@@ -511,12 +523,12 @@ dialog::backdrop { background: rgba(7, 11, 16, 0.72); }
   color: #fff6d8;
   font: 700 1.15rem "Auric Display", sans-serif;
   letter-spacing: 0.04em;
-  transform: translate(-50%, 8px);
+  transform: translate(-50%, 0);
   opacity: 0;
-  transition: opacity 1s ease;
   pointer-events: none;
 }
 #state-overlay.show { opacity: 1; }
+#state-overlay.show.bye { opacity: 0; transition: opacity 1s ease; }
 #state-overlay[hidden] { display: none !important; }
 
 #cabinet[data-orient="portrait"] { width: 720px; height: 1280px; }
@@ -543,16 +555,3 @@ dialog::backdrop { background: rgba(7, 11, 16, 0.72); }
 #cabinet[data-orient="portrait"] #auto-status { left: 200px; top: 1224px; width: 320px; text-align: center; }
 #cabinet[data-orient="portrait"] #note { left: 36px; top: 1132px; width: 648px; text-align: center; }
 #cabinet[data-orient="portrait"] #short { left: 200px; top: 1224px; width: 320px; text-align: center; }
-
-#demo-note {
-  position: fixed;
-  left: 12px;
-  bottom: 10px;
-  z-index: 70;
-  margin: 0;
-  color: #fff6d8;
-  font: 600 12px/1.3 system-ui, sans-serif;
-  letter-spacing: 0.02em;
-  text-shadow: 0 1px 2px #000;
-  pointer-events: none;
-}

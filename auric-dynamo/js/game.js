@@ -1,4 +1,4 @@
-const v = {
+const k = {
   cabinetL: "assets/art/raster/cabinet-landscape.webp",
   cabinetP: "assets/art/raster/cabinet-portrait.webp",
   logo: "assets/art/raster/logo.webp",
@@ -21,12 +21,16 @@ const v = {
   musicPressed: "assets/art/raster/btn-music-pressed.webp",
   gear: "assets/art/raster/btn-gear-normal.webp",
   gearPressed: "assets/art/raster/btn-gear-pressed.webp",
-  skip: "assets/art/raster/btn-skip.webp",
+  skip: "assets/art/raster/btn-skip-normal.webp",
+  skipPressed: "assets/art/raster/btn-skip-pressed.webp",
+  skipDisabled: "assets/art/raster/btn-skip-disabled.webp",
   stop: "assets/art/raster/btn-stop-normal.webp",
   stopPressed: "assets/art/raster/btn-stop-pressed.webp",
   help: "assets/art/raster/btn-help-normal.webp",
   helpPressed: "assets/art/raster/btn-help-pressed.webp",
-  star: "assets/art/raster/btn-star.webp",
+  star: "assets/art/standings/btn-star-normal.webp",
+  starPressed: "assets/art/standings/btn-star-pressed.webp",
+  starIcon: "assets/art/standings/star-icon@2x.webp",
   plaque: "assets/art/raster/plaque.webp",
   wheelFace: "assets/art/raster/wheel-face.webp",
   coinSheet: "assets/art/raster/coin-sheet-12x128.webp",
@@ -60,19 +64,19 @@ const v = {
     wheel: "assets/art/raster/mod-wheel.webp"
   }
 };
-function R(s) {
+function H(s) {
   const e = globalThis.__auricAsset;
   return typeof e == "function" ? e(s) : new URL(s, window.location.href).href;
 }
-function ft() {
+function vt() {
   try {
     return new URLSearchParams(location.search).has("fx");
   } catch {
     return !1;
   }
 }
-function pt(s, e = "#2fd0ff") {
-  if (!ft() || document.getElementById("fx-panel")) return;
+function kt(s, e = "#2fd0ff") {
+  if (!vt() || document.getElementById("fx-panel")) return;
   const t = document.createElement("style");
   t.textContent = `
 #fx-panel { position: fixed; left: 10px; top: 10px; z-index: 2147483000; font: 600 13px/1.3 system-ui, -apple-system, sans-serif; }
@@ -92,36 +96,36 @@ function pt(s, e = "#2fd0ff") {
   i.type = "button", i.id = "fx-toggle", i.textContent = "FX";
   const a = document.createElement("div");
   a.id = "fx-list", r.append(i, a), document.body.appendChild(r);
-  let h = !1;
+  let u = !1;
   i.onclick = () => {
-    if (!h) {
-      const c = mt(s);
-      if (h = c.length > 0, a.textContent = "", !h) {
-        const d = document.createElement("div");
-        d.style.cssText = "max-width:220px;white-space:normal;padding:4px 6px;color:#9fb0cc;font-weight:500", d.textContent = "The game has not finished starting. Some games need a lobby (open with ?brand=). Reopen this panel once it has.", a.appendChild(d);
+    if (!u) {
+      const d = At(s);
+      if (u = d.length > 0, a.textContent = "", !u) {
+        const c = document.createElement("div");
+        c.style.cssText = "max-width:220px;white-space:normal;padding:4px 6px;color:#9fb0cc;font-weight:500", c.textContent = "The game has not finished starting. Some games need a lobby (open with ?brand=). Reopen this panel once it has.", a.appendChild(c);
       }
-      for (const d of c) {
-        const p = document.createElement("button");
-        p.type = "button", p.textContent = d.label, p.onclick = () => {
+      for (const c of d) {
+        const m = document.createElement("button");
+        m.type = "button", m.textContent = c.label, m.onclick = () => {
           try {
-            Promise.resolve(d.run()).catch((b) => console.error("[fx]", d.label, b));
+            Promise.resolve(c.run()).catch((b) => console.error("[fx]", c.label, b));
           } catch (b) {
-            console.error("[fx]", d.label, b);
+            console.error("[fx]", c.label, b);
           }
-        }, a.appendChild(p);
+        }, a.appendChild(m);
       }
     }
     a.classList.toggle("open");
   };
 }
-function mt(s) {
+function At(s) {
   try {
     return s();
   } catch (e) {
     return console.error("[fx] building the case list failed", e), [];
   }
 }
-const Se = {
+const Ie = {
   reelStops: [480, 630, 780],
   assemble: 220,
   inhale: 120,
@@ -137,39 +141,39 @@ const Se = {
   fadeMs: 80,
   cycleFloorMs: 3e3,
   holdMs: 600
-}, ye = 2e3 / 2400, Je = 2, _t = Se.holdMs, gt = Se.cycleFloorMs, bt = [10, 25, 50];
-function Be(s) {
-  return bt.includes(s);
+}, xe = 2e3 / 2400, it = 2, St = Ie.holdMs, xt = Ie.cycleFloorMs, Mt = [10, 25, 50];
+function De(s) {
+  return Mt.includes(s);
 }
-function ze() {
+function ot() {
   return { phase: "idle", downAt: 0 };
 }
-function wt(s) {
+function Tt(s) {
   return { phase: "pressing", downAt: s };
 }
-function yt(s, e) {
-  return s.phase === "pressing" && e - s.downAt >= _t ? { ...s, phase: "armed" } : s;
+function Et(s, e) {
+  return s.phase === "pressing" && e - s.downAt >= St ? { ...s, phase: "armed" } : s;
 }
-function fe(s) {
+function be(s) {
   return s.phase === "idle" ? s : { ...s, phase: "cancelled" };
 }
-function vt(s, e) {
-  const t = ze();
+function It(s, e) {
+  const t = ot();
   return s.phase === "idle" || s.phase === "cancelled" || !e ? { hold: t, action: "none" } : s.phase === "armed" ? { hold: t, action: "autoplay" } : { hold: t, action: "spin" };
 }
-function kt(s, e) {
+function Lt(s, e) {
   return s !== null ? s : "spin";
 }
-function At(s, e) {
-  return Math.max(e, s + gt);
+function Pt(s, e) {
+  return Math.max(e, s + xt);
 }
-function St(s, e) {
+function Ct(s, e) {
   return s ? s.modifier === "replace" || s.modifier === "bank" || s.modifier === "wheel" ? s.modifier : s.collectionFlourish ? "collection" : e.remaining <= 0 ? "count" : null : null;
 }
-var ae = typeof globalThis < "u" ? globalThis : typeof window < "u" ? window : typeof global < "u" ? global : typeof self < "u" ? self : {}, Te = {};
-var Ve;
-function xt() {
-  return Ve || (Ve = 1, (function(s) {
+var ce = typeof globalThis < "u" ? globalThis : typeof window < "u" ? window : typeof global < "u" ? global : typeof self < "u" ? self : {}, Ce = {};
+var Ze;
+function Nt() {
+  return Ze || (Ze = 1, (function(s) {
     (function() {
       var e = function() {
         this.init();
@@ -196,9 +200,9 @@ function xt() {
             o.usingWebAudio && o.masterGain.gain.setValueAtTime(n, t.ctx.currentTime);
             for (var l = 0; l < o._howls.length; l++)
               if (!o._howls[l]._webAudio)
-                for (var u = o._howls[l]._getSoundIds(), f = 0; f < u.length; f++) {
-                  var _ = o._howls[l]._soundById(u[f]);
-                  _ && _._node && (_._node.volume = _._volume * n);
+                for (var h = o._howls[l]._getSoundIds(), p = 0; p < h.length; p++) {
+                  var g = o._howls[l]._soundById(h[p]);
+                  g && g._node && (g._node.volume = g._volume * n);
                 }
             return o;
           }
@@ -213,9 +217,9 @@ function xt() {
           o.ctx || b(), o._muted = n, o.usingWebAudio && o.masterGain.gain.setValueAtTime(n ? 0 : o._volume, t.ctx.currentTime);
           for (var l = 0; l < o._howls.length; l++)
             if (!o._howls[l]._webAudio)
-              for (var u = o._howls[l]._getSoundIds(), f = 0; f < u.length; f++) {
-                var _ = o._howls[l]._soundById(u[f]);
-                _ && _._node && (_._node.muted = n ? !0 : _._muted);
+              for (var h = o._howls[l]._getSoundIds(), p = 0; p < h.length; p++) {
+                var g = o._howls[l]._soundById(h[p]);
+                g && g._node && (g._node.muted = n ? !0 : g._muted);
               }
           return o;
         },
@@ -280,9 +284,9 @@ function xt() {
           }
           if (!o || typeof o.canPlayType != "function")
             return n;
-          var l = o.canPlayType("audio/mpeg;").replace(/^no$/, ""), u = n._navigator ? n._navigator.userAgent : "", f = u.match(/OPR\/(\d+)/g), _ = f && parseInt(f[0].split("/")[1], 10) < 33, m = u.indexOf("Safari") !== -1 && u.indexOf("Chrome") === -1, y = u.match(/Version\/(.*?) /), k = m && y && parseInt(y[1], 10) < 15;
+          var l = o.canPlayType("audio/mpeg;").replace(/^no$/, ""), h = n._navigator ? n._navigator.userAgent : "", p = h.match(/OPR\/(\d+)/g), g = p && parseInt(p[0].split("/")[1], 10) < 33, f = h.indexOf("Safari") !== -1 && h.indexOf("Chrome") === -1, w = h.match(/Version\/(.*?) /), v = f && w && parseInt(w[1], 10) < 15;
           return n._codecs = {
-            mp3: !!(!_ && (l || o.canPlayType("audio/mp3;").replace(/^no$/, ""))),
+            mp3: !!(!g && (l || o.canPlayType("audio/mp3;").replace(/^no$/, ""))),
             mpeg: !!l,
             opus: !!o.canPlayType('audio/ogg; codecs="opus"').replace(/^no$/, ""),
             ogg: !!o.canPlayType('audio/ogg; codecs="vorbis"').replace(/^no$/, ""),
@@ -293,8 +297,8 @@ function xt() {
             m4a: !!(o.canPlayType("audio/x-m4a;") || o.canPlayType("audio/m4a;") || o.canPlayType("audio/aac;")).replace(/^no$/, ""),
             m4b: !!(o.canPlayType("audio/x-m4b;") || o.canPlayType("audio/m4b;") || o.canPlayType("audio/aac;")).replace(/^no$/, ""),
             mp4: !!(o.canPlayType("audio/x-mp4;") || o.canPlayType("audio/mp4;") || o.canPlayType("audio/aac;")).replace(/^no$/, ""),
-            weba: !!(!k && o.canPlayType('audio/webm; codecs="vorbis"').replace(/^no$/, "")),
-            webm: !!(!k && o.canPlayType('audio/webm; codecs="vorbis"').replace(/^no$/, "")),
+            weba: !!(!v && o.canPlayType('audio/webm; codecs="vorbis"').replace(/^no$/, "")),
+            webm: !!(!v && o.canPlayType('audio/webm; codecs="vorbis"').replace(/^no$/, "")),
             dolby: !!o.canPlayType('audio/mp4; codecs="ec-3"').replace(/^no$/, ""),
             flac: !!(o.canPlayType("audio/x-flac;") || o.canPlayType("audio/flac;")).replace(/^no$/, "")
           }, n;
@@ -312,22 +316,22 @@ function xt() {
             var o = function(l) {
               for (; n._html5AudioPool.length < n.html5PoolSize; )
                 try {
-                  var u = new Audio();
-                  u._unlocked = !0, n._releaseHtml5Audio(u);
+                  var h = new Audio();
+                  h._unlocked = !0, n._releaseHtml5Audio(h);
                 } catch {
                   n.noAudio = !0;
                   break;
                 }
-              for (var f = 0; f < n._howls.length; f++)
-                if (!n._howls[f]._webAudio)
-                  for (var _ = n._howls[f]._getSoundIds(), m = 0; m < _.length; m++) {
-                    var y = n._howls[f]._soundById(_[m]);
-                    y && y._node && !y._node._unlocked && (y._node._unlocked = !0, y._node.load());
+              for (var p = 0; p < n._howls.length; p++)
+                if (!n._howls[p]._webAudio)
+                  for (var g = n._howls[p]._getSoundIds(), f = 0; f < g.length; f++) {
+                    var w = n._howls[p]._soundById(g[f]);
+                    w && w._node && !w._node._unlocked && (w._node._unlocked = !0, w._node.load());
                   }
               n._autoResume();
-              var k = n.ctx.createBufferSource();
-              k.buffer = n._scratchBuffer, k.connect(n.ctx.destination), typeof k.start > "u" ? k.noteOn(0) : k.start(0), typeof n.ctx.resume == "function" && n.ctx.resume(), k.onended = function() {
-                k.disconnect(0), n._audioUnlocked = !0, document.removeEventListener("touchstart", o, !0), document.removeEventListener("touchend", o, !0), document.removeEventListener("click", o, !0), document.removeEventListener("keydown", o, !0);
+              var v = n.ctx.createBufferSource();
+              v.buffer = n._scratchBuffer, v.connect(n.ctx.destination), typeof v.start > "u" ? v.noteOn(0) : v.start(0), typeof n.ctx.resume == "function" && n.ctx.resume(), v.onended = function() {
+                v.disconnect(0), n._audioUnlocked = !0, document.removeEventListener("touchstart", o, !0), document.removeEventListener("touchend", o, !0), document.removeEventListener("click", o, !0), document.removeEventListener("keydown", o, !0);
                 for (var A = 0; A < n._howls.length; A++)
                   n._howls[A]._emit("unlock");
               };
@@ -374,10 +378,10 @@ function xt() {
             return n._suspendTimer && clearTimeout(n._suspendTimer), n._suspendTimer = setTimeout(function() {
               if (n.autoSuspend) {
                 n._suspendTimer = null, n.state = "suspending";
-                var u = function() {
+                var h = function() {
                   n.state = "suspended", n._resumeAfterSuspend && (delete n._resumeAfterSuspend, n._autoResume());
                 };
-                n.ctx.suspend().then(u, u);
+                n.ctx.suspend().then(h, h);
               }
             }, 3e4), n;
           }
@@ -435,17 +439,17 @@ function xt() {
           }
           typeof n._src == "string" && (n._src = [n._src]);
           for (var l = 0; l < n._src.length; l++) {
-            var u, f;
+            var h, p;
             if (n._format && n._format[l])
-              u = n._format[l];
+              h = n._format[l];
             else {
-              if (f = n._src[l], typeof f != "string") {
+              if (p = n._src[l], typeof p != "string") {
                 n._emit("loaderror", null, "Non-string found in selected audio sources - ignoring.");
                 continue;
               }
-              u = /^data:audio\/([^;,]+);/i.exec(f), u || (u = /\.([^.]+)$/.exec(f.split("?", 1)[0])), u && (u = u[1].toLowerCase());
+              h = /^data:audio\/([^;,]+);/i.exec(p), h || (h = /\.([^.]+)$/.exec(p.split("?", 1)[0])), h && (h = h[1].toLowerCase());
             }
-            if (u || console.warn('No file extension was found. Consider using the "format" property or specify an extension.'), u && t.codecs(u)) {
+            if (h || console.warn('No file extension was found. Consider using the "format" property or specify an extension.'), h && t.codecs(h)) {
               o = n._src[l];
               break;
             }
@@ -454,7 +458,7 @@ function xt() {
             n._emit("loaderror", null, "No codec support for selected audio sources.");
             return;
           }
-          return n._src = o, n._state = "loading", window.location.protocol === "https:" && o.slice(0, 5) === "http:" && (n._html5 = !0, n._webAudio = !1), new i(n), n._webAudio && h(n), n;
+          return n._src = o, n._state = "loading", window.location.protocol === "https:" && o.slice(0, 5) === "http:" && (n._html5 = !0, n._webAudio = !1), new i(n), n._webAudio && u(n), n;
         },
         /**
          * Play a sound or resume previous playback.
@@ -463,86 +467,86 @@ function xt() {
          * @return {Number}          Sound ID.
          */
         play: function(n, o) {
-          var l = this, u = null;
+          var l = this, h = null;
           if (typeof n == "number")
-            u = n, n = null;
+            h = n, n = null;
           else {
             if (typeof n == "string" && l._state === "loaded" && !l._sprite[n])
               return null;
             if (typeof n > "u" && (n = "__default", !l._playLock)) {
-              for (var f = 0, _ = 0; _ < l._sounds.length; _++)
-                l._sounds[_]._paused && !l._sounds[_]._ended && (f++, u = l._sounds[_]._id);
-              f === 1 ? n = null : u = null;
+              for (var p = 0, g = 0; g < l._sounds.length; g++)
+                l._sounds[g]._paused && !l._sounds[g]._ended && (p++, h = l._sounds[g]._id);
+              p === 1 ? n = null : h = null;
             }
           }
-          var m = u ? l._soundById(u) : l._inactiveSound();
-          if (!m)
+          var f = h ? l._soundById(h) : l._inactiveSound();
+          if (!f)
             return null;
-          if (u && !n && (n = m._sprite || "__default"), l._state !== "loaded") {
-            m._sprite = n, m._ended = !1;
-            var y = m._id;
+          if (h && !n && (n = f._sprite || "__default"), l._state !== "loaded") {
+            f._sprite = n, f._ended = !1;
+            var w = f._id;
             return l._queue.push({
               event: "play",
               action: function() {
-                l.play(y);
+                l.play(w);
               }
-            }), y;
+            }), w;
           }
-          if (u && !m._paused)
-            return o || l._loadQueue("play"), m._id;
+          if (h && !f._paused)
+            return o || l._loadQueue("play"), f._id;
           l._webAudio && t._autoResume();
-          var k = Math.max(0, m._seek > 0 ? m._seek : l._sprite[n][0] / 1e3), A = Math.max(0, (l._sprite[n][0] + l._sprite[n][1]) / 1e3 - k), E = A * 1e3 / Math.abs(m._rate), B = l._sprite[n][0] / 1e3, O = (l._sprite[n][0] + l._sprite[n][1]) / 1e3;
-          m._sprite = n, m._ended = !1;
-          var q = function() {
-            m._paused = !1, m._seek = k, m._start = B, m._stop = O, m._loop = !!(m._loop || l._sprite[n][2]);
+          var v = Math.max(0, f._seek > 0 ? f._seek : l._sprite[n][0] / 1e3), A = Math.max(0, (l._sprite[n][0] + l._sprite[n][1]) / 1e3 - v), M = A * 1e3 / Math.abs(f._rate), E = l._sprite[n][0] / 1e3, F = (l._sprite[n][0] + l._sprite[n][1]) / 1e3;
+          f._sprite = n, f._ended = !1;
+          var R = function() {
+            f._paused = !1, f._seek = v, f._start = E, f._stop = F, f._loop = !!(f._loop || l._sprite[n][2]);
           };
-          if (k >= O) {
-            l._ended(m);
+          if (v >= F) {
+            l._ended(f);
             return;
           }
-          var x = m._node;
+          var x = f._node;
           if (l._webAudio) {
-            var Z = function() {
-              l._playLock = !1, q(), l._refreshBuffer(m);
-              var C = m._muted || l._muted ? 0 : m._volume;
-              x.gain.setValueAtTime(C, t.ctx.currentTime), m._playStart = t.ctx.currentTime, typeof x.bufferSource.start > "u" ? m._loop ? x.bufferSource.noteGrainOn(0, k, 86400) : x.bufferSource.noteGrainOn(0, k, A) : m._loop ? x.bufferSource.start(0, k, 86400) : x.bufferSource.start(0, k, A), E !== 1 / 0 && (l._endTimers[m._id] = setTimeout(l._ended.bind(l, m), E)), o || setTimeout(function() {
-                l._emit("play", m._id), l._loadQueue();
+            var Q = function() {
+              l._playLock = !1, R(), l._refreshBuffer(f);
+              var C = f._muted || l._muted ? 0 : f._volume;
+              x.gain.setValueAtTime(C, t.ctx.currentTime), f._playStart = t.ctx.currentTime, typeof x.bufferSource.start > "u" ? f._loop ? x.bufferSource.noteGrainOn(0, v, 86400) : x.bufferSource.noteGrainOn(0, v, A) : f._loop ? x.bufferSource.start(0, v, 86400) : x.bufferSource.start(0, v, A), M !== 1 / 0 && (l._endTimers[f._id] = setTimeout(l._ended.bind(l, f), M)), o || setTimeout(function() {
+                l._emit("play", f._id), l._loadQueue();
               }, 0);
             };
-            t.state === "running" && t.ctx.state !== "interrupted" ? Z() : (l._playLock = !0, l.once("resume", Z), l._clearTimer(m._id));
+            t.state === "running" && t.ctx.state !== "interrupted" ? Q() : (l._playLock = !0, l.once("resume", Q), l._clearTimer(f._id));
           } else {
             var Y = function() {
-              x.currentTime = k, x.muted = m._muted || l._muted || t._muted || x.muted, x.volume = m._volume * t.volume(), x.playbackRate = m._rate;
+              x.currentTime = v, x.muted = f._muted || l._muted || t._muted || x.muted, x.volume = f._volume * t.volume(), x.playbackRate = f._rate;
               try {
                 var C = x.play();
-                if (C && typeof Promise < "u" && (C instanceof Promise || typeof C.then == "function") ? (l._playLock = !0, q(), C.then(function() {
-                  l._playLock = !1, x._unlocked = !0, o ? l._loadQueue() : l._emit("play", m._id);
+                if (C && typeof Promise < "u" && (C instanceof Promise || typeof C.then == "function") ? (l._playLock = !0, R(), C.then(function() {
+                  l._playLock = !1, x._unlocked = !0, o ? l._loadQueue() : l._emit("play", f._id);
                 }).catch(function() {
-                  l._playLock = !1, l._emit("playerror", m._id, "Playback was unable to start. This is most commonly an issue on mobile devices and Chrome where playback was not within a user interaction."), m._ended = !0, m._paused = !0;
-                })) : o || (l._playLock = !1, q(), l._emit("play", m._id)), x.playbackRate = m._rate, x.paused) {
-                  l._emit("playerror", m._id, "Playback was unable to start. This is most commonly an issue on mobile devices and Chrome where playback was not within a user interaction.");
+                  l._playLock = !1, l._emit("playerror", f._id, "Playback was unable to start. This is most commonly an issue on mobile devices and Chrome where playback was not within a user interaction."), f._ended = !0, f._paused = !0;
+                })) : o || (l._playLock = !1, R(), l._emit("play", f._id)), x.playbackRate = f._rate, x.paused) {
+                  l._emit("playerror", f._id, "Playback was unable to start. This is most commonly an issue on mobile devices and Chrome where playback was not within a user interaction.");
                   return;
                 }
-                n !== "__default" || m._loop ? l._endTimers[m._id] = setTimeout(l._ended.bind(l, m), E) : (l._endTimers[m._id] = function() {
-                  l._ended(m), x.removeEventListener("ended", l._endTimers[m._id], !1);
-                }, x.addEventListener("ended", l._endTimers[m._id], !1));
-              } catch (F) {
-                l._emit("playerror", m._id, F);
+                n !== "__default" || f._loop ? l._endTimers[f._id] = setTimeout(l._ended.bind(l, f), M) : (l._endTimers[f._id] = function() {
+                  l._ended(f), x.removeEventListener("ended", l._endTimers[f._id], !1);
+                }, x.addEventListener("ended", l._endTimers[f._id], !1));
+              } catch (L) {
+                l._emit("playerror", f._id, L);
               }
             };
             x.src === "data:audio/wav;base64,UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA" && (x.src = l._src, x.load());
-            var P = window && window.ejecta || !x.readyState && t._navigator.isCocoonJS;
-            if (x.readyState >= 3 || P)
+            var K = window && window.ejecta || !x.readyState && t._navigator.isCocoonJS;
+            if (x.readyState >= 3 || K)
               Y();
             else {
               l._playLock = !0, l._state = "loading";
               var J = function() {
                 l._state = "loaded", Y(), x.removeEventListener(t._canPlayEvent, J, !1);
               };
-              x.addEventListener(t._canPlayEvent, J, !1), l._clearTimer(m._id);
+              x.addEventListener(t._canPlayEvent, J, !1), l._clearTimer(f._id);
             }
           }
-          return m._id;
+          return f._id;
         },
         /**
          * Pause playback and save current position.
@@ -558,16 +562,16 @@ function xt() {
                 o.pause(n);
               }
             }), o;
-          for (var l = o._getSoundIds(n), u = 0; u < l.length; u++) {
-            o._clearTimer(l[u]);
-            var f = o._soundById(l[u]);
-            if (f && !f._paused && (f._seek = o.seek(l[u]), f._rateSeek = 0, f._paused = !0, o._stopFade(l[u]), f._node))
+          for (var l = o._getSoundIds(n), h = 0; h < l.length; h++) {
+            o._clearTimer(l[h]);
+            var p = o._soundById(l[h]);
+            if (p && !p._paused && (p._seek = o.seek(l[h]), p._rateSeek = 0, p._paused = !0, o._stopFade(l[h]), p._node))
               if (o._webAudio) {
-                if (!f._node.bufferSource)
+                if (!p._node.bufferSource)
                   continue;
-                typeof f._node.bufferSource.stop > "u" ? f._node.bufferSource.noteOff(0) : f._node.bufferSource.stop(0), o._cleanBuffer(f._node);
-              } else (!isNaN(f._node.duration) || f._node.duration === 1 / 0) && f._node.pause();
-            arguments[1] || o._emit("pause", f ? f._id : null);
+                typeof p._node.bufferSource.stop > "u" ? p._node.bufferSource.noteOff(0) : p._node.bufferSource.stop(0), o._cleanBuffer(p._node);
+              } else (!isNaN(p._node.duration) || p._node.duration === 1 / 0) && p._node.pause();
+            arguments[1] || o._emit("pause", p ? p._id : null);
           }
           return o;
         },
@@ -586,10 +590,10 @@ function xt() {
                 l.stop(n);
               }
             }), l;
-          for (var u = l._getSoundIds(n), f = 0; f < u.length; f++) {
-            l._clearTimer(u[f]);
-            var _ = l._soundById(u[f]);
-            _ && (_._seek = _._start || 0, _._rateSeek = 0, _._paused = !0, _._ended = !0, l._stopFade(u[f]), _._node && (l._webAudio ? _._node.bufferSource && (typeof _._node.bufferSource.stop > "u" ? _._node.bufferSource.noteOff(0) : _._node.bufferSource.stop(0), l._cleanBuffer(_._node)) : (!isNaN(_._node.duration) || _._node.duration === 1 / 0) && (_._node.currentTime = _._start || 0, _._node.pause(), _._node.duration === 1 / 0 && l._clearSound(_._node))), o || l._emit("stop", _._id));
+          for (var h = l._getSoundIds(n), p = 0; p < h.length; p++) {
+            l._clearTimer(h[p]);
+            var g = l._soundById(h[p]);
+            g && (g._seek = g._start || 0, g._rateSeek = 0, g._paused = !0, g._ended = !0, l._stopFade(h[p]), g._node && (l._webAudio ? g._node.bufferSource && (typeof g._node.bufferSource.stop > "u" ? g._node.bufferSource.noteOff(0) : g._node.bufferSource.stop(0), l._cleanBuffer(g._node)) : (!isNaN(g._node.duration) || g._node.duration === 1 / 0) && (g._node.currentTime = g._start || 0, g._node.pause(), g._node.duration === 1 / 0 && l._clearSound(g._node))), o || l._emit("stop", g._id));
           }
           return l;
         },
@@ -613,9 +617,9 @@ function xt() {
               l._muted = n;
             else
               return l._muted;
-          for (var u = l._getSoundIds(o), f = 0; f < u.length; f++) {
-            var _ = l._soundById(u[f]);
-            _ && (_._muted = n, _._interval && l._stopFade(_._id), l._webAudio && _._node ? _._node.gain.setValueAtTime(n ? 0 : _._volume, t.ctx.currentTime) : _._node && (_._node.muted = t._muted ? !0 : n), l._emit("mute", _._id));
+          for (var h = l._getSoundIds(o), p = 0; p < h.length; p++) {
+            var g = l._soundById(h[p]);
+            g && (g._muted = n, g._interval && l._stopFade(g._id), l._webAudio && g._node ? g._node.gain.setValueAtTime(n ? 0 : g._volume, t.ctx.currentTime) : g._node && (g._node.muted = t._muted ? !0 : n), l._emit("mute", g._id));
           }
           return l;
         },
@@ -628,14 +632,14 @@ function xt() {
          * @return {Howl/Number} Returns self or current volume.
          */
         volume: function() {
-          var n = this, o = arguments, l, u;
+          var n = this, o = arguments, l, h;
           if (o.length === 0)
             return n._volume;
           if (o.length === 1 || o.length === 2 && typeof o[1] > "u") {
-            var f = n._getSoundIds(), _ = f.indexOf(o[0]);
-            _ >= 0 ? u = parseInt(o[0], 10) : l = parseFloat(o[0]);
-          } else o.length >= 2 && (l = parseFloat(o[0]), u = parseInt(o[1], 10));
-          var m;
+            var p = n._getSoundIds(), g = p.indexOf(o[0]);
+            g >= 0 ? h = parseInt(o[0], 10) : l = parseFloat(o[0]);
+          } else o.length >= 2 && (l = parseFloat(o[0]), h = parseInt(o[1], 10));
+          var f;
           if (typeof l < "u" && l >= 0 && l <= 1) {
             if (n._state !== "loaded" || n._playLock)
               return n._queue.push({
@@ -644,11 +648,11 @@ function xt() {
                   n.volume.apply(n, o);
                 }
               }), n;
-            typeof u > "u" && (n._volume = l), u = n._getSoundIds(u);
-            for (var y = 0; y < u.length; y++)
-              m = n._soundById(u[y]), m && (m._volume = l, o[2] || n._stopFade(u[y]), n._webAudio && m._node && !m._muted ? m._node.gain.setValueAtTime(l, t.ctx.currentTime) : m._node && !m._muted && (m._node.volume = l * t.volume()), n._emit("volume", m._id));
+            typeof h > "u" && (n._volume = l), h = n._getSoundIds(h);
+            for (var w = 0; w < h.length; w++)
+              f = n._soundById(h[w]), f && (f._volume = l, o[2] || n._stopFade(h[w]), n._webAudio && f._node && !f._muted ? f._node.gain.setValueAtTime(l, t.ctx.currentTime) : f._node && !f._muted && (f._node.volume = l * t.volume()), n._emit("volume", f._id));
           } else
-            return m = u ? n._soundById(u) : n._sounds[0], m ? m._volume : 0;
+            return f = h ? n._soundById(h) : n._sounds[0], f ? f._volume : 0;
           return n;
         },
         /**
@@ -659,27 +663,27 @@ function xt() {
          * @param  {Number} id   The sound id (omit to fade all sounds).
          * @return {Howl}
          */
-        fade: function(n, o, l, u) {
-          var f = this;
-          if (f._state !== "loaded" || f._playLock)
-            return f._queue.push({
+        fade: function(n, o, l, h) {
+          var p = this;
+          if (p._state !== "loaded" || p._playLock)
+            return p._queue.push({
               event: "fade",
               action: function() {
-                f.fade(n, o, l, u);
+                p.fade(n, o, l, h);
               }
-            }), f;
-          n = Math.min(Math.max(0, parseFloat(n)), 1), o = Math.min(Math.max(0, parseFloat(o)), 1), l = parseFloat(l), f.volume(n, u);
-          for (var _ = f._getSoundIds(u), m = 0; m < _.length; m++) {
-            var y = f._soundById(_[m]);
-            if (y) {
-              if (u || f._stopFade(_[m]), f._webAudio && !y._muted) {
-                var k = t.ctx.currentTime, A = k + l / 1e3;
-                y._volume = n, y._node.gain.setValueAtTime(n, k), y._node.gain.linearRampToValueAtTime(o, A);
+            }), p;
+          n = Math.min(Math.max(0, parseFloat(n)), 1), o = Math.min(Math.max(0, parseFloat(o)), 1), l = parseFloat(l), p.volume(n, h);
+          for (var g = p._getSoundIds(h), f = 0; f < g.length; f++) {
+            var w = p._soundById(g[f]);
+            if (w) {
+              if (h || p._stopFade(g[f]), p._webAudio && !w._muted) {
+                var v = t.ctx.currentTime, A = v + l / 1e3;
+                w._volume = n, w._node.gain.setValueAtTime(n, v), w._node.gain.linearRampToValueAtTime(o, A);
               }
-              f._startFadeInterval(y, n, o, l, _[m], typeof u > "u");
+              p._startFadeInterval(w, n, o, l, g[f], typeof h > "u");
             }
           }
-          return f;
+          return p;
         },
         /**
          * Starts the internal interval to fade a sound.
@@ -690,12 +694,12 @@ function xt() {
          * @param  {Number} id   The sound id to fade.
          * @param  {Boolean} isGroup   If true, set the volume on the group.
          */
-        _startFadeInterval: function(n, o, l, u, f, _) {
-          var m = this, y = o, k = l - o, A = Math.abs(k / 0.01), E = Math.max(4, A > 0 ? u / A : u), B = Date.now();
+        _startFadeInterval: function(n, o, l, h, p, g) {
+          var f = this, w = o, v = l - o, A = Math.abs(v / 0.01), M = Math.max(4, A > 0 ? h / A : h), E = Date.now();
           n._fadeTo = l, n._interval = setInterval(function() {
-            var O = (Date.now() - B) / u;
-            B = Date.now(), y += k * O, y = Math.round(y * 100) / 100, k < 0 ? y = Math.max(l, y) : y = Math.min(l, y), m._webAudio ? n._volume = y : m.volume(y, n._id, !0), _ && (m._volume = y), (l < o && y <= l || l > o && y >= l) && (clearInterval(n._interval), n._interval = null, n._fadeTo = null, m.volume(l, n._id), m._emit("fade", n._id));
-          }, E);
+            var F = (Date.now() - E) / h;
+            E = Date.now(), w += v * F, w = Math.round(w * 100) / 100, v < 0 ? w = Math.max(l, w) : w = Math.min(l, w), f._webAudio ? n._volume = w : f.volume(w, n._id, !0), g && (f._volume = w), (l < o && w <= l || l > o && w >= l) && (clearInterval(n._interval), n._interval = null, n._fadeTo = null, f.volume(l, n._id), f._emit("fade", n._id));
+          }, M);
         },
         /**
          * Internal method that stops the currently playing fade when
@@ -716,17 +720,17 @@ function xt() {
          * @return {Howl/Boolean} Returns self or current loop value.
          */
         loop: function() {
-          var n = this, o = arguments, l, u, f;
+          var n = this, o = arguments, l, h, p;
           if (o.length === 0)
             return n._loop;
           if (o.length === 1)
             if (typeof o[0] == "boolean")
               l = o[0], n._loop = l;
             else
-              return f = n._soundById(parseInt(o[0], 10)), f ? f._loop : !1;
-          else o.length === 2 && (l = o[0], u = parseInt(o[1], 10));
-          for (var _ = n._getSoundIds(u), m = 0; m < _.length; m++)
-            f = n._soundById(_[m]), f && (f._loop = l, n._webAudio && f._node && f._node.bufferSource && (f._node.bufferSource.loop = l, l && (f._node.bufferSource.loopStart = f._start || 0, f._node.bufferSource.loopEnd = f._stop, n.playing(_[m]) && (n.pause(_[m], !0), n.play(_[m], !0)))));
+              return p = n._soundById(parseInt(o[0], 10)), p ? p._loop : !1;
+          else o.length === 2 && (l = o[0], h = parseInt(o[1], 10));
+          for (var g = n._getSoundIds(h), f = 0; f < g.length; f++)
+            p = n._soundById(g[f]), p && (p._loop = l, n._webAudio && p._node && p._node.bufferSource && (p._node.bufferSource.loop = l, l && (p._node.bufferSource.loopStart = p._start || 0, p._node.bufferSource.loopEnd = p._stop, n.playing(g[f]) && (n.pause(g[f], !0), n.play(g[f], !0)))));
           return n;
         },
         /**
@@ -738,14 +742,14 @@ function xt() {
          * @return {Howl/Number} Returns self or the current playback rate.
          */
         rate: function() {
-          var n = this, o = arguments, l, u;
+          var n = this, o = arguments, l, h;
           if (o.length === 0)
-            u = n._sounds[0]._id;
+            h = n._sounds[0]._id;
           else if (o.length === 1) {
-            var f = n._getSoundIds(), _ = f.indexOf(o[0]);
-            _ >= 0 ? u = parseInt(o[0], 10) : l = parseFloat(o[0]);
-          } else o.length === 2 && (l = parseFloat(o[0]), u = parseInt(o[1], 10));
-          var m;
+            var p = n._getSoundIds(), g = p.indexOf(o[0]);
+            g >= 0 ? h = parseInt(o[0], 10) : l = parseFloat(o[0]);
+          } else o.length === 2 && (l = parseFloat(o[0]), h = parseInt(o[1], 10));
+          var f;
           if (typeof l == "number") {
             if (n._state !== "loaded" || n._playLock)
               return n._queue.push({
@@ -754,15 +758,15 @@ function xt() {
                   n.rate.apply(n, o);
                 }
               }), n;
-            typeof u > "u" && (n._rate = l), u = n._getSoundIds(u);
-            for (var y = 0; y < u.length; y++)
-              if (m = n._soundById(u[y]), m) {
-                n.playing(u[y]) && (m._rateSeek = n.seek(u[y]), m._playStart = n._webAudio ? t.ctx.currentTime : m._playStart), m._rate = l, n._webAudio && m._node && m._node.bufferSource ? m._node.bufferSource.playbackRate.setValueAtTime(l, t.ctx.currentTime) : m._node && (m._node.playbackRate = l);
-                var k = n.seek(u[y]), A = (n._sprite[m._sprite][0] + n._sprite[m._sprite][1]) / 1e3 - k, E = A * 1e3 / Math.abs(m._rate);
-                (n._endTimers[u[y]] || !m._paused) && (n._clearTimer(u[y]), n._endTimers[u[y]] = setTimeout(n._ended.bind(n, m), E)), n._emit("rate", m._id);
+            typeof h > "u" && (n._rate = l), h = n._getSoundIds(h);
+            for (var w = 0; w < h.length; w++)
+              if (f = n._soundById(h[w]), f) {
+                n.playing(h[w]) && (f._rateSeek = n.seek(h[w]), f._playStart = n._webAudio ? t.ctx.currentTime : f._playStart), f._rate = l, n._webAudio && f._node && f._node.bufferSource ? f._node.bufferSource.playbackRate.setValueAtTime(l, t.ctx.currentTime) : f._node && (f._node.playbackRate = l);
+                var v = n.seek(h[w]), A = (n._sprite[f._sprite][0] + n._sprite[f._sprite][1]) / 1e3 - v, M = A * 1e3 / Math.abs(f._rate);
+                (n._endTimers[h[w]] || !f._paused) && (n._clearTimer(h[w]), n._endTimers[h[w]] = setTimeout(n._ended.bind(n, f), M)), n._emit("rate", f._id);
               }
           } else
-            return m = n._soundById(u), m ? m._rate : n._rate;
+            return f = n._soundById(h), f ? f._rate : n._rate;
           return n;
         },
         /**
@@ -774,14 +778,14 @@ function xt() {
          * @return {Howl/Number} Returns self or the current seek position.
          */
         seek: function() {
-          var n = this, o = arguments, l, u;
+          var n = this, o = arguments, l, h;
           if (o.length === 0)
-            n._sounds.length && (u = n._sounds[0]._id);
+            n._sounds.length && (h = n._sounds[0]._id);
           else if (o.length === 1) {
-            var f = n._getSoundIds(), _ = f.indexOf(o[0]);
-            _ >= 0 ? u = parseInt(o[0], 10) : n._sounds.length && (u = n._sounds[0]._id, l = parseFloat(o[0]));
-          } else o.length === 2 && (l = parseFloat(o[0]), u = parseInt(o[1], 10));
-          if (typeof u > "u")
+            var p = n._getSoundIds(), g = p.indexOf(o[0]);
+            g >= 0 ? h = parseInt(o[0], 10) : n._sounds.length && (h = n._sounds[0]._id, l = parseFloat(o[0]));
+          } else o.length === 2 && (l = parseFloat(o[0]), h = parseInt(o[1], 10));
+          if (typeof h > "u")
             return 0;
           if (typeof l == "number" && (n._state !== "loaded" || n._playLock))
             return n._queue.push({
@@ -790,26 +794,26 @@ function xt() {
                 n.seek.apply(n, o);
               }
             }), n;
-          var m = n._soundById(u);
-          if (m)
+          var f = n._soundById(h);
+          if (f)
             if (typeof l == "number" && l >= 0) {
-              var y = n.playing(u);
-              y && n.pause(u, !0), m._seek = l, m._ended = !1, n._clearTimer(u), !n._webAudio && m._node && !isNaN(m._node.duration) && (m._node.currentTime = l);
-              var k = function() {
-                y && n.play(u, !0), n._emit("seek", u);
+              var w = n.playing(h);
+              w && n.pause(h, !0), f._seek = l, f._ended = !1, n._clearTimer(h), !n._webAudio && f._node && !isNaN(f._node.duration) && (f._node.currentTime = l);
+              var v = function() {
+                w && n.play(h, !0), n._emit("seek", h);
               };
-              if (y && !n._webAudio) {
+              if (w && !n._webAudio) {
                 var A = function() {
-                  n._playLock ? setTimeout(A, 0) : k();
+                  n._playLock ? setTimeout(A, 0) : v();
                 };
                 setTimeout(A, 0);
               } else
-                k();
+                v();
             } else if (n._webAudio) {
-              var E = n.playing(u) ? t.ctx.currentTime - m._playStart : 0, B = m._rateSeek ? m._rateSeek - m._seek : 0;
-              return m._seek + (B + E * Math.abs(m._rate));
+              var M = n.playing(h) ? t.ctx.currentTime - f._playStart : 0, E = f._rateSeek ? f._rateSeek - f._seek : 0;
+              return f._seek + (E + M * Math.abs(f._rate));
             } else
-              return m._node.currentTime;
+              return f._node.currentTime;
           return n;
         },
         /**
@@ -823,8 +827,8 @@ function xt() {
             var l = o._soundById(n);
             return l ? !l._paused : !1;
           }
-          for (var u = 0; u < o._sounds.length; u++)
-            if (!o._sounds[u]._paused)
+          for (var h = 0; h < o._sounds.length; h++)
+            if (!o._sounds[h]._paused)
               return !0;
           return !1;
         },
@@ -834,8 +838,8 @@ function xt() {
          * @return {Number} Audio duration in seconds.
          */
         duration: function(n) {
-          var o = this, l = o._duration, u = o._soundById(n);
-          return u && (l = o._sprite[u._sprite][1] / 1e3), l;
+          var o = this, l = o._duration, h = o._soundById(n);
+          return h && (l = o._sprite[h._sprite][1] / 1e3), l;
         },
         /**
          * Returns the current loaded state of this Howl.
@@ -851,15 +855,15 @@ function xt() {
         unload: function() {
           for (var n = this, o = n._sounds, l = 0; l < o.length; l++)
             o[l]._paused || n.stop(o[l]._id), n._webAudio || (n._clearSound(o[l]._node), o[l]._node.removeEventListener("error", o[l]._errorFn, !1), o[l]._node.removeEventListener(t._canPlayEvent, o[l]._loadFn, !1), o[l]._node.removeEventListener("ended", o[l]._endFn, !1), t._releaseHtml5Audio(o[l]._node)), delete o[l]._node, n._clearTimer(o[l]._id);
-          var u = t._howls.indexOf(n);
-          u >= 0 && t._howls.splice(u, 1);
-          var f = !0;
+          var h = t._howls.indexOf(n);
+          h >= 0 && t._howls.splice(h, 1);
+          var p = !0;
           for (l = 0; l < t._howls.length; l++)
             if (t._howls[l]._src === n._src || n._src.indexOf(t._howls[l]._src) >= 0) {
-              f = !1;
+              p = !1;
               break;
             }
-          return a && f && delete a[n._src], t.noAudio = !1, n._state = "unloaded", n._sounds = [], n = null, null;
+          return a && p && delete a[n._src], t.noAudio = !1, n._state = "unloaded", n._sounds = [], n = null, null;
         },
         /**
          * Listen to a custom event.
@@ -869,9 +873,9 @@ function xt() {
          * @param  {Number}   once  (INTERNAL) Marks event to fire only once.
          * @return {Howl}
          */
-        on: function(n, o, l, u) {
-          var f = this, _ = f["_on" + n];
-          return typeof o == "function" && _.push(u ? { id: l, fn: o, once: u } : { id: l, fn: o }), f;
+        on: function(n, o, l, h) {
+          var p = this, g = p["_on" + n];
+          return typeof o == "function" && g.push(h ? { id: l, fn: o, once: h } : { id: l, fn: o }), p;
         },
         /**
          * Remove a custom event. Call without parameters to remove all events.
@@ -881,23 +885,23 @@ function xt() {
          * @return {Howl}
          */
         off: function(n, o, l) {
-          var u = this, f = u["_on" + n], _ = 0;
+          var h = this, p = h["_on" + n], g = 0;
           if (typeof o == "number" && (l = o, o = null), o || l)
-            for (_ = 0; _ < f.length; _++) {
-              var m = l === f[_].id;
-              if (o === f[_].fn && m || !o && m) {
-                f.splice(_, 1);
+            for (g = 0; g < p.length; g++) {
+              var f = l === p[g].id;
+              if (o === p[g].fn && f || !o && f) {
+                p.splice(g, 1);
                 break;
               }
             }
           else if (n)
-            u["_on" + n] = [];
+            h["_on" + n] = [];
           else {
-            var y = Object.keys(u);
-            for (_ = 0; _ < y.length; _++)
-              y[_].indexOf("_on") === 0 && Array.isArray(u[y[_]]) && (u[y[_]] = []);
+            var w = Object.keys(h);
+            for (g = 0; g < w.length; g++)
+              w[g].indexOf("_on") === 0 && Array.isArray(h[w[g]]) && (h[w[g]] = []);
           }
-          return u;
+          return h;
         },
         /**
          * Listen to a custom event and remove it once fired.
@@ -907,8 +911,8 @@ function xt() {
          * @return {Howl}
          */
         once: function(n, o, l) {
-          var u = this;
-          return u.on(n, o, l, 1), u;
+          var h = this;
+          return h.on(n, o, l, 1), h;
         },
         /**
          * Emit all events of a specific type and pass the sound id.
@@ -918,11 +922,11 @@ function xt() {
          * @return {Howl}
          */
         _emit: function(n, o, l) {
-          for (var u = this, f = u["_on" + n], _ = f.length - 1; _ >= 0; _--)
-            (!f[_].id || f[_].id === o || n === "load") && (setTimeout(function(m) {
-              m.call(this, o, l);
-            }.bind(u, f[_].fn), 0), f[_].once && u.off(n, f[_].fn, f[_].id));
-          return u._loadQueue(n), u;
+          for (var h = this, p = h["_on" + n], g = p.length - 1; g >= 0; g--)
+            (!p[g].id || p[g].id === o || n === "load") && (setTimeout(function(f) {
+              f.call(this, o, l);
+            }.bind(h, p[g].fn), 0), p[g].once && h.off(n, p[g].fn, p[g].id));
+          return h._loadQueue(n), h;
         },
         /**
          * Queue of actions initiated before the sound has loaded.
@@ -947,13 +951,13 @@ function xt() {
           var o = this, l = n._sprite;
           if (!o._webAudio && n._node && !n._node.paused && !n._node.ended && n._node.currentTime < n._stop)
             return setTimeout(o._ended.bind(o, n), 100), o;
-          var u = !!(n._loop || o._sprite[l][2]);
-          if (o._emit("end", n._id), !o._webAudio && u && o.stop(n._id, !0).play(n._id), o._webAudio && u) {
+          var h = !!(n._loop || o._sprite[l][2]);
+          if (o._emit("end", n._id), !o._webAudio && h && o.stop(n._id, !0).play(n._id), o._webAudio && h) {
             o._emit("play", n._id), n._seek = n._start || 0, n._rateSeek = 0, n._playStart = t.ctx.currentTime;
-            var f = (n._stop - n._start) * 1e3 / Math.abs(n._rate);
-            o._endTimers[n._id] = setTimeout(o._ended.bind(o, n), f);
+            var p = (n._stop - n._start) * 1e3 / Math.abs(n._rate);
+            o._endTimers[n._id] = setTimeout(o._ended.bind(o, n), p);
           }
-          return o._webAudio && !u && (n._paused = !0, n._ended = !0, n._seek = n._start || 0, n._rateSeek = 0, o._clearTimer(n._id), o._cleanBuffer(n._node), t._autoSuspend()), !o._webAudio && !u && o.stop(n._id, !0), o;
+          return o._webAudio && !h && (n._paused = !0, n._ended = !0, n._seek = n._start || 0, n._rateSeek = 0, o._clearTimer(n._id), o._cleanBuffer(n._node), t._autoSuspend()), !o._webAudio && !h && o.stop(n._id, !0), o;
         },
         /**
          * Clear the end timer for a sound playback.
@@ -1000,14 +1004,14 @@ function xt() {
          * Drain excess inactive sounds from the pool.
          */
         _drain: function() {
-          var n = this, o = n._pool, l = 0, u = 0;
+          var n = this, o = n._pool, l = 0, h = 0;
           if (!(n._sounds.length < o)) {
-            for (u = 0; u < n._sounds.length; u++)
-              n._sounds[u]._ended && l++;
-            for (u = n._sounds.length - 1; u >= 0; u--) {
+            for (h = 0; h < n._sounds.length; h++)
+              n._sounds[h]._ended && l++;
+            for (h = n._sounds.length - 1; h >= 0; h--) {
               if (l <= o)
                 return;
-              n._sounds[u]._ended && (n._webAudio && n._sounds[u]._node && n._sounds[u]._node.disconnect(0), n._sounds.splice(u, 1), l--);
+              n._sounds[h]._ended && (n._webAudio && n._sounds[h]._node && n._sounds[h]._node.disconnect(0), n._sounds.splice(h, 1), l--);
             }
           }
         },
@@ -1019,8 +1023,8 @@ function xt() {
         _getSoundIds: function(n) {
           var o = this;
           if (typeof n > "u") {
-            for (var l = [], u = 0; u < o._sounds.length; u++)
-              l.push(o._sounds[u]._id);
+            for (var l = [], h = 0; h < o._sounds.length; h++)
+              l.push(o._sounds[h]._id);
             return l;
           } else
             return [n];
@@ -1109,45 +1113,45 @@ function xt() {
           o._duration === 1 / 0 && (o._duration = Math.ceil(n._node.duration * 10) / 10, o._sprite.__default[1] === 1 / 0 && (o._sprite.__default[1] = o._duration * 1e3), o._ended(n)), n._node.removeEventListener("ended", n._endFn, !1);
         }
       };
-      var a = {}, h = function(n) {
+      var a = {}, u = function(n) {
         var o = n._src;
         if (a[o]) {
-          n._duration = a[o].duration, p(n);
+          n._duration = a[o].duration, m(n);
           return;
         }
         if (/^data:[^;]+;base64,/.test(o)) {
-          for (var l = atob(o.split(",")[1]), u = new Uint8Array(l.length), f = 0; f < l.length; ++f)
-            u[f] = l.charCodeAt(f);
-          d(u.buffer, n);
+          for (var l = atob(o.split(",")[1]), h = new Uint8Array(l.length), p = 0; p < l.length; ++p)
+            h[p] = l.charCodeAt(p);
+          c(h.buffer, n);
         } else {
-          var _ = new XMLHttpRequest();
-          _.open(n._xhr.method, o, !0), _.withCredentials = n._xhr.withCredentials, _.responseType = "arraybuffer", n._xhr.headers && Object.keys(n._xhr.headers).forEach(function(m) {
-            _.setRequestHeader(m, n._xhr.headers[m]);
-          }), _.onload = function() {
-            var m = (_.status + "")[0];
-            if (m !== "0" && m !== "2" && m !== "3") {
-              n._emit("loaderror", null, "Failed loading audio file with status: " + _.status + ".");
+          var g = new XMLHttpRequest();
+          g.open(n._xhr.method, o, !0), g.withCredentials = n._xhr.withCredentials, g.responseType = "arraybuffer", n._xhr.headers && Object.keys(n._xhr.headers).forEach(function(f) {
+            g.setRequestHeader(f, n._xhr.headers[f]);
+          }), g.onload = function() {
+            var f = (g.status + "")[0];
+            if (f !== "0" && f !== "2" && f !== "3") {
+              n._emit("loaderror", null, "Failed loading audio file with status: " + g.status + ".");
               return;
             }
-            d(_.response, n);
-          }, _.onerror = function() {
+            c(g.response, n);
+          }, g.onerror = function() {
             n._webAudio && (n._html5 = !0, n._webAudio = !1, n._sounds = [], delete a[o], n.load());
-          }, c(_);
+          }, d(g);
         }
-      }, c = function(n) {
+      }, d = function(n) {
         try {
           n.send();
         } catch {
           n.onerror();
         }
-      }, d = function(n, o) {
+      }, c = function(n, o) {
         var l = function() {
           o._emit("loaderror", null, "Decoding audio data failed.");
-        }, u = function(f) {
-          f && o._sounds.length > 0 ? (a[o._src] = f, p(o, f)) : l();
+        }, h = function(p) {
+          p && o._sounds.length > 0 ? (a[o._src] = p, m(o, p)) : l();
         };
-        typeof Promise < "u" && t.ctx.decodeAudioData.length === 1 ? t.ctx.decodeAudioData(n).then(u).catch(l) : t.ctx.decodeAudioData(n, u, l);
-      }, p = function(n, o) {
+        typeof Promise < "u" && t.ctx.decodeAudioData.length === 1 ? t.ctx.decodeAudioData(n).then(h).catch(l) : t.ctx.decodeAudioData(n, h, l);
+      }, m = function(n, o) {
         o && !n._duration && (n._duration = o.duration), Object.keys(n._sprite).length === 0 && (n._sprite = { __default: [0, n._duration * 1e3] }), n._state !== "loaded" && (n._state = "loaded", n._emit("load"), n._loadQueue());
       }, b = function() {
         if (t.usingWebAudio) {
@@ -1159,13 +1163,13 @@ function xt() {
           t.ctx || (t.usingWebAudio = !1);
           var n = /iP(hone|od|ad)/.test(t._navigator && t._navigator.platform), o = t._navigator && t._navigator.appVersion.match(/OS (\d+)_(\d+)_?(\d+)?/), l = o ? parseInt(o[1], 10) : null;
           if (n && l && l < 9) {
-            var u = /safari/.test(t._navigator && t._navigator.userAgent.toLowerCase());
-            t._navigator && !u && (t.usingWebAudio = !1);
+            var h = /safari/.test(t._navigator && t._navigator.userAgent.toLowerCase());
+            t._navigator && !h && (t.usingWebAudio = !1);
           }
           t.usingWebAudio && (t.masterGain = typeof t.ctx.createGain > "u" ? t.ctx.createGainNode() : t.ctx.createGain(), t.masterGain.gain.setValueAtTime(t._muted ? 0 : t._volume, t.ctx.currentTime), t.masterGain.connect(t.ctx.destination)), t._setup();
         }
       };
-      s.Howler = t, s.Howl = r, typeof ae < "u" ? (ae.HowlerGlobal = e, ae.Howler = t, ae.Howl = r, ae.Sound = i) : typeof window < "u" && (window.HowlerGlobal = e, window.Howler = t, window.Howl = r, window.Sound = i);
+      s.Howler = t, s.Howl = r, typeof ce < "u" ? (ce.HowlerGlobal = e, ce.Howler = t, ce.Howl = r, ce.Sound = i) : typeof window < "u" && (window.HowlerGlobal = e, window.Howler = t, window.Howl = r, window.Sound = i);
     })();
     (function() {
       HowlerGlobal.prototype._pos = [0, 0, 0], HowlerGlobal.prototype._orientation = [0, 0, -1, 0, 1, 0], HowlerGlobal.prototype.stereo = function(t) {
@@ -1184,16 +1188,16 @@ function xt() {
         else
           return a._pos;
         return a;
-      }, HowlerGlobal.prototype.orientation = function(t, r, i, a, h, c) {
-        var d = this;
-        if (!d.ctx || !d.ctx.listener)
-          return d;
-        var p = d._orientation;
-        if (r = typeof r != "number" ? p[1] : r, i = typeof i != "number" ? p[2] : i, a = typeof a != "number" ? p[3] : a, h = typeof h != "number" ? p[4] : h, c = typeof c != "number" ? p[5] : c, typeof t == "number")
-          d._orientation = [t, r, i, a, h, c], typeof d.ctx.listener.forwardX < "u" ? (d.ctx.listener.forwardX.setTargetAtTime(t, Howler.ctx.currentTime, 0.1), d.ctx.listener.forwardY.setTargetAtTime(r, Howler.ctx.currentTime, 0.1), d.ctx.listener.forwardZ.setTargetAtTime(i, Howler.ctx.currentTime, 0.1), d.ctx.listener.upX.setTargetAtTime(a, Howler.ctx.currentTime, 0.1), d.ctx.listener.upY.setTargetAtTime(h, Howler.ctx.currentTime, 0.1), d.ctx.listener.upZ.setTargetAtTime(c, Howler.ctx.currentTime, 0.1)) : d.ctx.listener.setOrientation(t, r, i, a, h, c);
+      }, HowlerGlobal.prototype.orientation = function(t, r, i, a, u, d) {
+        var c = this;
+        if (!c.ctx || !c.ctx.listener)
+          return c;
+        var m = c._orientation;
+        if (r = typeof r != "number" ? m[1] : r, i = typeof i != "number" ? m[2] : i, a = typeof a != "number" ? m[3] : a, u = typeof u != "number" ? m[4] : u, d = typeof d != "number" ? m[5] : d, typeof t == "number")
+          c._orientation = [t, r, i, a, u, d], typeof c.ctx.listener.forwardX < "u" ? (c.ctx.listener.forwardX.setTargetAtTime(t, Howler.ctx.currentTime, 0.1), c.ctx.listener.forwardY.setTargetAtTime(r, Howler.ctx.currentTime, 0.1), c.ctx.listener.forwardZ.setTargetAtTime(i, Howler.ctx.currentTime, 0.1), c.ctx.listener.upX.setTargetAtTime(a, Howler.ctx.currentTime, 0.1), c.ctx.listener.upY.setTargetAtTime(u, Howler.ctx.currentTime, 0.1), c.ctx.listener.upZ.setTargetAtTime(d, Howler.ctx.currentTime, 0.1)) : c.ctx.listener.setOrientation(t, r, i, a, u, d);
         else
-          return p;
-        return d;
+          return m;
+        return c;
       }, Howl.prototype.init = /* @__PURE__ */ (function(t) {
         return function(r) {
           var i = this;
@@ -1225,67 +1229,67 @@ function xt() {
             i._stereo = t, i._pos = [t, 0, 0];
           else
             return i._stereo;
-        for (var h = i._getSoundIds(r), c = 0; c < h.length; c++) {
-          var d = i._soundById(h[c]);
-          if (d)
+        for (var u = i._getSoundIds(r), d = 0; d < u.length; d++) {
+          var c = i._soundById(u[d]);
+          if (c)
             if (typeof t == "number")
-              d._stereo = t, d._pos = [t, 0, 0], d._node && (d._pannerAttr.panningModel = "equalpower", (!d._panner || !d._panner.pan) && e(d, a), a === "spatial" ? typeof d._panner.positionX < "u" ? (d._panner.positionX.setValueAtTime(t, Howler.ctx.currentTime), d._panner.positionY.setValueAtTime(0, Howler.ctx.currentTime), d._panner.positionZ.setValueAtTime(0, Howler.ctx.currentTime)) : d._panner.setPosition(t, 0, 0) : d._panner.pan.setValueAtTime(t, Howler.ctx.currentTime)), i._emit("stereo", d._id);
+              c._stereo = t, c._pos = [t, 0, 0], c._node && (c._pannerAttr.panningModel = "equalpower", (!c._panner || !c._panner.pan) && e(c, a), a === "spatial" ? typeof c._panner.positionX < "u" ? (c._panner.positionX.setValueAtTime(t, Howler.ctx.currentTime), c._panner.positionY.setValueAtTime(0, Howler.ctx.currentTime), c._panner.positionZ.setValueAtTime(0, Howler.ctx.currentTime)) : c._panner.setPosition(t, 0, 0) : c._panner.pan.setValueAtTime(t, Howler.ctx.currentTime)), i._emit("stereo", c._id);
             else
-              return d._stereo;
+              return c._stereo;
         }
         return i;
       }, Howl.prototype.pos = function(t, r, i, a) {
-        var h = this;
-        if (!h._webAudio)
-          return h;
-        if (h._state !== "loaded")
-          return h._queue.push({
+        var u = this;
+        if (!u._webAudio)
+          return u;
+        if (u._state !== "loaded")
+          return u._queue.push({
             event: "pos",
             action: function() {
-              h.pos(t, r, i, a);
+              u.pos(t, r, i, a);
             }
-          }), h;
+          }), u;
         if (r = typeof r != "number" ? 0 : r, i = typeof i != "number" ? -0.5 : i, typeof a > "u")
           if (typeof t == "number")
-            h._pos = [t, r, i];
+            u._pos = [t, r, i];
           else
-            return h._pos;
-        for (var c = h._getSoundIds(a), d = 0; d < c.length; d++) {
-          var p = h._soundById(c[d]);
-          if (p)
+            return u._pos;
+        for (var d = u._getSoundIds(a), c = 0; c < d.length; c++) {
+          var m = u._soundById(d[c]);
+          if (m)
             if (typeof t == "number")
-              p._pos = [t, r, i], p._node && ((!p._panner || p._panner.pan) && e(p, "spatial"), typeof p._panner.positionX < "u" ? (p._panner.positionX.setValueAtTime(t, Howler.ctx.currentTime), p._panner.positionY.setValueAtTime(r, Howler.ctx.currentTime), p._panner.positionZ.setValueAtTime(i, Howler.ctx.currentTime)) : p._panner.setPosition(t, r, i)), h._emit("pos", p._id);
+              m._pos = [t, r, i], m._node && ((!m._panner || m._panner.pan) && e(m, "spatial"), typeof m._panner.positionX < "u" ? (m._panner.positionX.setValueAtTime(t, Howler.ctx.currentTime), m._panner.positionY.setValueAtTime(r, Howler.ctx.currentTime), m._panner.positionZ.setValueAtTime(i, Howler.ctx.currentTime)) : m._panner.setPosition(t, r, i)), u._emit("pos", m._id);
             else
-              return p._pos;
+              return m._pos;
         }
-        return h;
+        return u;
       }, Howl.prototype.orientation = function(t, r, i, a) {
-        var h = this;
-        if (!h._webAudio)
-          return h;
-        if (h._state !== "loaded")
-          return h._queue.push({
+        var u = this;
+        if (!u._webAudio)
+          return u;
+        if (u._state !== "loaded")
+          return u._queue.push({
             event: "orientation",
             action: function() {
-              h.orientation(t, r, i, a);
+              u.orientation(t, r, i, a);
             }
-          }), h;
-        if (r = typeof r != "number" ? h._orientation[1] : r, i = typeof i != "number" ? h._orientation[2] : i, typeof a > "u")
+          }), u;
+        if (r = typeof r != "number" ? u._orientation[1] : r, i = typeof i != "number" ? u._orientation[2] : i, typeof a > "u")
           if (typeof t == "number")
-            h._orientation = [t, r, i];
+            u._orientation = [t, r, i];
           else
-            return h._orientation;
-        for (var c = h._getSoundIds(a), d = 0; d < c.length; d++) {
-          var p = h._soundById(c[d]);
-          if (p)
+            return u._orientation;
+        for (var d = u._getSoundIds(a), c = 0; c < d.length; c++) {
+          var m = u._soundById(d[c]);
+          if (m)
             if (typeof t == "number")
-              p._orientation = [t, r, i], p._node && (p._panner || (p._pos || (p._pos = h._pos || [0, 0, -0.5]), e(p, "spatial")), typeof p._panner.orientationX < "u" ? (p._panner.orientationX.setValueAtTime(t, Howler.ctx.currentTime), p._panner.orientationY.setValueAtTime(r, Howler.ctx.currentTime), p._panner.orientationZ.setValueAtTime(i, Howler.ctx.currentTime)) : p._panner.setOrientation(t, r, i)), h._emit("orientation", p._id);
+              m._orientation = [t, r, i], m._node && (m._panner || (m._pos || (m._pos = u._pos || [0, 0, -0.5]), e(m, "spatial")), typeof m._panner.orientationX < "u" ? (m._panner.orientationX.setValueAtTime(t, Howler.ctx.currentTime), m._panner.orientationY.setValueAtTime(r, Howler.ctx.currentTime), m._panner.orientationZ.setValueAtTime(i, Howler.ctx.currentTime)) : m._panner.setOrientation(t, r, i)), u._emit("orientation", m._id);
             else
-              return p._orientation;
+              return m._orientation;
         }
-        return h;
+        return u;
       }, Howl.prototype.pannerAttr = function() {
-        var t = this, r = arguments, i, a, h;
+        var t = this, r = arguments, i, a, u;
         if (!t._webAudio)
           return t;
         if (r.length === 0)
@@ -1312,23 +1316,23 @@ function xt() {
               panningModel: typeof i.pannerAttr.panningModel < "u" ? i.pannerAttr.panningModel : t._panningModel
             });
           else
-            return h = t._soundById(parseInt(r[0], 10)), h ? h._pannerAttr : t._pannerAttr;
+            return u = t._soundById(parseInt(r[0], 10)), u ? u._pannerAttr : t._pannerAttr;
         else r.length === 2 && (i = r[0], a = parseInt(r[1], 10));
-        for (var c = t._getSoundIds(a), d = 0; d < c.length; d++)
-          if (h = t._soundById(c[d]), h) {
-            var p = h._pannerAttr;
-            p = {
-              coneInnerAngle: typeof i.coneInnerAngle < "u" ? i.coneInnerAngle : p.coneInnerAngle,
-              coneOuterAngle: typeof i.coneOuterAngle < "u" ? i.coneOuterAngle : p.coneOuterAngle,
-              coneOuterGain: typeof i.coneOuterGain < "u" ? i.coneOuterGain : p.coneOuterGain,
-              distanceModel: typeof i.distanceModel < "u" ? i.distanceModel : p.distanceModel,
-              maxDistance: typeof i.maxDistance < "u" ? i.maxDistance : p.maxDistance,
-              refDistance: typeof i.refDistance < "u" ? i.refDistance : p.refDistance,
-              rolloffFactor: typeof i.rolloffFactor < "u" ? i.rolloffFactor : p.rolloffFactor,
-              panningModel: typeof i.panningModel < "u" ? i.panningModel : p.panningModel
+        for (var d = t._getSoundIds(a), c = 0; c < d.length; c++)
+          if (u = t._soundById(d[c]), u) {
+            var m = u._pannerAttr;
+            m = {
+              coneInnerAngle: typeof i.coneInnerAngle < "u" ? i.coneInnerAngle : m.coneInnerAngle,
+              coneOuterAngle: typeof i.coneOuterAngle < "u" ? i.coneOuterAngle : m.coneOuterAngle,
+              coneOuterGain: typeof i.coneOuterGain < "u" ? i.coneOuterGain : m.coneOuterGain,
+              distanceModel: typeof i.distanceModel < "u" ? i.distanceModel : m.distanceModel,
+              maxDistance: typeof i.maxDistance < "u" ? i.maxDistance : m.maxDistance,
+              refDistance: typeof i.refDistance < "u" ? i.refDistance : m.refDistance,
+              rolloffFactor: typeof i.rolloffFactor < "u" ? i.rolloffFactor : m.rolloffFactor,
+              panningModel: typeof i.panningModel < "u" ? i.panningModel : m.panningModel
             };
-            var b = h._panner;
-            b || (h._pos || (h._pos = t._pos || [0, 0, -0.5]), e(h, "spatial"), b = h._panner), b.coneInnerAngle = p.coneInnerAngle, b.coneOuterAngle = p.coneOuterAngle, b.coneOuterGain = p.coneOuterGain, b.distanceModel = p.distanceModel, b.maxDistance = p.maxDistance, b.refDistance = p.refDistance, b.rolloffFactor = p.rolloffFactor, b.panningModel = p.panningModel;
+            var b = u._panner;
+            b || (u._pos || (u._pos = t._pos || [0, 0, -0.5]), e(u, "spatial"), b = u._panner), b.coneInnerAngle = m.coneInnerAngle, b.coneOuterAngle = m.coneOuterAngle, b.coneOuterGain = m.coneOuterGain, b.distanceModel = m.distanceModel, b.maxDistance = m.maxDistance, b.refDistance = m.refDistance, b.rolloffFactor = m.rolloffFactor, b.panningModel = m.panningModel;
           }
         return t;
       }, Sound.prototype.init = /* @__PURE__ */ (function(t) {
@@ -1346,10 +1350,10 @@ function xt() {
         r = r || "spatial", r === "spatial" ? (t._panner = Howler.ctx.createPanner(), t._panner.coneInnerAngle = t._pannerAttr.coneInnerAngle, t._panner.coneOuterAngle = t._pannerAttr.coneOuterAngle, t._panner.coneOuterGain = t._pannerAttr.coneOuterGain, t._panner.distanceModel = t._pannerAttr.distanceModel, t._panner.maxDistance = t._pannerAttr.maxDistance, t._panner.refDistance = t._pannerAttr.refDistance, t._panner.rolloffFactor = t._pannerAttr.rolloffFactor, t._panner.panningModel = t._pannerAttr.panningModel, typeof t._panner.positionX < "u" ? (t._panner.positionX.setValueAtTime(t._pos[0], Howler.ctx.currentTime), t._panner.positionY.setValueAtTime(t._pos[1], Howler.ctx.currentTime), t._panner.positionZ.setValueAtTime(t._pos[2], Howler.ctx.currentTime)) : t._panner.setPosition(t._pos[0], t._pos[1], t._pos[2]), typeof t._panner.orientationX < "u" ? (t._panner.orientationX.setValueAtTime(t._orientation[0], Howler.ctx.currentTime), t._panner.orientationY.setValueAtTime(t._orientation[1], Howler.ctx.currentTime), t._panner.orientationZ.setValueAtTime(t._orientation[2], Howler.ctx.currentTime)) : t._panner.setOrientation(t._orientation[0], t._orientation[1], t._orientation[2])) : (t._panner = Howler.ctx.createStereoPanner(), t._panner.pan.setValueAtTime(t._stereo, Howler.ctx.currentTime)), t._panner.connect(t._node), t._paused || t._parent.pause(t._id, !0).play(t._id, !0);
       };
     })();
-  })(Te)), Te;
+  })(Ce)), Ce;
 }
-var ne = xt();
-const et = [
+var se = Nt();
+const at = [
   "ambience",
   "click",
   "latch",
@@ -1367,14 +1371,14 @@ const et = [
   "land",
   "riser",
   "coin"
-], Mt = new Set(et.filter((s) => s !== "ambience"));
-function Tt(s, e, t) {
+], Bt = new Set(at.filter((s) => s !== "ambience"));
+function Ft(s, e, t) {
   return e === s && t < 1;
 }
-function Et(s, e, t) {
+function Ot(s, e, t) {
   return t || !e ? 0 : s ? 0.16 : 0.38;
 }
-class It {
+class Ht {
   howls = /* @__PURE__ */ new Map();
   retries = /* @__PURE__ */ new Map();
   lastRequested = null;
@@ -1393,11 +1397,11 @@ class It {
   onDegraded;
   constructor(e = () => {
   }) {
-    this.onDegraded = e, ne.Howler.autoSuspend = !0;
+    this.onDegraded = e, se.Howler.autoSuspend = !0;
   }
   load() {
-    for (const e of et) {
-      const t = new ne.Howl({
+    for (const e of at) {
+      const t = new se.Howl({
         src: [`assets/audio/${e}.ogg`, `assets/audio/${e}.mp3`],
         preload: !0,
         loop: e === "ambience",
@@ -1408,7 +1412,7 @@ class It {
         },
         onplayerror: () => {
           const r = this.retries.get(e) ?? 0;
-          Tt(e, this.lastRequested, r) && (this.retries.set(e, r + 1), t.once("unlock", () => {
+          Ft(e, this.lastRequested, r) && (this.retries.set(e, r + 1), t.once("unlock", () => {
             this.lastRequested === e && this.effects && !this.muted && t.play();
           }));
         }
@@ -1418,13 +1422,13 @@ class It {
   }
   unlock() {
     this.unlocked = !0;
-    const e = ne.Howler.ctx;
+    const e = se.Howler.ctx;
     e && e.state !== "running" && e.resume(), this.installBus(), this.syncAmbience();
   }
   /** Master compressor in front of the speakers, the same bus shape as a two-bus cabinet mix. */
   installBus() {
     if (this.busReady) return;
-    const e = ne.Howler.ctx, t = ne.Howler.masterGain;
+    const e = se.Howler.ctx, t = se.Howler.masterGain;
     if (!e || !t) return;
     const r = e.createDynamicsCompressor();
     r.threshold.value = -8, r.knee.value = 6, r.ratio.value = 8, r.attack.value = 4e-3, r.release.value = 0.18;
@@ -1435,7 +1439,7 @@ class It {
     t.connect(r), r.connect(e.destination), this.busReady = !0;
   }
   setPrefs(e, t, r) {
-    this.muted = e, this.music = t, this.effects = r, ne.Howler.mute(e), this.syncAmbience();
+    this.muted = e, this.music = t, this.effects = r, se.Howler.mute(e), this.syncAmbience();
   }
   setPresenting(e) {
     this.presenting = e, this.syncAmbience();
@@ -1448,7 +1452,7 @@ class It {
     this.syncAmbience();
   }
   play(e, t = 1) {
-    if (!this.unlocked || this.muted || this.hidden || !this.effects || !Mt.has(e)) return;
+    if (!this.unlocked || this.muted || this.hidden || !this.effects || !Bt.has(e)) return;
     const r = this.generation, i = this.howls.get(e);
     if (!i) return;
     this.lastRequested = e, this.installBus();
@@ -1477,7 +1481,7 @@ class It {
   syncAmbience() {
     const e = this.howls.get("ambience");
     if (!e || !this.unlocked) return;
-    const t = Et(this.presenting, this.music, this.muted);
+    const t = Ot(this.presenting, this.music, this.muted);
     if (this.hidden || t === 0) {
       this.ambGain = 0, e.pause();
       return;
@@ -1492,7 +1496,7 @@ class It {
     this.howls.clear();
   }
 }
-const Xe = "auric-dynamo.board.v1", Lt = [
+const Ke = "auric-dynamo.board.v1", Rt = [
   { id: "first-win", label: "First net gain" },
   { id: "feature", label: "Feature landed" },
   { id: "wheel", label: "Wheel opened" },
@@ -1501,46 +1505,46 @@ const Xe = "auric-dynamo.board.v1", Lt = [
   { id: "mega", label: "Mega net" },
   { id: "epic", label: "Epic net" },
   { id: "session", label: "Session ahead" }
-], Qe = ["Spark", "Ember", "Brass", "Glow", "Dynamo", "Charge", "Crown", "Auric"];
-function de() {
+], Je = ["Spark", "Ember", "Brass", "Glow", "Dynamo", "Charge", "Crown", "Auric"];
+function he() {
   return { handle: "Player", rows: [], seen: [], achievements: [] };
 }
-function tt(s) {
+function lt(s) {
   const e = s.replace(/[^A-Za-z0-9 ]/g, "").trim().slice(0, 16);
   return e.length > 0 ? e : "Player";
 }
-function Pt(s) {
+function Dt(s) {
   return new Date(s).toISOString().slice(0, 10);
 }
-function Ct(s) {
-  const e = Math.min(Qe.length, 1 + Math.floor(Math.max(0, s) / 5));
-  return { level: e, name: Qe[e - 1] ?? "Spark" };
+function $t(s) {
+  const e = Math.min(Je.length, 1 + Math.floor(Math.max(0, s) / 5));
+  return { level: e, name: Je[e - 1] ?? "Spark" };
 }
-function Nt(s) {
-  if (!s) return de();
+function Wt(s) {
+  if (!s) return he();
   try {
     const e = JSON.parse(s);
-    return !e || !Array.isArray(e.rows) || !Array.isArray(e.seen) ? de() : {
-      handle: tt(typeof e.handle == "string" ? e.handle : "Player"),
+    return !e || !Array.isArray(e.rows) || !Array.isArray(e.seen) ? he() : {
+      handle: lt(typeof e.handle == "string" ? e.handle : "Player"),
       rows: e.rows.filter((t) => t && typeof t.handle == "string"),
       seen: e.seen.filter((t) => typeof t == "string").slice(-80),
       achievements: Array.isArray(e.achievements) ? e.achievements.filter((t) => typeof t == "string") : []
     };
   } catch {
-    return de();
+    return he();
   }
 }
-function Bt(s) {
+function Gt(s) {
   return JSON.stringify(s);
 }
-function Ot(s, e) {
+function qt(s, e) {
   const t = s.cost > 0 ? s.net / s.cost : 0, r = [];
   return e.wins >= 1 && r.push("first-win"), (s.modifier === "replace" || s.modifier === "bank" || s.modifier === "wheel") && r.push("feature"), s.modifier === "wheel" && r.push("wheel"), s.flourish && r.push("flourish"), t >= 5 && r.push("big"), t >= 25 && r.push("mega"), t >= 100 && r.push("epic"), e.highestSession > 0 && r.push("session"), r;
 }
-function Ft(s, e) {
+function Vt(s, e) {
   if (s.seen.includes(e.id)) return s;
-  const t = Pt(e.at), r = s.rows.map((h) => ({ ...h }));
-  let i = r.find((h) => h.handle === s.handle);
+  const t = Dt(e.at), r = s.rows.map((u) => ({ ...u }));
+  let i = r.find((u) => u.handle === s.handle);
   i || (i = {
     handle: s.handle,
     biggestWin: 0,
@@ -1551,8 +1555,8 @@ function Ft(s, e) {
     dayPlays: 0
   }, r.push(i)), i.day !== t && (i.day = t, i.dayBest = e.net, i.dayPlays = 0), i.dayPlays += 1, e.net > i.dayBest && (i.dayBest = e.net), e.net > i.biggestWin && (i.biggestWin = e.net), e.sessionNet > i.highestSession && (i.highestSession = e.sessionNet), e.net > 0 && (i.wins += 1);
   const a = [...s.achievements];
-  for (const h of Ot(e, i))
-    a.includes(h) || a.push(h);
+  for (const u of qt(e, i))
+    a.includes(u) || a.push(u);
   return {
     handle: s.handle,
     rows: r,
@@ -1560,10 +1564,10 @@ function Ft(s, e) {
     achievements: a
   };
 }
-function Ht(s) {
+function Xt(s) {
   return s.rows.find((e) => e.handle === s.handle) ?? null;
 }
-function Rt(s, e) {
+function Qt(s, e) {
   return [...s].sort((t, r) => r[e] - t[e] || t.handle.localeCompare(r.handle));
 }
 class j extends Error {
@@ -1571,21 +1575,21 @@ class j extends Error {
     super(e), this.name = "EconomyError";
   }
 }
-const Dt = 1, $t = 1e5, Wt = [10, 20, 50, 100], Gt = 10, ie = 1e4, Re = {
+const Yt = 1, jt = 1e5, Ut = [10, 20, 50, 100], Zt = 10, oe = 1e4, qe = {
   blank: 0,
   0: 0,
   1: 1,
   5: 3,
   10: 12,
   "00": 40
-}, De = [
+}, Ve = [
   { token: "blank", from: 0, to: 2200, weight: 2200 },
   { token: "0", from: 2200, to: 7269, weight: 5069 },
   { token: "1", from: 7269, to: 8e3, weight: 731 },
   { token: "5", from: 8e3, to: 9200, weight: 1200 },
   { token: "10", from: 9200, to: 9700, weight: 500 },
   { token: "00", from: 9700, to: 1e4, weight: 300 }
-], $e = [
+], Xe = [
   { id: "x1", from: 0, to: 6200, weight: 6200, multiplier: 1 },
   { id: "x2", from: 6200, to: 8e3, weight: 1800, multiplier: 2 },
   { id: "x5", from: 8e3, to: 8700, weight: 700, multiplier: 5 },
@@ -1593,119 +1597,119 @@ const Dt = 1, $t = 1e5, Wt = [10, 20, 50, 100], Gt = 10, ie = 1e4, Re = {
   { id: "replace", from: 9100, to: 9500, weight: 400, multiplier: null },
   { id: "bank", from: 9500, to: 9920, weight: 420, multiplier: null },
   { id: "wheel", from: 9920, to: 1e4, weight: 80, multiplier: null }
-], ve = [1, 2, 4, 6, 10, 16, 40, 110];
+], Me = [1, 2, 4, 6, 10, 16, 40, 110];
 function G(s, e) {
   if (!Number.isSafeInteger(s)) throw new j(`unsafe ${e}`);
   return s;
 }
-function Oe(s, e, t) {
+function $e(s, e, t) {
   return G(s, t), G(e, t), G(s * e, t);
 }
-function se(s, e, t) {
+function re(s, e, t) {
   return G(s, t), G(e, t), G(s + e, t);
 }
-function We(s) {
-  return Wt.includes(s);
+function Qe(s) {
+  return Ut.includes(s);
 }
-function Ee(s) {
-  if (!Number.isInteger(s) || s < 0 || s >= ie) throw new j("token draw");
-  const e = De.find((t) => s >= t.from && s < t.to);
+function Ne(s) {
+  if (!Number.isInteger(s) || s < 0 || s >= oe) throw new j("token draw");
+  const e = Ve.find((t) => s >= t.from && s < t.to);
   if (!e) throw new j("token draw");
   return e.token;
 }
-function qt(s) {
-  if (!Number.isInteger(s) || s < 0 || s >= ie) throw new j("modifier draw");
-  const e = $e.find((t) => s >= t.from && s < t.to);
+function Kt(s) {
+  if (!Number.isInteger(s) || s < 0 || s >= oe) throw new j("modifier draw");
+  const e = Xe.find((t) => s >= t.from && s < t.to);
   if (!e) throw new j("modifier draw");
   return e.id;
 }
-function N(s) {
-  return De.find((e) => e.token === s).from;
+function B(s) {
+  return Ve.find((e) => e.token === s).from;
 }
-function re(s) {
-  return $e.find((e) => e.id === s).from;
+function ie(s) {
+  return Xe.find((e) => e.id === s).from;
 }
-function nt(s) {
+function dt(s) {
   if (s.some((t) => t === "blank")) return 0;
-  const e = s.reduce((t, r) => t + Re[r], 0);
+  const e = s.reduce((t, r) => t + qe[r], 0);
   return G(e, "raw number");
 }
-function Vt(s) {
+function Jt(s) {
   return s === "blank" ? "blank" : s;
 }
-function st(s) {
+function ct(s) {
   return s === "x1" ? "1x" : s === "x2" ? "2x" : s === "x5" ? "5x" : s === "x10" ? "10x" : s === "replace" ? "Replace" : s === "bank" ? "Bank + Add" : "Wheel";
 }
-function pe(s, e) {
+function we(s, e) {
   const t = [
-    Ee(s.nextInt(ie)),
-    Ee(s.nextInt(ie)),
-    Ee(s.nextInt(ie))
-  ], r = nt(t), i = Oe(r, e, "base");
+    Ne(s.nextInt(oe)),
+    Ne(s.nextInt(oe)),
+    Ne(s.nextInt(oe))
+  ], r = dt(t), i = $e(r, e, "base");
   return { tokens: t, raw: r, base: i };
 }
-function rt(s, e, t) {
-  if (!We(e)) throw new j("cost");
+function ut(s, e, t) {
+  if (!Qe(e)) throw new j("cost");
   if (!Number.isSafeInteger(t) || t < 0 || t > 9) throw new j("meter");
-  const r = e / 10, i = pe(s, r), a = qt(s.nextInt(ie)), h = [];
-  let c = null, d = null, p = 0, b = null, n = 0, o = [], l = 0;
+  const r = e / 10, i = we(s, r), a = Kt(s.nextInt(oe)), u = [];
+  let d = null, c = null, m = 0, b = null, n = 0, o = [], l = 0;
   if (a === "x1" || a === "x2" || a === "x5" || a === "x10")
-    c = a === "x1" ? 1 : a === "x2" ? 2 : a === "x5" ? 5 : 10, n = Oe(c - 1, i.base, "modifier addition"), l = se(i.base, n, "gross"), o = [i.base, n];
+    d = a === "x1" ? 1 : a === "x2" ? 2 : a === "x5" ? 5 : 10, n = $e(d - 1, i.base, "modifier addition"), l = re(i.base, n, "gross"), o = [i.base, n];
   else if (a === "replace") {
-    const y = pe(s, r);
-    h.push(y), b = i.base, l = y.base, o = [y.base];
+    const w = we(s, r);
+    u.push(w), b = i.base, l = w.base, o = [w.base];
   } else if (a === "bank") {
-    const y = pe(s, r), k = pe(s, r);
-    h.push(y, k), l = se(se(i.base, y.base, "bank"), k.base, "gross"), o = [i.base, y.base, k.base];
+    const w = we(s, r), v = we(s, r);
+    u.push(w, v), l = re(re(i.base, w.base, "bank"), v.base, "gross"), o = [i.base, w.base, v.base];
   } else
-    d = s.nextInt(ve.length), p = Oe(e, ve[d], "wheel"), l = se(i.base, p, "gross"), o = [i.base, p];
-  if (o.reduce((y, k) => se(y, k, "contributors"), 0) !== l) throw new j("contributor sum");
-  const f = se(l, -e, "net"), _ = t + 1 >= Gt, m = _ ? 0 : t + 1;
+    c = s.nextInt(Me.length), m = $e(e, Me[c], "wheel"), l = re(i.base, m, "gross"), o = [i.base, m];
+  if (o.reduce((w, v) => re(w, v, "contributors"), 0) !== l) throw new j("contributor sum");
+  const p = re(l, -e, "net"), g = t + 1 >= Zt, f = g ? 0 : t + 1;
   return {
     cost: e,
     unit: r,
     initial: i,
     modifier: a,
-    multiplier: c,
-    steps: h,
-    wheelIndex: d,
-    wheelPrize: p,
+    multiplier: d,
+    steps: u,
+    wheelIndex: c,
+    wheelPrize: m,
     discarded: b,
     modifierAdd: n,
     contributors: o,
     gross: l,
-    net: f,
+    net: p,
     collectionBefore: t,
-    collectionAfter: m,
-    collectionFlourish: _
+    collectionAfter: f,
+    collectionFlourish: g
   };
 }
-function Q(s, e) {
+function X(s, e) {
   if (G(s, "net"), G(e, "cost"), e <= 0) throw new j("cost");
   return s <= 0 ? 0 : s < 5 * e ? 1 : s < 25 * e ? 2 : s < 100 * e ? 3 : 4;
 }
-function Xt(s, e, t) {
+function zt(s, e, t) {
   if (s <= 0 || t === null || t <= 0) return 0;
-  const r = Q(t, e), i = Q(s, e);
+  const r = X(t, e), i = X(s, e);
   return r < i ? r : i;
 }
-function I(s) {
+function P(s) {
   const e = s < 0 ? "-" : "", t = Math.abs(s).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   return e + t;
 }
-function Qt(s) {
-  return s.net > 0 ? "Net gain" : s.gross === 0 ? "No return" : s.net === 0 ? "No net change" : `Returned ${I(s.gross)}`;
+function en(s) {
+  return s.net > 0 ? "Net gain" : s.gross === 0 ? "No return" : s.net === 0 ? "No net change" : `Returned ${P(s.gross)}`;
 }
-function Yt(s) {
-  return s.gross === 0 ? `No return. Net change -${I(s.cost)}.` : s.net === 0 ? "No net change." : s.net < 0 ? `Returned ${I(s.gross)}. Net change -${I(-s.net)}.` : `Returned ${I(s.gross)}. Net change +${I(s.net)}.`;
+function tn(s) {
+  return s.gross === 0 ? `No return. Net change -${P(s.cost)}.` : s.net === 0 ? "No net change." : s.net < 0 ? `Returned ${P(s.gross)}. Net change -${P(-s.net)}.` : `Returned ${P(s.gross)}. Net change +${P(s.net)}.`;
 }
 function W(s) {
-  return String(nt(s));
+  return String(dt(s));
 }
-function jt() {
-  const s = De.map((r) => `${Vt(r.token)}: ${r.weight} out of 10000, worth ${Re[r.token]}`).join(`
-`), e = $e.map((r) => `${st(r.id)}: ${r.weight} out of 10000`).join(`
-`), t = ve.map((r, i) => `Wedge ${i + 1}: cost x ${r} (1 out of 8)`).join(`
+function nn() {
+  const s = Ve.map((r) => `${Jt(r.token)}: ${r.weight} out of 10000, worth ${qe[r.token]}`).join(`
+`), e = Xe.map((r) => `${ct(r.id)}: ${r.weight} out of 10000`).join(`
+`), t = Me.map((r, i) => `Wedge ${i + 1}: cost x ${r} (1 out of 8)`).join(`
 `);
   return [
     {
@@ -1756,34 +1760,34 @@ The wedge is chosen before the wheel moves. The pointer lands on that wedge. Cha
     }
   ];
 }
-const he = Math.PI * 2, we = 8, ce = he / we;
-function ke(s) {
-  return -((s + 0.5) * ce);
+const me = Math.PI * 2, Se = 8, fe = me / Se;
+function Te(s) {
+  return -((s + 0.5) * fe);
 }
-function it(s) {
-  let e = -s % he;
-  return e < 0 && (e += he), (Math.floor((e + 1e-9) / ce) % we + we) % we;
+function ht(s) {
+  let e = -s % me;
+  return e < 0 && (e += me), (Math.floor((e + 1e-9) / fe) % Se + Se) % Se;
 }
-function Ut(s) {
+function sn(s) {
   return 1 - (1 - Math.min(1, Math.max(0, s))) ** 3;
 }
-function Zt(s, e, t = Je) {
-  const r = ke(s), i = r - t * he;
-  return i + (r - i) * Ut(e);
+function rn(s, e, t = it) {
+  const r = Te(s), i = r - t * me;
+  return i + (r - i) * sn(e);
 }
-function Kt(s, e = Je) {
-  const t = ke(s), r = t - e * he, i = t - r, a = Math.floor(-r / ce - 1e-9), h = Math.ceil(-t / ce + 1e-9), c = [];
-  for (let d = a; d >= h; d--) {
-    const p = -d * ce;
-    if (p <= r + 1e-8 || p > t + 1e-8) continue;
-    const b = (p - r) / i;
+function on(s, e = it) {
+  const t = Te(s), r = t - e * me, i = t - r, a = Math.floor(-r / fe - 1e-9), u = Math.ceil(-t / fe + 1e-9), d = [];
+  for (let c = a; c >= u; c--) {
+    const m = -c * fe;
+    if (m <= r + 1e-8 || m > t + 1e-8) continue;
+    const b = (m - r) / i;
     if (b <= 0 || b > 1) continue;
     const n = 1 - Math.cbrt(1 - b);
-    n > 0 && n <= 1 && c.push(n);
+    n > 0 && n <= 1 && d.push(n);
   }
-  return c.sort((d, p) => d - p), c;
+  return d.sort((c, m) => c - m), d;
 }
-function me() {
+function ye() {
   return {
     reading: null,
     discarded: null,
@@ -1797,26 +1801,26 @@ function me() {
     guaranteedNet: null
   };
 }
-function ot(s) {
+function ft(s) {
   return s === 1 ? "chord-2" : s === 2 ? "chord-3" : s === 3 ? "chord-full" : s === 4 ? "fanfare" : null;
 }
-function Jt(s, e, t) {
+function an(s, e, t) {
   if (t <= 0) return s;
   if (t >= 1) return e;
   const r = e - s;
   let i;
   if (t <= 0.6) i = t / 0.6 * 0.85;
   else {
-    const h = (t - 0.6) / 0.4;
-    i = 0.85 + h * h * (3 - 2 * h) * 0.15;
+    const u = (t - 0.6) / 0.4;
+    i = 0.85 + u * u * (3 - 2 * u) * 0.15;
   }
   const a = Math.floor(s + r * i);
   return Math.min(e, Math.max(s, a));
 }
-function zt(s) {
+function ln(s) {
   return { ...s, bankAdds: [...s.bankAdds] };
 }
-function U(s) {
+function Z(s) {
   const e = s.net, t = s.gross;
   return s.modifier === "replace" ? {
     reading: W(s.steps[0].tokens),
@@ -1864,25 +1868,25 @@ function U(s) {
     guaranteedNet: e
   };
 }
-function en(s, e, t) {
+function dn(s, e, t) {
   for (let r = e + 1; r < s.length; r++) s[r].startMs += t;
 }
-function tn(s, e) {
+function cn(s, e) {
   let t = s.length ? s[s.length - 1].startMs + s[s.length - 1].durationMs : 0;
   if (t <= e) return !1;
   for (const r of ["inhale", "countup", "collection", "resolve"]) {
-    const i = s.findIndex((c) => c.kind === r);
+    const i = s.findIndex((d) => d.kind === r);
     if (i < 0) continue;
     const a = t - e;
     if (a <= 0) return !1;
-    const h = Math.min(s[i].durationMs, a);
-    s[i].durationMs -= h, en(s, i, -h), t -= h;
+    const u = Math.min(s[i].durationMs, a);
+    s[i].durationMs -= u, dn(s, i, -u), t -= u;
   }
   return t > e;
 }
-function Fe(s, e, t, r = Se) {
+function We(s, e, t, r = Ie) {
   if (e === "reduced") {
-    const k = U(s), A = s.net > 0 ? Q(s.net, s.cost) : 0, E = ot(A);
+    const v = Z(s), A = s.net > 0 ? X(s.net, s.cost) : 0, M = ft(A);
     return {
       receiptId: t,
       mode: e,
@@ -1895,116 +1899,116 @@ function Fe(s, e, t, r = Se) {
           startMs: 0,
           durationMs: r.reduced,
           cueTier: A,
-          parts: k
+          parts: v
         }
       ],
-      cues: [{ at: 0, sound: E ?? "latch", presentation: !0 }]
+      cues: [{ at: 0, sound: M ?? "latch", presentation: !0 }]
     };
   }
-  const i = e === "super" ? r.superScale : e === "turbo" ? r.turboScale : 1, a = (k) => Math.max(0, Math.round(k * i)), h = [];
-  let c = 0;
-  const d = (k, A, E, B) => {
-    const O = Xt(s.net, s.cost, E.guaranteedNet);
-    h.push({
-      kind: k,
+  const i = e === "super" ? r.superScale : e === "turbo" ? r.turboScale : 1, a = (v) => Math.max(0, Math.round(v * i)), u = [];
+  let d = 0;
+  const c = (v, A, M, E) => {
+    const F = zt(s.net, s.cost, M.guaranteedNet);
+    u.push({
+      kind: v,
       receiptId: t,
-      startMs: c,
+      startMs: d,
       durationMs: A,
-      cueTier: O,
-      parts: zt(E),
-      ...B
-    }), c += A;
-  }, p = [
+      cueTier: F,
+      parts: ln(M),
+      ...E
+    }), d += A;
+  }, m = [
     a(r.reelStops[0]),
     a(r.reelStops[1]),
     a(r.reelStops[2])
   ];
-  let b = me();
-  const n = s.net > 0 && (Q(s.net, s.cost) >= 2 || s.modifier === "wheel" || s.modifier === "replace" || s.modifier === "bank");
-  if (d("reels", p[2] + a(n ? 900 : 150), b, { reelStops: p }), b = { ...b, reading: W(s.initial.tokens) }, d("assemble", a(r.assemble), b), d("inhale", a(r.inhale), b), s.multiplier !== null)
-    b = U(s);
+  let b = ye();
+  const n = s.net > 0 && (X(s.net, s.cost) >= 2 || s.modifier === "wheel" || s.modifier === "replace" || s.modifier === "bank");
+  if (c("reels", m[2] + a(n ? 900 : 150), b, { reelStops: m }), b = { ...b, reading: W(s.initial.tokens) }, c("assemble", a(r.assemble), b), c("inhale", a(r.inhale), b), s.multiplier !== null)
+    b = Z(s);
   else if (s.modifier === "replace")
     b = {
-      ...me(),
+      ...ye(),
       reading: W(s.initial.tokens),
       discarded: s.discarded,
       guaranteedNet: null
     };
   else if (s.modifier === "bank") {
-    const k = s.initial.base > s.cost ? s.initial.base - s.cost : null;
+    const v = s.initial.base > s.cost ? s.initial.base - s.cost : null;
     b = {
-      ...me(),
+      ...ye(),
       reading: W(s.initial.tokens),
       bankLocked: s.initial.base,
-      guaranteedNet: k
+      guaranteedNet: v
     };
   } else {
-    const k = s.initial.base > 0 ? s.initial.base : null;
+    const v = s.initial.base > 0 ? s.initial.base : null;
     b = {
-      ...me(),
+      ...ye(),
       reading: W(s.initial.tokens),
       base: s.initial.base,
-      guaranteedNet: k
+      guaranteedNet: v
     };
   }
-  d("modifier", a(r.modifier), b), s.modifier === "replace" && d("replace", a(r.feature.replace), U(s)), s.modifier === "bank" && d("bank", a(r.feature.bank), U(s)), s.modifier === "wheel" && d("wheel", a(r.feature.wheel), U(s));
-  const o = Q(s.net, s.cost), l = o === 3 && s.net >= 50 * s.cost ? 5600 : r.count[o], u = a(l);
-  u > 0 && d("countup", u, U(s)), d("resolve", a(r.resolve), U(s)), d("collection", a(r.collection), U(s));
-  const f = tn(h, r.cap), _ = h.length ? h[h.length - 1].startMs + h[h.length - 1].durationMs : 0, m = f ? r.cap : _, y = nn(s, h);
-  return { receiptId: t, mode: e, stages: h, cues: y, totalMs: m, capped: f };
+  c("modifier", a(r.modifier), b), s.modifier === "replace" && c("replace", a(r.feature.replace), Z(s)), s.modifier === "bank" && c("bank", a(r.feature.bank), Z(s)), s.modifier === "wheel" && c("wheel", a(r.feature.wheel), Z(s));
+  const o = X(s.net, s.cost), l = o === 3 && s.net >= 50 * s.cost ? 5600 : r.count[o], h = a(l);
+  h > 0 && c("countup", h, Z(s)), c("resolve", a(r.resolve), Z(s)), c("collection", a(r.collection), Z(s));
+  const p = cn(u, r.cap), g = u.length ? u[u.length - 1].startMs + u[u.length - 1].durationMs : 0, f = p ? r.cap : g, w = un(s, u);
+  return { receiptId: t, mode: e, stages: u, cues: w, totalMs: f, capped: p };
 }
-function nn(s, e, t) {
-  const r = [], i = e.find((u) => u.kind === "reels");
+function un(s, e, t) {
+  const r = [], i = e.find((h) => h.kind === "reels");
   if (i?.reelStops) {
     r.push({ at: i.startMs, sound: "spin", presentation: !0 });
-    const u = s.net > 0 && (s.modifier === "replace" || s.modifier === "bank" || s.modifier === "wheel" || Q(s.net, s.cost) >= 2), f = i.reelStops[i.reelStops.length - 1];
-    i.reelStops.forEach((_, m) => {
-      r.push({ at: _, sound: "click", presentation: !0 }), r.push({ at: _, sound: "stop", presentation: !0 }), r.push({ at: _ + 36, sound: "land", presentation: !0, rate: 1 + m * 0.18 });
-    }), u && f !== void 0 && r.push({ at: Math.max(i.startMs, f - 220), sound: "riser", presentation: !0 });
+    const h = s.net > 0 && (s.modifier === "replace" || s.modifier === "bank" || s.modifier === "wheel" || X(s.net, s.cost) >= 2), p = i.reelStops[i.reelStops.length - 1];
+    i.reelStops.forEach((g, f) => {
+      r.push({ at: g, sound: "click", presentation: !0 }), r.push({ at: g, sound: "stop", presentation: !0 }), r.push({ at: g + 36, sound: "land", presentation: !0, rate: 1 + f * 0.18 });
+    }), h && p !== void 0 && r.push({ at: Math.max(i.startMs, p - 220), sound: "riser", presentation: !0 });
   }
-  const a = (u) => e.find((f) => f.kind === u), h = a("assemble");
-  h && r.push({ at: h.startMs, sound: "latch", presentation: !0 });
-  const c = a("modifier");
-  c && (r.push({ at: c.startMs, sound: "brass", presentation: !0 }), c.cueTier > 0 && r.push({ at: c.startMs, sound: "teal-lift", presentation: !0 }));
-  const d = a("replace");
-  d && r.push({ at: d.startMs, sound: "latch", presentation: !0 });
-  const p = a("bank");
-  p && (r.push({ at: p.startMs, sound: "latch", presentation: !0 }), r.push({ at: p.startMs + Math.round(p.durationMs * 0.5), sound: "latch", presentation: !0 }), r.push({ at: p.startMs + Math.round(p.durationMs * (5 / 6)), sound: "latch", presentation: !0 }));
+  const a = (h) => e.find((p) => p.kind === h), u = a("assemble");
+  u && r.push({ at: u.startMs, sound: "latch", presentation: !0 });
+  const d = a("modifier");
+  d && (r.push({ at: d.startMs, sound: "brass", presentation: !0 }), d.cueTier > 0 && r.push({ at: d.startMs, sound: "teal-lift", presentation: !0 }));
+  const c = a("replace");
+  c && r.push({ at: c.startMs, sound: "latch", presentation: !0 });
+  const m = a("bank");
+  m && (r.push({ at: m.startMs, sound: "latch", presentation: !0 }), r.push({ at: m.startMs + Math.round(m.durationMs * 0.5), sound: "latch", presentation: !0 }), r.push({ at: m.startMs + Math.round(m.durationMs * (5 / 6)), sound: "latch", presentation: !0 }));
   const b = a("wheel");
   if (b && s.wheelIndex !== null) {
     r.push({ at: b.startMs, sound: "turbine", presentation: !0 });
-    const u = b.durationMs * ye;
-    for (const f of Kt(s.wheelIndex))
-      r.push({ at: b.startMs + f * u, sound: "tick", presentation: !0 });
+    const h = b.durationMs * xe;
+    for (const p of on(s.wheelIndex))
+      r.push({ at: b.startMs + p * h, sound: "tick", presentation: !0 });
   }
-  const n = a("countup"), o = ot(Q(s.net, s.cost));
+  const n = a("countup"), o = ft(X(s.net, s.cost));
   if (n && o && s.net > 0) {
     r.push({ at: n.startMs, sound: o, presentation: !0 }), r.push({ at: n.startMs, sound: "coin", presentation: !0 });
-    for (let u = 1; u <= 6; u += 1) {
-      const f = u / 7, _ = 1 - (1 - f) * (1 - f);
-      r.push({ at: n.startMs + Math.round(n.durationMs * _), sound: "coin", presentation: !0 });
+    for (let h = 1; h <= 6; h += 1) {
+      const p = h / 7, g = 1 - (1 - p) * (1 - p);
+      r.push({ at: n.startMs + Math.round(n.durationMs * g), sound: "coin", presentation: !0 });
     }
   }
   const l = a("collection");
-  return l && r.push({ at: l.startMs, sound: "collect", presentation: !0 }), r.sort((u, f) => u.at - f.at);
+  return l && r.push({ at: l.startMs, sound: "collect", presentation: !0 }), r.sort((h, p) => h.at - p.at);
 }
-const sn = [0, 8, 14, 20, 24];
-function rn(s, e) {
-  const t = Q(s, e);
+const hn = [0, 8, 14, 20, 24];
+function fn(s, e) {
+  const t = X(s, e);
   return t < 2 || e <= 0 ? null : t === 2 ? "big" : t >= 4 ? "epic" : s >= 50 * e ? "super" : "mega";
 }
-function X(s, e) {
+function V(s, e) {
   return e <= s.startMs ? 0 : s.durationMs <= 0 ? 1 : Math.min(1, (e - s.startMs) / s.durationMs);
 }
-function at(s, e) {
+function pt(s, e) {
   let t = null;
   for (const r of s.stages)
     r.startMs <= e && (t = r);
   return t;
 }
-function on(s, e, t) {
-  const r = at(e, t);
-  return r ? r.kind === "replace" ? an(s, X(r, t)) : r.kind === "bank" ? ln(s, X(r, t)) : r.kind === "wheel" ? dn(s, X(r, t)) : r.parts : e.stages[0]?.parts ?? {
+function pn(s, e, t) {
+  const r = pt(e, t);
+  return r ? r.kind === "replace" ? mn(s, V(r, t)) : r.kind === "bank" ? gn(s, V(r, t)) : r.kind === "wheel" ? _n(s, V(r, t)) : r.parts : e.stages[0]?.parts ?? {
     reading: null,
     discarded: null,
     base: null,
@@ -2017,7 +2021,7 @@ function on(s, e, t) {
     guaranteedNet: null
   };
 }
-function an(s, e) {
+function mn(s, e) {
   const t = e >= 0.78;
   return {
     reading: W(t ? s.steps[0].tokens : s.initial.tokens),
@@ -2032,10 +2036,10 @@ function an(s, e) {
     guaranteedNet: t ? s.net : null
   };
 }
-function ln(s, e) {
+function gn(s, e) {
   const t = e >= 0.5, r = e >= 5 / 6, i = [];
   t && i.push(s.steps[0].base), r && i.push(s.steps[1].base);
-  const a = s.initial.base + i.reduce((c, d) => c + d, 0), h = a > s.cost ? a - s.cost : null;
+  const a = s.initial.base + i.reduce((d, c) => d + c, 0), u = a > s.cost ? a - s.cost : null;
   return {
     reading: W(s.initial.tokens),
     discarded: null,
@@ -2046,11 +2050,11 @@ function ln(s, e) {
     wheel: null,
     gross: r ? s.gross : null,
     net: r ? s.net : null,
-    guaranteedNet: r ? s.net : h
+    guaranteedNet: r ? s.net : u
   };
 }
-function dn(s, e) {
-  const t = e >= ye;
+function _n(s, e) {
+  const t = e >= xe;
   return {
     reading: W(s.initial.tokens),
     discarded: null,
@@ -2064,75 +2068,75 @@ function dn(s, e) {
     guaranteedNet: t ? s.net : s.initial.base > 0 ? s.initial.base : null
   };
 }
-function cn(s, e) {
-  const t = [{ label: "Cost", amount: s.cost, text: I(s.cost), strike: !1 }];
-  if (e.discarded !== null && t.push({ label: "Discarded base", amount: e.discarded, text: I(e.discarded), strike: !0 }), e.base !== null && t.push({ label: "Base", amount: e.base, text: I(e.base), strike: !1 }), e.modifierAdd !== null && t.push({
-    label: s.multiplier ? `${st(s.modifier)} addition` : "Modifier addition",
+function bn(s, e) {
+  const t = [{ label: "Cost", amount: s.cost, text: P(s.cost), strike: !1 }];
+  if (e.discarded !== null && t.push({ label: "Discarded base", amount: e.discarded, text: P(e.discarded), strike: !0 }), e.base !== null && t.push({ label: "Base", amount: e.base, text: P(e.base), strike: !1 }), e.modifierAdd !== null && t.push({
+    label: s.multiplier ? `${ct(s.modifier)} addition` : "Modifier addition",
     amount: e.modifierAdd,
-    text: I(e.modifierAdd),
+    text: P(e.modifierAdd),
     strike: !1
-  }), e.bankLocked !== null && t.push({ label: "Locked base", amount: e.bankLocked, text: I(e.bankLocked), strike: !1 }), e.bankAdds.forEach((r, i) => {
-    t.push({ label: `Added result ${i + 1}`, amount: r, text: I(r), strike: !1 });
-  }), e.wheel !== null && t.push({ label: "Wheel prize", amount: e.wheel, text: I(e.wheel), strike: !1 }), e.gross !== null && t.push({ label: "Gross", amount: e.gross, text: I(e.gross), strike: !1 }), e.net !== null) {
-    const r = e.net > 0 ? `+${I(e.net)}` : I(e.net);
+  }), e.bankLocked !== null && t.push({ label: "Locked base", amount: e.bankLocked, text: P(e.bankLocked), strike: !1 }), e.bankAdds.forEach((r, i) => {
+    t.push({ label: `Added result ${i + 1}`, amount: r, text: P(r), strike: !1 });
+  }), e.wheel !== null && t.push({ label: "Wheel prize", amount: e.wheel, text: P(e.wheel), strike: !1 }), e.gross !== null && t.push({ label: "Gross", amount: e.gross, text: P(e.gross), strike: !1 }), e.net !== null) {
+    const r = e.net > 0 ? `+${P(e.net)}` : P(e.net);
     t.push({ label: "Net", amount: null, text: r, strike: !1 });
   }
   return t;
 }
-function un(s, e) {
+function wn(s, e) {
   return e.error ? "error" : e.idle && !e.onboarded ? "onboarding" : e.idle ? "idle" : !s || s.kind === "reels" ? "spinning" : s.kind === "replace" ? "replace" : s.kind === "bank" ? "bank" : s.kind === "wheel" ? "wheel" : s.kind === "collection" ? "collection" : s.kind === "countup" && s.cueTier > 0 ? "celebrating" : "resolving";
 }
-function Ae(s) {
-  const { outcome: e, schedule: t, balanceAfter: r } = s, i = Math.max(0, s.elapsed), a = on(e, t, i), h = at(t, i), c = e.net > 0 ? Q(e.net, e.cost) : 0, d = t.stages.find((C) => C.kind === "countup");
-  let p = null, b = 0;
-  a.gross !== null && c === 0 && (p = a.gross), a.gross !== null && c > 0 && (d && i < d.startMs ? p = null : d && i < d.startMs + d.durationMs ? (p = Jt(0, e.gross, X(d, i)), b = c >= 3 ? X(d, i) : 0) : a.gross !== null && (p = e.gross, b = c >= 3 ? 1 : 0)), t.mode === "reduced" && (p = e.gross, b = 0);
-  const n = p ?? 0, o = a.gross === null && t.mode !== "reduced" ? r - e.gross : r - e.gross + (c > 0 && d && i < d.startMs + d.durationMs && t.mode !== "reduced" ? n : e.gross), l = t.mode === "reduced" ? e.net > 0 ? c : 0 : a.guaranteedNet === null ? 0 : e.net > 0 ? Q(Math.min(a.guaranteedNet, e.net), e.cost) : 0, u = d && i >= d.startMs && i < d.startMs + d.durationMs, f = t.mode === "reduced" || !u || c === 0 ? 0 : sn[c], _ = t.stages.find((C) => C.kind === "modifier"), m = _ && i >= _.startMs ? (_.cueTier > 0 ? 0.85 : 0.4) * Math.min(1, X(_, i) || 1) : 0;
-  let y = null;
+function Ee(s) {
+  const { outcome: e, schedule: t, balanceAfter: r } = s, i = Math.max(0, s.elapsed), a = pn(e, t, i), u = pt(t, i), d = e.net > 0 ? X(e.net, e.cost) : 0, c = t.stages.find((C) => C.kind === "countup");
+  let m = null, b = 0;
+  a.gross !== null && d === 0 && (m = a.gross), a.gross !== null && d > 0 && (c && i < c.startMs ? m = null : c && i < c.startMs + c.durationMs ? (m = an(0, e.gross, V(c, i)), b = d >= 3 ? V(c, i) : 0) : a.gross !== null && (m = e.gross, b = d >= 3 ? 1 : 0)), t.mode === "reduced" && (m = e.gross, b = 0);
+  const n = m ?? 0, o = a.gross === null && t.mode !== "reduced" ? r - e.gross : r - e.gross + (d > 0 && c && i < c.startMs + c.durationMs && t.mode !== "reduced" ? n : e.gross), l = t.mode === "reduced" ? e.net > 0 ? d : 0 : a.guaranteedNet === null ? 0 : e.net > 0 ? X(Math.min(a.guaranteedNet, e.net), e.cost) : 0, h = c && i >= c.startMs && i < c.startMs + c.durationMs, p = t.mode === "reduced" || !h || d === 0 ? 0 : hn[d], g = t.stages.find((C) => C.kind === "modifier"), f = g && i >= g.startMs ? (g.cueTier > 0 ? 0.85 : 0.4) * Math.min(1, V(g, i) || 1) : 0;
+  let w = null;
   if (e.modifier === "wheel" && e.wheelIndex !== null) {
-    const C = t.stages.find((F) => F.kind === "wheel");
+    const C = t.stages.find((L) => L.kind === "wheel");
     if (t.mode === "reduced")
-      y = { rotation: ke(e.wheelIndex), lit: e.wheelIndex, spinning: !1 };
+      w = { rotation: Te(e.wheelIndex), lit: e.wheelIndex, spinning: !1 };
     else if (C && i >= C.startMs) {
-      const F = X(C, i), V = F < ye, g = V ? F / ye : 1, S = Zt(e.wheelIndex, g), T = V ? null : e.wheelIndex;
-      !V && (it(S), e.wheelIndex), y = { rotation: S, lit: T, spinning: V };
+      const L = V(C, i), ee = L < xe, ge = ee ? L / xe : 1, D = rn(e.wheelIndex, ge), le = ee ? null : e.wheelIndex;
+      !ee && (ht(D), e.wheelIndex), w = { rotation: D, lit: le, spinning: ee };
     } else
-      y = { rotation: ke(0), lit: null, spinning: !1 };
+      w = { rotation: Te(0), lit: null, spinning: !1 };
   }
-  const k = t.mode === "reduced" ? e.modifier === "replace" ? e.steps[0].tokens : e.initial.tokens : hn(e, t, i), A = fn(t, i), E = t.mode !== "reduced" && c > 0 && p !== null && d !== void 0 && i < d.startMs + d.durationMs, B = p === null || E ? "Total" : "Gross", O = a.net === null ? "Net pending" : a.net > 0 ? `Net +${I(a.net)}` : `Net ${I(a.net)}`, q = t.stages.find((C) => C.kind === "collection"), x = t.mode === "reduced" || (q ? i >= q.startMs : !1), Z = x ? e.collectionFlourish ? 10 : e.collectionBefore + 1 : e.collectionBefore, Y = x && e.collectionFlourish, P = s.sessionNetAfter ?? e.net, J = t.mode === "reduced" || a.net !== null;
+  const v = t.mode === "reduced" ? e.modifier === "replace" ? e.steps[0].tokens : e.initial.tokens : yn(e, t, i), A = vn(t, i), M = t.mode !== "reduced" && d > 0 && m !== null && c !== void 0 && i < c.startMs + c.durationMs, E = m === null || M ? "Total" : "Gross", F = a.net === null ? "Net pending" : a.net > 0 ? `Net +${P(a.net)}` : `Net ${P(a.net)}`, R = t.stages.find((C) => C.kind === "collection"), x = t.mode === "reduced" || (R ? i >= R.startMs : !1), Q = x ? e.collectionFlourish ? 10 : e.collectionBefore + 1 : e.collectionBefore, Y = x && e.collectionFlourish, K = s.sessionNetAfter ?? e.net, J = t.mode === "reduced" || a.net !== null;
   return {
     receiptId: t.receiptId,
-    phase: un(h, { onboarded: s.onboarded ?? !0, error: s.error ?? !1, idle: s.idle ?? !1 }),
+    phase: wn(u, { onboarded: s.onboarded ?? !0, error: s.error ?? !1, idle: s.idle ?? !1 }),
     cost: e.cost,
     balanceShown: o,
-    tokens: k,
+    tokens: v,
     spinning: A,
-    modifier: _ && i >= _.startMs || t.mode === "reduced" ? e.modifier : null,
+    modifier: g && i >= g.startMs || t.mode === "reduced" ? e.modifier : null,
     reading: a.reading,
     discarded: a.discarded,
-    lines: cn(e, a),
-    hero: p,
-    totalLabel: B,
-    netText: O,
+    lines: bn(e, a),
+    hero: m,
+    totalLabel: E,
+    netText: F,
     cueTier: e.net <= 0 ? 0 : l,
-    plate: t.mode === "reduced" || e.net <= 0 ? null : rn(e.net, e.cost),
-    particles: f,
+    plate: t.mode === "reduced" || e.net <= 0 ? null : fn(e.net, e.cost),
+    particles: p,
     bloom: e.net <= 0 || t.mode === "reduced" ? 0 : b,
-    modifierGlow: t.mode === "reduced" ? 0 : m,
-    anticipation: t.mode !== "reduced" && e.net > 0 && (e.modifier === "replace" || e.modifier === "bank" || e.modifier === "wheel" || c >= 2) && A.some(Boolean),
-    wheel: y,
-    meterFilled: Math.min(10, Z),
+    modifierGlow: t.mode === "reduced" ? 0 : f,
+    anticipation: t.mode !== "reduced" && e.net > 0 && (e.modifier === "replace" || e.modifier === "bank" || e.modifier === "wheel" || d >= 2) && A.some(Boolean),
+    wheel: w,
+    meterFilled: Math.min(10, Q),
     meterFlourish: Y,
     reduced: t.mode === "reduced",
-    sessionNetShown: J ? P : P - e.net
+    sessionNetShown: J ? K : K - e.net
   };
 }
-function hn(s, e, t) {
-  const i = e.stages.find((c) => c.kind === "reels")?.reelStops ?? [0, 0, 0], a = e.stages.find((c) => c.kind === "replace"), h = e.stages.find((c) => c.kind === "bank");
+function yn(s, e, t) {
+  const i = e.stages.find((d) => d.kind === "reels")?.reelStops ?? [0, 0, 0], a = e.stages.find((d) => d.kind === "replace"), u = e.stages.find((d) => d.kind === "bank");
   if (a && t >= a.startMs)
-    return X(a, t) < 0.78 ? [null, null, null] : s.steps[0].tokens;
-  if (h && t >= h.startMs) {
-    const c = X(h, t);
-    return c >= 1 / 6 && c < 0.5 || c >= 0.62 && c < 5 / 6 ? [null, null, null] : c >= 5 / 6 ? s.steps[1].tokens : c >= 0.5 ? s.steps[0].tokens : s.initial.tokens;
+    return V(a, t) < 0.78 ? [null, null, null] : s.steps[0].tokens;
+  if (u && t >= u.startMs) {
+    const d = V(u, t);
+    return d >= 1 / 6 && d < 0.5 || d >= 0.62 && d < 5 / 6 ? [null, null, null] : d >= 5 / 6 ? s.steps[1].tokens : d >= 0.5 ? s.steps[0].tokens : s.initial.tokens;
   }
   return [
     t >= i[0] ? s.initial.tokens[0] : null,
@@ -2140,64 +2144,64 @@ function hn(s, e, t) {
     t >= i[2] ? s.initial.tokens[2] : null
   ];
 }
-function fn(s, e) {
+function vn(s, e) {
   if (s.mode === "reduced") return [!1, !1, !1, !1];
-  const r = s.stages.find((d) => d.kind === "reels")?.reelStops ?? [0, 0, 0], i = s.stages.find((d) => d.kind === "modifier"), a = s.stages.find((d) => d.kind === "replace"), h = s.stages.find((d) => d.kind === "bank");
-  let c = !1;
-  if (a && e >= a.startMs && X(a, e) < 0.78 && (c = !0), h && e >= h.startMs) {
-    const d = X(h, e);
-    (d >= 1 / 6 && d < 0.5 || d >= 0.62 && d < 5 / 6) && (c = !0);
+  const r = s.stages.find((c) => c.kind === "reels")?.reelStops ?? [0, 0, 0], i = s.stages.find((c) => c.kind === "modifier"), a = s.stages.find((c) => c.kind === "replace"), u = s.stages.find((c) => c.kind === "bank");
+  let d = !1;
+  if (a && e >= a.startMs && V(a, e) < 0.78 && (d = !0), u && e >= u.startMs) {
+    const c = V(u, e);
+    (c >= 1 / 6 && c < 0.5 || c >= 0.62 && c < 5 / 6) && (d = !0);
   }
   return [
-    c || e < r[0],
-    c || e < r[1],
-    c || e < r[2],
+    d || e < r[0],
+    d || e < r[1],
+    d || e < r[2],
     e < (i?.startMs ?? r[2])
   ];
 }
-function lt(s) {
+function mt(s) {
   return [
-    `Cost ${I(s.cost)}.`,
-    s.discarded !== null ? `Discarded base ${I(s.discarded)} is excluded.` : "",
-    `Gross ${I(s.gross)}.`,
-    Qt(s) + ".",
-    Yt(s),
+    `Cost ${P(s.cost)}.`,
+    s.discarded !== null ? `Discarded base ${P(s.discarded)} is excluded.` : "",
+    `Gross ${P(s.gross)}.`,
+    en(s) + ".",
+    tn(s),
     s.collectionFlourish ? "Energy flourish, no credit reward." : ""
   ].filter(Boolean).join(" ");
 }
-class dt extends Error {
+class gt extends Error {
   constructor() {
     super("economic draw aborted"), this.name = "RngAbortError";
   }
 }
-const He = 2 ** 32;
-function ct(s) {
-  if (!Number.isInteger(s) || s < 1 || s > He) throw new Error("invalid bound");
-  return Math.floor(He / s) * s;
+const Ge = 2 ** 32;
+function _t(s) {
+  if (!Number.isInteger(s) || s < 1 || s > Ge) throw new Error("invalid bound");
+  return Math.floor(Ge / s) * s;
 }
-function pn(s, e) {
-  if (!Number.isInteger(s) || s < 0 || s >= He) throw new Error("invalid sample");
-  const t = ct(e);
+function kn(s, e) {
+  if (!Number.isInteger(s) || s < 0 || s >= Ge) throw new Error("invalid sample");
+  const t = _t(e);
   return s >= t ? { ok: !1 } : { ok: !0, value: s % e };
 }
-class mn {
+class An {
   constructor(e = (r) => crypto.getRandomValues(r), t = 32) {
     this.source = e, this.maxRejects = t;
   }
   source;
   maxRejects;
   nextInt(e) {
-    ct(e);
+    _t(e);
     const t = new Uint32Array(1);
     for (let r = 0; r < this.maxRejects; r++) {
       this.source(t);
-      const i = pn(t[0], e);
+      const i = kn(t[0], e);
       if (i.ok) return i.value;
     }
-    throw new dt();
+    throw new gt();
   }
 }
-class _n {
+class Sn {
   constructor(e) {
     this.inner = e;
   }
@@ -2207,8 +2211,8 @@ class _n {
     return this.inner.nextInt(e);
   }
 }
-const xe = "auric-dynamo.snapshot.v1", gn = "auric-dynamo";
-function ut() {
+const Le = "auric-dynamo.snapshot.v1", xn = "auric-dynamo";
+function bt() {
   return {
     muted: !1,
     music: !0,
@@ -2220,28 +2224,28 @@ function ut() {
     cost: 10
   };
 }
-function Ge(s, e = "durable") {
+function Ye(s, e = "durable") {
   return {
-    schemaVersion: Dt,
+    schemaVersion: Yt,
     revision: 1,
-    balance: $t,
+    balance: jt,
     meter: 0,
     sessionNet: 0,
     activeMs: 0,
     sessionStartedAt: s,
-    prefs: ut(),
+    prefs: bt(),
     receipt: null,
     storage: e,
     economy: "local"
   };
 }
-function ue(s) {
+function pe(s) {
   return typeof s == "object" && s !== null && !Array.isArray(s);
 }
-function bn(s) {
-  return ue(s) ? typeof s.gross == "number" && typeof s.net == "number" && typeof s.cost == "number" && typeof s.modifier == "string" && Array.isArray(s.contributors) && Array.isArray(s.steps) && ue(s.initial) : !1;
+function Mn(s) {
+  return pe(s) ? typeof s.gross == "number" && typeof s.net == "number" && typeof s.cost == "number" && typeof s.modifier == "string" && Array.isArray(s.contributors) && Array.isArray(s.steps) && pe(s.initial) : !1;
 }
-function qe(s) {
+function je(s) {
   if (s === null || s === "") return { ok: !1, reason: "empty" };
   let e;
   try {
@@ -2249,7 +2253,7 @@ function qe(s) {
   } catch {
     return { ok: !1, reason: "corrupt" };
   }
-  if (!ue(e)) return { ok: !1, reason: "corrupt" };
+  if (!pe(e)) return { ok: !1, reason: "corrupt" };
   if (e.schemaVersion !== 1) return { ok: !1, reason: "version" };
   if (!Number.isSafeInteger(e.balance) || e.balance < 0) return { ok: !1, reason: "balance" };
   if (!Number.isSafeInteger(e.meter) || e.meter < 0 || e.meter > 9) return { ok: !1, reason: "meter" };
@@ -2257,7 +2261,7 @@ function qe(s) {
   if (!Number.isSafeInteger(e.revision) || e.revision < 1) return { ok: !1, reason: "revision" };
   if (typeof e.activeMs != "number" || !Number.isFinite(e.activeMs) || e.activeMs < 0) return { ok: !1, reason: "time" };
   if (typeof e.sessionStartedAt != "number" || !Number.isFinite(e.sessionStartedAt)) return { ok: !1, reason: "time" };
-  if (!ue(e.prefs) || !We(e.prefs.cost) || !Be(e.prefs.autoplayCount))
+  if (!pe(e.prefs) || !Qe(e.prefs.cost) || !De(e.prefs.autoplayCount))
     return { ok: !1, reason: "prefs" };
   const t = e.prefs;
   if (typeof t.muted != "boolean" || typeof t.music != "boolean" || typeof t.effects != "boolean")
@@ -2266,7 +2270,7 @@ function qe(s) {
   if (!(t.reducedMotion === null || typeof t.reducedMotion == "boolean")) return { ok: !1, reason: "prefs" };
   let r = null;
   if (e.receipt !== null && e.receipt !== void 0) {
-    if (!ue(e.receipt) || !bn(e.receipt.outcome)) return { ok: !1, reason: "receipt" };
+    if (!pe(e.receipt) || !Mn(e.receipt.outcome)) return { ok: !1, reason: "receipt" };
     if (typeof e.receipt.id != "string" || !e.receipt.id) return { ok: !1, reason: "receipt" };
     if (e.receipt.revision !== e.revision) return { ok: !1, reason: "receipt" };
     if (e.receipt.balanceAfter !== e.balance) return { ok: !1, reason: "receipt" };
@@ -2300,16 +2304,16 @@ function qe(s) {
     }
   };
 }
-function ht(s, e, t) {
-  const r = qe(s.get(xe));
-  return r.ok ? { snapshot: { ...r.snapshot, storage: t }, resetReason: null } : { snapshot: Ge(e, t), resetReason: r.reason === "empty" ? null : r.reason };
+function wt(s, e, t) {
+  const r = je(s.get(Le));
+  return r.ok ? { snapshot: { ...r.snapshot, storage: t }, resetReason: null } : { snapshot: Ye(e, t), resetReason: r.reason === "empty" ? null : r.reason };
 }
-function oe(s, e) {
-  s.set(xe, JSON.stringify(e));
+function ae(s, e) {
+  s.set(Le, JSON.stringify(e));
 }
-async function wn(s) {
+async function Tn(s) {
   return s.locker.exclusive(() => {
-    const e = s.memory ?? ht(s.kv, s.now, "durable").snapshot;
+    const e = s.memory ?? wt(s.kv, s.now, "durable").snapshot;
     if (!s.settled && e.balance < s.cost)
       return { result: { kind: "insufficient", snapshot: e }, memory: s.memory, warning: null };
     let t;
@@ -2317,11 +2321,11 @@ async function wn(s) {
       t = s.settled.outcome;
     else
       try {
-        t = rt(s.rng, s.cost, e.meter);
-      } catch (d) {
-        if (d instanceof dt)
+        t = ut(s.rng, s.cost, e.meter);
+      } catch (c) {
+        if (c instanceof gt)
           return { result: { kind: "rng-abort", snapshot: e }, memory: s.memory, warning: null };
-        throw d;
+        throw c;
       }
     let r;
     try {
@@ -2329,7 +2333,7 @@ async function wn(s) {
     } catch {
       return { result: { kind: "overflow", snapshot: e }, memory: s.memory, warning: null };
     }
-    const i = e.revision + 1, a = G(e.sessionNet + t.net, "session net"), h = {
+    const i = e.revision + 1, a = G(e.sessionNet + t.net, "session net"), u = {
       id: s.newId(),
       revision: i,
       acknowledged: !1,
@@ -2337,33 +2341,33 @@ async function wn(s) {
       balanceAfter: r,
       meterAfter: t.collectionAfter,
       sessionNetAfter: a
-    }, c = {
+    }, d = {
       ...e,
       revision: i,
       balance: r,
       meter: t.collectionAfter,
       sessionNet: a,
       activeMs: Math.max(e.activeMs, s.activeMs),
-      receipt: h,
+      receipt: u,
       economy: s.settled ? "wallet" : e.economy
     };
     if (s.memory)
-      return { result: { kind: "committed", snapshot: c, storage: "memory" }, memory: c, warning: null };
+      return { result: { kind: "committed", snapshot: d, storage: "memory" }, memory: d, warning: null };
     try {
-      return oe(s.kv, c), { result: { kind: "committed", snapshot: c, storage: c.storage }, memory: null, warning: null };
+      return ae(s.kv, d), { result: { kind: "committed", snapshot: d, storage: d.storage }, memory: null, warning: null };
     } catch {
-      const d = { ...c, storage: "memory" };
+      const c = { ...d, storage: "memory" };
       return {
-        result: { kind: "committed", snapshot: d, storage: "memory" },
-        memory: d,
+        result: { kind: "committed", snapshot: c, storage: "memory" },
+        memory: c,
         warning: "This browser could not save the demo. Play continues in this tab only. A reload will not restore it."
       };
     }
   });
 }
-async function yn(s) {
+async function En(s) {
   return s.locker.exclusive(() => {
-    const e = s.memory ?? vn(s.kv), t = e.receipt;
+    const e = s.memory ?? In(s.kv), t = e.receipt;
     if (!t || t.id !== s.id || t.revision !== s.revision || e.revision !== s.revision)
       return { snapshot: e, memory: s.memory, applied: !1 };
     if (t.acknowledged) return { snapshot: e, memory: s.memory, applied: !1 };
@@ -2374,7 +2378,7 @@ async function yn(s) {
     };
     if (s.memory) return { snapshot: r, memory: r, applied: !0 };
     try {
-      oe(s.kv, r);
+      ae(s.kv, r);
     } catch {
       const i = { ...r, storage: "memory" };
       return { snapshot: i, memory: i, applied: !0 };
@@ -2382,32 +2386,32 @@ async function yn(s) {
     return { snapshot: r, memory: null, applied: !0 };
   });
 }
-function vn(s) {
-  const e = qe(s.get(xe));
-  return e.ok ? e.snapshot : Ge(Date.now(), "durable");
+function In(s) {
+  const e = je(s.get(Le));
+  return e.ok ? e.snapshot : Ye(Date.now(), "durable");
 }
-async function kn(s) {
+async function Ln(s) {
   return s.locker.exclusive(() => {
-    const e = qe(s.kv.get(xe)), t = e.ok ? { ...e.snapshot.prefs, onboarded: !0 } : ut(), r = Ge(s.now, s.storage);
+    const e = je(s.kv.get(Le)), t = e.ok ? { ...e.snapshot.prefs, onboarded: !0 } : bt(), r = Ye(s.now, s.storage);
     r.prefs = t, r.revision = e.ok ? e.snapshot.revision + 1 : 1;
     try {
-      oe(s.kv, r);
+      ae(s.kv, r);
     } catch {
       r.storage = "memory";
     }
     return r;
   });
 }
-function An() {
+function Pn() {
   return { exclusive: (s) => Promise.resolve(s()) };
 }
-function Sn() {
-  return new mn();
+function Cn() {
+  return new An();
 }
-class xn {
-  constructor(e, t, r, i, a, h, c) {
-    this.outcome = e, this.schedule = t, this.balanceAfter = r, this.meterAfter = i, this.sessionNetAfter = a, this.audio = h, this.hooks = c, this.finished = new Promise((d) => {
-      this.resolveDone = d;
+class Nn {
+  constructor(e, t, r, i, a, u, d) {
+    this.outcome = e, this.schedule = t, this.balanceAfter = r, this.meterAfter = i, this.sessionNetAfter = a, this.audio = u, this.hooks = d, this.finished = new Promise((c) => {
+      this.resolveDone = c;
     });
   }
   outcome;
@@ -2431,7 +2435,7 @@ class xn {
     this.done || t || e <= 0 || (this.elapsed = Math.min(this.schedule.totalMs, this.elapsed + e), this.fireCues(), this.elapsed >= this.schedule.totalMs ? this.finish() : this.hooks.onFrame(this.frame()));
   }
   skip() {
-    this.done || (this.audio.cancelPending(), this.audio.fadePresentation(Se.fadeMs), this.fired = this.schedule.cues.length, this.elapsed = this.schedule.totalMs, this.finish());
+    this.done || (this.audio.cancelPending(), this.audio.fadePresentation(Ie.fadeMs), this.fired = this.schedule.cues.length, this.elapsed = this.schedule.totalMs, this.finish());
   }
   emit() {
     this.fireCues(), this.elapsed >= this.schedule.totalMs ? this.finish() : this.hooks.onFrame(this.frame());
@@ -2442,7 +2446,7 @@ class xn {
       this.audio.play(e[this.fired].sound, e[this.fired].rate), this.fired += 1;
   }
   frame() {
-    return Ae({
+    return Ee({
       outcome: this.outcome,
       schedule: this.schedule,
       elapsed: this.elapsed,
@@ -2454,7 +2458,7 @@ class xn {
   finish() {
     if (this.done) return;
     this.done = !0;
-    const e = Ae({
+    const e = Ee({
       outcome: this.outcome,
       schedule: this.schedule,
       elapsed: Math.max(this.schedule.totalMs, 1),
@@ -2462,16 +2466,16 @@ class xn {
       meterAfter: this.meterAfter,
       sessionNetAfter: this.sessionNetAfter
     });
-    this.hooks.onFrame(e), this.summarySent || (this.summarySent = !0, this.hooks.onSummary(lt(this.outcome))), this.hooks.onDone(), this.resolveDone();
+    this.hooks.onFrame(e), this.summarySent || (this.summarySent = !0, this.hooks.onSummary(mt(this.outcome))), this.hooks.onDone(), this.resolveDone();
   }
 }
-class Mn {
-  constructor(e, t, r, i, a, h, c, d, p = !1, b = () => crypto.randomUUID()) {
-    this.kv = e, this.locker = t, this.rng = r, this.audio = i, this.onFrame = a, this.onSummary = h, this.newId = b, this.osReduced = p, this.now = c;
-    const n = ht(e, c, d);
+class Bn {
+  constructor(e, t, r, i, a, u, d, c, m = !1, b = () => crypto.randomUUID()) {
+    this.kv = e, this.locker = t, this.rng = r, this.audio = i, this.onFrame = a, this.onSummary = u, this.newId = b, this.osReduced = m, this.now = d;
+    const n = wt(e, d, c);
     if (this.snapshot = n.snapshot, this.resetReason = n.resetReason, this.activeMs = this.snapshot.activeMs, n.resetReason)
       try {
-        oe(e, this.snapshot);
+        ae(e, this.snapshot);
       } catch {
         this.enterMemory("This browser could not save the demo. Play continues in this tab only. A reload will not restore it.");
       }
@@ -2574,7 +2578,7 @@ class Mn {
     }, this.memory) this.memory = this.snapshot;
     else
       try {
-        oe(this.kv, this.snapshot);
+        ae(this.kv, this.snapshot);
       } catch {
         this.enterMemory("This browser could not save the last result. Play continues in this tab only.");
       }
@@ -2618,7 +2622,7 @@ class Mn {
     return this.auto = null, this.beginSpin();
   }
   startAuto(e) {
-    if (!Be(e) || this.locked || this.auto) return !1;
+    if (!De(e) || this.locked || this.auto) return !1;
     this.auto = { remaining: e, stopped: null, nextAt: Number.POSITIVE_INFINITY };
     const t = this.beginSpin();
     return t || (this.auto = null), t;
@@ -2642,7 +2646,7 @@ class Mn {
     await this.bootP, await this.runP;
   }
   setCost(e) {
-    return this.locked || !We(e) ? !1 : (this.snapshot = { ...this.snapshot, prefs: { ...this.snapshot.prefs, cost: e } }, this.persistPrefs(), !0);
+    return this.locked || !Qe(e) ? !1 : (this.snapshot = { ...this.snapshot, prefs: { ...this.snapshot.prefs, cost: e } }, this.persistPrefs(), !0);
   }
   setTurbo(e) {
     this.locked || (this.snapshot = { ...this.snapshot, prefs: { ...this.snapshot.prefs, turbo: e } }, this.persistPrefs());
@@ -2654,7 +2658,7 @@ class Mn {
     this.snapshot = { ...this.snapshot, prefs: { ...this.snapshot.prefs, ...e } }, this.persistPrefs();
   }
   setAutoCount(e) {
-    return this.locked || !Be(e) ? !1 : (this.snapshot = { ...this.snapshot, prefs: { ...this.snapshot.prefs, autoplayCount: e } }, this.persistPrefs(), !0);
+    return this.locked || !De(e) ? !1 : (this.snapshot = { ...this.snapshot, prefs: { ...this.snapshot.prefs, autoplayCount: e } }, this.persistPrefs(), !0);
   }
   finishOnboarding() {
     this.snapshot = { ...this.snapshot, prefs: { ...this.snapshot.prefs, onboarded: !0 } }, this.persistPrefs();
@@ -2662,7 +2666,7 @@ class Mn {
   async reset() {
     if (this.locked || this.mode !== "practice") return !1;
     this.auto = null;
-    const e = this.memory ? "memory" : this.snapshot.storage, t = await kn({ kv: this.kv, locker: this.locker, now: this.now, storage: e });
+    const e = this.memory ? "memory" : this.snapshot.storage, t = await Ln({ kv: this.kv, locker: this.locker, now: this.now, storage: e });
     return this.snapshot = t, this.memory = t.storage === "memory" ? t : null, this.activeMs = 0, this.summary = "", this.lastOutcome = null, this.message = null, !0;
   }
   /** Inert in production builds. Development uses it for scripted screenshots. */
@@ -2682,12 +2686,12 @@ class Mn {
       if (this.walletPlay)
         try {
           t = await this.walletPlay(this.snapshot.prefs.cost, this.snapshot.meter);
-        } catch (c) {
-          const d = c instanceof Error ? c.message : "";
-          /insufficient/i.test(d) ? (this.message = "Not enough for this cost.", this.auto && (this.auto.stopped = "credits")) : /rules/i.test(d) ? (this.message = "Accept the rules to continue.", this.auto && (this.auto.stopped = "error")) : (this.message = d || "The draw could not be completed. Nothing was taken. Try again.", this.auto && (this.auto.stopped = "error"));
+        } catch (d) {
+          const c = d instanceof Error ? d.message : "";
+          /insufficient/i.test(c) ? (this.message = "Not enough for this cost.", this.auto && (this.auto.stopped = "credits")) : /rules/i.test(c) ? (this.message = "Accept the rules to continue.", this.auto && (this.auto.stopped = "error")) : (this.message = c || "The draw could not be completed. Nothing was taken. Try again.", this.auto && (this.auto.stopped = "error"));
           return;
         }
-      const r = await wn({
+      const r = await Tn({
         kv: this.kv,
         locker: this.locker,
         rng: this.rng,
@@ -2709,17 +2713,17 @@ class Mn {
         await this.ack(i.id, i.revision);
         return;
       }
-      const a = Fe(i.outcome, this.motion(), i.id), h = new xn(i.outcome, a, i.balanceAfter, i.meterAfter, i.sessionNetAfter, this.audio, {
-        onFrame: (c) => this.show(c),
-        onSummary: (c) => this.postSummary(c),
+      const a = We(i.outcome, this.motion(), i.id), u = new Nn(i.outcome, a, i.balanceAfter, i.meterAfter, i.sessionNetAfter, this.audio, {
+        onFrame: (d) => this.show(d),
+        onSummary: (d) => this.postSummary(d),
         onDone: () => {
         }
       });
-      this.presentation = h;
+      this.presentation = u;
       try {
-        h.start(), await h.finished;
+        u.start(), await u.finished;
       } catch {
-        h.skip(), await h.finished;
+        u.skip(), await u.finished;
       }
       await this.ack(i.id, i.revision);
     } catch {
@@ -2734,17 +2738,17 @@ class Mn {
       this.auto = null;
       return;
     }
-    if (St(this.lastOutcome, {
+    if (Ct(this.lastOutcome, {
       remaining: this.auto.remaining
     })) {
       this.auto = null;
       return;
     }
-    const t = At(this.acceptedAt, this.now);
+    const t = Pt(this.acceptedAt, this.now);
     t <= this.now ? this.beginSpin() : this.auto.nextAt = t;
   }
   async ack(e, t) {
-    const r = await yn({
+    const r = await En({
       kv: this.kv,
       locker: this.locker,
       memory: this.memory,
@@ -2759,11 +2763,11 @@ class Mn {
   }
   restoreReceipt() {
     const e = this.snapshot.receipt;
-    e && (this.showRestoredFrame(e), this.postSummary(lt(e.outcome)), this.lastOutcome = e.outcome, e.acknowledged || (this.bootP = this.ack(e.id, e.revision)));
+    e && (this.showRestoredFrame(e), this.postSummary(mt(e.outcome)), this.lastOutcome = e.outcome, e.acknowledged || (this.bootP = this.ack(e.id, e.revision)));
   }
   showRestoredFrame(e) {
-    const t = Fe(e.outcome, "reduced", e.id);
-    this.show(Ae({
+    const t = We(e.outcome, "reduced", e.id);
+    this.show(Ee({
       outcome: e.outcome,
       schedule: t,
       elapsed: t.totalMs,
@@ -2781,7 +2785,7 @@ class Mn {
       return;
     }
     try {
-      oe(this.kv, this.snapshot);
+      ae(this.kv, this.snapshot);
     } catch {
       this.enterMemory("This browser could not save the demo. Play continues in this tab only. A reload will not restore it.");
     }
@@ -2793,24 +2797,24 @@ class Mn {
     return !this.snapshot.prefs.onboarded && !this.locked ? "onboarding" : this.message && !this.locked && this.message.startsWith("The draw") ? "error" : this.locked ? this.framePhase === "idle" ? "spinning" : this.framePhase : "idle";
   }
 }
-const Ye = {
+const ze = {
   symbolById: {},
   paylines: []
-}, Ie = {}, Tn = 240, En = 5, In = 3, Le = { outQuad: (s) => 1 - (1 - s) * (1 - s), inOutQuad: (s) => s < 0.5 ? 2 * s * s : 1 - Math.pow(-2 * s + 2, 2) / 2, outBack: (s) => 1 + 2.2 * Math.pow(s - 1, 3) + 1.2 * Math.pow(s - 1, 2) }, Pe = (s, e) => (s % e + e) % e;
-class Ln {
+}, Be = {}, Fn = 240, On = 5, Hn = 3, Fe = { outQuad: (s) => 1 - (1 - s) * (1 - s), inOutQuad: (s) => s < 0.5 ? 2 * s * s : 1 - Math.pow(-2 * s + 2, 2) / 2, outBack: (s) => 1 + 2.2 * Math.pow(s - 1, 3) + 1.2 * Math.pow(s - 1, 2) }, Oe = (s, e) => (s % e + e) % e;
+class Rn {
   /**
    * opts is optional. Lucky Pots calls this with the canvas, the payline svg and the two marker
    * columns, and gets the 5 by 3 view it has always had. Another game can pass
    * { reels, rows, cell, paylines, symbolArt } and use the same spin, blur and bounce.
    */
   constructor(e, t, r, i, a = {}) {
-    this.c = e, this.ctx = e.getContext("2d"), this.svg = t, this.reelsN = a.reels ?? En, this.rowsN = a.rows ?? In, this.cell = a.cell ?? Tn, this.pitch = a.cellH ?? this.cell, this.w = this.reelsN * this.cell, this.h = this.rowsN * this.pitch, this.symbolArt = a.symbolArt ?? null, this.well = a.well ?? ["#1b4a2f", "#0a2217"], this.symbolFill = a.symbolFill === !0, this.plain = a.plain === !0, this.cellArt = a.cellArt ?? null, this.glowSprite = a.glowSprite ?? null, this.winSpark = a.winSpark ?? null, this.landSeconds = a.landSeconds ?? 0.42, this.paylines = a.paylines ?? Ye.paylines, this.paused = !1, a.reels && (e.width = this.w, e.height = this.h), this.strips = null, this.pos = new Array(this.reelsN).fill(0), this.reel = Array.from({ length: this.reelsN }, () => ({ phase: "idle", speed: 0 })), this.highlight = null, this.labels = /* @__PURE__ */ new Map(), this.wildReels = [], this.wildAnim = /* @__PURE__ */ new Map(), this.onReelStop = () => {
-    }, this.glowReels = /* @__PURE__ */ new Set(), this.markers = { l: [], r: [] }, r && i && this.paylines.forEach((h, c) => {
-      const d = document.createElement("div");
-      d.className = "marker", d.textContent = c + 1, d.style.top = (h[0] + 0.5) * this.pitch + "px", r.appendChild(d);
-      const p = document.createElement("div");
-      p.className = "marker", p.textContent = c + 1, p.style.top = (h[this.reelsN - 1] + 0.5) * this.pitch + "px", i.appendChild(p), this.markers.l.push(d), this.markers.r.push(p);
-    }), this.last = performance.now(), requestAnimationFrame((h) => this.frame(h));
+    this.c = e, this.ctx = e.getContext("2d"), this.svg = t, this.reelsN = a.reels ?? On, this.rowsN = a.rows ?? Hn, this.cell = a.cell ?? Fn, this.pitch = a.cellH ?? this.cell, this.w = this.reelsN * this.cell, this.h = this.rowsN * this.pitch, this.symbolArt = a.symbolArt ?? null, this.well = a.well ?? ["#1b4a2f", "#0a2217"], this.symbolFill = a.symbolFill === !0, this.plain = a.plain === !0, this.cellArt = a.cellArt ?? null, this.glowSprite = a.glowSprite ?? null, this.winSpark = a.winSpark ?? null, this.pulseWins = !1, this.landSeconds = a.landSeconds ?? 0.42, this.paylines = a.paylines ?? ze.paylines, this.paused = !1, a.reels && (e.width = this.w, e.height = this.h), this.strips = null, this.pos = new Array(this.reelsN).fill(0), this.reel = Array.from({ length: this.reelsN }, () => ({ phase: "idle", speed: 0 })), this.highlight = null, this.labels = /* @__PURE__ */ new Map(), this.wildReels = [], this.wildAnim = /* @__PURE__ */ new Map(), this.onReelStop = () => {
+    }, this.glowReels = /* @__PURE__ */ new Set(), this.markers = { l: [], r: [] }, r && i && this.paylines.forEach((u, d) => {
+      const c = document.createElement("div");
+      c.className = "marker", c.textContent = d + 1, c.style.top = (u[0] + 0.5) * this.pitch + "px", r.appendChild(c);
+      const m = document.createElement("div");
+      m.className = "marker", m.textContent = d + 1, m.style.top = (u[this.reelsN - 1] + 0.5) * this.pitch + "px", i.appendChild(m), this.markers.l.push(c), this.markers.r.push(m);
+    }), this.last = performance.now(), requestAnimationFrame((u) => this.frame(u));
   }
   /** Install strips and sit the reels on the given stops. */
   setStrips(e, t) {
@@ -2822,7 +2826,7 @@ class Ln {
   }
   symAt(e, t) {
     const r = this.strips[e];
-    return r[Pe(t, r.length)];
+    return r[Oe(t, r.length)];
   }
   /** Start all reels spinning. Resolves immediately; stopAt lands them. */
   spin({ stagger: e = 0.12 } = {}) {
@@ -2839,9 +2843,9 @@ class Ln {
         i();
         return;
       }
-      for (let d = 0; d < this.rowsN; d++) a[Pe(t + d, a.length)] = r[d];
-      const h = this.reel[e], c = performance.now() / 1e3;
-      h.stopAt = Math.max(c, (h.startedAt || c) + 0.12), h.target = t, h.pendingStop = !0, h.onLand = () => {
+      for (let c = 0; c < this.rowsN; c++) a[Oe(t + c, a.length)] = r[c];
+      const u = this.reel[e], d = performance.now() / 1e3;
+      u.stopAt = Math.max(d, (u.startedAt || d) + 0.12), u.target = t, u.pendingStop = !0, u.onLand = () => {
         this.onReelStop(e, r.slice()), i();
       };
     });
@@ -2852,15 +2856,15 @@ class Ln {
    * Resolves when the last reel has settled.
    */
   stopAt(e, t, { stagger: r = 0.22, minSpin: i = 0.6, delays: a = [] } = {}) {
-    return new Promise((h) => {
-      const c = performance.now() / 1e3;
-      let d = this.reelsN;
-      e.forEach((p, b) => {
+    return new Promise((u) => {
+      const d = performance.now() / 1e3;
+      let c = this.reelsN;
+      e.forEach((m, b) => {
         const n = this.strips[b];
-        for (let u = 0; u < this.rowsN; u++) n[Pe(p + u, n.length)] = t[b][u];
+        for (let h = 0; h < this.rowsN; h++) n[Oe(m + h, n.length)] = t[b][h];
         const o = this.reel[b], l = a[b] || 0;
-        o.stopAt = Math.max(c, o.startedAt + i) + b * r + l, o.target = p, o.landed = !1, o.pendingStop = !0, o.onLand = () => {
-          d--, this.onReelStop(b, t[b].slice()), d === 0 && h();
+        o.stopAt = Math.max(d, o.startedAt + i) + b * r + l, o.target = m, o.landed = !1, o.pendingStop = !0, o.onLand = () => {
+          c--, this.onReelStop(b, t[b].slice()), c === 0 && u();
         };
       });
     });
@@ -2887,24 +2891,24 @@ class Ln {
           i.phase = "pull", i.pullFrom = this.pos[a];
         else return;
       if (i.phase === "pull") {
-        const h = Math.min(1, (t - i.t0) / 0.14);
-        this.pos[a] = i.pullFrom + 0.35 * Math.sin(h * Math.PI / 2), h >= 1 && (i.phase = "spin", i.speed = 4);
+        const u = Math.min(1, (t - i.t0) / 0.14);
+        this.pos[a] = i.pullFrom + 0.35 * Math.sin(u * Math.PI / 2), u >= 1 && (i.phase = "spin", i.speed = 4);
       } else if (i.phase === "spin") {
         if (i.speed = Math.min(26, i.speed + 90 * r), this.pos[a] -= i.speed * r, i.pendingStop && t >= i.stopAt) {
           i.phase = "land", i.landT0 = t, i.pendingStop = !1;
-          const h = this.pos[a] - Math.floor(this.pos[a]);
-          i.landFrom = i.target + 2.6 + h, this.pos[a] = i.landFrom;
+          const u = this.pos[a] - Math.floor(this.pos[a]);
+          i.landFrom = i.target + 2.6 + u, this.pos[a] = i.landFrom;
         }
       } else if (i.phase === "land") {
-        const h = this.landSeconds, c = Math.min(1, (t - i.landT0) / h), d = 0.26;
-        if (c < 0.62) {
-          const p = Le.outQuad(c / 0.62);
-          this.pos[a] = i.landFrom + (i.target - d - i.landFrom) * p;
+        const u = this.landSeconds, d = Math.min(1, (t - i.landT0) / u), c = 0.26;
+        if (d < 0.62) {
+          const m = Fe.outQuad(d / 0.62);
+          this.pos[a] = i.landFrom + (i.target - c - i.landFrom) * m;
         } else {
-          const p = Le.inOutQuad((c - 0.62) / 0.38);
-          this.pos[a] = i.target - d + d * p;
+          const m = Fe.inOutQuad((d - 0.62) / 0.38);
+          this.pos[a] = i.target - c + c * m;
         }
-        c >= 1 && (this.pos[a] = i.target, i.phase = "idle", i.speed = 0, i.onLand && i.onLand(), i.onLand = null);
+        d >= 1 && (this.pos[a] = i.target, i.phase = "idle", i.speed = 0, i.onLand && i.onLand(), i.onLand = null);
       }
     });
     for (const [, i] of this.wildAnim)
@@ -2917,47 +2921,49 @@ class Ln {
       if (this.plain) this.drawDrum(t);
       else for (let r = 0; r < this.reelsN; r++) for (let i = 0; i < this.rowsN; i++) this.drawCell(t, r, i, e);
       for (let r = 0; r < this.reelsN; r++) {
-        const i = this.reel[r], a = this.pos[r], h = Math.floor(a), c = a - h, d = i.phase === "spin" ? Math.min(1, i.speed / 20) : 0;
+        const i = this.reel[r], a = this.pos[r], u = Math.floor(a), d = a - u, c = i.phase === "spin" ? Math.min(1, i.speed / 20) : 0;
         t.save(), t.beginPath(), t.rect(r * this.cell, 0, this.cell, this.h), t.clip();
-        const p = this.wildReels.find((b) => b.reel === r);
-        if (p && i.phase === "idle")
-          this.drawWildReel(t, r, p, e);
+        const m = this.wildReels.find((b) => b.reel === r);
+        if (m && i.phase === "idle")
+          this.drawWildReel(t, r, m, e);
         else
           for (let b = -1; b <= this.rowsN; b++) {
-            const n = this.symAt(r, h + b), o = (b - c) * this.pitch;
-            this.drawSymbol(t, n, r * this.cell, o, d, i.phase === "idle" ? [r, b] : null, e);
+            const n = this.symAt(r, u + b), o = (b - d) * this.pitch;
+            this.drawSymbol(t, n, r * this.cell, o, c, i.phase === "idle" ? [r, b] : null, e);
           }
         if (t.restore(), this.glowReels.has(r) && i.phase !== "idle") {
           const b = this.glowSprite;
           if (t.save(), b && b.complete && b.naturalWidth) {
-            const n = 0.55 + 0.45 * Math.sin(e * 14);
-            t.globalAlpha = n, t.drawImage(b, r * this.cell - 4, -4, this.cell + 8, 28), t.drawImage(b, r * this.cell - 4, this.h - 24, this.cell + 8, 28), t.drawImage(b, r * this.cell - 6, this.h * 0.35, 22, this.h * 0.3), t.drawImage(b, r * this.cell + this.cell - 16, this.h * 0.2, 22, this.h * 0.3);
+            const n = this.winSpark;
+            n && n.complete && n.naturalWidth && (t.globalAlpha = 0.5 + 0.35 * Math.sin(e * 9), t.drawImage(n, r * this.cell - 8, 0, this.cell + 16, this.h));
+            const o = 0.6 + 0.4 * Math.sin(e * 14);
+            t.globalAlpha = o, t.drawImage(b, r * this.cell - 12, this.h * 0.1, 44, 44), t.drawImage(b, r * this.cell + this.cell - 32, this.h * 0.36, 40, 40), t.drawImage(b, r * this.cell + this.cell * 0.22, this.h * 0.62, 36, 36), t.drawImage(b, r * this.cell - 6, -6, this.cell + 12, 36), t.drawImage(b, r * this.cell - 6, this.h - 30, this.cell + 12, 36);
           } else
             t.strokeStyle = `rgba(255,216,74,${0.6 + 0.4 * Math.sin(e * 10)})`, t.lineWidth = 8, t.shadowColor = "#ffd84a", t.shadowBlur = 30, t.strokeRect(r * this.cell + 6, 6, this.cell - 12, this.h - 12);
           t.restore();
         }
       }
       if (this.highlight) {
-        const r = Ie.frame_win_cell;
+        const r = Be.frame_win_cell;
         for (const i of this.highlight) {
-          const [a, h] = i.split(",").map(Number), c = 0.75 + 0.25 * Math.sin(e * 8);
+          const [a, u] = i.split(",").map(Number), d = 0.75 + 0.25 * Math.sin(e * 8);
           t.save();
-          const d = this.winSpark;
-          if (d && d.complete && d.naturalWidth)
-            t.globalAlpha = 0.55 + 0.45 * Math.sin(e * 8), t.drawImage(d, a * this.cell, h * this.pitch, this.cell, this.pitch);
+          const c = this.winSpark;
+          if (c && c.complete && c.naturalWidth)
+            t.globalAlpha = 0.55 + 0.45 * Math.sin(e * 8), t.drawImage(c, a * this.cell, u * this.pitch, this.cell, this.pitch);
           else if (r) {
-            const p = this.cell * (0.06 + 0.025 * Math.sin(e * 6));
-            t.globalAlpha = 0.85 + 0.15 * Math.sin(e * 6), t.drawImage(r, a * this.cell - p / 2, h * this.cell - p / 2, this.cell + p, this.cell + p);
+            const m = this.cell * (0.06 + 0.025 * Math.sin(e * 6));
+            t.globalAlpha = 0.85 + 0.15 * Math.sin(e * 6), t.drawImage(r, a * this.cell - m / 2, u * this.cell - m / 2, this.cell + m, this.cell + m);
           } else
-            t.strokeStyle = `rgba(255,220,90,${c})`, t.lineWidth = 7, t.shadowColor = "#ffd84a", t.shadowBlur = 24, t.strokeRect(a * this.cell + 7, h * this.cell + 7, this.cell - 14, this.cell - 14);
+            t.strokeStyle = `rgba(255,220,90,${d})`, t.lineWidth = 7, t.shadowColor = "#ffd84a", t.shadowBlur = 24, t.strokeRect(a * this.cell + 7, u * this.cell + 7, this.cell - 14, this.cell - 14);
           t.restore();
         }
       }
       for (const [r, i] of this.labels) {
-        const [a, h] = r.split(",").map(Number), c = a * this.cell + this.cell / 2, d = h * this.cell + this.cell / 2;
+        const [a, u] = r.split(",").map(Number), d = a * this.cell + this.cell / 2, c = u * this.cell + this.cell / 2;
         t.save(), t.font = "700 34px Cinzel";
-        const p = t.measureText(i).width + 36;
-        t.fillStyle = "rgba(70,0,60,.85)", t.strokeStyle = "#ff3fd6", t.lineWidth = 4, Pn(t, c - p / 2, d - 28, p, 56, 14), t.fill(), t.stroke(), t.fillStyle = "#fff", t.textAlign = "center", t.textBaseline = "middle", t.fillText(i, c, d + 2), t.restore();
+        const m = t.measureText(i).width + 36;
+        t.fillStyle = "rgba(70,0,60,.85)", t.strokeStyle = "#ff3fd6", t.lineWidth = 4, Dn(t, d - m / 2, c - 28, m, 56, 14), t.fill(), t.stroke(), t.fillStyle = "#fff", t.textAlign = "center", t.textBaseline = "middle", t.fillText(i, d, c + 2), t.restore();
       }
     }
   }
@@ -2974,51 +2980,55 @@ class Ln {
     }
   }
   drawCell(e, t, r, i) {
-    const a = t * this.cell, h = r * this.pitch, c = this.cell, d = this.pitch, p = e.createRadialGradient(a + c / 2, h + d / 2, 20, a + c / 2, h + d / 2, Math.max(c, d) * 0.8);
-    p.addColorStop(0, this.well[0]), p.addColorStop(1, this.well[1]), e.fillStyle = p, e.fillRect(a, h, c, d), e.save(), e.beginPath(), e.rect(a, h, c, d), e.clip(), e.strokeStyle = "rgba(120,200,140,.07)", e.lineWidth = 2;
+    const a = t * this.cell, u = r * this.pitch, d = this.cell, c = this.pitch, m = e.createRadialGradient(a + d / 2, u + c / 2, 20, a + d / 2, u + c / 2, Math.max(d, c) * 0.8);
+    m.addColorStop(0, this.well[0]), m.addColorStop(1, this.well[1]), e.fillStyle = m, e.fillRect(a, u, d, c), e.save(), e.beginPath(), e.rect(a, u, d, c), e.clip(), e.strokeStyle = "rgba(120,200,140,.07)", e.lineWidth = 2;
     for (let b = -this.cell; b < this.cell * 2; b += 30)
-      e.beginPath(), e.moveTo(a + b, h), e.lineTo(a + b + this.cell, h + this.cell), e.stroke(), e.beginPath(), e.moveTo(a + b + this.cell, h), e.lineTo(a + b, h + this.cell), e.stroke();
-    e.restore(), e.strokeStyle = "#a67c2e", e.lineWidth = 3, e.strokeRect(a + 4, h + 4, c - 8, d - 8), e.strokeStyle = "rgba(0,0,0,.5)", e.lineWidth = 2, e.strokeRect(a + 1, h + 1, c - 2, d - 2), this.highlight && !this.highlight.has(`${t},${r}`) && !this.wildReels.some((b) => b.reel === t) && (e.fillStyle = "rgba(0,0,0,.55)", e.fillRect(a, h, c, d));
+      e.beginPath(), e.moveTo(a + b, u), e.lineTo(a + b + this.cell, u + this.cell), e.stroke(), e.beginPath(), e.moveTo(a + b + this.cell, u), e.lineTo(a + b, u + this.cell), e.stroke();
+    e.restore(), e.strokeStyle = "#a67c2e", e.lineWidth = 3, e.strokeRect(a + 4, u + 4, d - 8, c - 8), e.strokeStyle = "rgba(0,0,0,.5)", e.lineWidth = 2, e.strokeRect(a + 1, u + 1, d - 2, c - 2), this.highlight && !this.highlight.has(`${t},${r}`) && !this.wildReels.some((b) => b.reel === t) && (e.fillStyle = "rgba(0,0,0,.55)", e.fillRect(a, u, d, c));
   }
-  drawSymbol(e, t, r, i, a, h) {
-    const c = this.symbolArt ? null : Ye.symbolById[t], d = this.symbolArt ? this.symbolArt(t) : c && Ie[c.art];
-    if (!d) return;
-    const p = this.pitch;
+  drawSymbol(e, t, r, i, a, u) {
+    const d = this.symbolArt ? null : ze.symbolById[t], c = this.symbolArt ? this.symbolArt(t) : d && Be[d.art];
+    if (!c) return;
+    const m = this.pitch;
     if (this.symbolFill) {
-      const f = d.naturalWidth || d.width || 1, _ = d.naturalHeight || d.height || 1, m = this.cell * 0.8, y = p * 0.8;
-      let k = m, A = k * (_ / f);
-      A > y && (A = y, k = A * (f / _));
-      const E = (this.cell - k) / 2, B = (p - A) / 2;
-      e.save(), e.beginPath(), e.rect(r, i, this.cell, p), e.clip();
-      const O = h && this.highlight && !this.highlight.has(`${h[0]},${h[1]}`), q = Math.abs(i + p / 2 - this.h / 2), x = Math.min(1, Math.max(0, (q - this.pitch * 0.42) / (this.pitch * 0.55)));
-      e.save(), e.globalAlpha = O ? 0.45 : 1 - x * 0.5, a > 0.05 && (e.globalAlpha *= 0.82), e.drawImage(d, r + E, i + B, k, A), e.restore(), e.restore();
+      const p = c.naturalWidth || c.width || 1, g = c.naturalHeight || c.height || 1, f = this.cell * 0.8, w = m * 0.8;
+      let v = f, A = v * (g / p);
+      A > w && (A = w, v = A * (p / g));
+      const M = (this.cell - v) / 2, E = (m - A) / 2;
+      e.save(), e.beginPath(), e.rect(r, i, this.cell, m), e.clip();
+      const F = !!(u && this.highlight && this.highlight.has(`${u[0]},${u[1]}`)), R = u && this.highlight && !F, x = Math.abs(i + m / 2 - this.h / 2), Q = Math.min(1, Math.max(0, (x - this.pitch * 0.42) / (this.pitch * 0.55)));
+      if (e.save(), e.globalAlpha = R ? 0.45 : 1 - Q * 0.5, a > 0.05 && (e.globalAlpha *= 0.82), this.pulseWins && F) {
+        const Y = 0.5 + 0.5 * Math.sin(performance.now() / 70);
+        e.filter = `brightness(${1.15 + Y})`;
+      }
+      e.drawImage(c, r + M, i + E, v, A), e.restore(), e.restore();
       return;
     }
-    const n = Math.min(this.cell, p) - 14 * 2, o = (this.cell - n) / 2, l = (p - n) / 2, u = h && this.highlight && !this.highlight.has(`${h[0]},${h[1]}`);
-    if (e.save(), u && (e.globalAlpha = 0.45), a > 0.05) {
+    const n = Math.min(this.cell, m) - 14 * 2, o = (this.cell - n) / 2, l = (m - n) / 2, h = u && this.highlight && !this.highlight.has(`${u[0]},${u[1]}`);
+    if (e.save(), h && (e.globalAlpha = 0.45), a > 0.05) {
       e.globalAlpha = 0.55;
-      const f = 1 + a * 0.6, _ = n * f, m = (_ - n) / 2;
-      e.drawImage(d, r + o, i + l - m, n, _), e.globalAlpha = 0.35, e.drawImage(d, r + o, i + l - m - a * 40, n, _);
+      const p = 1 + a * 0.6, g = n * p, f = (g - n) / 2;
+      e.drawImage(c, r + o, i + l - f, n, g), e.globalAlpha = 0.35, e.drawImage(c, r + o, i + l - f - a * 40, n, g);
     } else
-      e.drawImage(d, r + o, i + l, n, n), c && c.label && this.drawLabel(e, c.label, r + this.cell / 2, i + this.cell - 22);
+      e.drawImage(c, r + o, i + l, n, n), d && d.label && this.drawLabel(e, d.label, r + this.cell / 2, i + this.cell - 22);
     e.restore();
   }
   drawLabel(e, t, r, i, a = 34) {
     e.save(), e.font = `400 ${a}px "Luckiest Guy", "Lilita One", Impact`, e.textAlign = "center", e.textBaseline = "middle", e.lineJoin = "round", e.lineWidth = 8, e.strokeStyle = "#4a2a00", e.strokeText(t, r, i);
-    const h = e.createLinearGradient(0, i - a / 2, 0, i + a / 2);
-    h.addColorStop(0, "#fff2a8"), h.addColorStop(0.5, "#ffd84a"), h.addColorStop(1, "#d08a00"), e.fillStyle = h, e.fillText(t, r, i), e.restore();
+    const u = e.createLinearGradient(0, i - a / 2, 0, i + a / 2);
+    u.addColorStop(0, "#fff2a8"), u.addColorStop(0.5, "#ffd84a"), u.addColorStop(1, "#d08a00"), e.fillStyle = u, e.fillText(t, r, i), e.restore();
   }
   drawWildReel(e, t, r, i) {
-    const a = this.wildAnim.get(t), h = a ? Le.outBack(a.p) : 1, c = Ie.lep_full;
-    if (!c) return;
-    const d = t * this.cell, p = d + this.cell / 2, b = this.h / 2;
+    const a = this.wildAnim.get(t), u = a ? Fe.outBack(a.p) : 1, d = Be.lep_full;
+    if (!d) return;
+    const c = t * this.cell, m = c + this.cell / 2, b = this.h / 2;
     e.save();
-    const n = e.createLinearGradient(d, 0, d, this.h);
-    n.addColorStop(0, "#2a7a3a"), n.addColorStop(1, "#0d3a1c"), e.fillStyle = n, e.fillRect(d + 4, 4, this.cell - 8, this.h - 8), e.strokeStyle = "#ffd84a", e.lineWidth = 6, e.shadowColor = "#ffd84a", e.shadowBlur = 20 + 10 * Math.sin(i * 6), e.strokeRect(d + 6, 6, this.cell - 12, this.h - 12), e.shadowBlur = 0, e.translate(p, b), e.scale(h, h), e.translate(-p, -b);
-    const o = this.h - 60, l = o * c.width / c.height, u = Math.min(l, this.cell * 1.25), f = u * c.height / c.width;
-    if (e.drawImage(c, p - u / 2, this.h - 20 - f, u, f), this.drawLabel(e, "WILD", p, this.h - 30, 44), r.mult > 1) {
-      const _ = "x" + r.mult;
-      e.font = '400 72px "Luckiest Guy", Impact', e.textAlign = "center", e.textBaseline = "middle", e.lineJoin = "round", e.lineWidth = 12, e.strokeStyle = "#0b3a12", e.strokeText(_, p, this.h * 0.62), e.fillStyle = "#7dff6a", e.fillText(_, p, this.h * 0.62);
+    const n = e.createLinearGradient(c, 0, c, this.h);
+    n.addColorStop(0, "#2a7a3a"), n.addColorStop(1, "#0d3a1c"), e.fillStyle = n, e.fillRect(c + 4, 4, this.cell - 8, this.h - 8), e.strokeStyle = "#ffd84a", e.lineWidth = 6, e.shadowColor = "#ffd84a", e.shadowBlur = 20 + 10 * Math.sin(i * 6), e.strokeRect(c + 6, 6, this.cell - 12, this.h - 12), e.shadowBlur = 0, e.translate(m, b), e.scale(u, u), e.translate(-m, -b);
+    const o = this.h - 60, l = o * d.width / d.height, h = Math.min(l, this.cell * 1.25), p = h * d.height / d.width;
+    if (e.drawImage(d, m - h / 2, this.h - 20 - p, h, p), this.drawLabel(e, "WILD", m, this.h - 30, 44), r.mult > 1) {
+      const g = "x" + r.mult;
+      e.font = '400 72px "Luckiest Guy", Impact', e.textAlign = "center", e.textBaseline = "middle", e.lineJoin = "round", e.lineWidth = 12, e.strokeStyle = "#0b3a12", e.strokeText(g, m, this.h * 0.62), e.fillStyle = "#7dff6a", e.fillText(g, m, this.h * 0.62);
     }
     e.restore();
   }
@@ -3037,29 +3047,29 @@ class Ln {
   }
   showLine(e, t = "") {
     const r = this.paylines[e], i = [[-40, (r[0] + 0.5) * this.pitch]];
-    r.forEach((h, c) => i.push([(c + 0.5) * this.cell, (h + 0.5) * this.pitch])), i.push([this.w + 40, (r[this.reelsN - 1] + 0.5) * this.pitch]);
+    r.forEach((u, d) => i.push([(d + 0.5) * this.cell, (u + 0.5) * this.pitch])), i.push([this.w + 40, (r[this.reelsN - 1] + 0.5) * this.pitch]);
     const a = document.createElementNS("http://www.w3.org/2000/svg", "polyline");
-    a.setAttribute("points", i.map((h) => h.join(",")).join(" ")), t && a.setAttribute("class", t), this.svg.appendChild(a), this.markers.l[e].classList.add("on"), this.markers.r[e].classList.add("on");
+    a.setAttribute("points", i.map((u) => u.join(",")).join(" ")), t && a.setAttribute("class", t), this.svg.appendChild(a), this.markers.l[e].classList.add("on"), this.markers.r[e].classList.add("on");
   }
 }
-function Pn(s, e, t, r, i, a) {
+function Dn(s, e, t, r, i, a) {
   s.beginPath(), s.moveTo(e + a, t), s.arcTo(e + r, t, e + r, t + i, a), s.arcTo(e + r, t + i, e, t + i, a), s.arcTo(e, t + i, e, t, a), s.arcTo(e, t, e + r, t, a), s.closePath();
 }
-const le = ["blank", "0", "1", "5", "10", "00"], Ce = ["x1", "x2", "x5", "x10", "replace", "bank", "wheel"];
-function je(s, e) {
+const ue = ["blank", "0", "1", "5", "10", "00"], He = ["x1", "x2", "x5", "x10", "replace", "bank", "wheel"];
+function et(s, e) {
   const t = Math.max(0, e.indexOf(s)), r = e[(t + e.length - 1) % e.length] ?? s, i = e[(t + 1) % e.length] ?? s;
   return [r, s, i];
 }
-function _e(s, e) {
+function ve(s, e) {
   const t = [];
   for (let r = 0; r < e; r++) t.push(...s);
   return t;
 }
-function L(s) {
+function N(s) {
   const e = new Image();
-  return e.src = R(s), e;
+  return e.src = H(s), e;
 }
-class Cn {
+class tt {
   constructor(e, t) {
     this.canvas = e, this.sheet = t;
   }
@@ -3076,6 +3086,20 @@ class Cn {
   }
   stop() {
     this.active = !1;
+  }
+  /** A short pop from the bottom. The coins finish falling on their own. */
+  burst() {
+    const e = this.canvas.width || 960, t = this.canvas.height || 540;
+    for (let r = 0; r < 16; r += 1)
+      this.coins.push({
+        x: e * (0.16 + Math.random() * 0.68),
+        y: t * (0.78 + Math.random() * 0.16),
+        vy: -(220 + Math.random() * 180),
+        s: 18 + Math.random() * 16,
+        frame: Math.floor(Math.random() * 12),
+        spin: 10 + Math.random() * 10
+      });
+    this.active = !1, this.raf || (this.last = performance.now(), this.raf = requestAnimationFrame((r) => this.frame(r)));
   }
   clear() {
     this.active = !1, this.coins = [], this.canvas.getContext("2d")?.clearRect(0, 0, this.canvas.width, this.canvas.height), this.raf && cancelAnimationFrame(this.raf), this.raf = 0;
@@ -3096,19 +3120,24 @@ class Cn {
         spin: 8 + Math.random() * 10
       });
     t.clearRect(0, 0, i, a);
-    const h = this.sheet, c = h.complete && h.naturalWidth >= 128;
-    this.coins = this.coins.filter((d) => d.y < a + 80 && d.s < 160);
-    for (const d of this.coins) {
-      if (d.vy += 280 * r, d.y += d.vy * r, d.s += 70 * r, d.frame = (d.frame + d.spin * r) % 12, !c) continue;
-      const p = Math.floor(d.frame) * 128;
-      t.drawImage(h, p, 0, 128, 128, d.x - d.s / 2, d.y - d.s / 2, d.s, d.s);
+    const u = this.sheet, d = u.complete && u.naturalWidth >= 128;
+    this.coins = this.coins.filter((c) => c.y < a + 80 && c.s < 160);
+    for (const c of this.coins) {
+      if (c.vy += 280 * r, c.y += c.vy * r, c.s += 70 * r, c.frame = (c.frame + c.spin * r) % 12, !d) continue;
+      const m = Math.floor(c.frame) * 128;
+      t.drawImage(u, m, 0, 128, 128, c.x - c.s / 2, c.y - c.s / 2, c.s, c.s);
     }
-    this.active || this.coins.length ? this.raf = requestAnimationFrame((d) => this.frame(d)) : this.raf = 0;
+    this.active || this.coins.length ? this.raf = requestAnimationFrame((c) => this.frame(c)) : this.raf = 0;
   }
 }
-class Nn {
+class $n {
   view = null;
   rain = null;
+  pop = null;
+  burstFor = "";
+  wheelSpinning = !1;
+  wheelFlashAt = 0;
+  wheelLandAt = 0;
   reels = null;
   wheel = null;
   big = null;
@@ -3135,25 +3164,29 @@ class Nn {
     const i = document.createElement("div");
     i.id = "bigwin", i.hidden = !0;
     const a = document.createElement("canvas");
-    a.id = "coins", a.id = "coins", a.width = 960, a.height = 540;
-    const h = document.createElement("img");
-    h.id = "bigwin-art", h.alt = "";
+    a.id = "coins", a.width = 960, a.height = 540;
+    const u = document.createElement("canvas");
+    u.id = "coin-burst", u.width = 960, u.height = 540;
+    const d = document.createElement("img");
+    d.id = "bigwin-art", d.alt = "";
     const c = document.createElement("p");
     c.id = "plate-amount";
-    const d = document.createElement("button");
-    d.id = "bigwin-skip", d.type = "button", d.textContent = "Skip", d.addEventListener("click", () => {
+    const m = document.createElement("button");
+    m.id = "bigwin-skip", m.type = "button", m.textContent = "Skip", m.addEventListener("click", () => {
       document.getElementById("reveal")?.dispatchEvent(new MouseEvent("click", { bubbles: !0 }));
-    }), i.append(a, h, c, d);
-    const p = document.getElementById("overlay") ?? e, b = document.getElementById("wheel-host");
-    e.append(t), (b ?? e).append(r), p.append(i), this.reels = t, this.wheel = r, this.big = i, this.bigArt = h, this.wheelFace = L(v.wheelFace), this.pointerArt = L(v.pointer);
-    const n = L(v.coinSheet), o = L(v.reelCell), l = document.createElement("canvas");
-    l.width = 720, l.height = 512;
-    const u = L(v.numerals[1]), f = L(v.numerals[0]), _ = () => {
-      if (!u.complete || !f.complete || !u.naturalWidth || !f.naturalWidth) return;
-      const m = l.getContext("2d");
-      m && (m.clearRect(0, 0, l.width, l.height), m.drawImage(u, 40, 40, 300, 430), m.drawImage(f, 340, 40, 340, 430));
+    }), i.append(a, d, c, m);
+    const b = document.getElementById("overlay") ?? e, n = document.getElementById("wheel-host");
+    e.append(t), (n ?? e).append(r), b.append(i, u), this.reels = t, this.wheel = r, this.big = i, this.bigArt = d, this.wheelFace = N(k.wheelFace), this.pointerArt = N(k.pointer);
+    const o = N(k.coinSheet);
+    this.pop = new tt(u, o);
+    const l = N(k.reelCell), h = document.createElement("canvas");
+    h.width = 720, h.height = 512;
+    const p = N(k.numerals[1]), g = N(k.numerals[0]), f = () => {
+      if (!p.complete || !g.complete || !p.naturalWidth || !g.naturalWidth) return;
+      const w = h.getContext("2d");
+      w && (w.clearRect(0, 0, h.width, h.height), w.drawImage(p, 40, 40, 300, 430), w.drawImage(g, 340, 40, 340, 430));
     };
-    u.addEventListener("load", _), f.addEventListener("load", _), _(), this.symbols.set("0", L(v.numerals[0])), this.symbols.set("1", u), this.symbols.set("5", L(v.numerals[5])), this.symbols.set("00", L(v.numerals["00"])), this.symbols.set("10", l), this.symbols.set("x1", L(v.modifiers.x1)), this.symbols.set("x2", L(v.modifiers.x2)), this.symbols.set("x5", L(v.modifiers.x5)), this.symbols.set("x10", L(v.modifiers.x10)), this.symbols.set("replace", L(v.modifiers.replace)), this.symbols.set("bank", L(v.modifiers.bank)), this.symbols.set("wheel", L(v.modifiers.wheel)), this.bulbOn = L(v.bulbOn), this.bulbOff = L(v.bulbOff), this.glow = L(v.glowEmerald), this.spark = L(v.spark), this.view = new Ln(t, null, null, null, {
+    p.addEventListener("load", f), g.addEventListener("load", f), f(), this.symbols.set("0", N(k.numerals[0])), this.symbols.set("1", p), this.symbols.set("5", N(k.numerals[5])), this.symbols.set("00", N(k.numerals["00"])), this.symbols.set("10", h), this.symbols.set("x1", N(k.modifiers.x1)), this.symbols.set("x2", N(k.modifiers.x2)), this.symbols.set("x5", N(k.modifiers.x5)), this.symbols.set("x10", N(k.modifiers.x10)), this.symbols.set("replace", N(k.modifiers.replace)), this.symbols.set("bank", N(k.modifiers.bank)), this.symbols.set("wheel", N(k.modifiers.wheel)), this.bulbOn = N(k.bulbOn), this.bulbOff = N(k.bulbOff), this.glow = N(k.glowEmerald), this.spark = N(k.spark), this.view = new Rn(t, null, null, null, {
       reels: 4,
       rows: 3,
       cell: 104,
@@ -3163,20 +3196,20 @@ class Nn {
       plain: !0,
       symbolFill: !0,
       landSeconds: 0.22,
-      cellArt: (m) => m < 3 && o.complete && o.naturalWidth ? o : null,
+      cellArt: (w) => w < 3 && l.complete && l.naturalWidth ? l : null,
       glowSprite: this.spark,
       winSpark: this.glow,
-      symbolArt: (m) => {
-        if (m === "blank") return null;
-        const y = this.symbols.get(m);
-        return y ? y instanceof HTMLCanvasElement ? y.width ? y : null : y.complete && y.naturalWidth > 0 ? y : null : null;
+      symbolArt: (w) => {
+        if (w === "blank") return null;
+        const v = this.symbols.get(w);
+        return v ? v instanceof HTMLCanvasElement ? v.width ? v : null : v.complete && v.naturalWidth > 0 ? v : null : null;
       }
     }), this.view.setStrips(
-      [_e(le, 4), _e(le, 4), _e(le, 4), _e(Ce, 3)],
+      [ve(ue, 4), ve(ue, 4), ve(ue, 4), ve(He, 3)],
       [1, 2, 3, 0]
     ), this.view.onReelStop = () => {
       e.dispatchEvent(new CustomEvent("auric-land", { bubbles: !0 }));
-    }, this.rain = new Cn(a, n), this.resize();
+    }, this.rain = new tt(a, o), this.resize();
   }
   setHidden(e) {
     this.view && (this.view.paused = e), e && this.rain?.stop();
@@ -3185,94 +3218,104 @@ class Nn {
     this.frame = e, this.cost = t;
     const r = this.view;
     if (!r) return;
-    const i = e.spinning.some(Boolean), a = [e.tokens[0], e.tokens[1], e.tokens[2], e.modifier], h = a.every((c) => c !== null);
-    if (i && !this.wasSpinning && !e.reduced) {
-      const c = document.getElementById("turbo")?.checked === !0;
-      r.spin({ stagger: c ? 0.02 : 0.04 }), this.armed = !0, this.held.fill(null);
-      const d = document.getElementById("reel-sweep");
-      d && (d.classList.remove("go"), d.offsetWidth, d.classList.add("go"));
+    const i = e.spinning.some(Boolean), a = [e.tokens[0], e.tokens[1], e.tokens[2], e.modifier], u = a.every((d) => d !== null);
+    if (i && !this.wasSpinning && this.pop?.clear(), i && !this.wasSpinning && !e.reduced) {
+      const d = document.getElementById("turbo")?.checked === !0;
+      r.spin({ stagger: d ? 0.02 : 0.04 }), this.armed = !0, this.held.fill(null);
+      const c = document.getElementById("reel-sweep");
+      c && (c.classList.remove("go"), c.offsetWidth, c.classList.add("go"));
     }
-    this.armed && !e.reduced ? (a.forEach((c, d) => {
-      if (c !== null && !e.spinning[d] && this.held[d] !== c) {
-        this.held[d] = c;
-        const p = d < 3 ? le : Ce;
-        r.landReel(d, [3, 5, 7, 2][d] ?? 0, je(c, p));
+    this.armed && !e.reduced ? (a.forEach((d, c) => {
+      if (d !== null && !e.spinning[c] && this.held[c] !== d) {
+        this.held[c] = d;
+        const m = c < 3 ? ue : He;
+        r.landReel(c, [3, 5, 7, 2][c] ?? 0, et(d, m));
       }
-    }), !i && h && (this.armed = !1)) : h && !r.isSpinning() && a.join("|") !== this.held.join("|") && (r.setStrips(a.map((c, d) => je(c, d < 3 ? le : Ce)), [0, 0, 0, 0]), a.forEach((c, d) => {
-      this.held[d] = c;
-    })), this.wasSpinning = i, r.glowReels.clear(), r.highlight = null, e.anticipation && !e.reduced && e.spinning.slice(0, 3).every((d) => !d) && e.spinning[3] && r.glowReels.add(3), !e.reduced && !i && e.cueTier > 0 && (r.highlight = /* @__PURE__ */ new Set(["0,1", "1,1", "2,1"])), this.paintWheel(e), this.paintWin(e);
+    }), !i && u && (this.armed = !1)) : u && !r.isSpinning() && a.join("|") !== this.held.join("|") && (r.setStrips(a.map((d, c) => et(d, c < 3 ? ue : He)), [0, 0, 0, 0]), a.forEach((d, c) => {
+      this.held[c] = d;
+    })), this.wasSpinning = i, r.glowReels.clear(), r.highlight = null, e.anticipation && !e.reduced && e.spinning.slice(0, 3).every((c) => !c) && e.spinning[3] && r.glowReels.add(3), r.pulseWins = !1, !e.reduced && !i && e.cueTier > 0 && (r.highlight = /* @__PURE__ */ new Set(["0,1", "1,1", "2,1"]), r.pulseWins = e.cueTier === 1), this.paintWheel(e), this.paintWin(e);
   }
   /** Wallet amounts are cents. Practice amounts are shown as whole numbers. */
   setMoney(e) {
     this.money = e;
   }
   pointerWedge() {
-    return this.frame?.wheel ? it(this.frame.wheel.rotation) : null;
+    return this.frame?.wheel ? ht(this.frame.wheel.rotation) : null;
   }
   /** Keeps the idle lamp chase moving between receipts. */
   tick(e) {
     this.paintWheel(e);
   }
   resize() {
-    const e = this.big?.querySelector("canvas");
-    e && (e.width = Math.max(320, window.innerWidth), e.height = Math.max(180, window.innerHeight));
-    const t = this.wheel, r = document.getElementById("wheel-host");
-    if (t && r) {
-      const i = Math.max(160, Math.floor(Math.min(r.clientWidth, r.clientHeight)));
-      t.width !== i && (t.width = i, t.height = i);
+    const e = Math.max(320, window.innerWidth), t = Math.max(180, window.innerHeight), r = this.big?.querySelector("canvas");
+    r && (r.width = e, r.height = t);
+    const i = document.getElementById("coin-burst");
+    i instanceof HTMLCanvasElement && (i.width = e, i.height = t);
+    const a = this.wheel, u = document.getElementById("wheel-host");
+    if (a && u) {
+      const d = Math.max(160, Math.floor(Math.min(u.clientWidth, u.clientHeight)));
+      a.width !== d && (a.width = d, a.height = d);
     }
   }
   destroy() {
-    this.rain?.clear(), this.view && (this.view.paused = !0), this.view = null, this.big?.remove(), this.wheel?.remove(), this.reels?.parentElement?.replaceChildren();
+    this.rain?.clear(), this.pop?.clear(), document.getElementById("coin-burst")?.remove(), this.view && (this.view.paused = !0), this.view = null, this.big?.remove(), this.wheel?.remove(), this.reels?.parentElement?.replaceChildren();
   }
   paintWheel(e) {
     const t = this.wheel, r = t?.getContext("2d"), i = this.wheelFace;
     if (!t || !r || !i) return;
-    const a = t.width, h = a / 2, c = e?.wheel ?? null, d = e?.reduced ?? !1, p = c?.rotation ?? 0;
-    if (r.clearRect(0, 0, a, a), r.save(), r.translate(h, h), r.rotate(p), i.complete && i.naturalWidth && r.drawImage(i, -a / 2, -a / 2, a, a), r.fillStyle = "#fff6d8", r.strokeStyle = "#3a2200", r.lineWidth = Math.max(3, a * 0.013), r.lineJoin = "round", r.miterLimit = 2, r.textBaseline = "middle", r.shadowColor = "rgba(12, 8, 2, 0.9)", ve.forEach((l, u) => {
-      const f = -Math.PI / 2 + (22.5 + u * 45) * Math.PI / 180, _ = this.money ? (this.cost * l / 100).toFixed(2) : String(this.cost * l), m = a * 0.16;
-      let y = Math.round(a * 0.07);
-      for (r.font = `700 ${y}px Auric Serif, serif`; y > Math.round(a * 0.045) && r.measureText(_).width > m; )
-        y -= 1, r.font = `700 ${y}px Auric Serif, serif`;
-      const k = Math.cos(f) >= 0, A = a * 0.33;
-      r.save(), r.translate(Math.cos(f) * A, Math.sin(f) * A), r.rotate(k ? f : f + Math.PI), r.textAlign = "center", r.shadowBlur = Math.max(2, a * 0.01), r.strokeText(_, 0, 0), r.shadowBlur = 0, r.fillText(_, 0, 0), r.restore();
-    }), r.restore(), c?.lit !== null && c?.lit !== void 0 && !c.spinning && this.glow?.complete && (r.globalAlpha = 0.9, r.drawImage(this.glow, h - a * 0.16, a * 0.02, a * 0.32, a * 0.22), r.globalAlpha = 1), c?.spinning && this.spark?.complete && !d) {
-      const l = this.spark, u = performance.now() / 40;
+    const a = t.width, u = a / 2, d = e?.wheel ?? null, c = e?.reduced ?? !1, m = !!d?.spinning;
+    m && !this.wheelSpinning && (this.wheelFlashAt = performance.now()), !m && this.wheelSpinning && d && d.lit !== null && (this.wheelLandAt = performance.now()), this.wheelSpinning = m;
+    const b = d?.rotation ?? 0;
+    r.clearRect(0, 0, a, a), r.save(), r.translate(u, u), r.rotate(b), i.complete && i.naturalWidth && r.drawImage(i, -a / 2, -a / 2, a, a), r.fillStyle = "#fff6d8", r.strokeStyle = "#3a2200", r.lineWidth = Math.max(3, a * 0.013), r.lineJoin = "round", r.miterLimit = 2, r.textBaseline = "middle", r.shadowColor = "rgba(12, 8, 2, 0.9)", Me.forEach((p, g) => {
+      const f = -Math.PI / 2 + (22.5 + g * 45) * Math.PI / 180, w = this.money ? (this.cost * p / 100).toFixed(2) : String(this.cost * p), v = a * 0.16;
+      let A = Math.round(a * 0.07);
+      for (r.font = `700 ${A}px Auric Serif, serif`; A > Math.round(a * 0.045) && r.measureText(w).width > v; )
+        A -= 1, r.font = `700 ${A}px Auric Serif, serif`;
+      const M = Math.cos(f) >= 0, E = a * 0.33;
+      r.save(), r.translate(Math.cos(f) * E, Math.sin(f) * E), r.rotate(M ? f : f + Math.PI), r.textAlign = "center", r.shadowBlur = Math.max(2, a * 0.01), r.strokeText(w, 0, 0), r.shadowBlur = 0, r.fillText(w, 0, 0), r.restore();
+    }), r.restore();
+    const n = performance.now() - this.wheelFlashAt;
+    if (m && n < 280 && !c && (r.save(), r.globalAlpha = 1 - n / 280, r.fillStyle = "#fff6d8", r.beginPath(), r.arc(u, u, a * 0.46, 0, Math.PI * 2), r.fill(), r.restore()), d?.lit !== null && d?.lit !== void 0 && !d.spinning && this.glow?.complete) {
+      const p = performance.now() - this.wheelLandAt, g = !c && p < 720 ? 0.35 + 0.65 * Math.abs(Math.sin(p / 60)) : 0.9;
+      r.globalAlpha = g, r.drawImage(this.glow, u - a * 0.18, a * 0.01, a * 0.36, a * 0.26), r.globalAlpha = 1;
+    }
+    if (d?.spinning && this.spark?.complete && !c) {
+      const p = this.spark, g = performance.now() / 40;
       for (let f = 0; f < 6; f++) {
-        const _ = -Math.PI / 2 - (u + f * 7) * Math.PI / 180;
-        r.globalAlpha = 0.25 + f * 0.1, r.drawImage(l, h + Math.cos(_) * a * 0.42 - 12, h + Math.sin(_) * a * 0.42 - 12, 24, 24);
+        const w = -Math.PI / 2 - (g + f * 7) * Math.PI / 180;
+        r.globalAlpha = 0.25 + f * 0.1, r.drawImage(p, u + Math.cos(w) * a * 0.42 - 12, u + Math.sin(w) * a * 0.42 - 12, 24, 24);
       }
       r.globalAlpha = 1;
     }
-    const b = this.pointerArt;
-    if (b && b.complete && b.naturalWidth) {
-      const l = a * 0.2, u = l * (b.naturalWidth / b.naturalHeight), f = !d && c && c.lit !== null && !c.spinning ? Math.sin(performance.now() / 90) * a * 0.012 : 0;
-      r.drawImage(b, h - u / 2, a * 0.015 + f, u, l);
+    const o = this.pointerArt;
+    if (o && o.complete && o.naturalWidth) {
+      const p = a * 0.2, g = p * (o.naturalWidth / o.naturalHeight), f = !c && d && d.lit !== null && !d.spinning ? Math.sin(performance.now() / 90) * a * 0.012 : 0;
+      r.drawImage(o, u - g / 2, a * 0.015 + f, g, p);
     }
-    const n = this.bulbOn, o = this.bulbOff;
-    if (n?.complete && o?.complete) {
-      const l = !d && (!c || c.spinning || c.lit === null), u = Math.floor(performance.now() / (c?.spinning ? 70 : 180));
+    const l = this.bulbOn, h = this.bulbOff;
+    if (l?.complete && h?.complete) {
+      const p = !c && (!d || d.spinning || d.lit === null), g = Math.floor(performance.now() / (d?.spinning ? 70 : 180));
       for (let f = 0; f < 16; f++) {
-        const _ = l && (f === u % 16 || f === (u + 1) % 16), m = c !== null && c.lit !== null && f % 2 === c.lit % 2, y = _ || m ? n : o, k = f / 16 * Math.PI * 2 - Math.PI / 2, A = a * 0.045;
-        r.drawImage(y, h + Math.cos(k) * a * 0.46 - A / 2, h + Math.sin(k) * a * 0.46 - A / 2, A, A);
+        const w = p && (f === g % 16 || f === (g + 1) % 16), v = d !== null && d.lit !== null && f % 2 === d.lit % 2, A = w || v ? l : h, M = f / 16 * Math.PI * 2 - Math.PI / 2, E = a * 0.045;
+        r.drawImage(A, u + Math.cos(M) * a * 0.46 - E / 2, u + Math.sin(M) * a * 0.46 - E / 2, E, E);
       }
     }
   }
   paintWin(e) {
-    const t = e.reduced ? null : e.plate, r = e.phase === "celebrating" || e.phase === "resolving", i = t !== null && e.hero !== null && e.hero > 0 && r;
-    if (!this.big || !this.bigArt) return;
+    const t = e.reduced ? null : e.plate, r = e.phase === "celebrating" || e.phase === "resolving", i = t !== null && e.hero !== null && e.hero > 0 && r, a = t === null && !e.reduced && e.cueTier === 1 && r && (e.hero ?? 0) > 0, u = e.receiptId ?? "";
+    if (a && u !== "" && this.burstFor !== u && (this.burstFor = u, this.pop?.burst()), !this.big || !this.bigArt) return;
     if (this.big.hidden = !i, !i) {
       this.rain?.stop();
       return;
     }
-    const a = v.plates[t];
-    this.bigArt.dataset.tier !== t && (this.bigArt.dataset.tier = t, this.bigArt.src = R(a));
-    const h = t === "epic" ? 7 : t === "super" ? 6 : t === "mega" ? 5 : 3;
-    this.rain?.start(h);
+    const d = k.plates[t];
+    this.bigArt.dataset.tier !== t && (this.bigArt.dataset.tier = t, this.bigArt.src = H(d));
+    const c = t === "epic" ? 7 : t === "super" ? 6 : t === "mega" ? 5 : 3;
+    this.rain?.start(c);
   }
 }
-const ge = window.matchMedia("(prefers-reduced-motion: reduce)");
-function Bn() {
+const ke = window.matchMedia("(prefers-reduced-motion: reduce)");
+function Wn() {
   const s = "locks" in navigator, e = s ? localStorage : sessionStorage, t = {
     get: (i) => {
       try {
@@ -3287,31 +3330,31 @@ function Bn() {
   };
   return s ? { kv: t, locker: {
     exclusive(i) {
-      return Promise.resolve(navigator.locks.request(gn, () => i()));
+      return Promise.resolve(navigator.locks.request(xn, () => i()));
     }
   }, storage: "durable", notice: null } : {
     kv: t,
-    locker: An(),
+    locker: Pn(),
     storage: "tab",
     notice: "This browser keeps a separate demo balance in each tab."
   };
 }
-function w(s) {
+function y(s) {
   const e = document.getElementById(s);
   if (!e) throw new Error(`missing ${s}`);
   return e;
 }
-function On() {
+function Gn() {
   const s = Array.from(document.querySelectorAll("dialog")).filter((e) => e.open);
   return s[s.length - 1] ?? null;
 }
-function Fn(s) {
+function qn(s) {
   return Array.from(s.querySelectorAll("button, a[href], input, select, textarea")).filter((e) => e.hasAttribute("disabled") || e.getAttribute("aria-hidden") === "true" ? !1 : e.tabIndex >= 0);
 }
 function $(s) {
-  return I(s);
+  return P(s);
 }
-function Ue(s, e) {
+function nt(s, e) {
   if (e === null) {
     s.dataset.value !== "" && s.replaceChildren(), s.dataset.value = "";
     return;
@@ -3325,24 +3368,24 @@ function Ue(s, e) {
     }
   }
 }
-function H(s, e) {
-  w(s).style.backgroundImage = `url("${R(e)}")`;
+function O(s, e) {
+  y(s).style.backgroundImage = `url("${H(e)}")`;
 }
-function Ze() {
-  const s = window.innerHeight > window.innerWidth, e = w("cabinet");
+function st() {
+  const s = window.innerHeight > window.innerWidth, e = y("cabinet");
   e.dataset.orient = s ? "portrait" : "landscape";
   const t = s ? 720 : 1280, r = s ? 1280 : 720;
-  e.style.width = `${t}px`, e.style.height = `${r}px`, e.style.backgroundImage = `url("${R(s ? v.cabinetP : v.cabinetL)}")`;
-  const i = Math.min(window.innerWidth / t, window.innerHeight / r), a = (window.innerWidth - t * i) / 2, h = (window.innerHeight - r * i) / 2;
-  e.style.transform = `translate(${a}px, ${h}px) scale(${i})`, H("cost-up", v.plus), H("cost-down", v.minus), H("turbo-btn", v.turbo), H("start-auto", v.auto), H("sound-btn", v.sound), H("music-btn", v.music), H("settings-open", v.gear), H("reveal", v.skip), H("stop-auto", v.stop), H("help-open", v.help), H("board-open", v.star);
-  const c = document.getElementById("reel-sweep");
-  c && (c.style.backgroundImage = `url("${R(v.streak)}")`);
-  const d = document.getElementById("shock");
-  d instanceof HTMLImageElement && (d.src = R(v.glowEmerald));
-  for (const l of Array.from(document.querySelectorAll("#sparks img"))) l.src = R(v.sparkSmall);
-  const p = document.getElementById("splash-art");
-  p instanceof HTMLImageElement && (p.src = R(s ? v.splashP : v.splashL));
-  const b = `url("${R(v.plaque)}")`, n = s ? "11px 12px" : "16px 18px";
+  e.style.width = `${t}px`, e.style.height = `${r}px`, e.style.backgroundImage = `url("${H(s ? k.cabinetP : k.cabinetL)}")`;
+  const i = Math.min(window.innerWidth / t, window.innerHeight / r), a = (window.innerWidth - t * i) / 2, u = (window.innerHeight - r * i) / 2;
+  e.style.transform = `translate(${a}px, ${u}px) scale(${i})`, O("cost-up", k.plus), O("cost-down", k.minus), O("turbo-btn", k.turbo), O("start-auto", k.auto), O("sound-btn", k.sound), O("music-btn", k.music), O("settings-open", k.gear), O("reveal", k.skip), O("stop-auto", k.stop), O("help-open", k.help), O("board-open", k.star);
+  const d = document.getElementById("reel-sweep");
+  d && (d.style.backgroundImage = `url("${H(k.streak)}")`);
+  const c = document.getElementById("shock");
+  c instanceof HTMLImageElement && (c.src = H(k.glowEmerald));
+  for (const l of Array.from(document.querySelectorAll("#sparks img"))) l.src = H(k.sparkSmall);
+  const m = document.getElementById("splash-art");
+  m instanceof HTMLImageElement && (m.src = H(s ? k.splashP : k.splashL));
+  const b = `url("${H(k.plaque)}")`, n = s ? "11px 12px" : "16px 18px";
   for (const l of Array.from(document.querySelectorAll(".led, #auto-status, #short, #banner")))
     l.style.borderStyle = "solid", l.style.borderWidth = n, l.style.borderImage = `${b} 78 90 fill / ${n} / 0 stretch`, l.style.background = "transparent";
   const o = s ? "10px 12px" : "12px 16px";
@@ -3351,20 +3394,20 @@ function Ze() {
   for (const l of Array.from(document.querySelectorAll("dialog")))
     l.style.borderImage = `${b} 70 84 fill / 22px 26px / 0 stretch`;
 }
-function Ke() {
-  const s = w("bulb-rim"), e = 36;
+function rt() {
+  const s = y("bulb-rim"), e = 36;
   if (s.childElementCount !== e) {
     s.replaceChildren();
     for (let i = 0; i < e; i += 1) {
       const a = document.createElement("span");
       a.className = "bulb", a.style.setProperty("--i", String(i));
-      const h = document.createElement("img");
-      h.alt = "", h.src = R(v.bulbOff);
-      const c = document.createElement("img");
-      c.alt = "", c.className = "on", c.src = R(v.bulbOn), a.append(h, c), s.append(a);
+      const u = document.createElement("img");
+      u.alt = "", u.src = H(k.bulbOff);
+      const d = document.createElement("img");
+      d.alt = "", d.className = "on", d.src = H(k.bulbOn), a.append(u, d), s.append(a);
     }
   }
-  const t = w("cabinet").dataset.orient === "portrait", r = [];
+  const t = y("cabinet").dataset.orient === "portrait", r = [];
   if (t) {
     for (let i = 0; i < 20; i += 1) {
       const a = Math.PI * (1.08 + 0.84 * i / 19);
@@ -3385,50 +3428,67 @@ function Ke() {
     }
   }
   Array.from(s.children).forEach((i, a) => {
-    const h = i, c = r[a] ?? r[0];
-    h.style.left = `${c[0]}px`, h.style.top = `${c[1]}px`;
+    const u = i, d = r[a] ?? r[0];
+    u.style.left = `${d[0]}px`, u.style.top = `${d[1]}px`;
   });
 }
-function Hn(s) {
+function Vn(s) {
   const e = s.filter((t) => t !== null);
-  return e.length === 0 ? "" : e.some((t) => t === "blank") ? "0" : String(e.reduce((t, r) => t + Re[r], 0));
+  return e.length === 0 ? "" : e.some((t) => t === "blank") ? "0" : String(e.reduce((t, r) => t + qe[r], 0));
 }
-let Ne = "";
-function Rn(s) {
-  const e = w("cabinet"), t = s?.spinning.some(Boolean) ?? !1, r = !!(s && s.cueTier >= 2 && (s.phase === "celebrating" || s.phase === "resolving"));
-  e.dataset.energy = s?.reduced ? "idle" : r ? "win" : t ? "spin" : "idle", e.dataset.phase = s?.phase ?? "idle";
-  const i = w("feature-banner"), a = w("build-digits"), h = w("build"), c = w("fly");
+let Re = "";
+function Xn(s, e) {
+  const t = y("fly"), r = !!(s && s.wheel && s.wheel.lit !== null && !s.wheel.spinning && !s.reduced), i = s?.lines.find((u) => u.label === "Wheel prize");
+  if (r && i && i.amount !== null && t.dataset.value !== String(i.amount)) {
+    t.dataset.value = String(i.amount), t.textContent = $(i.amount), t.hidden = !1;
+    const u = document.getElementById("wheel-host"), d = t.offsetParent instanceof HTMLElement ? t.offsetParent : null, c = new DOMMatrix(getComputedStyle(e).transform).a || 1;
+    if (u && d) {
+      const b = u.getBoundingClientRect(), n = d.getBoundingClientRect();
+      t.style.right = "auto", t.style.left = `${(b.left + b.width / 2 - n.left) / c - 36}px`, t.style.top = `${(b.top + b.height * 0.22 - n.top) / c}px`;
+    }
+    const m = document.getElementById("hero");
+    if (m) {
+      const b = t.getBoundingClientRect(), n = m.getBoundingClientRect();
+      t.style.setProperty("--dx", `${(n.left + n.width / 2 - (b.left + b.width / 2)) / c}px`), t.style.setProperty("--dy", `${(n.top + n.height / 2 - (b.top + b.height / 2)) / c}px`);
+    }
+    t.classList.remove("go"), t.offsetWidth, t.classList.add("go");
+    return;
+  }
+  r || s?.phase === "celebrating" || s?.phase === "resolving" || (t.dataset.value = "", t.hidden = !0, t.classList.remove("go"));
+}
+function Qn(s) {
+  const e = y("cabinet"), t = s?.spinning.some(Boolean) ?? !1, r = !!(s && s.cueTier >= 2 && (s.phase === "celebrating" || s.phase === "resolving")), i = !!(s && !s.reduced && (s.plate === "super" || s.plate === "epic") && s.hero !== null && s.hero > 0 && (s.phase === "celebrating" || s.phase === "resolving"));
+  e.dataset.energy = s?.reduced ? "idle" : r ? "win" : t ? "spin" : "idle", e.dataset.phase = s?.phase ?? "idle", e.dataset.shake = i ? "heavy" : "", Xn(s, e);
+  const a = y("feature-banner"), u = y("build-digits"), d = y("build"), c = y("fly");
   if (!s || s.phase === "idle" || s.phase === "onboarding") {
-    i.textContent = "", a.textContent = "", a.dataset.len = "", h.classList.remove("slam", "shock", "sparks"), Ne = "", c.hidden = !0;
+    a.textContent = "", u.textContent = "", u.dataset.len = "", d.classList.remove("slam", "shock", "sparks"), Re = "", c.hidden = !0;
     return;
   }
   if (s.phase === "celebrating" || s.phase === "resolving") {
-    i.textContent = "", a.textContent = "", h.classList.remove("slam", "shock", "sparks");
+    a.textContent = "", u.textContent = "", d.classList.remove("slam", "shock", "sparks");
     return;
   }
-  i.textContent = s.phase === "replace" ? "Replace" : s.phase === "bank" ? "Bank + Add" : s.phase === "wheel" ? "Wheel" : "";
-  const d = Hn(s.tokens), p = d.length > (a.dataset.len?.length ?? 0);
-  a.dataset.len = d;
-  const b = s.modifier === "x2" ? 2 : s.modifier === "x5" ? 5 : s.modifier === "x10" ? 10 : 0, n = `${s.receiptId}:${s.modifier ?? ""}`;
-  if (b > 1 && s.cueTier > 0 && s.reading !== null && !s.reduced)
-    a.textContent = String(Number(s.reading) * b), p && a.classList.add("flash"), Ne !== n && (Ne = n, h.classList.remove("slam", "shock"), h.offsetWidth, h.classList.add("slam", "shock"));
+  a.textContent = s.phase === "replace" ? "Replace" : s.phase === "bank" ? "Bank + Add" : s.phase === "wheel" ? "Wheel" : "";
+  const m = Vn(s.tokens), b = m.length > (u.dataset.len?.length ?? 0);
+  u.dataset.len = m;
+  const n = s.modifier === "x2" ? 2 : s.modifier === "x5" ? 5 : s.modifier === "x10" ? 10 : 0, o = `${s.receiptId}:${s.modifier ?? ""}`;
+  if (n > 1 && s.cueTier > 0 && s.reading !== null && !s.reduced)
+    u.textContent = String(Number(s.reading) * n), b && u.classList.add("flash"), Re !== o && (Re = o, d.classList.remove("slam", "shock"), d.offsetWidth, d.classList.add("slam", "shock"));
   else if (s.phase === "bank") {
-    const u = s.lines.find((_) => _.label === "Locked base")?.amount ?? 0, f = s.lines.filter((_) => _.label.startsWith("Added")).reduce((_, m) => _ + (m.amount ?? 0), 0);
-    a.textContent = u || f ? $(u + f) : d, p && a.classList.add("flash");
+    const h = s.lines.find((g) => g.label === "Locked base")?.amount ?? 0, p = s.lines.filter((g) => g.label.startsWith("Added")).reduce((g, f) => g + (f.amount ?? 0), 0);
+    u.textContent = h || p ? $(h + p) : m, b && u.classList.add("flash");
   } else {
-    const u = s.spinning.some(Boolean) || s.tokens.some((f) => f === null);
-    a.textContent = u ? d : "", p && u && a.classList.add("flash");
+    const h = s.spinning.some(Boolean) || s.tokens.some((p) => p === null);
+    u.textContent = h ? m : "", b && h && u.classList.add("flash");
   }
-  const o = s.tokens.every((u) => u !== null) && !!s.reading;
-  h.classList.toggle("sparks", o && !s.reduced);
-  const l = s.lines.find((u) => u.label === "Wheel prize");
-  l && l.amount !== null && !s.reduced && c.dataset.value !== String(l.amount) && (c.dataset.value = String(l.amount), c.hidden = !1, c.textContent = $(l.amount), c.classList.remove("go"), c.offsetWidth, c.classList.add("go")), l || (c.dataset.value = "", c.hidden = !0, c.classList.remove("go"));
+  const l = s.tokens.every((h) => h !== null) && !!s.reading;
+  d.classList.toggle("sparks", l && !s.reduced);
 }
-function Dn(s) {
+function Yn(s) {
   const e = Math.floor(s / 1e3), t = Math.floor(e / 60), r = e % 60;
   return `${t}:${r.toString().padStart(2, "0")}`;
 }
-async function $n() {
+async function jn() {
   const s = [
     new FontFace("Auric Serif", "url(assets/fonts/NotoSerif-Bold.ttf)", { weight: "700" }),
     new FontFace("Auric Sans", "url(assets/fonts/NotoSansDisplay-Bold.ttf)", { weight: "700" }),
@@ -3441,362 +3501,390 @@ async function $n() {
     }
   }));
 }
-function be(s, e) {
-  const t = w("lines");
+function Ae(s, e) {
+  const t = y("lines");
   t.replaceChildren();
   const r = s?.lines ?? [{ label: "Cost", amount: e, text: $(e), strike: !1 }], i = r.length === 1 && r[0]?.label === "Cost" ? [] : r;
-  for (const c of i) {
-    const d = document.createElement("div");
-    d.className = c.strike ? "line strike" : "line";
-    const p = document.createElement("span");
-    p.textContent = c.label;
+  for (const d of i) {
+    const c = document.createElement("div");
+    c.className = d.strike ? "line strike" : "line";
+    const m = document.createElement("span");
+    m.textContent = d.label;
     const b = document.createElement("span");
-    b.textContent = c.text, d.append(p, b), t.append(d);
+    b.textContent = d.text, c.append(m, b), t.append(c);
   }
   const a = s == null || s.netText === "Net pending";
-  Ue(w("hero"), s?.hero ?? (a ? 0 : null));
-  const h = document.getElementById("plate-amount");
-  h && Ue(h, s?.hero ?? null), w("total-label").textContent = s?.totalLabel ?? "Total", w("net").textContent = s?.netText ?? "Net pending", w("meter").textContent = s?.meterFlourish ? "10/10 energy flourish, no credit reward" : `${s?.meterFilled ?? 0}/10`;
+  nt(y("hero"), s?.hero ?? (a ? 0 : null));
+  const u = document.getElementById("plate-amount");
+  u && nt(u, s?.hero ?? null), y("total-label").textContent = s?.totalLabel ?? "Total", y("net").textContent = s?.netText ?? "Net pending", y("meter").textContent = s?.meterFlourish ? "10/10 energy flourish, no credit reward" : `${s?.meterFilled ?? 0}/10`;
 }
-function Wn(s) {
-  let e = de();
+function Un(s) {
+  let e = he();
   try {
-    e = Nt(s.get(Xe));
+    e = Wt(s.get(Ke));
   } catch {
-    e = de();
+    e = he();
   }
-  const t = w("handle");
+  const t = y("handle");
   t.value = e.handle;
-  const r = w("wordmark");
-  r.src = R(v.logo);
-  const i = document.getElementById("onboard-logo");
-  i instanceof HTMLImageElement && (i.src = R(v.logo));
-  const a = document.getElementById("help-logo");
-  a instanceof HTMLImageElement && (a.src = R(v.logo));
-  const h = document.getElementById("help-wheel");
-  h instanceof HTMLImageElement && (h.src = R(v.wheelFace));
+  const r = document.getElementById("board-star");
+  r instanceof HTMLImageElement && (r.src = H(k.starIcon));
+  const i = y("wordmark");
+  i.src = H(k.logo);
+  const a = document.getElementById("onboard-logo");
+  a instanceof HTMLImageElement && (a.src = H(k.logo));
+  const u = document.getElementById("help-logo");
+  u instanceof HTMLImageElement && (u.src = H(k.logo));
+  const d = document.getElementById("help-wheel");
+  d instanceof HTMLImageElement && (d.src = H(k.wheelFace));
   const c = () => {
-    const p = Ht(e), b = Ct(p?.wins ?? 0);
-    w("board-level").textContent = p ? `Level ${b.level} ${b.name}. Wins ${p.wins}. Biggest net ${$(p.biggestWin)}. Today's best net ${$(p.dayBest)}.` : `Level ${b.level} ${b.name}. No scored play yet.`;
-    const n = w("board-body");
-    n.replaceChildren();
-    const o = [
+    const b = Xt(e), n = $t(b?.wins ?? 0);
+    y("board-level").textContent = b ? `Level ${n.level} ${n.name}. Wins ${b.wins}. Biggest net ${$(b.biggestWin)}. Today's best net ${$(b.dayBest)}.` : `Level ${n.level} ${n.name}. No scored play yet.`;
+    const o = y("board-body");
+    o.replaceChildren();
+    const l = [
       ["Biggest net", "biggestWin"],
       ["Highest session net", "highestSession"],
       ["Wins", "wins"],
       ["Today's best net", "dayBest"]
     ];
-    for (const [f, _] of o) {
-      const m = document.createElement("h3");
-      m.textContent = f;
-      const y = document.createElement("table");
-      Rt(e.rows, _).forEach((k, A) => {
+    for (const [g, f] of l) {
+      const w = document.createElement("h3");
+      w.textContent = g;
+      const v = document.createElement("table");
+      Qt(e.rows, f).forEach((A, M) => {
         const E = document.createElement("tr");
-        for (const B of [String(A + 1), k.handle, _ === "wins" ? String(k.wins) : $(k[_])]) {
-          const O = document.createElement("td");
-          O.textContent = B, E.append(O);
+        for (const F of [String(M + 1), A.handle, f === "wins" ? String(A.wins) : $(A[f])]) {
+          const R = document.createElement("td");
+          R.textContent = F, E.append(R);
         }
-        y.append(E);
-      }), n.append(m, y);
+        v.append(E);
+      }), o.append(w, v);
     }
-    const l = document.createElement("p"), u = Lt.filter((f) => e.achievements.includes(f.id)).map((f) => f.label);
-    l.textContent = u.length ? u.join(", ") : "No achievements yet.", n.append(l);
-  }, d = () => {
+    const h = document.createElement("p"), p = Rt.filter((g) => e.achievements.includes(g.id)).map((g) => g.label);
+    h.textContent = p.length ? p.join(", ") : "No achievements yet.", o.append(h);
+  }, m = () => {
     try {
-      s.set(Xe, Bt(e));
+      s.set(Ke, Gt(e));
     } catch {
     }
   };
   return t.addEventListener("change", () => {
-    e = { ...e, handle: tt(t.value) }, t.value = e.handle, d(), c();
-  }), w("board-open").addEventListener("click", () => {
+    e = { ...e, handle: lt(t.value) }, t.value = e.handle, m(), c();
+  }), y("board-open").addEventListener("click", () => {
     c();
-    const p = w("board-dialog");
-    p.open || p.showModal(), queueMicrotask(() => w("board-close").focus());
-  }), w("board-close").addEventListener("click", () => w("board-dialog").close()), c(), {
-    note(p, b) {
-      if (!p || b) return;
-      const n = Ft(e, {
-        id: p.id,
-        net: p.net,
-        cost: p.cost,
-        sessionNet: p.sessionNet,
-        modifier: p.modifier,
-        flourish: p.flourish,
+    const b = y("board-dialog");
+    b.open || b.showModal(), queueMicrotask(() => y("board-close").focus());
+  }), y("board-close").addEventListener("click", () => y("board-dialog").close()), c(), {
+    note(b, n) {
+      if (!b || n) return;
+      const o = Vt(e, {
+        id: b.id,
+        net: b.net,
+        cost: b.cost,
+        sessionNet: b.sessionNet,
+        modifier: b.modifier,
+        flourish: b.flourish,
         at: Date.now()
       });
-      n !== e && (e = n, d(), c());
+      o !== e && (e = o, m(), c());
     }
   };
 }
-function Gn() {
-  const s = Bn(), e = Wn(s.kv), t = new It((g) => {
-    w("banner").hidden = !1, w("banner").textContent = g;
+function Zn() {
+  const s = Wn(), e = Un(s.kv), t = new Ht((_) => {
+    y("banner").hidden = !1, y("banner").textContent = _;
   });
   t.load();
-  const r = new Nn(), i = new _n(Sn());
-  let a = null, h = !1, c;
-  c = new Mn(
+  const r = new $n(), i = new Sn(Cn());
+  let a = null, u = !1, d;
+  d = new Bn(
     s.kv,
     s.locker,
     i,
     t,
-    (g) => {
-      a = g, r.render(g, g.cost), be(g, g.cost), w("balance").textContent = $(g.balanceShown), w("session").textContent = $(g.sessionNetShown), h && P();
+    (_) => {
+      a = _, r.render(_, _.cost), Ae(_, _.cost), y("balance").textContent = $(_.balanceShown), y("session").textContent = $(_.sessionNetShown), u && L();
     },
-    (g) => {
-      w("live").textContent = g;
+    (_) => {
+      y("live").textContent = _;
     },
     performance.now(),
     s.storage,
-    ge.matches
-  ), h = !0, s.notice && x(s.notice), c.resetReason && x("Saved demo data could not be read, so the demo credits were reset.");
-  const d = w("spin");
-  let p = !1, b = "", n = 0;
-  function o(g) {
-    const S = w("state-overlay");
-    S.textContent = g, S.hidden = !1, S.classList.remove("show"), S.offsetWidth, S.classList.add("show"), window.clearTimeout(n), n = window.setTimeout(() => {
-      S.classList.remove("show"), window.setTimeout(() => {
-        S.classList.contains("show") || (S.hidden = !0);
+    ke.matches
+  ), u = !0, s.notice && K(s.notice), d.resetReason && K("Saved demo data could not be read, so the demo credits were reset.");
+  const c = y("spin");
+  let m = !1, b = !1, n = !1, o = "", l = 0, h = 0;
+  function p(_) {
+    const S = y("state-overlay");
+    S.textContent = _, S.hidden = !1, S.classList.remove("show", "bye"), S.offsetWidth, S.classList.add("show"), window.clearTimeout(l), window.clearTimeout(h), l = window.setTimeout(() => {
+      S.classList.add("bye"), h = window.setTimeout(() => {
+        S.classList.contains("bye") && (S.hidden = !0, S.classList.remove("show", "bye"));
       }, 1e3);
-    }, 1600);
-  }
-  function l() {
-    const g = w("splash");
-    g.hidden = !1, g.classList.remove("out"), queueMicrotask(() => w("splash-start").focus());
-  }
-  function u() {
-    const g = w("splash");
-    g.classList.add("out"), window.setTimeout(() => {
-      g.hidden = !0;
     }, 1e3);
   }
-  let f = ze(), _ = null, m = 0;
-  d.addEventListener("pointerdown", (g) => {
-    g.button === 0 && (p = !0, H("spin", v.spinPressed), f = wt(performance.now()), _ = null, window.clearInterval(m), m = window.setInterval(() => {
-      f = yt(f, performance.now());
-    }, 40));
-  }), d.addEventListener("pointerup", (g) => {
-    window.clearInterval(m);
-    const S = g.target === d || d.contains(g.target);
-    p = !1;
-    const T = vt(f, S);
-    f = T.hold, _ = T.action, window.setTimeout(() => {
-      _ = null;
-    }, 0);
-  }), d.addEventListener("pointercancel", () => {
-    window.clearInterval(m), f = fe(f), _ = "none";
-  }), d.addEventListener("pointerleave", () => {
-    f.phase !== "idle" && (f = fe(f), _ = "none");
-  }), d.addEventListener("blur", () => {
-    window.clearInterval(m), f = fe(f);
-  }), d.addEventListener("click", () => {
-    const g = kt(_);
-    _ = null, g === "spin" && c.spin(), g === "autoplay" && (c.startAuto(c.status().autoplayCount), o("Auto Spin Enabled")), P();
-  }), d.addEventListener("keydown", (g) => {
-    g.key === "Escape" && (f = fe(f), _ = "none");
-  }), w("reveal").addEventListener("click", () => {
-    c.reveal(), P();
-  }), w("start-auto").addEventListener("click", () => {
-    c.startAuto(c.status().autoplayCount), o("Auto Spin Enabled"), P();
-  }), w("stop-auto").addEventListener("click", () => {
-    c.stopAutoplay(), o("Auto Spin Disabled"), P();
-  });
-  const y = () => {
-    if (c.status().locked) return;
-    w("reset-dialog").showModal(), queueMicrotask(() => w("reset-cancel").focus());
-  };
-  w("reset").addEventListener("click", y), w("short-reset").addEventListener("click", y), w("reset-confirm").addEventListener("click", () => {
-    c.reset().then(() => {
-      w("reset-dialog").close(), a = null, be(null, c.status().cost), P();
-    });
-  }), w("reset-cancel").addEventListener("click", () => w("reset-dialog").close());
-  let k = null;
-  w("help-open").addEventListener("click", () => {
-    k = w("help-open"), Z();
-  }), w("help-close").addEventListener("click", () => w("help-dialog").close()), w("help-dialog").addEventListener("close", () => {
-    if (c.noteHelp(!1), !c.status().onboarded) {
-      l();
-      return;
-    }
-    (k ?? d).focus();
-  }), w("onboard-help").addEventListener("click", () => {
-    k = w("onboard-start"), Z();
-  }), w("onboard-start").addEventListener("click", () => {
-    c.finishOnboarding(), w("onboard-dialog").close(), u(), P(), d.focus();
-  }), w("splash-start").addEventListener("click", () => {
-    c.finishOnboarding(), u(), P(), d.focus();
-  });
-  const A = (g) => {
-    const S = Array.from(document.querySelectorAll('input[name="cost"]')), T = S.findIndex((D) => D.checked), M = S[T + g];
-    !M || M.disabled || (M.checked = !0, M.dispatchEvent(new Event("change", { bubbles: !0 })));
-  };
-  w("cost-down").addEventListener("click", () => A(-1)), w("cost-up").addEventListener("click", () => A(1)), w("exit").addEventListener("click", () => {
-  });
-  for (const g of Array.from(document.querySelectorAll('input[name="cost"]')))
-    g.addEventListener("change", () => {
-      g.checked && (c.setCost(Number(g.value)), P());
-    });
-  w("turbo").addEventListener("change", (g) => {
-    c.setSpeed(g.target.checked ? 1 : 0);
-  }), w("muted").addEventListener("change", (g) => {
-    c.setAudioPrefs({ muted: g.target.checked }), Y();
-  }), w("music").addEventListener("change", (g) => {
-    c.setAudioPrefs({ music: g.target.checked }), Y();
-  }), w("effects").addEventListener("change", (g) => {
-    c.setAudioPrefs({ effects: g.target.checked }), Y();
-  }), w("reduced").addEventListener("change", (g) => {
-    const S = g.target.value;
-    c.setReduced(S === "device" ? null : S === "reduce"), P();
-  }), w("auto-count").addEventListener("change", (g) => {
-    c.setAutoCount(Number(g.target.value));
-  }), document.addEventListener("keydown", (g) => {
-    const S = On();
-    if (S) {
-      if (g.key === "Escape") {
-        g.preventDefault(), S.close();
+  function g() {
+    const _ = y("splash");
+    _.hidden = !1, _.classList.remove("out"), queueMicrotask(() => y("splash-start").focus());
+  }
+  function f() {
+    const _ = y("splash");
+    _.classList.add("out"), window.setTimeout(() => {
+      _.hidden = !0;
+    }, 1e3);
+  }
+  let w = ot(), v = null, A = 0;
+  c.addEventListener("pointerdown", (_) => {
+    if (_.button === 0) {
+      if (d.status().reveal) {
+        n = !0, d.reveal(), L();
         return;
       }
-      if (g.key === "Tab") {
-        const M = Fn(S);
-        if (M.length > 0) {
-          g.preventDefault();
-          const D = M.indexOf(document.activeElement), z = g.shiftKey ? -1 : 1;
-          M[(D + z + M.length) % M.length].focus();
+      n = !1, m = !0, O("spin", k.spinPressed), w = Tt(performance.now()), v = null, window.clearInterval(A), A = window.setInterval(() => {
+        w = Et(w, performance.now());
+      }, 40);
+    }
+  }), c.addEventListener("pointerup", (_) => {
+    window.clearInterval(A);
+    const S = _.target === c || c.contains(_.target);
+    m = !1;
+    const I = It(w, S);
+    w = I.hold, v = I.action, window.setTimeout(() => {
+      v = null;
+    }, 0);
+  }), c.addEventListener("pointercancel", () => {
+    window.clearInterval(A), w = be(w), v = "none";
+  }), c.addEventListener("pointerleave", () => {
+    w.phase !== "idle" && (w = be(w), v = "none");
+  }), c.addEventListener("blur", () => {
+    window.clearInterval(A), w = be(w);
+  }), c.addEventListener("click", () => {
+    if (n || d.status().reveal) {
+      n = !1, d.status().reveal && d.reveal(), L();
+      return;
+    }
+    const _ = Lt(v);
+    v = null, _ === "spin" && d.spin(), _ === "autoplay" && (d.startAuto(d.status().autoplayCount), p("Auto Spin Enabled")), L();
+  }), c.addEventListener("keydown", (_) => {
+    _.key === "Escape" && (w = be(w), v = "none");
+  }), y("reveal").addEventListener("click", () => {
+    d.reveal(), L();
+  }), document.addEventListener("pointerdown", (_) => {
+    if (!d.status().reveal) return;
+    const S = _.target;
+    S instanceof Element && (S.closest("dialog, #fx-panel, #fx-toggle, #reveal, #spin") || (d.reveal(), L()));
+  }), y("start-auto").addEventListener("click", () => {
+    d.startAuto(d.status().autoplayCount), p("Auto Spin Enabled"), L();
+  }), y("stop-auto").addEventListener("click", () => {
+    d.stopAutoplay(), p("Auto Spin Disabled"), L();
+  });
+  const M = () => {
+    if (d.status().locked) return;
+    y("reset-dialog").showModal(), queueMicrotask(() => y("reset-cancel").focus());
+  };
+  y("reset").addEventListener("click", M), y("short-reset").addEventListener("click", M), y("reset-confirm").addEventListener("click", () => {
+    d.reset().then(() => {
+      y("reset-dialog").close(), a = null, Ae(null, d.status().cost), L();
+    });
+  }), y("reset-cancel").addEventListener("click", () => y("reset-dialog").close());
+  let E = null;
+  y("help-open").addEventListener("click", () => {
+    E = y("help-open"), J();
+  }), y("help-close").addEventListener("click", () => y("help-dialog").close()), y("help-dialog").addEventListener("close", () => {
+    if (d.noteHelp(!1), !d.status().onboarded) {
+      g();
+      return;
+    }
+    (E ?? c).focus();
+  }), y("onboard-help").addEventListener("click", () => {
+    E = y("onboard-start"), J();
+  }), y("onboard-start").addEventListener("click", () => {
+    d.finishOnboarding(), y("onboard-dialog").close(), f(), L(), c.focus();
+  }), y("splash-start").addEventListener("click", () => {
+    d.finishOnboarding(), f(), L(), c.focus();
+  });
+  const F = (_) => {
+    const S = Array.from(document.querySelectorAll('input[name="cost"]')), I = S.findIndex((q) => q.checked), T = S[I + _];
+    !T || T.disabled || (T.checked = !0, T.dispatchEvent(new Event("change", { bubbles: !0 })));
+  };
+  y("cost-down").addEventListener("click", () => F(-1)), y("cost-up").addEventListener("click", () => F(1)), y("exit").addEventListener("click", () => {
+  });
+  for (const _ of Array.from(document.querySelectorAll('input[name="cost"]')))
+    _.addEventListener("change", () => {
+      _.checked && (d.setCost(Number(_.value)), L());
+    });
+  y("turbo").addEventListener("change", (_) => {
+    d.setSpeed(_.target.checked ? 1 : 0);
+  }), y("muted").addEventListener("change", (_) => {
+    d.setAudioPrefs({ muted: _.target.checked }), C();
+  }), y("music").addEventListener("change", (_) => {
+    d.setAudioPrefs({ music: _.target.checked }), C();
+  }), y("effects").addEventListener("change", (_) => {
+    d.setAudioPrefs({ effects: _.target.checked }), C();
+  }), y("reduced").addEventListener("change", (_) => {
+    const S = _.target.value;
+    d.setReduced(S === "device" ? null : S === "reduce"), L();
+  }), y("auto-count").addEventListener("change", (_) => {
+    d.setAutoCount(Number(_.target.value));
+  }), document.addEventListener("keydown", (_) => {
+    const S = Gn();
+    if (S) {
+      if (_.key === "Escape") {
+        _.preventDefault(), S.close();
+        return;
+      }
+      if (_.key === "Tab") {
+        const T = qn(S);
+        if (T.length > 0) {
+          _.preventDefault();
+          const q = T.indexOf(document.activeElement), U = _.shiftKey ? -1 : 1;
+          T[(q + U + T.length) % T.length].focus();
         }
       }
       return;
     }
-    if (g.key !== " " && g.key !== "Enter") return;
-    const T = g.target;
-    !T || T.closest("dialog, input, select, textarea, button, a") || T.closest("#play-surface") && (g.preventDefault(), c.spin(), P());
+    if (_.key !== " " && _.key !== "Enter") return;
+    const I = _.target;
+    !I || I.closest("dialog, input, select, textarea, button, a") || I.closest("#play-surface") && (_.preventDefault(), d.spin(), L());
   });
-  const E = () => t.unlock();
-  window.addEventListener("pointerdown", E, { once: !1 }), window.addEventListener("keydown", E), document.addEventListener("visibilitychange", () => {
-    const g = document.hidden;
-    c.setHidden(g), t.setHidden(g), r.setHidden(g);
+  const R = () => t.unlock();
+  window.addEventListener("pointerdown", R, { once: !1 }), window.addEventListener("keydown", R), document.addEventListener("visibilitychange", () => {
+    const _ = document.hidden;
+    d.setHidden(_), t.setHidden(_), r.setHidden(_);
   }), window.addEventListener("blur", () => {
-    c.setHidden(!0), t.setHidden(!0);
+    d.setHidden(!0), t.setHidden(!0);
   }), window.addEventListener("focus", () => {
-    document.hidden || (c.setHidden(!1), t.setHidden(!1));
-  }), ge.addEventListener("change", () => {
-    c.osReduced = ge.matches;
+    document.hidden || (d.setHidden(!1), t.setHidden(!1));
+  }), ke.addEventListener("change", () => {
+    d.osReduced = ke.matches;
   });
-  let B = performance.now(), O = -1;
-  const q = (g) => {
-    const S = Math.min(100, g - B);
-    B = g, c.advance(S);
-    const T = Math.floor(c.status().activeMs / 1e3);
-    T !== O && (O = T, w("time").textContent = Dn(c.status().activeMs)), r.tick(a), P(), requestAnimationFrame(q);
+  let x = performance.now(), Q = -1;
+  const Y = (_) => {
+    const S = Math.min(100, _ - x);
+    x = _, d.advance(S);
+    const I = Math.floor(d.status().activeMs / 1e3);
+    I !== Q && (Q = I, y("time").textContent = Yn(d.status().activeMs)), r.tick(a), L(), requestAnimationFrame(Y);
   };
-  function x(g) {
-    const S = w("banner");
-    S.hidden = !1, S.textContent = g;
-  }
-  function Z() {
-    c.noteHelp(!0);
-    const g = w("onboard-dialog");
-    g.open && g.close();
-    const S = w("help-dialog");
-    S.open || S.showModal(), S.scrollTop = 0, queueMicrotask(() => w("help-title").focus());
-  }
-  function Y() {
-    const g = c.status();
-    t.setPrefs(g.muted, g.music, g.effects), t.setPresenting(g.locked);
-  }
-  function P() {
-    const g = c.status();
-    w("session").textContent = $(a?.sessionNetShown ?? g.sessionNet), w("balance").textContent = $(a?.balanceShown ?? g.balance), d.disabled = g.locked || !g.onboarded;
-    const S = p ? v.spinPressed : d.disabled ? v.spinDisabled : v.spin;
-    H("spin", S), w("reveal").disabled = !g.reveal, w("start-auto").disabled = g.locked || !g.onboarded, w("reset").disabled = g.locked, w("stop-auto").disabled = g.autoRemaining === null;
-    for (const te of Array.from(document.querySelectorAll('input[name="cost"]')))
-      te.disabled = g.locked, te.checked = Number(te.value) === g.cost;
-    w("turbo").checked = g.turbo, w("turbo").disabled = g.locked, w("turbo-btn").setAttribute("aria-pressed", String(g.turbo)), w("turbo-btn").disabled = g.locked, w("sound-btn").setAttribute("aria-pressed", String(!g.muted)), w("music-btn").setAttribute("aria-pressed", String(g.music)), w("muted").checked = g.muted, w("music").checked = g.music, w("effects").checked = g.effects;
-    const T = w("reduced");
-    T.value = g.reducedMotion === null ? "device" : g.reducedMotion ? "reduce" : "allow", w("auto-count").value = String(g.autoplayCount), w("auto-count").disabled = g.locked;
-    const M = w("auto-status");
-    M.textContent = g.autoRemaining === null ? "Autoplay off" : `Autoplay ${g.autoRemaining} left`;
-    const D = g.message ?? g.warning ?? "", K = !g.locked && g.balance < g.cost || D.includes("Not enough");
-    M.hidden = K;
-    const ee = w("note");
-    ee.textContent = K ? "" : D, ee.hidden = K || D === "", w("short").hidden = !K, w("short-text").textContent = D || "Insufficient balance", K ? b !== "low" && (b = "low", o("Insufficient balance")) : b === "low" && (b = ""), w("short-reset").hidden = !c.allowsReset(), w("reset").hidden = !c.allowsReset(), Y(), e.note(c.receiptView(), g.locked), w("cost-read").textContent = $(g.cost), w("cost-down").disabled = g.locked || g.cost <= 10, w("cost-up").disabled = g.locked || g.cost >= 100;
-    const Me = g.reducedMotion === !0 || g.reducedMotion === null && ge.matches;
-    w("cabinet").dataset.motion = (g.locked ? a?.reduced : Me) ? "reduce" : "allow", t.setReelLoop(!!(a && a.spinning.some(Boolean) && !a.reduced)), Rn(a);
+  function K(_) {
+    const S = y("banner");
+    S.hidden = !1, S.textContent = _;
   }
   function J() {
-    const g = w("help-body");
-    for (const S of jt()) {
-      const T = document.createElement("h3");
-      T.textContent = S.heading;
-      const M = document.createElement("p");
-      M.textContent = S.body, g.append(T, M);
+    d.noteHelp(!0);
+    const _ = y("onboard-dialog");
+    _.open && _.close();
+    const S = y("help-dialog");
+    S.open || S.showModal(), S.scrollTop = 0, queueMicrotask(() => y("help-title").focus());
+  }
+  function C() {
+    const _ = d.status();
+    t.setPrefs(_.muted, _.music, _.effects), t.setPresenting(_.locked);
+  }
+  function L() {
+    const _ = d.status();
+    y("session").textContent = $(a?.sessionNetShown ?? _.sessionNet), y("balance").textContent = $(a?.balanceShown ?? _.balance);
+    const S = _.reveal;
+    c.disabled = !_.onboarded || _.locked && !S;
+    const I = m ? k.spinPressed : c.disabled ? k.spinDisabled : k.spin;
+    O("spin", I);
+    const T = y("reveal");
+    T.disabled = !S, O("reveal", b ? k.skipPressed : S ? k.skip : k.skipDisabled), y("start-auto").disabled = _.locked || !_.onboarded, y("reset").disabled = _.locked, y("stop-auto").disabled = _.autoRemaining === null;
+    for (const Pe of Array.from(document.querySelectorAll('input[name="cost"]')))
+      Pe.disabled = _.locked, Pe.checked = Number(Pe.value) === _.cost;
+    y("turbo").checked = _.turbo, y("turbo").disabled = _.locked, y("turbo-btn").setAttribute("aria-pressed", String(_.turbo)), y("turbo-btn").disabled = _.locked, y("sound-btn").setAttribute("aria-pressed", String(!_.muted)), y("music-btn").setAttribute("aria-pressed", String(_.music)), y("muted").checked = _.muted, y("music").checked = _.music, y("effects").checked = _.effects;
+    const q = y("reduced");
+    q.value = _.reducedMotion === null ? "device" : _.reducedMotion ? "reduce" : "allow", y("auto-count").value = String(_.autoplayCount), y("auto-count").disabled = _.locked;
+    const U = y("auto-status");
+    U.textContent = _.autoRemaining === null ? "Autoplay off" : `Autoplay ${_.autoRemaining} left`;
+    const ne = _.message ?? _.warning ?? "", z = !_.locked && _.balance < _.cost || ne.includes("Not enough");
+    U.hidden = z;
+    const de = y("note");
+    de.textContent = z ? "" : ne, de.hidden = z || ne === "", y("short").hidden = !z, y("short-text").textContent = ne || "Insufficient balance", z ? o !== "low" && (o = "low", p("Insufficient balance")) : o === "low" && (o = ""), y("short-reset").hidden = !d.allowsReset(), y("reset").hidden = !d.allowsReset(), C(), e.note(d.receiptView(), _.locked), y("cost-read").textContent = $(_.cost), y("cost-down").disabled = _.locked || _.cost <= 10, y("cost-up").disabled = _.locked || _.cost >= 100;
+    const yt = _.reducedMotion === !0 || _.reducedMotion === null && ke.matches;
+    y("cabinet").dataset.motion = (_.locked ? a?.reduced : yt) ? "reduce" : "allow", t.setReelLoop(!!(a && a.spinning.some(Boolean) && !a.reduced)), Qn(a);
+  }
+  function ee() {
+    const _ = y("help-body");
+    for (const S of nn()) {
+      const I = document.createElement("h3");
+      I.textContent = S.heading;
+      const T = document.createElement("p");
+      T.textContent = S.body, _.append(I, T);
     }
   }
-  J(), Ze(), Ke(), window.addEventListener("resize", () => {
-    Ze(), Ke(), r.resize();
-  }), be(null, c.status().cost), w("stage").addEventListener("auric-land", () => {
-    const g = w("build-digits");
-    g.classList.remove("flash"), g.offsetWidth, g.classList.add("flash");
+  ee(), st(), rt(), window.addEventListener("resize", () => {
+    st(), rt(), r.resize();
+  }), Ae(null, d.status().cost), y("stage").addEventListener("auric-land", () => {
+    const _ = y("build-digits");
+    _.classList.remove("flash"), _.offsetWidth, _.classList.add("flash");
   });
-  const C = (g, S) => {
-    w(S).addEventListener("click", () => {
-      const T = w(g);
-      T.disabled || (T.checked = !T.checked, T.dispatchEvent(new Event("change", { bubbles: !0 })));
+  const ge = (_, S) => {
+    y(S).addEventListener("click", () => {
+      const I = y(_);
+      I.disabled || (I.checked = !I.checked, I.dispatchEvent(new Event("change", { bubbles: !0 })));
     });
   };
-  w("turbo-btn").addEventListener("click", () => {
-    if (c.status().locked) return;
-    const g = (c.status().speed + 1) % 3;
-    c.setSpeed(g), o(g === 2 ? "Super Turbo Spin Enabled" : g === 1 ? "Turbo Spin Enabled" : "Turbo Spin Disabled"), P();
-  }), C("muted", "sound-btn"), C("music", "music-btn");
-  const F = (g, S, T) => {
-    const M = w(g);
-    M.addEventListener("pointerdown", () => H(g, T));
-    const D = () => H(g, S);
-    M.addEventListener("pointerup", D), M.addEventListener("pointercancel", D);
+  y("turbo-btn").addEventListener("click", () => {
+    if (d.status().locked) return;
+    const _ = (d.status().speed + 1) % 3;
+    d.setSpeed(_), p(_ === 2 ? "Super Turbo Spin Enabled" : _ === 1 ? "Turbo Spin Enabled" : "Turbo Spin Disabled"), L();
+  }), ge("muted", "sound-btn"), ge("music", "music-btn");
+  const D = (_, S, I) => {
+    const T = y(_);
+    T.addEventListener("pointerdown", () => O(_, I));
+    const q = () => O(_, S);
+    T.addEventListener("pointerup", q), T.addEventListener("pointercancel", q);
   };
-  F("cost-down", v.minus, v.minusPressed), F("cost-up", v.plus, v.plusPressed), F("turbo-btn", v.turbo, v.turboPressed), F("start-auto", v.auto, v.autoPressed), F("stop-auto", v.stop, v.stopPressed), F("sound-btn", v.sound, v.soundPressed), F("music-btn", v.music, v.musicPressed), F("settings-open", v.gear, v.gearPressed), F("help-open", v.help, v.helpPressed), w("settings-open").addEventListener("click", () => {
-    const g = w("settings-dialog");
-    g.open || g.showModal(), queueMicrotask(() => w("settings-close").focus());
-  }), w("settings-close").addEventListener("click", () => w("settings-dialog").close()), $n().then(() => r.mount(w("stage"))).then(() => {
+  D("cost-down", k.minus, k.minusPressed), D("cost-up", k.plus, k.plusPressed), D("turbo-btn", k.turbo, k.turboPressed), D("start-auto", k.auto, k.autoPressed), D("stop-auto", k.stop, k.stopPressed), D("sound-btn", k.sound, k.soundPressed), D("music-btn", k.music, k.musicPressed), D("settings-open", k.gear, k.gearPressed), D("help-open", k.help, k.helpPressed), D("board-open", k.star, k.starPressed);
+  const le = y("reveal");
+  le.addEventListener("pointerdown", () => {
+    b = !0;
+  });
+  const Ue = () => {
+    b = !1;
+  };
+  le.addEventListener("pointerup", Ue), le.addEventListener("pointercancel", Ue), y("settings-open").addEventListener("click", () => {
+    const _ = y("settings-dialog");
+    _.open || _.showModal(), queueMicrotask(() => y("settings-close").focus());
+  }), y("settings-close").addEventListener("click", () => y("settings-dialog").close()), jn().then(() => r.mount(y("stage"))).then(() => {
     document.getElementById("boot")?.remove(), r.resize(), r.tick(a), a && r.render(a, a.cost);
   });
-  const V = (g, S) => ({
-    label: g,
+  const te = (_, S) => ({
+    label: _,
     run: () => {
-      let T = 0;
-      const M = rt({
-        nextInt(Me) {
-          const te = S[T++] ?? 0;
-          return te >= Me ? 0 : te;
+      let I = 0;
+      const T = ut({
+        nextInt(z) {
+          const de = S[I++] ?? 0;
+          return de >= z ? 0 : de;
         }
-      }, 10, 0), D = Fe(M, "normal", "fx"), z = Ae({
-        outcome: M,
-        schedule: D,
-        elapsed: D.totalMs,
+      }, 10, 0), q = We(T, "normal", "fx"), U = Ee({
+        outcome: T,
+        schedule: q,
+        elapsed: q.totalMs,
         balanceAfter: 0,
         sessionNetAfter: 0
-      }), K = Q(M.net, M.cost), ee = {
-        ...z,
-        phase: M.modifier === "wheel" ? "wheel" : z.plate ? "celebrating" : z.phase,
-        hero: M.gross,
-        cueTier: K
+      }), ne = X(T.net, T.cost), _e = {
+        ...U,
+        phase: T.modifier === "wheel" ? "wheel" : U.plate ? "celebrating" : U.phase,
+        hero: T.gross,
+        cueTier: ne
       };
-      a = ee, r.render(ee, M.cost), be(ee, M.cost);
+      a = _e, r.render(_e, T.cost), Ae(_e, T.cost);
     }
   });
-  pt(() => [
-    V("Small", [N("10"), N("10"), N("0"), re("x1")]),
-    V("Big", [N("00"), N("00"), N("0"), re("x1")]),
-    V("Mega", [N("00"), N("10"), N("10"), re("x5")]),
-    V("Super", [N("00"), N("00"), N("00"), re("x5")]),
-    V("Epic", [N("00"), N("00"), N("00"), re("x10")]),
-    V("Wheel", [N("0"), N("1"), N("0"), re("wheel"), 7]),
-    { label: "Low balance", run: () => o("Insufficient balance") }
-  ], "#e0b15a"), P(), new URLSearchParams(location.search).get("brand") || (w("exit").hidden = !0), c.status().onboarded || l(), requestAnimationFrame(q), window.addEventListener("pagehide", () => {
-    c.destroy().then(() => {
+  kt(() => [
+    te("Small", [B("10"), B("10"), B("0"), ie("x1")]),
+    te("Big", [B("00"), B("00"), B("0"), ie("x1")]),
+    te("Mega", [B("00"), B("10"), B("10"), ie("x5")]),
+    te("Super", [B("00"), B("00"), B("00"), ie("x5")]),
+    te("Epic", [B("00"), B("00"), B("00"), ie("x10")]),
+    te("Wheel", [B("0"), B("1"), B("0"), ie("wheel"), 7]),
+    { label: "Low balance", run: () => p("Insufficient balance") }
+  ], "#e0b15a"), L(), new URLSearchParams(location.search).get("brand") || (y("exit").hidden = !0), d.status().onboarded || g(), requestAnimationFrame(Y), window.addEventListener("pagehide", () => {
+    d.destroy().then(() => {
       t.destroy(), r.destroy();
     });
   });
 }
-Gn();
+Zn();
