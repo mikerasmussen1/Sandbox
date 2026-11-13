@@ -17,10 +17,10 @@ const PITCH_X = 6.5;
 const PITCH_Y = 5;
 
 /**
- * Bottom-course center above the guardian's feet. His head tops out near 37px,
- * so the lowest gems rest on the head.
+ * Bottom-course center above the guardian's feet. His head tops out near 41px,
+ * so the lowest gems rest on the crown.
  */
-const BASE_Y = -34;
+const BASE_Y = -46;
 
 /** Jade texture is 128px. This lands near a 17px gem. */
 export const CARRY_SCALE = 0.09;

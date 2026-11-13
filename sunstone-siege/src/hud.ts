@@ -672,10 +672,10 @@ export class Hud {
     guardianPlate.circle(0, 0, 32).fill({ color: 0x1a120c });
     guardianPlate.circle(0, 0, 28).fill({ color: 0x4a3018 });
     guardianPlate.eventMode = "none";
-    const idle = art.clip("guardian", "idle");
+    const idle = art.clip("hero", "walk");
     this.guardianFace = new Sprite(idle?.frames[0]?.[0] ?? Texture.EMPTY);
-    this.guardianFace.anchor.set(0.5, 0.38);
-    this.guardianFace.scale.set(0.34);
+    this.guardianFace.anchor.set(idle?.anchorX ?? 0.5, idle?.anchorY ?? 0.7);
+    this.guardianFace.scale.set((idle?.draw ?? 0.25) * 0.7);
     this.guardianFace.eventMode = "none";
     const guardianMask = new Graphics().circle(0, 0, 26).fill({ color: 0xffffff });
     guardianMask.eventMode = "none";

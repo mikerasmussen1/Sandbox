@@ -15,22 +15,19 @@ const SANS = 'Palatino, "Palatino Linotype", Georgia, serif';
 export const RANGE_COLOR = TOWER_HUE;
 
 const PLAY: Record<string, number> = {
-  walk: 1.2, run: 1.25, fly: 1.15, idle: 1,
+  walk: 1.2, run: 1.25, fly: 1.15, idle: 1, roll: 1.15, push: 1.2,
   attack: 1.8, hit: 1.85, block: 1.6, death: 1.7,
   slam: 1.65, roar: 1.7, build: 1.15, sell: 1.25,
 };
 
-const ELITE: ReadonlySet<EnemyKind> = new Set(["shield", "golem", "boss"]);
 /**
- * Portrait camera shows 600 world px. A swarmer's opaque body is ~63 px, so
- * 0.92 lands that body near 5.5% of the screen — about four-fifths of the king,
- * which is the proportion measured on the reference frames.
+ * Clip.draw is already world-units per source pixel, measured so the opaque
+ * body matches the reference ratios. These stay at 1 so a call site that
+ * still multiplies does not shrink the new art.
  */
-const ENEMY_DRAW = 0.92;
-/** King silhouette stays near 7% of the portrait, inside the 6–8% framing band. */
-const HERO_DRAW = 0.31;
-/** Tower sheets are tall; 0.50 puts a tier-1 hall near 10% of the screen. */
-const TOWER_DRAW = 0.50;
+const ENEMY_DRAW = 1;
+const HERO_DRAW = 1;
+const TOWER_DRAW = 1;
 /** Screen-pixel radius of the build cards. The menu is scaled by 1/zoom so this stays constant. */
 const MENU_REACH = 220;
 /** Clear the Jade vault and the top bar, and the Flare button along the bottom. */
@@ -58,26 +55,25 @@ function isTower(kind: StationKind): kind is TowerKind {
 }
 
 function bodyScale(kind: EnemyKind, clipDraw: number): number {
-  let scale = clipDraw * ENEMY_DRAW;
-  if (kind === "shard" || kind === "roller") scale *= 0.28;
-  else if (kind === "skitter") scale *= 1.16;
-  else if (kind === "sapper") scale *= 0.9;
-  else if (kind === "runner") scale *= 0.92;
-  else if (kind === "giant") scale *= 1.08;
-  else if (ELITE.has(kind)) scale *= 1.1;
+  const scale = clipDraw * ENEMY_DRAW;
+  if (kind === "shard") return scale * 0.38;
   return scale;
 }
 
 function towerLook(kind: TowerKind, tier: number, spec: Spec): { asset: string; tint: number; mul: number } {
-  if (spec === "rain") return { asset: "tower_dart_t3", tint: 0xffd76a, mul: 1.16 };
-  if (spec === "volley") return { asset: "tower_dart_t2", tint: 0xfff6df, mul: 1.08 };
-  if (spec === "ballista") return { asset: "tower_lens_t3", tint: 0xffe2a8, mul: 1.14 };
-  if (spec === "catapult") return { asset: "tower_lens_t2", tint: 0xd7c4a4, mul: 1.14 };
-  if (spec === "snare") return { asset: "tower_drum_t3", tint: 0xc8b6ff, mul: 1.1 };
-  if (spec === "beam") return { asset: "tower_lens_t1", tint: 0xfff1a8, mul: 1.1 };
-  if (spec === "spears") return { asset: "tower_dart_t2", tint: 0x9ecbff, mul: 1.06 };
-  if (spec === "knights") return { asset: "tower_dart_t3", tint: 0xf0d7a2, mul: 1.08 };
-  return { asset: towerAsset(kind, tier), tint: 0xffffff, mul: 1 + tier * 0.1 };
+  const step = Math.max(0, Math.min(2, tier));
+  const level = step + 1;
+  let asset = towerAsset(kind);
+  if (step > 0 && spec !== "none") {
+    if (kind === "dart" && spec === "rain") asset = `tower_rain_t${level}`;
+    else if (kind === "dart" && spec === "volley") asset = `tower_volley_t${level}`;
+    else if (kind === "lens" && spec === "ballista") asset = `tower_ballista_t${level}`;
+    else if (kind === "lens" && spec === "catapult") asset = `tower_catapult_t${level}`;
+    else if (kind === "drum" && spec === "snare") asset = `tower_snare_t${level}`;
+    else if (kind === "drum" && spec === "beam") asset = `tower_beam_t${level}`;
+    else if (kind === "spire") asset = `tower_beam_t${level}`;
+  }
+  return { asset, tint: 0xffffff, mul: 1 };
 }
 
 interface Actor {
@@ -109,23 +105,36 @@ interface Gem { s: Sprite; x: number; y: number; vx: number; vy: number; life: n
 interface Bucket { x: number; y: number; n: number; age: number }
 interface RingFx { s: Sprite; life: number; max: number; grow: number }
 
-function towerAsset(kind: TowerKind, tier: number): string {
-  const name = kind === "spire" ? "serpent" : kind;
-  return `tower_${name}_t${tier + 1}`;
+function towerAsset(kind: TowerKind): string {
+  if (kind === "dart") return "tower_archer_t1";
+  if (kind === "lens") return "tower_siege_t1";
+  if (kind === "drum" || kind === "spire") return "tower_mystic_t1";
+  return "tower_barracks_t1";
 }
 
 function enemyAsset(kind: EnemyKind): string {
-  if (kind === "shield") return "enemy_shieldbearer";
-  if (kind === "giant") return "enemy_giant";
-  if (kind === "sapper") return "enemy_sapper";
-  if (kind === "shard" || kind === "roller") return "enemy_golem";
-  return `enemy_${kind}`;
+  if (kind === "skitter" || kind === "jaguar") return "swarmer";
+  if (kind === "runner") return "runner";
+  if (kind === "shield") return "shield";
+  if (kind === "giant" || kind === "golem") return "giant";
+  if (kind === "sapper") return "sapper";
+  if (kind === "glider") return "flyer";
+  if (kind === "roller" || kind === "shard") return "boulder";
+  if (kind === "boss") return "boss";
+  return "swarmer";
 }
 
 function locomote(kind: EnemyKind): string {
-  if (kind === "skitter" || kind === "jaguar") return "run";
   if (kind === "glider") return "fly";
+  if (kind === "roller" || kind === "shard") return "roll";
   return "walk";
+}
+
+function enemyTint(kind: EnemyKind): number {
+  if (kind === "roller" || kind === "shard") return 0xe8a86a;
+  if (kind === "jaguar") return 0xb7c4e6;
+  if (kind === "golem") return 0xd8dce4;
+  return 0xffffff;
 }
 
 /** Sheet rows are S, SE, E, NE, N, NW, W, SW. Angle 0 points east, and y grows downward. */
@@ -136,13 +145,21 @@ function facingRow(angle: number, rows: number): number {
   return [2, 1, 0, 7, 6, 5, 4, 3][i];
 }
 
-function frameAt(clip: Clip, row: number, time: number, name: string): { texture: Texture; done: boolean } {
+function frameAt(clip: Clip, row: number, time: number, name: string): { texture: Texture; done: boolean; ax: number; ay: number } {
   const speed = PLAY[name] ?? 1.6;
-  const count = clip.frames[row]?.length ?? 1;
+  const rowIndex = Math.min(row, clip.frames.length - 1);
+  const frames = clip.frames[rowIndex] ?? [];
+  const count = frames.length || 1;
   const raw = Math.floor(time * clip.fps * speed);
   const done = !clip.loop && raw >= count;
   const index = clip.loop ? raw % count : Math.min(count - 1, Math.max(0, raw));
-  return { texture: clip.frames[Math.min(row, clip.frames.length - 1)][index], done };
+  const anchor = clip.anchors[rowIndex]?.[index];
+  return {
+    texture: frames[index] ?? Texture.EMPTY,
+    done,
+    ax: anchor?.x ?? clip.anchorX,
+    ay: anchor?.y ?? clip.anchorY,
+  };
 }
 
 export class WorldView {
@@ -233,7 +250,16 @@ export class WorldView {
   private heroBody: Sprite | null = null;
   private heroLine: Sprite | null = null;
   private heroRing: Graphics | null = null;
+  private heroShadow: Sprite | null = null;
   private heroTime = 0;
+  private heroFace = 0;
+  private heroPX = -1;
+  private heroPY = -1;
+  private keep: Sprite | null = null;
+  private keepShadow: Sprite | null = null;
+  private readonly crews = new Map<number, { body: Sprite; shadow: Sprite }[]>();
+  private readonly built = new Map<number, { body: Sprite; shadow: Sprite; asset: string }>();
+  private readonly scenery: { body: Sprite; shadow: Sprite }[] = [];
   private readonly spearBolts: Sprite[] = [];
   private spearUsed = 0;
   private readonly labels = new Container();
@@ -256,6 +282,7 @@ export class WorldView {
     /** Seconds to wait before this arrow starts its fall, so the shower staggers. */
     delay: number;
     dusted: boolean;
+    ang: number;
   }[] = [];
   private readonly rainPool: Sprite[] = [];
   private readonly marks: { x: number; y: number; r: number; life: number; hot: boolean }[] = [];
@@ -346,14 +373,18 @@ export class WorldView {
     this.plaza = map.plaza;
     this.sunAt = map.sun;
     this.sun.position.set(map.sun.x, map.sun.y);
-    this.sun.zIndex = map.sun.y;
-    const disk = map.plaza * 1.85;
+    this.sun.zIndex = map.sun.y + 1;
+    const disk = map.plaza * 0.42;
     const scale = disk / Math.max(1, this.disk.texture.width);
     this.disk.scale.set(scale);
     this.inner.scale.set(scale);
     this.ring.scale.set(scale * 1.04);
     this.bloom.scale.set(scale * 1.15);
-    this.glow.scale.set(scale * 1.8);
+    this.glow.scale.set(scale * 2.4);
+    this.placeKeep(map.sun.x, map.sun.y);
+    this.dressProps(map);
+    this.clearBuilt();
+    for (const id of [...this.crews.keys()]) this.freeCrew(id);
     for (const g of this.ghosts) this.retireGhost(g);
     this.ghosts.length = 0;
   }
@@ -394,7 +425,7 @@ export class WorldView {
       return;
     }
     if (this.ghostKind !== kind) {
-      const clip = this.art.clip(towerAsset(kind, 0), "idle");
+      const clip = this.art.clip(towerAsset(kind), "idle");
       this.placeGhost.texture = clip?.frames[0][0] ?? Texture.EMPTY;
       if (clip) {
         this.placeGhost.anchor.set(clip.anchorX, clip.anchorY);
@@ -704,13 +735,100 @@ export class WorldView {
   }
 
   private shadowSprite(): Sprite {
-    const s = new Sprite(this.art.shadow);
+    const s = new Sprite(Texture.EMPTY);
     s.anchor.set(0.5, 0.5);
-    s.alpha = 0.22;
-    s.blendMode = "multiply";
-    s.tint = 0x1a120c;
     s.eventMode = "none";
     return s;
+  }
+
+  /** Atlas contact shadow. Same world-per-pixel scale as the body, its own ground anchor. */
+  private dressShadow(sprite: Sprite, id: string, scale: number, alpha = 0.92): void {
+    const mark = this.art.mark(id);
+    if (!mark) {
+      sprite.visible = false;
+      return;
+    }
+    sprite.visible = true;
+    sprite.texture = mark.texture;
+    sprite.anchor.set(mark.ax, mark.ay);
+    sprite.scale.set(scale);
+    sprite.tint = 0xffffff;
+    sprite.alpha = alpha;
+    sprite.blendMode = "normal";
+    sprite.rotation = 0;
+  }
+
+  private placeKeep(x: number, y: number): void {
+    const clip = this.art.clip("base_keep", "idle");
+    if (!clip) return;
+    if (!this.keep || !this.keepShadow) {
+      this.keep = new Sprite(clip.frames[0][0]);
+      this.keep.eventMode = "none";
+      this.keepShadow = this.shadowSprite();
+      this.shadowLayer.addChild(this.keepShadow);
+      this.actors.addChild(this.keep);
+    }
+    const posed = frameAt(clip, 0, 0, "idle");
+    this.keep.texture = posed.texture;
+    this.keep.anchor.set(posed.ax, posed.ay);
+    this.keep.scale.set(clip.draw);
+    this.keep.position.set(x, y);
+    this.keep.zIndex = y;
+    this.dressShadow(this.keepShadow, "base_keep", clip.draw);
+    this.keepShadow.position.set(x, y);
+  }
+
+  private dressProps(map: MapDef): void {
+    for (const piece of this.scenery) {
+      piece.body.destroy();
+      piece.shadow.destroy();
+    }
+    this.scenery.length = 0;
+    const names = ["tree_kapok", "tree_palm", "tree_canopy", "bush", "rock_big", "rock_small"];
+    const road: { x: number; y: number }[] = [];
+    for (const route of map.routes) {
+      for (let dist = 0; dist < route.len; dist += 36) road.push(poseAt(route, dist));
+    }
+    let seed = 19 + map.routes.length * 13 + Math.round(map.sun.x);
+    const rnd = (): number => {
+      seed = (seed * 16807) % 2147483647;
+      return seed / 2147483647;
+    };
+    let placed = 0;
+    let tries = 0;
+    while (placed < 40 && tries < 500) {
+      tries += 1;
+      const x = 48 + rnd() * (MAP_W - 96);
+      const y = 48 + rnd() * (MAP_H - 96);
+      if (Math.hypot(x - map.sun.x, y - map.sun.y) < 170) continue;
+      if (road.some((point) => Math.hypot(point.x - x, point.y - y) < map.pathWidth * 0.72 + 28)) continue;
+      const name = names[Math.floor(rnd() * names.length)];
+      const texture = this.art.prop(name);
+      if (!texture) continue;
+      const body = new Sprite(texture);
+      const anchor = texture.defaultAnchor;
+      body.anchor.set(anchor?.x ?? 0.5, anchor?.y ?? 0.8);
+      const scale = this.art.propScale(name) * (0.86 + rnd() * 0.28);
+      body.scale.set(name === "bush" || name === "rock_small" ? scale * 0.85 : scale);
+      body.position.set(x, y);
+      body.zIndex = y;
+      body.eventMode = "none";
+      const shadow = this.shadowSprite();
+      this.dressShadow(shadow, `prop_${name}`, body.scale.x, 0.85);
+      shadow.position.set(x, y);
+      this.shadowLayer.addChild(shadow);
+      this.actors.addChild(body);
+      this.scenery.push({ body, shadow });
+      placed += 1;
+    }
+  }
+
+  private clearBuilt(): void {
+    for (const piece of this.built.values()) {
+      piece.body.destroy();
+      piece.shadow.destroy();
+    }
+    this.built.clear();
   }
 
   private buildMenu(): void {
@@ -724,11 +842,11 @@ export class WorldView {
       const plate = new Graphics();
       plate.roundRect(-102, -108, 204, 248, 20).fill({ color: 0x140e0a, alpha: 0.94 });
       plate.circle(0, -48, 40).stroke({ width: 4, color: TOWER_HUE[kind] });
-      const clip = this.art.clip(towerAsset(kind, 0), "idle");
+      const clip = this.art.clip(towerAsset(kind), "idle");
       const icon = new Sprite(clip?.frames[0][0] ?? Texture.EMPTY);
       if (clip) {
         icon.anchor.set(clip.anchorX, clip.anchorY);
-        icon.scale.set(clip.draw * 0.36);
+        icon.scale.set(clip.draw * 0.72);
       }
       icon.position.set(0, -22);
       const badge = new Text({
@@ -833,7 +951,7 @@ export class WorldView {
     body.anchor.set(clip.anchorX, clip.anchorY);
     const outline = this.takeSprite(clip.frames[0][0]);
     outline.anchor.set(clip.anchorX, clip.anchorY);
-    outline.tint = 0x14080c;
+    outline.visible = false;
     const shadow = this.shadowSprite();
     this.shadowLayer.addChild(shadow);
     this.actors.addChild(outline, body);
@@ -852,12 +970,10 @@ export class WorldView {
   private paint(actor: Actor, clip: Clip, row: number, name: string, draw: number): void {
     const posed = frameAt(clip, row, actor.time, name);
     actor.body.texture = posed.texture;
-    actor.outline.texture = posed.texture;
-    actor.body.anchor.set(clip.anchorX, clip.anchorY);
-    actor.outline.anchor.set(clip.anchorX, clip.anchorY);
+    actor.body.anchor.set(posed.ax, posed.ay);
     actor.body.scale.set(draw);
-    const outline = draw * 1.06;
-    actor.outline.scale.set(outline);
+    actor.body.rotation = 0;
+    actor.outline.visible = false;
   }
 
   private syncTowers(sim: Siege, step: number): void {
@@ -902,8 +1018,8 @@ export class WorldView {
       actor.body.zIndex = tower.y;
       actor.outline.zIndex = tower.y - 0.2;
       actor.body.tint = tower.stunnedUntil > sim.time ? 0xb7c4d4 : look.tint;
-      actor.shadow.position.set(tower.x, tower.y + 8);
-      actor.shadow.scale.set(0.72, 0.4);
+      this.dressShadow(actor.shadow, asset, draw);
+      actor.shadow.position.set(tower.x, tower.y);
       if (actor.clip === "attack" && actor.time < 0.09) {
         this.burst(tower.x, tower.y - 70, TOWER_HUE[tower.kind], 3);
         if (tower.tier >= 1) this.burst(tower.x + 18, tower.y - 86, TOWER_HUE[tower.kind], 3);
@@ -956,23 +1072,68 @@ export class WorldView {
       actor.outline.position.set(e.x + ox, e.y + oy - lift - hop + 2);
       actor.body.zIndex = e.y;
       actor.outline.zIndex = e.y - 0.2;
-      actor.body.blendMode = e.flash > 0 ? "add" : "normal";
-      actor.body.tint = 0xffffff;
-      actor.outline.scale.set(draw * punch * 1.08);
-      actor.outline.tint = e.flash > 0 ? 0xffffff : 0x140c08;
-      actor.body.alpha = e.kind === "roller" ? 0 : stealthedFade(e);
-      actor.outline.alpha = e.kind === "roller" ? 0 : 1;
-      actor.shadow.position.set(e.x, e.y + (e.flying ? 14 : 6));
-      const shadow = e.kind === "boss" ? 1.15 : e.kind === "giant" ? 1.05 : e.kind === "golem" ? 0.82 : e.kind === "skitter" ? 0.5 : 0.62;
-      actor.shadow.scale.set(shadow, e.flying ? 0.2 : 0.28);
-      actor.shadow.tint = 0x14200f;
-      actor.shadow.alpha = e.kind === "roller" ? 0 : e.flying ? 0.28 : 0.72;
+      const rock = e.kind === "roller" || e.kind === "shard";
+      actor.body.blendMode = !rock && e.flash > 0 ? "add" : "normal";
+      actor.body.tint = rock ? (e.flash > 0 ? 0xffe2b8 : 0xe8a86a) : e.flash > 0 ? 0xffffff : enemyTint(e.kind);
+      actor.body.alpha = stealthedFade(e);
+      if (e.kind === "roller") actor.body.rotation = e.dist / 46;
+      this.dressShadow(actor.shadow, asset, draw, e.flying ? 0.4 : 0.92);
+      actor.shadow.position.set(e.x + ox, e.y + oy);
+      if (e.kind === "roller") this.syncCrew(e);
+      else this.freeCrew(e.id);
     }
     for (const [id, actor] of this.enemies) {
       if (seen.has(id)) continue;
       this.enemies.delete(id);
+      this.freeCrew(id);
       this.freeActor(actor);
     }
+  }
+
+  /** Four pushers behind the boulder. They are a visual crew; the sim still moves one unit. */
+  private syncCrew(e: Enemy): void {
+    const clip = this.art.clip("pusher", "push") ?? this.art.clip("pusher", "walk");
+    if (!clip) return;
+    let crew = this.crews.get(e.id);
+    if (!crew) {
+      crew = [];
+      for (let i = 0; i < 4; i++) {
+        const body = this.takeSprite(clip.frames[0][0]);
+        const shadow = this.shadowSprite();
+        this.shadowLayer.addChild(shadow);
+        this.actors.addChild(body);
+        crew.push({ body, shadow });
+      }
+      this.crews.set(e.id, crew);
+    }
+    const row = facingRow(e.angle, clip.frames.length);
+    const posed = frameAt(clip, row, this.time, "push");
+    for (let i = 0; i < crew.length; i++) {
+      const back = 52 + (i % 2) * 16;
+      const side = (i - 1.5) * 22;
+      const px = e.x - Math.cos(e.angle) * back + Math.cos(e.angle + Math.PI / 2) * side;
+      const py = e.y - Math.sin(e.angle) * back + Math.sin(e.angle + Math.PI / 2) * side;
+      const member = crew[i];
+      member.body.texture = posed.texture;
+      member.body.anchor.set(posed.ax, posed.ay);
+      member.body.scale.set(clip.draw);
+      member.body.position.set(px, py);
+      member.body.zIndex = py;
+      member.body.rotation = 0;
+      member.body.tint = 0xffffff;
+      this.dressShadow(member.shadow, "pusher", clip.draw);
+      member.shadow.position.set(px, py);
+    }
+  }
+
+  private freeCrew(id: number): void {
+    const crew = this.crews.get(id);
+    if (!crew) return;
+    for (const member of crew) {
+      member.body.destroy();
+      member.shadow.destroy();
+    }
+    this.crews.delete(id);
   }
 
   private enemyClip(e: Enemy, asset: string): string {
@@ -988,7 +1149,7 @@ export class WorldView {
 
   private syncAllies(sim: Siege, step: number): void {
     const seen = new Set<number>();
-    const clip = this.art.clip("enemy_runner", "walk");
+    const clip = this.art.clip("soldier", "walk");
     if (!clip) return;
     for (const ally of sim.allies) {
       if (!ally.alive) continue;
@@ -1001,16 +1162,13 @@ export class WorldView {
       }
       actor.time += step > 0 ? step : 0;
       const row = facingRow(ally.angle, clip.frames.length);
-      const troop = ally.role === "spear" ? 1.15 : ally.role === "knight" ? 1.05 : ally.role === "recruit" ? 0.72 : 0.95;
+      const troop = ally.role === "recruit" ? 0.82 : 1;
       this.paint(actor, clip, row, "walk", clip.draw * troop);
       actor.body.position.set(ally.x, ally.y);
-      actor.outline.position.set(ally.x, ally.y + 2);
       actor.body.zIndex = ally.y;
-      actor.outline.zIndex = ally.y - 0.2;
-      actor.body.tint = ally.role === "knight" ? 0xf0d7a2 : ally.role === "spear" ? 0x9ecbff : ally.role === "recruit" ? 0xb7f0c8 : 0x8ec4ff;
-      actor.outline.tint = 0x14203a;
-      actor.shadow.position.set(ally.x, ally.y + 6);
-      actor.shadow.scale.set(0.7, 0.4);
+      actor.body.tint = ally.role === "knight" ? 0xffe6c2 : ally.role === "spear" ? 0xd6e8ff : ally.role === "recruit" ? 0xd8ffe8 : 0xffffff;
+      this.dressShadow(actor.shadow, "soldier", clip.draw * troop);
+      actor.shadow.position.set(ally.x, ally.y);
     }
     for (const [id, actor] of this.allies) {
       if (seen.has(id)) continue;
@@ -1023,28 +1181,7 @@ export class WorldView {
     this.pads.clear();
     for (const e of sim.enemies) {
       if (!e.alive) continue;
-      if (e.kind === "roller") {
-        const x = e.x + Math.cos(e.angle) * 18;
-        const y = e.y + Math.sin(e.angle) * 18;
-        this.pads.ellipse(x + 10, y + 26, 72, 26).fill({ color: 0x1a120c, alpha: 0.32 });
-        this.pads.ellipse(x + 7, y + 10, 54, 38).fill({ color: 0x5a4e44 });
-        this.pads.ellipse(x - 10, y - 14, 50, 36).fill({ color: 0x9a8874 });
-        this.pads.ellipse(x - 24, y - 32, 24, 16).fill({ color: 0xe6d8c6 });
-        this.pads.ellipse(x - 10, y - 14, 50, 36).stroke({ width: 4, color: 0x3a3028, alpha: 0.9 });
-        for (let k = 0; k < 4; k++) {
-          const back = 58 + (k % 2) * 16;
-          const side = (k - 1.5) * 22;
-          const px = e.x - Math.cos(e.angle) * back + Math.cos(e.angle + Math.PI / 2) * side;
-          const py = e.y - Math.sin(e.angle) * back + Math.sin(e.angle + Math.PI / 2) * side;
-          this.pads.ellipse(px, py + 12, 14, 6).fill({ color: 0x1a120c, alpha: 0.3 });
-          this.pads.roundRect(px - 8, py - 8, 16, 22, 6).fill({ color: 0xc43434 });
-          this.pads.circle(px, py - 18, 8).fill({ color: 0xf0d2b0 });
-          this.pads.circle(px - 3, py - 20, 1.6).fill({ color: 0x1a120c });
-          this.pads.circle(px + 3, py - 20, 1.6).fill({ color: 0x1a120c });
-        }
-        continue;
-      }
-      if (e.boulder <= 0) continue;
+      if (e.kind === "roller" || e.boulder <= 0) continue;
       const reach = 34 + e.boulder * 0.12;
       const x = e.x + Math.cos(e.angle) * 28;
       const y = e.y + Math.sin(e.angle) * 28;
@@ -1071,8 +1208,12 @@ export class WorldView {
     sim.stations.forEach((station, i) => {
       const color = padHue(station.kind);
       const hot = i === near;
-      if (station.kind === "wall") this.drawWall(sim, station);
-      else if (station.tier === 0) this.padPlot(station.x, station.y, hot ? 62 : 54);
+      if (station.kind === "wall") this.drawWall(sim, station, i);
+      else if (station.kind === "barracks" && station.tier > 0) this.drawBarracks(station, i);
+      else if (station.tier === 0) {
+        this.hideBuilt(i);
+        this.padPlot(station.x, station.y, hot ? 62 : 54);
+      }
       const next = station.tier < 3 ? sim.stationCost(station) : 0;
       const remain = next > 0 ? Math.max(0, Math.ceil(next - station.paid)) : 0;
       const broke = sim.funding === i && sim.jade < 1 && remain > 0;
@@ -1115,7 +1256,7 @@ export class WorldView {
       const ghost = this.padGhost(i);
       if (empty && close && isTower(station.kind)) {
         const kind = station.kind;
-        const asset = towerAsset(kind, 0);
+        const asset = towerAsset(kind);
         const clip = this.art.clip(asset, "idle") ?? this.art.clip(asset, "walk");
         if (clip) {
           ghost.texture = clip.frames[0]?.[0] ?? Texture.EMPTY;
@@ -1268,44 +1409,78 @@ export class WorldView {
     }
   }
 
-  private drawWall(sim: Siege, station: Station): void {
+  private drawWall(sim: Siege, station: Station, index: number): void {
     const route = sim.map.routes[station.path];
     const pose = route ? poseAt(route, station.dist) : { x: station.x, y: station.y, angle: 0 };
-    const across = pose.angle + Math.PI / 2;
-    const tier = station.tier;
-    const alive = station.alive;
-    const span = 78 + Math.max(0, tier) * 8;
-    const posts = tier >= 3 ? 7 : 5;
-    const wood = !alive ? 0x6a5348 : tier >= 3 ? 0xb7c0ca : tier >= 2 ? 0x8a4e2c : 0xc4844e;
-    const shade = !alive ? 0x4a3a32 : tier >= 3 ? 0x8d98a4 : tier >= 2 ? 0x5c3218 : 0x8a5a32;
-    const lit = tier >= 3 ? 0xe7eef4 : 0xe0b07a;
-    const px = Math.cos(across);
-    const py = Math.sin(across);
-    this.pads.moveTo(pose.x - px * span, pose.y - py * span - 8);
-    this.pads.lineTo(pose.x + px * span, pose.y + py * span - 8);
-    this.pads.stroke({ width: tier >= 3 ? 8 : 6, color: wood, alpha: alive ? 0.95 : 0.4 });
-    for (let i = 0; i < posts; i++) {
-      const t = (i / (posts - 1) - 0.5) * 2;
-      const x = pose.x + px * span * t;
-      const y = pose.y + py * span * t;
-      const broken = !alive && Math.abs(t) < 0.34;
-      const h = broken ? 10 : tier >= 3 ? 34 : 40;
-      this.pads.roundRect(x - 7, y - h + 16, 14, h, 3).fill({ color: shade, alpha: broken ? 0.45 : 1 });
-      this.pads.roundRect(x - 7, y - h + 16, 6, h, 3).fill({ color: wood, alpha: broken ? 0.4 : 1 });
-      this.pads.rect(x - 5, y - h + 16, 4, 5).fill({ color: lit, alpha: broken ? 0.3 : 0.9 });
-      if (tier >= 2 && alive && !broken) {
-        this.pads.poly([x, y - h + 6, x - 6, y - h + 18, x + 6, y - h + 18]).fill({ color: tier >= 3 ? 0xd5dee8 : 0xf2f6fb });
-      }
+    if (station.tier <= 0) {
+      this.hideBuilt(index);
+      this.padPlot(pose.x, pose.y, 54);
+      return;
     }
+    const asset = station.tier >= 3 ? "wall_stone" : station.tier >= 2 ? "wall_spiked" : "wall_wood";
+    const clip = this.art.clip(asset, "idle");
+    if (!clip) return;
+    const row = facingRow(pose.angle + Math.PI, clip.frames.length);
+    const piece = this.showBuilt(index, asset, clip, row);
+    piece.body.position.set(pose.x, pose.y);
+    piece.body.zIndex = pose.y;
+    piece.body.alpha = station.alive ? 1 : 0.4;
+    piece.shadow.position.set(pose.x, pose.y);
+    piece.shadow.alpha = station.alive ? 0.92 : 0.3;
     const heroOn = Math.hypot(pose.x - sim.heroX, pose.y - sim.heroY) < 56;
-    if (alive && station.hurt > 0 && station.maxHp > 0 && !heroOn) {
-      const w = span * 1.6;
+    if (station.alive && station.hurt > 0 && station.maxHp > 0 && !heroOn) {
+      const w = 96;
       const u = Math.max(0, station.hp / station.maxHp);
       const bx = pose.x - w / 2;
-      const by = pose.y - 52;
+      const by = pose.y - 70;
       this.pads.roundRect(bx, by, w, 8, 3).fill({ color: 0x102033, alpha: 0.9 });
       this.pads.roundRect(bx, by, w * u, 8, 3).fill({ color: 0x4aa3ff, alpha: 0.95 });
     }
+  }
+
+  private drawBarracks(station: Station, index: number): void {
+    let asset = "tower_barracks_t1";
+    if (station.tier >= 2 && station.spec === "spears") asset = "tower_spears_t3";
+    else if (station.tier >= 2 && station.spec === "knights") asset = "tower_knights_t3";
+    const clip = this.art.clip(asset, "idle");
+    if (!clip) return;
+    const piece = this.showBuilt(index, asset, clip, 0);
+    piece.body.position.set(station.x, station.y);
+    piece.body.zIndex = station.y;
+    piece.shadow.position.set(station.x, station.y);
+  }
+
+  private showBuilt(index: number, asset: string, clip: Clip, row: number): { body: Sprite; shadow: Sprite; asset: string } {
+    let piece = this.built.get(index);
+    if (!piece) {
+      piece = { body: this.takeSprite(clip.frames[0][0]), shadow: this.shadowSprite(), asset: "" };
+      this.shadowLayer.addChild(piece.shadow);
+      this.actors.addChild(piece.body);
+      this.built.set(index, piece);
+    }
+    if (piece.asset !== asset) {
+      const posed = frameAt(clip, row, 0, "idle");
+      piece.body.texture = posed.texture;
+      piece.body.anchor.set(posed.ax, posed.ay);
+      piece.body.scale.set(clip.draw);
+      piece.body.alpha = 1;
+      piece.asset = asset;
+      this.dressShadow(piece.shadow, asset, clip.draw);
+    } else if (asset.startsWith("wall_")) {
+      const posed = frameAt(clip, row, 0, "idle");
+      piece.body.texture = posed.texture;
+      piece.body.anchor.set(posed.ax, posed.ay);
+    }
+    piece.body.visible = true;
+    piece.shadow.visible = true;
+    return piece;
+  }
+
+  private hideBuilt(index: number): void {
+    const piece = this.built.get(index);
+    if (!piece) return;
+    piece.body.visible = false;
+    piece.shadow.visible = false;
   }
 
   /** Ring pulse at the tap, held until the hero arrives. */
@@ -1483,31 +1658,49 @@ export class WorldView {
   }
 
   private paintBolt(shot: Shot, color: number, ox: number, oy: number, head: boolean): void {
+    const arrow = shot.family === "dart";
     const tex = shot.family === "spire" ? "fx-orb" : shot.family === "lens" || shot.family === "hero" ? "fx-spear" : "fx-dart";
-    const bolt = this.takeShot(this.art.frame(tex));
+    const bolt = this.takeShot(arrow ? (this.art.prop("arrow") ?? this.art.frame("fx-dart")) : this.art.frame(tex));
     bolt.position.set(shot.x + ox, shot.y + oy);
     bolt.rotation = Math.atan2(shot.y - shot.py, shot.x - shot.px);
     const fat = shot.family === "lens" ? 2.4 : shot.family === "spire" ? 0.7 + shot.tier * 0.22 : 0.85 + shot.tier * 0.12;
-    if (shot.family === "dart") {
-      bolt.scale.set(head ? 0.22 : 0.16, 0.08);
-      bolt.tint = 0xfffdf6;
+    if (arrow) {
+      const length = (head ? 28 : 22) + shot.tier * 2;
+      const scale = length / Math.max(1, bolt.texture.width);
+      bolt.anchor.set(0.5, 0.5);
+      bolt.scale.set(scale);
+      bolt.tint = 0xfff6df;
+      bolt.blendMode = "normal";
     } else if (shot.family === "lens") {
+      bolt.anchor.set(0.15, 0.5);
       bolt.scale.set(0.48, 0.16);
       bolt.tint = 0xfffaf0;
+      bolt.blendMode = "add";
     } else {
+      bolt.anchor.set(0.15, 0.5);
       bolt.scale.set(head ? fat : fat * 0.72);
       bolt.tint = color;
+      bolt.blendMode = "add";
     }
     bolt.alpha = head ? 1 : 0.55;
-    bolt.blendMode = "add";
-    const trail = this.takeShot(this.art.frame("fx-dart"));
-    const span = 18 + shot.tier * 10;
-    trail.position.set(shot.x + ox - ((shot.x - shot.px) / (Math.hypot(shot.x - shot.px, shot.y - shot.py) || 1)) * span, shot.y + oy);
+    const trail = this.takeShot(arrow ? (this.art.prop("arrow") ?? this.art.frame("fx-spear")) : this.art.frame("fx-spear"));
+    const span = 14 + shot.tier * 4;
+    const inv = Math.hypot(shot.x - shot.px, shot.y - shot.py) || 1;
+    trail.position.set(shot.x + ox - ((shot.x - shot.px) / inv) * span, shot.y + oy - ((shot.y - shot.py) / inv) * span);
     trail.rotation = bolt.rotation;
-    trail.scale.set(shot.family === "dart" ? 0.14 : 0.22, shot.family === "dart" ? 0.1 : 0.22);
-    trail.tint = color;
-    trail.alpha = 0.75;
-    trail.blendMode = "add";
+    if (arrow) {
+      trail.anchor.set(0.85, 0.5);
+      trail.scale.set(bolt.scale.x * 1.7, bolt.scale.y * 0.55);
+      trail.tint = 0xffe2a0;
+      trail.alpha = 0.35;
+      trail.blendMode = "normal";
+    } else {
+      trail.anchor.set(0.15, 0.5);
+      trail.scale.set(0.22, 0.16);
+      trail.tint = color;
+      trail.alpha = 0.55;
+      trail.blendMode = "add";
+    }
   }
 
   private takeShot(tex: Texture): Sprite {
@@ -1653,6 +1846,7 @@ export class WorldView {
       this.heroBody.anchor.set(0.5, 0.9);
       this.heroLine.anchor.set(0.5, 0.9);
       this.heroLine.tint = 0x14080c;
+      this.heroLine.visible = false;
       this.heroBody.eventMode = "none";
       this.heroLine.eventMode = "none";
       this.heroRing = new Graphics();
@@ -1664,35 +1858,36 @@ export class WorldView {
     this.hero.position.set(at.x, at.y);
     this.hero.zIndex = at.y + 8;
     const throwing = sim.guardianCast > 0;
-    const clipName = throwing ? "attack" : sim.heroMoving ? "walk" : "idle";
-    const clip = this.art.clip("guardian", clipName) ?? this.art.clip("guardian", "idle");
+    const movedX = at.x - this.heroPX;
+    const movedY = at.y - this.heroPY;
+    if (this.heroPX >= 0 && sim.heroMoving && Math.hypot(movedX, movedY) > 0.15) this.heroFace = Math.atan2(movedY, movedX);
+    this.heroPX = at.x;
+    this.heroPY = at.y;
+    const clip = this.art.clip("hero", "walk");
     if (clip) {
-      const row = facingRow(sim.guardianAim, clip.frames.length);
+      const row = facingRow(sim.heroMoving ? this.heroFace : sim.guardianAim, clip.frames.length);
       const frames = clip.frames[Math.min(row, clip.frames.length - 1)] ?? [];
       if (frames.length > 0) {
-        let index = 0;
-        if (throwing) {
-          const span = Math.max(0.05, BALANCE.hero.cast);
-          const u = 1 - sim.guardianCast / span;
-          index = Math.min(frames.length - 1, Math.max(0, Math.floor(u * frames.length)));
-        } else {
-          this.heroTime += step > 0 ? step : 0.016;
-          index = Math.floor(this.heroTime * (sim.heroMoving ? 14 : clip.fps)) % frames.length;
-        }
+        this.heroTime += step > 0 ? step : 0.016;
+        const index = sim.heroMoving ? Math.floor(this.heroTime * 12) % frames.length : throwing ? Math.min(2, frames.length - 1) : 0;
         const tex = frames[index];
+        const anchor = clip.anchors[Math.min(row, clip.anchors.length - 1)]?.[index];
         this.heroBody.texture = tex;
-        this.heroLine.texture = tex;
-        this.heroBody.scale.set(HERO_DRAW);
-        this.heroLine.scale.set(HERO_DRAW * 1.18);
+        this.heroBody.anchor.set(anchor?.x ?? clip.anchorX, anchor?.y ?? clip.anchorY);
+        this.heroBody.scale.set(clip.draw * HERO_DRAW);
+        this.heroLine.visible = false;
         const bob = sim.heroMoving ? Math.abs(Math.sin(this.heroTime * 11)) * -3 : Math.sin(this.time * 2.2) * -1;
         const lean = throwing ? Math.cos(sim.guardianAim) * 6 : 0;
         this.heroBody.position.set(lean, bob);
-        this.heroLine.position.set(1 + lean, 2 + bob);
+        if (!this.heroShadow) {
+          this.heroShadow = this.shadowSprite();
+          this.shadowLayer.addChild(this.heroShadow);
+        }
+        this.dressShadow(this.heroShadow, "hero", clip.draw * HERO_DRAW);
+        this.heroShadow.position.set(at.x, at.y);
       }
     }
     this.heroRing.clear();
-    const pulse = sim.heroMoving ? 1 + Math.abs(Math.sin(this.heroTime * 11)) * 0.28 : 1;
-    this.heroRing.ellipse(0, 4, 22 * pulse, 8).fill({ color: 0x1a2418, alpha: 0.35 });
     this.heroRing.ellipse(0, 2, 10, 4).stroke({ width: 1.5, color: 0xffe08a, alpha: 0.55 });
     if (sim.guardianCast > 0) {
       const sweep = 1 - sim.guardianCast / Math.max(0.05, BALANCE.hero.cast);
@@ -1968,9 +2163,18 @@ export class WorldView {
       s.alpha = 1;
       return s;
     }
-    const made = new Sprite(this.art.frame("fx-dart"));
-    made.anchor.set(0.5, 0.85);
+    const arrow = this.art.prop("arrow") ?? this.art.frame("fx-dart");
+    const made = new Sprite(arrow);
+    made.anchor.set(0.5, 0.5);
     made.eventMode = "none";
+    const streak = new Sprite(arrow);
+    streak.anchor.set(0.5, 0.5);
+    streak.position.set(-20, 0);
+    streak.scale.set(1.7, 0.5);
+    streak.alpha = 0.4;
+    streak.tint = 0xffe2a0;
+    streak.eventMode = "none";
+    made.addChild(streak);
     this.fxLayer.addChild(made);
     return made;
   }
@@ -1996,25 +2200,31 @@ export class WorldView {
       const gx = x + Math.cos(ang) * dist;
       const gy = y + Math.sin(ang) * dist * 0.86;
       const s = this.takeRain();
+      const streak = s.children[0] as Sprite | undefined;
+      if (streak) streak.visible = true;
       s.tint = golden ? 0xfff0a8 : 0xfff8e6;
-      s.rotation = Math.PI / 2 + (Math.random() - 0.5) * 0.2;
-      s.scale.set(0.3 + Math.random() * 0.06, 0.42 + Math.random() * 0.08);
-      const hy = gy - 64 - Math.random() * 48;
-      s.position.set(gx + (Math.random() - 0.5) * 6, hy);
+      const hy = gy - 70 - Math.random() * 36;
+      const hx = gx + (Math.random() - 0.5) * 10;
+      const fall = Math.atan2(gy - hy, gx - hx);
+      s.rotation = fall;
+      const length = (golden ? 34 : 26) + Math.random() * 4;
+      s.scale.set(length / Math.max(1, s.texture.width));
+      s.position.set(hx, hy);
       this.rains.push({
         s,
         x: gx,
         y: gy,
-        hx: gx,
+        hx,
         hy,
-        px: gx,
+        px: hx,
         py: hy,
         fx: gx,
-        fy: hy,
+        fy: gy,
         phase: "wait",
         t: 0,
         delay: 0.04 + Math.random() * 0.4,
         dusted: false,
+        ang: fall,
       });
     }
   }
@@ -2047,8 +2257,9 @@ export class WorldView {
     const posed = frameAt(ghost.clip, ghost.row, ghost.time, "death");
     ghost.body.texture = posed.texture;
     ghost.outline.texture = posed.texture;
-    ghost.body.anchor.set(ghost.clip.anchorX, ghost.clip.anchorY);
-    ghost.outline.anchor.set(ghost.clip.anchorX, ghost.clip.anchorY);
+    ghost.body.anchor.set(posed.ax, posed.ay);
+    ghost.outline.anchor.set(posed.ax, posed.ay);
+    ghost.outline.visible = false;
     ghost.body.scale.set(draw);
     ghost.outline.scale.set(draw * 1.05);
     ghost.body.position.set(ghost.x, ghost.y);
@@ -2230,9 +2441,12 @@ export class WorldView {
     for (let i = this.rains.length - 1; i >= 0; i--) {
       const rain = this.rains[i];
       rain.t += step;
+      const streak = rain.s.children[0] as Sprite | undefined;
       if (rain.phase === "wait") {
-        rain.s.position.set(rain.hx, rain.hy + Math.sin(rain.t * 5 + rain.x) * 1.5);
-        rain.s.rotation = Math.PI / 2;
+        rain.px = rain.hx;
+        rain.py = rain.hy + Math.sin(rain.t * 5 + rain.x) * 1.5;
+        rain.s.rotation = rain.ang;
+        if (streak) streak.visible = true;
         if (rain.t > 0.7) {
           rain.phase = "fall";
           rain.t = 0;
@@ -2240,18 +2454,20 @@ export class WorldView {
       } else if (rain.phase === "fall") {
         if (rain.t < rain.delay) {
           rain.s.position.set(rain.hx, rain.hy);
-          rain.s.rotation = Math.PI / 2;
+          rain.s.rotation = rain.ang;
         } else {
           const u = Math.min(1, (rain.t - rain.delay) / 0.22);
           const e = u * u;
+          rain.px = rain.hx + (rain.x - rain.hx) * e;
           rain.py = rain.hy + (rain.y - rain.hy) * e;
-          rain.s.position.set(rain.hx, rain.py);
-          rain.s.rotation = Math.PI / 2;
+          rain.s.position.set(rain.px, rain.py);
+          rain.s.rotation = rain.ang;
           if (u >= 1) {
             rain.phase = "stuck";
             rain.t = 0;
             rain.s.position.set(rain.x, rain.y);
-            rain.s.rotation = Math.PI / 2 + (Math.random() - 0.5) * 0.4;
+            rain.s.rotation = rain.ang + (Math.random() - 0.5) * 0.35;
+            if (streak) streak.visible = false;
             if (!rain.dusted) {
               rain.dusted = true;
               if (this.puffs.length < 28) this.puffs.push({ x: rain.x, y: rain.y, life: 0, max: 0.22 });

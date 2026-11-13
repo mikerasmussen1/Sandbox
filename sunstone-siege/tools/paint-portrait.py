@@ -270,44 +270,6 @@ def paint(level: dict, theme: tuple, index: int) -> None:
         painted = np.array(img)
         painted[~mask, :3] = np.clip(rgb[~mask], 0, 255).astype(np.uint8)
         img = Image.fromarray(painted, "RGBA")
-    shadows = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    sd = ImageDraw.Draw(shadows)
-    props = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    pr = ImageDraw.Draw(props)
-    hi = tuple(min(255, int(c) + 55) for c in accent)
-    dark = tuple(max(0, int(c) - 36) for c in accent)
-    rock = (168, 140, 104) if index in (1, 3, 5, 7) else (132, 124, 112)
-    for _ in range(128):
-        x = int(rng.integers(36, W - 36))
-        y = int(rng.integers(36, H - 36))
-        if math.hypot(x - SUN[0], y - SUN[1]) < 190:
-            continue
-        if not mask[y, x]:
-            continue
-        if any(math.hypot(x - px, y - py) < level["width"] * 0.62 for px, py in road[::6]):
-            continue
-        kind = int(rng.integers(0, 6))
-        if kind <= 2:
-            rad = int(rng.integers(22, 46))
-            sd.ellipse((x - rad, y + 6, x + rad + 14, y + rad * 0.85), fill=(12, 14, 10, 170))
-            pr.rectangle((x - 5, y - 4, x + 5, y + 18), fill=(92, 58, 32, 255))
-            pr.rectangle((x - 3, y - 4, x - 1, y + 10), fill=(140, 96, 58, 255))
-            pr.ellipse((x - rad * 0.72, y - rad * 0.15, x + rad * 0.78, y + rad * 0.6), fill=dark + (255,))
-            pr.ellipse((x - rad * 0.9, y - rad * 1.25, x + rad * 0.75, y + rad * 0.12), fill=accent + (255,))
-            pr.ellipse((x - rad * 0.4, y - rad * 1.05, x + rad * 0.12, y - rad * 0.4), fill=hi + (235,))
-        elif kind == 3:
-            sd.ellipse((x - 28, y + 8, x + 34, y + 26), fill=(12, 14, 10, 165))
-            pr.ellipse((x - 24, y - 2, x + 26, y + 16), fill=dark + (255,))
-            pr.ellipse((x - 20, y - 18, x + 22, y + 6), fill=accent + (255,))
-            pr.ellipse((x - 8, y - 16, x + 4, y - 2), fill=hi + (220,))
-        else:
-            sd.ellipse((x - 28, y + 8, x + 32, y + 24), fill=(12, 14, 10, 170))
-            pr.ellipse((x - 18, y - 2, x + 24, y + 14), fill=tuple(max(0, c - 48) for c in rock) + (255,))
-            pr.ellipse((x - 22, y - 18, x + 16, y + 4), fill=rock + (255,))
-            pr.ellipse((x - 12, y - 16, x + 2, y - 4), fill=tuple(min(255, c + 48) for c in rock) + (255,))
-    shadows = shadows.filter(ImageFilter.GaussianBlur(5))
-    img.alpha_composite(shadows)
-    img.alpha_composite(props)
     sx, sy = SUN
     keep = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     kd = ImageDraw.Draw(keep)
@@ -316,39 +278,12 @@ def paint(level: dict, theme: tuple, index: int) -> None:
     keep = keep.filter(ImageFilter.GaussianBlur(8))
     img.alpha_composite(keep)
     plaza = ImageDraw.Draw(img)
-    # Courtyard under the sun, then a timber hall just north of it.
+    # Stone courtyard. The keep and the trees are sprites, not painted blobs.
     plaza.ellipse((sx - 120, sy - 6, sx + 128, sy + 62), fill=(118, 96, 68, 255))
     plaza.ellipse((sx - 114, sy - 36, sx + 114, sy + 32), fill=(196, 168, 122, 255))
     plaza.ellipse((sx - 48, sy - 30, sx + 10, sy - 4), fill=(232, 214, 170, 170))
-    hall_x, hall_y = sx, sy - 118
-    plaza.rounded_rectangle((hall_x - 108, hall_y - 6, hall_x + 108, hall_y + 52), radius=8, fill=(92, 58, 32, 255))
-    plaza.rounded_rectangle((hall_x - 98, hall_y - 48, hall_x + 98, hall_y + 24), radius=5, fill=(168, 116, 68, 255))
-    plaza.rounded_rectangle((hall_x - 90, hall_y - 44, hall_x - 52, hall_y + 10), radius=4, fill=(196, 146, 92, 255))
-    plaza.polygon([(hall_x - 120, hall_y - 36), (hall_x, hall_y - 108), (hall_x + 120, hall_y - 36)], fill=(122, 64, 40, 255))
-    plaza.polygon([(hall_x - 96, hall_y - 44), (hall_x - 10, hall_y - 96), (hall_x + 12, hall_y - 44)], fill=(168, 102, 62, 255))
-    plaza.rectangle((hall_x + 64, hall_y - 108, hall_x + 72, hall_y - 48), fill=(92, 58, 32, 255))
-    plaza.polygon([(hall_x + 72, hall_y - 118), (hall_x + 118, hall_y - 98), (hall_x + 72, hall_y - 78)], fill=(64, 128, 196, 255))
     plaza.ellipse((sx - RIM, sy - RIM * 0.62, sx + RIM, sy + RIM * 0.4), fill=(214, 168, 78, 255))
     plaza.ellipse((sx - RIM + 8, sy - RIM * 0.48, sx + RIM - 10, sy + RIM * 0.08), fill=(255, 214, 120, 255))
-    for i in range(22):
-        ang = i / 22 * math.pi * 2
-        fx = sx + math.cos(ang) * 168
-        fy = sy + math.sin(ang) * 118
-        if abs(fx - sx) < 140 and sy - 260 < fy < sy - 40:
-            continue
-        if any(math.hypot(fx - px, fy - py) < level["width"] * 0.5 for px, py in road[::4]):
-            continue
-        plaza.rectangle((fx - 5, fy - 16, fx + 5, fy + 10), fill=(92, 58, 32, 255))
-        plaza.rectangle((fx - 3, fy - 16, fx - 1, fy + 4), fill=(150, 104, 62, 255))
-        plaza.rectangle((fx - 16, fy - 10, fx + 16, fy - 4), fill=(168, 112, 62, 255))
-        nxt = (i + 1) / 22 * math.pi * 2
-        nx = sx + math.cos(nxt) * 168
-        ny = sy + math.sin(nxt) * 118
-        if abs(nx - sx) < 140 and sy - 260 < ny < sy - 40:
-            continue
-        if any(math.hypot(nx - px, ny - py) < level["width"] * 0.5 for px, py in road[::4]):
-            continue
-        plaza.line([(fx, fy - 7), (nx, ny - 7)], fill=(140, 90, 48, 255), width=4)
     arr = np.asarray(img).astype(np.float32)
     rgb_arr = arr[..., :3]
     yy, xx = np.mgrid[0:H, 0:W]

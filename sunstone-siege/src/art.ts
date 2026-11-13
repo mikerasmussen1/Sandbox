@@ -1,32 +1,45 @@
 /**
- * 2.5D art. Towers and raiders are pre-rendered sprite sheets (8 facings for
- * raiders, one facing for towers). Maps, the Sunstone, and the stone UI stay
- * as whole images.
+ * 2.5D art. Units, towers, walls, the keep and props come from the
+ * Meshy atlas. The sheet is four 2048 pages (atlas-256.png plus the
+ * related packs) rather than one 4096 image: a 4096 texture sits on the
+ * iOS Safari canvas-area limit and the MAX_TEXTURE_SIZE boundary, and
+ * frames cross both midlines so the pages are repacked, not sliced.
+ * The 19 MB full-colour PNG is not shipped.
  *
- * An optional PixiJS atlas at art/sprites/atlas.json replaces those sheets
- * when it is present (the Meshy zip). Every frame shares that one texture,
- * so the units stay in a single batch. Frame names:
- *   {id}/{clip}/{facing}/{index}     enemy_skitter/run/s/0
- *   {id}_{clip}_{facing}_{index}     tower_dart_t1_idle_s_0
- * Facings, in row order: s, se, e, ne, n, nw, w, sw. One facing is enough
- * for a tower tier. Props are prop/{name} or prop_{name}.
+ * Frame names are {id}/{clip}/{facing}/{index}. Facings, in row order:
+ * s, se, e, ne, n, nw, w, sw. Walls only have s, se, e, ne; the other
+ * four rows reuse those. Each frame keeps the anchor from the JSON
+ * (the ground point; y varies per frame). Shadows are shadow/{id} and
+ * shadow/prop_{name}.
  */
-import { Assets, Rectangle, Spritesheet, Texture } from "pixi.js";
+import { Assets, Spritesheet, Texture } from "pixi.js";
 
 export interface Clip {
   frames: Texture[][];
+  /** Per-frame ground point, same shape as frames. */
+  anchors: { x: number; y: number }[][];
   fps: number;
   loop: boolean;
   anchorX: number;
   anchorY: number;
+  /** World units per source pixel, so the measured body lands on the reference ratio. */
   draw: number;
+}
+
+export interface Mark {
+  texture: Texture;
+  ax: number;
+  ay: number;
 }
 
 export interface ArtSet {
   frame(name: string): Texture;
   clip(id: string, name: string): Clip | null;
-  /** A 3/4 prop from the atlas, or null until that prop is in the sheet. */
   prop(name: string): Texture | null;
+  /** World units per source pixel for a placed prop. */
+  propScale(name: string): number;
+  /** Contact shadow for a unit id or prop_{name}. */
+  mark(id: string): Mark | null;
   map(biome: "valley" | "ruins" | "crater"): Texture;
   level(world: number): Texture;
   title: Texture;
@@ -39,78 +52,90 @@ export interface ArtSet {
   glow: Texture;
 }
 
-interface ClipMeta {
-  file: string;
-  frames: number;
-  loop: boolean;
-  fps: number;
-  frame_w: number;
-  frame_h: number;
-  draw: number;
-}
+const UI = [
+  "art/ui/jade.webp",
+  "art/ui/flare.webp",
+  "art/ui/flare-off.webp",
+  "art/ui/fx-beam.webp",
+  "art/ui/fx-boom.webp",
+  "art/ui/fx-lightning.webp",
+  "art/ui/fx-orb.webp",
+  "art/ui/fx-spear.webp",
+  "art/ui/fx-stun.webp",
+  "art/title.webp",
+  "art/valley.webp",
+  "art/logo.webp",
+  "art/panel.webp",
+  "art/button.webp",
+  "art/button-down.webp",
+  "art/glow.webp",
+  "art/sun-core.webp",
+  "art/sun-inner.webp",
+  "art/sun-outer.webp",
+  "art/map-jungle.webp",
+  "art/map-river.webp",
+  "art/map-night.webp",
+];
 
-interface UnitMeta {
-  id: string;
-  anchor: [number, number];
-  rows: string[];
-  clips: Record<string, ClipMeta>;
-}
+/** Portrait shows 600 world px. These are the measured reference heights. */
+const VISIBLE = 600;
+const NAMED_HEIGHT: Record<string, number> = {
+  hero: 0.069 * VISIBLE,
+  swarmer: 0.052 * VISIBLE,
+  giant: 0.12 * VISIBLE,
+  boulder: 0.15 * VISIBLE,
+  boss: 0.114 * VISIBLE,
+  base_keep: 0.22 * VISIBLE,
+};
 
-interface Manifest {
-  units: UnitMeta[];
-  ui: string[];
-  maps: string[];
-  plates: string[];
-}
+const FACINGS = ["s", "se", "e", "ne", "n", "nw", "w", "sw"];
+const FACING = new Set(FACINGS);
+/** Walls ship four views. The opposite side reuses the matching one. */
+const WALL_FOLD: Record<string, string> = { n: "s", nw: "se", w: "e", sw: "ne" };
 
 export async function loadArt(onProgress?: (progress: number) => void): Promise<ArtSet> {
-  const manifest = await fetch("./art/sprites/manifest.json").then((res) => {
-    if (!res.ok) throw new Error("sunstone-siege: missing sprite manifest");
-    return res.json() as Promise<Manifest>;
-  });
-  const urls: string[] = [];
-  for (const unit of manifest.units) {
-    for (const clip of Object.values(unit.clips)) urls.push(clip.file);
-  }
-  urls.push(...manifest.ui, ...manifest.maps, ...manifest.plates);
+  const urls = [...UI];
   for (let i = 0; i < 8; i++) urls.push(`art/map-l${i}.webp`);
   const loaded = await Assets.load<Texture>(urls, onProgress);
   const tex = (url: string): Texture => loaded[url];
 
   const frames = new Map<string, Texture>();
-  for (const url of manifest.ui) frames.set(url.slice(url.lastIndexOf("/") + 1, -5), tex(url));
-  frames.set("sun-core", tex("art/sun-core.webp"));
-  frames.set("sun-inner", tex("art/sun-inner.webp"));
-  frames.set("sun-outer", tex("art/sun-outer.webp"));
+  const take = (file: string, name: string): void => {
+    frames.set(name, tex(file));
+  };
+  take("art/ui/jade.webp", "jade");
+  take("art/ui/flare.webp", "flare");
+  take("art/ui/flare-off.webp", "flare-off");
+  take("art/ui/fx-beam.webp", "fx-beam");
+  take("art/ui/fx-boom.webp", "fx-boom");
+  take("art/ui/fx-lightning.webp", "fx-lightning");
+  take("art/ui/fx-orb.webp", "fx-orb");
+  take("art/ui/fx-spear.webp", "fx-spear");
+  take("art/ui/fx-stun.webp", "fx-stun");
+  take("art/sun-core.webp", "sun-core");
+  take("art/sun-inner.webp", "sun-inner");
+  take("art/sun-outer.webp", "sun-outer");
+
+  const sheet = await Assets.load<Spritesheet>("./art/sprites/atlas.json");
+  const textures = new Map<string, Texture>();
+  const sources = new Set<Texture["source"]>();
+  const absorb = (page: Spritesheet): void => {
+    for (const [name, texture] of Object.entries(page.textures)) {
+      textures.set(name, texture);
+      if (!sources.has(texture.source)) {
+        sources.add(texture.source);
+        texture.source.scaleMode = "linear";
+        texture.source.autoGenerateMipmaps = true;
+      }
+    }
+  };
+  absorb(sheet);
+  for (const link of sheet.linkedSheets ?? []) absorb(link);
 
   const clips = new Map<string, Clip>();
-  for (const unit of manifest.units) {
-    for (const [name, clip] of Object.entries(unit.clips)) {
-      const sheet = tex(clip.file);
-      const rows: Texture[][] = [];
-      for (let r = 0; r < unit.rows.length; r++) {
-        const row: Texture[] = [];
-        for (let c = 0; c < clip.frames; c++) {
-          row.push(new Texture({
-            source: sheet.source,
-            frame: new Rectangle(c * clip.frame_w, r * clip.frame_h, clip.frame_w, clip.frame_h),
-          }));
-        }
-        rows.push(row);
-      }
-      clips.set(`${unit.id}:${name}`, {
-        frames: rows,
-        fps: clip.fps,
-        loop: clip.loop,
-        anchorX: unit.anchor[0],
-        anchorY: unit.anchor[1],
-        draw: clip.draw,
-      });
-    }
-  }
-
   const props = new Map<string, Texture>();
-  await applyAtlas(clips, frames, props);
+  const marks = new Map<string, Mark>();
+  buildAtlas(textures, clips, props, marks, frames);
 
   const maps = {
     valley: tex("art/map-jungle.webp"),
@@ -124,10 +149,13 @@ export async function loadArt(onProgress?: (progress: number) => void): Promise<
     map.source.autoGenerateMipmaps = true;
   }
 
+  const heroMark = marks.get("hero");
   return {
     frame: (name) => frames.get(name) ?? Texture.EMPTY,
     clip: (id, name) => clips.get(`${id}:${name}`) ?? null,
     prop: (name) => props.get(name) ?? null,
+    propScale: (name) => (name === "arrow" ? 0.24 : 0.32),
+    mark: (id) => marks.get(id) ?? null,
     map: (biome) => maps[biome],
     level: (world) => levels[Math.max(0, Math.min(levels.length - 1, world))] ?? maps.valley,
     title: tex("art/title.webp"),
@@ -136,14 +164,10 @@ export async function loadArt(onProgress?: (progress: number) => void): Promise<
     panel: tex("art/panel.webp"),
     button: tex("art/button.webp"),
     buttonDown: tex("art/button-down.webp"),
-    shadow: tex("art/shadow.webp"),
+    shadow: heroMark?.texture ?? Texture.EMPTY,
     glow: tex("art/glow.webp"),
   };
 }
-
-const FACINGS = ["s", "se", "e", "ne", "n", "nw", "w", "sw"];
-const FACING = new Set(FACINGS);
-const CLIP_NAMES = ["walk", "run", "fly", "idle", "attack", "hit", "death", "build", "sell", "block", "slam", "roar"];
 
 interface ParsedFrame {
   id: string;
@@ -152,91 +176,59 @@ interface ParsedFrame {
   index: number;
 }
 
-function basename(name: string): string {
-  return name.replace(/\.(png|webp|jpe?g)$/i, "");
+interface Held {
+  index: number;
+  texture: Texture;
+  ax: number;
+  ay: number;
 }
 
-function clipFromRest(rest: string): { id: string; clip: string } {
-  for (const clip of CLIP_NAMES) {
-    if (rest.endsWith(`_${clip}`)) return { id: rest.slice(0, -(clip.length + 1)), clip };
-  }
-  return { id: rest, clip: "idle" };
+function anchorOf(texture: Texture): { x: number; y: number } {
+  const anchor = texture.defaultAnchor;
+  return { x: anchor?.x ?? 0.5, y: anchor?.y ?? 0.85 };
 }
 
-/** Slash names keep underscores inside the id. Underscore names end in _facing_index. */
+function trimHeight(texture: Texture): number {
+  return Math.max(1, texture.frame.height);
+}
+
 function parseFrameName(name: string): ParsedFrame | null {
-  const base = basename(name);
-  const slash = base.split("/");
-  if (slash.length >= 4 && FACING.has(slash[slash.length - 2].toLowerCase()) && /^\d+$/.test(slash[slash.length - 1])) {
+  const slash = name.split("/");
+  if (slash.length >= 4 && FACING.has(slash[slash.length - 2]) && /^\d+$/.test(slash[slash.length - 1])) {
     return {
       id: slash[0],
       clip: slash.slice(1, -2).join("/") || "idle",
-      facing: slash[slash.length - 2].toLowerCase(),
+      facing: slash[slash.length - 2],
       index: Number(slash[slash.length - 1]),
     };
   }
-  if (slash.length === 3 && FACING.has(slash[2].toLowerCase())) {
-    return { id: slash[0], clip: slash[1], facing: slash[2].toLowerCase(), index: 0 };
-  }
-  if (slash.length === 2 && !base.startsWith("prop")) return { id: slash[0], clip: slash[1], facing: "s", index: 0 };
-  const indexed = base.match(/^(.*)_([a-z]{1,2})_(\d+)$/i);
-  if (indexed && FACING.has(indexed[2].toLowerCase())) {
-    const { id, clip } = clipFromRest(indexed[1]);
-    return { id, clip, facing: indexed[2].toLowerCase(), index: Number(indexed[3]) };
-  }
   return null;
 }
 
-function parseAnim(name: string): { id: string; clip: string; facing: string } | null {
-  const slash = name.split("/");
-  if (slash.length >= 3 && FACING.has(slash[slash.length - 1].toLowerCase())) {
-    return { id: slash[0], clip: slash.slice(1, -1).join("/") || "idle", facing: slash[slash.length - 1].toLowerCase() };
-  }
-  if (slash.length === 2) return { id: slash[0], clip: slash[1], facing: "s" };
-  const tail = name.match(/^(.*)_([a-z]{1,2})$/i);
-  if (tail && FACING.has(tail[2].toLowerCase())) {
-    const { id, clip } = clipFromRest(tail[1]);
-    return { id, clip, facing: tail[2].toLowerCase() };
-  }
-  return null;
-}
-
-function propName(name: string): string | null {
-  const base = basename(name);
-  if (base.startsWith("prop/")) return base.slice("prop/".length);
-  if (base.startsWith("props/")) return base.slice("props/".length);
-  if (base.startsWith("prop_")) return base.slice("prop_".length);
-  return null;
-}
-
-/**
- * Loads art/sprites/atlas.json when the zip has been dropped in. A missing
- * file leaves the manifest sheets in place. Textures stay on the one atlas
- * source so a full wave still batches.
- */
-async function applyAtlas(clips: Map<string, Clip>, frames: Map<string, Texture>, props: Map<string, Texture>): Promise<void> {
-  let sheet: Spritesheet;
-  try {
-    const probe = await fetch("./art/sprites/atlas.json");
-    if (!probe.ok) return;
-    sheet = await Assets.load<Spritesheet>("./art/sprites/atlas.json");
-  } catch {
-    return;
-  }
-  if (!sheet?.textures) return;
-  const sample = Object.values(sheet.textures)[0];
-  if (sample?.source) {
-    sample.source.scaleMode = "linear";
-    sample.source.autoGenerateMipmaps = true;
-  }
-
-  const buckets = new Map<string, Map<string, { index: number; texture: Texture }[]>>();
-  const fromAnim = new Set<string>();
-  const add = (parsed: ParsedFrame, texture: Texture, animated: boolean): void => {
+function buildAtlas(
+  textures: Map<string, Texture>,
+  clips: Map<string, Clip>,
+  props: Map<string, Texture>,
+  marks: Map<string, Mark>,
+  frames: Map<string, Texture>,
+): void {
+  const buckets = new Map<string, Map<string, Held[]>>();
+  for (const [name, texture] of textures) {
+    if (name.startsWith("shadow/")) {
+      const id = name.slice("shadow/".length);
+      const anchor = anchorOf(texture);
+      marks.set(id, { texture, ax: anchor.x, ay: anchor.y });
+      continue;
+    }
+    if (name.startsWith("prop/")) {
+      const prop = name.slice("prop/".length);
+      props.set(prop, texture);
+      if (prop === "arrow") frames.set("fx-dart", texture);
+      continue;
+    }
+    const parsed = parseFrameName(name);
+    if (!parsed) continue;
     const key = `${parsed.id}:${parsed.clip}`;
-    const slot = `${key}:${parsed.facing}`;
-    if (animated) fromAnim.add(slot);
-    else if (fromAnim.has(slot)) return;
     let facings = buckets.get(key);
     if (!facings) {
       facings = new Map();
@@ -247,46 +239,44 @@ async function applyAtlas(clips: Map<string, Clip>, frames: Map<string, Texture>
       list = [];
       facings.set(parsed.facing, list);
     }
-    list.push({ index: parsed.index, texture });
-  };
-
-  for (const [name, textures] of Object.entries(sheet.animations ?? {})) {
-    const anim = parseAnim(name);
-    if (!anim) continue;
-    textures.forEach((texture, index) => add({ ...anim, index }, texture, true));
-  }
-  for (const [name, texture] of Object.entries(sheet.textures)) {
-    const prop = propName(name);
-    if (prop) {
-      props.set(prop, texture);
-      continue;
-    }
-    const parsed = parseFrameName(name);
-    if (!parsed) {
-      const bare = basename(name).split("/").pop() ?? name;
-      frames.set(bare === "arrow" ? "fx-dart" : bare, texture);
-      continue;
-    }
-    add(parsed, texture, false);
+    const anchor = anchorOf(texture);
+    list.push({ index: parsed.index, texture, ax: anchor.x, ay: anchor.y });
   }
 
   for (const [key, facings] of buckets) {
+    const id = key.slice(0, key.indexOf(":"));
     const present = FACINGS.filter((facing) => (facings.get(facing)?.length ?? 0) > 0);
     if (present.length === 0) continue;
-    const rowOf = (facing: string): Texture[] => {
-      const list = facings.get(facing) ?? facings.get("s") ?? facings.get(present[0]) ?? [];
-      return [...list].sort((a, b) => a.index - b.index).map((frame) => frame.texture);
+    const rowFor = (facing: string): Held[] => {
+      const folded = id.startsWith("wall_") ? WALL_FOLD[facing] ?? facing : facing;
+      const list = facings.get(folded) ?? facings.get(facing) ?? facings.get("s") ?? facings.get(present[0]) ?? [];
+      return [...list].sort((a, b) => a.index - b.index);
     };
-    const rows = present.length === 1 ? [rowOf(present[0])] : FACINGS.map((facing) => rowOf(facing));
-    const prior = clips.get(key);
-    const clipName = key.slice(key.indexOf(":") + 1);
+    const use = present.length === 1 ? [present[0]] : FACINGS;
+    const rows = use.map((facing) => rowFor(facing));
+    const first = rows[0][0];
     clips.set(key, {
-      frames: rows,
-      fps: prior?.fps ?? 10,
-      loop: prior?.loop ?? clipName !== "death",
-      anchorX: prior?.anchorX ?? 0.5,
-      anchorY: prior?.anchorY ?? 0.78,
-      draw: prior?.draw ?? 0.5,
+      frames: rows.map((row) => row.map((held) => held.texture)),
+      anchors: rows.map((row) => row.map((held) => ({ x: held.ax, y: held.ay }))),
+      fps: id === "hero" ? 12 : 10,
+      loop: true,
+      anchorX: first?.ax ?? 0.5,
+      anchorY: first?.ay ?? 0.85,
+      draw: 0.3,
     });
+  }
+
+  const swarmer = clips.get("swarmer:walk");
+  const density = swarmer ? NAMED_HEIGHT.swarmer / trimHeight(swarmer.frames[0][0]) : 0.32;
+  const archer = clips.get("tower_archer_t1:idle");
+  const towerDensity = archer ? (0.1 * VISIBLE) / trimHeight(archer.frames[0][0]) : density;
+  for (const [key, clip] of clips) {
+    const id = key.slice(0, key.indexOf(":"));
+    const sample = clip.frames[0][0];
+    const height = trimHeight(sample);
+    if (NAMED_HEIGHT[id] != null) clip.draw = NAMED_HEIGHT[id] / height;
+    else if (id.startsWith("tower_")) clip.draw = towerDensity;
+    else if (id.startsWith("wall_")) clip.draw = 48 / height;
+    else clip.draw = density;
   }
 }
