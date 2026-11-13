@@ -21,11 +21,16 @@ const PLAY: Record<string, number> = {
 };
 
 const ELITE: ReadonlySet<EnemyKind> = new Set(["shield", "golem", "boss"]);
-/** Sheets are authored large. This lands a swarmer at a few percent of a phone screen. */
-const ENEMY_DRAW = 0.48;
-/** About 7% of a portrait screen once the camera shows a third of the valley, and still taller than a swarmer. */
+/**
+ * Portrait camera shows 600 world px. A swarmer's opaque body is ~63 px, so
+ * 0.92 lands that body near 5.5% of the screen — about four-fifths of the king,
+ * which is the proportion measured on the reference frames.
+ */
+const ENEMY_DRAW = 0.92;
+/** King silhouette stays near 7% of the portrait, inside the 6–8% framing band. */
 const HERO_DRAW = 0.31;
-const TOWER_DRAW = 0.34;
+/** Tower sheets are tall; 0.50 puts a tier-1 hall near 10% of the screen. */
+const TOWER_DRAW = 0.50;
 /** Screen-pixel radius of the build cards. The menu is scaled by 1/zoom so this stays constant. */
 const MENU_REACH = 220;
 /** Clear the Jade vault and the top bar, and the Flare button along the bottom. */
@@ -341,7 +346,7 @@ export class WorldView {
     this.sunAt = map.sun;
     this.sun.position.set(map.sun.x, map.sun.y);
     this.sun.zIndex = map.sun.y;
-    const disk = map.plaza * 1.15;
+    const disk = map.plaza * 1.85;
     const scale = disk / Math.max(1, this.disk.texture.width);
     this.disk.scale.set(scale);
     this.inner.scale.set(scale);
@@ -896,8 +901,8 @@ export class WorldView {
       actor.body.zIndex = tower.y;
       actor.outline.zIndex = tower.y - 0.2;
       actor.body.tint = tower.stunnedUntil > sim.time ? 0xb7c4d4 : look.tint;
-      actor.shadow.position.set(tower.x, tower.y + 6);
-      actor.shadow.scale.set(1.45, 0.78);
+      actor.shadow.position.set(tower.x, tower.y + 8);
+      actor.shadow.scale.set(0.72, 0.4);
       if (actor.clip === "attack" && actor.time < 0.09) {
         this.burst(tower.x, tower.y - 70, TOWER_HUE[tower.kind], 3);
         if (tower.tier >= 1) this.burst(tower.x + 18, tower.y - 86, TOWER_HUE[tower.kind], 3);
@@ -957,10 +962,10 @@ export class WorldView {
       actor.body.alpha = e.kind === "roller" ? 0 : stealthedFade(e);
       actor.outline.alpha = e.kind === "roller" ? 0 : 1;
       actor.shadow.position.set(e.x, e.y + (e.flying ? 14 : 6));
-      const shadow = e.kind === "boss" ? 2.4 : e.kind === "giant" ? 2.8 : e.kind === "golem" ? 1.8 : e.kind === "skitter" ? 1.15 : 1.35;
-      actor.shadow.scale.set(shadow, e.flying ? 0.42 : 0.62);
+      const shadow = e.kind === "boss" ? 1.15 : e.kind === "giant" ? 1.05 : e.kind === "golem" ? 0.82 : e.kind === "skitter" ? 0.5 : 0.62;
+      actor.shadow.scale.set(shadow, e.flying ? 0.2 : 0.28);
       actor.shadow.tint = 0x14200f;
-      actor.shadow.alpha = e.kind === "roller" ? 0 : e.flying ? 0.28 : 0.62;
+      actor.shadow.alpha = e.kind === "roller" ? 0 : e.flying ? 0.28 : 0.72;
     }
     for (const [id, actor] of this.enemies) {
       if (seen.has(id)) continue;
@@ -1018,21 +1023,23 @@ export class WorldView {
     for (const e of sim.enemies) {
       if (!e.alive) continue;
       if (e.kind === "roller") {
-        const x = e.x + Math.cos(e.angle) * 16;
-        const y = e.y + Math.sin(e.angle) * 16;
-        this.pads.ellipse(x + 8, y + 22, 62, 22).fill({ color: 0x1a120c, alpha: 0.3 });
-        this.pads.ellipse(x + 6, y + 8, 46, 32).fill({ color: 0x5a4e44 });
-        this.pads.ellipse(x - 8, y - 12, 42, 30).fill({ color: 0x9a8874 });
-        this.pads.ellipse(x - 20, y - 26, 20, 14).fill({ color: 0xe6d8c6 });
-        this.pads.ellipse(x - 8, y - 12, 42, 30).stroke({ width: 3, color: 0x3a3028, alpha: 0.9 });
+        const x = e.x + Math.cos(e.angle) * 18;
+        const y = e.y + Math.sin(e.angle) * 18;
+        this.pads.ellipse(x + 10, y + 26, 72, 26).fill({ color: 0x1a120c, alpha: 0.32 });
+        this.pads.ellipse(x + 7, y + 10, 54, 38).fill({ color: 0x5a4e44 });
+        this.pads.ellipse(x - 10, y - 14, 50, 36).fill({ color: 0x9a8874 });
+        this.pads.ellipse(x - 24, y - 32, 24, 16).fill({ color: 0xe6d8c6 });
+        this.pads.ellipse(x - 10, y - 14, 50, 36).stroke({ width: 4, color: 0x3a3028, alpha: 0.9 });
         for (let k = 0; k < 4; k++) {
-          const back = 44 + (k % 2) * 12;
-          const side = (k - 1.5) * 16;
+          const back = 58 + (k % 2) * 16;
+          const side = (k - 1.5) * 22;
           const px = e.x - Math.cos(e.angle) * back + Math.cos(e.angle + Math.PI / 2) * side;
           const py = e.y - Math.sin(e.angle) * back + Math.sin(e.angle + Math.PI / 2) * side;
-          this.pads.ellipse(px, py + 8, 9, 4).fill({ color: 0x1a120c, alpha: 0.28 });
-          this.pads.roundRect(px - 5, py - 4, 10, 14, 4).fill({ color: 0xc43434 });
-          this.pads.circle(px, py - 12, 5).fill({ color: 0xe24a42 });
+          this.pads.ellipse(px, py + 12, 14, 6).fill({ color: 0x1a120c, alpha: 0.3 });
+          this.pads.roundRect(px - 8, py - 8, 16, 22, 6).fill({ color: 0xc43434 });
+          this.pads.circle(px, py - 18, 8).fill({ color: 0xf0d2b0 });
+          this.pads.circle(px - 3, py - 20, 1.6).fill({ color: 0x1a120c });
+          this.pads.circle(px + 3, py - 20, 1.6).fill({ color: 0x1a120c });
         }
         continue;
       }
@@ -1064,7 +1071,7 @@ export class WorldView {
       const color = padHue(station.kind);
       const hot = i === near;
       if (station.kind === "wall") this.drawWall(sim, station);
-      else if (station.tier === 0) this.brackets(station.x, station.y, hot ? 46 : 40);
+      else if (station.tier === 0) this.padPlot(station.x, station.y, hot ? 62 : 54);
       const next = station.tier < 3 ? sim.stationCost(station) : 0;
       const remain = next > 0 ? Math.max(0, Math.ceil(next - station.paid)) : 0;
       const broke = sim.funding === i && sim.jade < 1 && remain > 0;
@@ -1095,7 +1102,7 @@ export class WorldView {
       icon.zIndex = station.y + 4;
       const cost = this.stationCostLabel(i);
       cost.text = open ? String(shown) : next > 0 ? String(remain) : "MAX";
-      cost.style.fontSize = 18;
+      cost.style.fontSize = 26;
       cost.style.fill = broke ? 0xffb089 : 0xfff6df;
       const covered = Math.hypot(station.x - hero.x, station.y - hero.y) < 48;
       cost.visible = !covered;
@@ -1196,6 +1203,18 @@ export class WorldView {
       this.stationCosts[i] = label;
     }
     return label;
+  }
+
+  private padPlot(x: number, y: number, size: number): void {
+    const w = size;
+    const h = size * 0.78;
+    this.pads.roundRect(x - w / 2 + 3, y - h / 2 + 6, w, h, 8).fill({ color: 0x0c3a18, alpha: 0.28 });
+    this.pads.roundRect(x - w / 2, y - h / 2, w, h, 8).fill({ color: 0x157a38, alpha: 0.94 });
+    this.pads.roundRect(x - w / 2, y - h / 2, w, h, 8).stroke({ width: 3, color: 0x0d4a22, alpha: 0.95 });
+    this.pads.circle(x + w * 0.28, y + h * 0.18, 8).fill({ color: 0xf0c14a });
+    this.pads.circle(x + w * 0.28, y + h * 0.18, 8).stroke({ width: 2, color: 0x8a5a12, alpha: 1 });
+    this.pads.circle(x + w * 0.22, y + h * 0.1, 2.4).fill({ color: 0xfff6df, alpha: 0.9 });
+    this.brackets(x, y, size * 0.92);
   }
 
   private brackets(x: number, y: number, size: number): void {
@@ -1672,7 +1691,7 @@ export class WorldView {
     }
     this.heroRing.clear();
     const pulse = sim.heroMoving ? 1 + Math.abs(Math.sin(this.heroTime * 11)) * 0.28 : 1;
-    this.heroRing.ellipse(0, 3, 14 * pulse, 5).fill({ color: 0x1a2418, alpha: 0.22 });
+    this.heroRing.ellipse(0, 4, 22 * pulse, 8).fill({ color: 0x1a2418, alpha: 0.35 });
     this.heroRing.ellipse(0, 2, 10, 4).stroke({ width: 1.5, color: 0xffe08a, alpha: 0.55 });
     if (sim.guardianCast > 0) {
       const sweep = 1 - sim.guardianCast / Math.max(0.05, BALANCE.hero.cast);

@@ -152,8 +152,10 @@ def render_frame(parts: list[tuple], yaw: float, fw: int, fh: int, ppu: float, f
             continue
         nz = np.sqrt(np.clip(1.0 - disk, 0.0, 1.0))
         nd = np.clip(dx * lx + dy * ly + nz * lz, 0.0, 1.0)
-        shade = 0.36 + 0.64 * nd + (nd > 0.84) * 0.1
-        shade = shade * (0.82 + 0.18 * nz)
+        # Soft cartoon wrap: the dark side stays a color, and a broad highlight sells the volume.
+        wrap = 0.58 + 0.5 * nd
+        spec = np.clip((nd - 0.62) / 0.38, 0.0, 1.0) ** 2
+        shade = wrap * (0.94 + 0.06 * nz) + spec * 0.28
         far = z + nz * rz
         win = inside & (far > depth[y0:y1, x0:x1])
         slot = rgb[y0:y1, x0:x1]
