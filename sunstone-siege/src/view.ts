@@ -176,6 +176,7 @@ export class WorldView {
   private zoom = 1;
   private readonly art: ArtSet;
   private readonly mapSprite = new Sprite();
+  private readonly waterGfx = new Graphics();
   private readonly ground = new Graphics();
   private readonly pads = new Graphics();
   private readonly chevronGfx = new Graphics();
@@ -238,6 +239,7 @@ export class WorldView {
   private sunFlash = 0;
   private onBranch: ((index: number, spec: Spec) => void) | null = null;
   private reduced = false;
+  private waters: Vec[][] = [];
   private plaza = 160;
   private sunAt = { x: 960, y: 540 };
   private beamCursor = 0;
@@ -302,6 +304,7 @@ export class WorldView {
   constructor(art: ArtSet) {
     this.art = art;
     this.mapSprite.eventMode = "none";
+    this.waterGfx.eventMode = "none";
     this.ground.eventMode = "none";
     this.ground.rect(-1200, -1200, 1920 + 2400, 1080 + 2400).fill({ color: 0x2c3034 });
     this.pads.eventMode = "none";
@@ -330,7 +333,7 @@ export class WorldView {
     this.mark.eventMode = "none";
     this.picker.eventMode = "passive";
     this.picker.visible = false;
-    this.world.addChild(this.ground, this.mapSprite, this.chevronGfx, this.pads, this.shadowLayer, this.range, this.actors, this.link, this.bars, this.mark, this.fxLayer, this.labels, this.picker, this.tag, this.menu);
+    this.world.addChild(this.ground, this.mapSprite, this.waterGfx, this.chevronGfx, this.pads, this.shadowLayer, this.range, this.actors, this.link, this.bars, this.mark, this.fxLayer, this.labels, this.picker, this.tag, this.menu);
     this.actors.addChild(this.sun);
     this.flashRect.eventMode = "none";
     this.flashRect.blendMode = "add";
@@ -366,6 +369,8 @@ export class WorldView {
     this.mapSprite.texture = texture;
     this.mapSprite.width = MAP_W;
     this.mapSprite.height = MAP_H;
+    this.waters = map.water;
+    this.drawWater();
     this.paintChevrons(map);
     this.plaza = map.plaza;
     this.sunAt = map.sun;
@@ -615,6 +620,7 @@ export class WorldView {
   update(dt: number, sim: Siege, hold = false): void {
     const step = hold ? 0 : dt;
     this.time += step > 0 ? step : 0.016;
+    this.drawWater();
     for (const [kind, left] of this.fresh) {
       const next = left - (step || 0.016);
       if (next <= 0) this.fresh.delete(kind);
@@ -839,19 +845,96 @@ export class WorldView {
       const body = new Sprite(texture);
       const anchor = texture.defaultAnchor;
       body.anchor.set(anchor?.x ?? 0.5, anchor?.y ?? 0.8);
-      const scale = this.art.propScale(name) * (0.82 + rnd() * 0.34);
+      const scale = this.art.propScale(name) * (0.72 + rnd() * 0.55);
       body.scale.set(name === "bush" || name === "rock_small" ? scale * 0.85 : scale);
+      const spin = name.startsWith("tree") ? 0.22 : 1.1;
+      body.rotation = (rnd() - 0.5) * spin;
+      const warm = [0xffffff, 0xfff1dc, 0xf3e6cf, 0xfff8ee];
+      const cool = [0xffffff, 0xe7f3dc, 0xf4f7ea, 0xfff6e4];
+      body.tint = (desert ? warm : cool)[Math.floor(rnd() * 4)];
       body.position.set(x, y);
       body.zIndex = y;
       body.eventMode = "none";
       const shadow = this.shadowSprite();
       this.dressShadow(shadow, `prop_${name}`, body.scale.x, 0.85);
+      shadow.rotation = body.rotation;
       shadow.position.set(x, y);
       this.shadowLayer.addChild(shadow);
       this.actors.addChild(body);
       this.scenery.push({ body, shadow });
       taken.push({ x, y });
       placed += 1;
+      if ((name === "bush" || name === "rock_small") && rnd() > 0.62 && placed < want) {
+        const texture2 = this.art.prop(name);
+        if (!texture2) continue;
+        const extra = new Sprite(texture2);
+        const extraAnchor = texture2.defaultAnchor;
+        extra.anchor.set(extraAnchor?.x ?? 0.5, extraAnchor?.y ?? 0.8);
+        extra.scale.set(body.scale.x * 0.72);
+        extra.rotation = (rnd() - 0.5) * 1.2;
+        extra.tint = body.tint;
+        extra.position.set(x + (rnd() - 0.5) * 22, y + (rnd() - 0.4) * 16);
+        extra.zIndex = extra.y;
+        extra.eventMode = "none";
+        const extraShadow = this.shadowSprite();
+        this.dressShadow(extraShadow, `prop_${name}`, extra.scale.x, 0.7);
+        extraShadow.rotation = extra.rotation;
+        extraShadow.position.set(extra.x, extra.y);
+        this.shadowLayer.addChild(extraShadow);
+        this.actors.addChild(extra);
+        this.scenery.push({ body: extra, shadow: extraShadow });
+        taken.push({ x: extra.x, y: extra.y });
+        placed += 1;
+      }
+    }
+    const placeProp = (name: string, x: number, y: number, scaleMul: number, rot: number): void => {
+      if (x < 16 || y < 16 || x > MAP_W - 16 || y > MAP_H - 16) return;
+      if (Math.hypot(x - map.sun.x, y - map.sun.y) < 168) return;
+      if (map.pads.some((pad) => Math.hypot(pad.x - x, pad.y - y) < 58)) return;
+      for (const route of map.routes) {
+        for (let dist = 0; dist < route.len; dist += 36) {
+          const point = poseAt(route, dist);
+          const need = map.pathWidth * 0.4 + (scaleMul > 1.1 ? 54 : 18);
+          if (Math.hypot(point.x - x, point.y - y) < need) return;
+        }
+      }
+      const texture = this.art.prop(name);
+      if (!texture) return;
+      const body = new Sprite(texture);
+      const anchor = texture.defaultAnchor;
+      body.anchor.set(anchor?.x ?? 0.5, anchor?.y ?? 0.8);
+      body.scale.set(this.art.propScale(name) * scaleMul);
+      body.rotation = rot;
+      body.tint = desert ? 0xfff0dc : 0xe9f4df;
+      body.position.set(x, y);
+      body.zIndex = y + (scaleMul > 1.2 ? 40 : 0);
+      body.eventMode = "none";
+      const shadow = this.shadowSprite();
+      this.dressShadow(shadow, `prop_${name}`, body.scale.x, 0.8);
+      shadow.rotation = rot;
+      shadow.position.set(x, y);
+      this.shadowLayer.addChild(shadow);
+      this.actors.addChild(body);
+      this.scenery.push({ body, shadow });
+    };
+    for (let dist = 80; dist < (map.routes[0]?.len ?? 0); dist += 150) {
+      const here = poseAt(map.routes[0], dist);
+      const ahead = poseAt(map.routes[0], Math.min(map.routes[0].len - 1, dist + 20));
+      const ang = Math.atan2(ahead.y - here.y, ahead.x - here.x);
+      const nx = -Math.sin(ang);
+      const ny = Math.cos(ang);
+      const reach = map.pathWidth * 0.55 + 28;
+      placeProp("cliff_edge", here.x + nx * reach, here.y + ny * reach, 0.7 + rnd() * 0.35, ang);
+      if (dist % 300 < 150) {
+        placeProp("cliff_edge", here.x - nx * reach, here.y - ny * reach, 0.62 + rnd() * 0.3, ang + Math.PI);
+      }
+    }
+    const frameNames = desert ? ["tree_palm", "rock_big", "bush"] : ["tree_canopy", "tree_kapok", "bush"];
+    for (let i = 0; i < 8; i++) {
+      const y = 80 + i * 190;
+      const name = frameNames[i % frameNames.length];
+      placeProp(name, 42 + (i % 3) * 8, y, 1.25 + (i % 2) * 0.2, (i - 4) * 0.04);
+      placeProp(name, MAP_W - 46 - (i % 3) * 8, y + 70, 1.3 + (i % 2) * 0.15, (i - 3) * 0.05);
     }
   }
 
@@ -1437,6 +1520,30 @@ export class WorldView {
         this.pads.lineTo(x0 + dx * end, y0 + dy * end);
         this.pads.stroke({ width: 1.6, color: 0xfff6ea, alpha: 0.95 * alpha });
         t += dash + gap;
+      }
+    }
+  }
+
+  /** A quiet moving sheen on the painted water. Still when motion is reduced. */
+  private drawWater(): void {
+    this.waterGfx.clear();
+    if (!this.waters.length) return;
+    const t = this.reduced ? 0.4 : this.time;
+    for (const poly of this.waters) {
+      if (poly.length < 3) continue;
+      let cx = 0;
+      let cy = 0;
+      for (const p of poly) {
+        cx += p.x;
+        cy += p.y;
+      }
+      cx /= poly.length;
+      cy /= poly.length;
+      const glints = this.reduced ? 1 : 4;
+      for (let i = 0; i < glints; i++) {
+        const v = poly[i % poly.length];
+        const u = 0.32 + 0.38 * (0.5 + 0.5 * Math.sin(t * 1.5 + i * 1.8));
+        this.waterGfx.ellipse(cx + (v.x - cx) * u, cy + (v.y - cy) * u, 20, 5).fill({ color: 0xf7fdff, alpha: 0.32 });
       }
     }
   }

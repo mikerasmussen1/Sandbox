@@ -22,6 +22,8 @@ export interface MapDef {
   routes: Route[];
   flights: Route[];
   pads: Vec[];
+  /** Pools, rivers, and the gorge. The view shimmers these. */
+  water: Vec[][];
 }
 
 const NAMES = [
@@ -135,6 +137,7 @@ function build(index: number): MapDef {
     routes,
     flights: routes.map((route) => flightOf(route, SUN)),
     pads: level.pads.map((p) => ({ ...p })),
+    water: level.water.map((poly) => poly.map((p) => ({ ...p }))),
   };
 }
 

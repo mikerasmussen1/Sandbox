@@ -59,6 +59,7 @@ async function boot(): Promise<void> {
   let finished = false;
   let selected = 0;
   let zoom = 1;
+  let lookLock: { zoom: number; camX: number; camY: number } | null = null;
   let zoomMin = 0.4;
   let zoomMax = 1.4;
   let camX = 0;
@@ -229,6 +230,7 @@ async function boot(): Promise<void> {
       __hero?: (x: number, y: number) => void;
       __skip?: () => void;
       __begin?: (index: number) => void;
+      __look?: (z: number, x: number, y: number) => void;
       __tower?: (kind: string, x: number, y: number) => boolean;
       __choose?: (index: number, kind: string) => boolean;
       __spec?: (index: number, spec: string) => boolean;
@@ -258,6 +260,17 @@ async function boot(): Promise<void> {
     act.__hero = (x, y) => { if (sim) { sim.heroX = x; sim.heroY = y; } };
     act.__skip = () => { if (sim) sim.time = 30; };
     act.__begin = (index: number) => begin(index);
+    act.__look = (z: number, x: number, y: number) => {
+      if (z <= 0) {
+        lookLock = null;
+        hud.root.visible = true;
+        view.overlay.visible = true;
+        return;
+      }
+      lookLock = { zoom: z, camX: x, camY: y };
+      hud.root.visible = z < 0.8 ? false : hud.root.visible;
+      view.overlay.visible = z < 0.8 ? false : view.overlay.visible;
+    };
     act.__tower = (kind: string, x: number, y: number) => {
       if (!sim) return false;
       if (kind === "barracks") {
@@ -604,6 +617,13 @@ async function boot(): Promise<void> {
   }
 
   function frameFight(dt: number): void {
+    if (lookLock) {
+      zoom = lookLock.zoom;
+      camX = lookLock.camX;
+      camY = lookLock.camY;
+      clamp();
+      return;
+    }
     if (!sim || mode !== "play" || paused || settingsOpen) return;
     const w = app.screen.width;
     const h = app.screen.height;
