@@ -2,13 +2,48 @@
  * Headless proof that the valley can be lost and won, and that the special
  * rules behave. Combat numbers are the invented placeholders in balance.ts.
  */
-import { BALANCE, starsFor, towerCost } from "../src/balance";
+import { BALANCE, starsFor, towerCost, worldCount } from "../src/balance";
 import { SUN } from "../src/maps";
 import { Siege, stealthed, type Station } from "../src/sim";
-import type { RelicId } from "../src/types";
+import type { RelicId, Spec, TowerKind } from "../src/types";
 
 function fail(msg: string): never {
   throw new Error(msg);
+}
+
+type Cell = { kind: "win" | "hold" | "lose"; integrity: number; t: number };
+
+function cellOf(phase: string, integrity: number, t: number): Cell {
+  if (phase === "victory") return { kind: "win", integrity, t };
+  if (integrity <= 0 || phase === "defeat") return { kind: "lose", integrity, t };
+  return { kind: "hold", integrity, t };
+}
+
+/** A hold outranks a loss. A win outranks a hold. That is the worst case for a counter. */
+function defenseRank(cell: Cell): number {
+  if (cell.kind === "win") return 3000 + cell.integrity;
+  if (cell.kind === "hold") return 2000 + cell.integrity;
+  return cell.t;
+}
+
+function mulberry32(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function withSeed<T>(seed: number, fn: () => T): T {
+  const prev = Math.random;
+  Math.random = mulberry32(seed);
+  try {
+    return fn();
+  } finally {
+    Math.random = prev;
+  }
 }
 
 function tickUntil(sim: Siege, seconds: number, dt = 1 / 30): void {
@@ -51,9 +86,9 @@ function cover(sim: Siege): boolean {
     if (station) covered.add(station.path);
   }
   if (covered.size >= sim.map.routes.length) return false;
-  const open = sim.stations.filter((s) => s.kind !== "wall" && s.tier === 0 && !covered.has(s.path));
+  const open = sim.stations.filter((s) => (s.kind === "dart" || s.kind === "lens") && s.tier === 0 && !covered.has(s.path));
   if (!open.length) return false;
-  open.sort((a, b) => sim.stationCost(a) - sim.stationCost(b) || dist(a) - dist(b));
+  open.sort((a, b) => (a.kind === "dart" ? 0 : 1) - (b.kind === "dart" ? 0 : 1) || dist(a) - dist(b));
   const pick = open[0];
   if (sim.jade >= sim.stationCost(pick)) sim.fundNow(sim.stations.indexOf(pick));
   return true;
@@ -61,18 +96,28 @@ function cover(sim: Siege): boolean {
 
 function spend(sim: Siege): void {
   if (cover(sim)) return;
+  if (buy(sim, (s) => s.kind === "dart" && s.tier === 1)) return;
+  if (buy(sim, (s) => s.kind === "lens" && s.tier === 0)) return;
+  if (buy(sim, (s) => s.kind === "lens" && s.tier === 1)) return;
   if (buy(sim, (s) => s.kind === "dart" && s.tier === 0)) return;
   if (buy(sim, (s) => s.kind === "drum" && s.tier === 0)) return;
-  if (buy(sim, (s) => s.kind === "lens" && s.tier === 0)) return;
-  if (buy(sim, (s) => s.kind === "dart" && s.tier === 1)) return;
-  if (buy(sim, (s) => s.kind === "drum" && s.tier === 1)) return;
-  if (buy(sim, (s) => s.kind === "dart" && s.tier === 2)) return;
-  if (buy(sim, (s) => s.kind === "lens" && s.tier === 1)) return;
-  if (buy(sim, (s) => s.kind === "wall" && s.tier === 0)) return;
-  if (buy(sim, (s) => s.kind === "spire" && s.tier === 0)) return;
   if (buy(sim, (s) => s.kind === "barracks" && s.tier === 0)) return;
   if (buy(sim, (s) => s.kind === "barracks" && s.tier === 1)) return;
-  buy(sim, (s) => s.kind !== "wall" && s.tier > 0 && s.tier < 3);
+  if (buy(sim, (s) => s.kind === "drum" && s.tier === 1)) return;
+  if (buy(sim, (s) => s.kind === "wall" && s.tier === 0)) return;
+  if (buy(sim, (s) => s.kind === "base" && s.tier < 3)) return;
+  buy(sim, (s) => (s.kind === "dart" || s.kind === "lens" || s.kind === "drum" || s.kind === "wall") && s.tier > 0 && s.tier < 3);
+}
+
+/** Funds one family and takes one branch, so a countered valley can show the gap. */
+function spendFamily(sim: Siege, kind: TowerKind | "barracks", spec: Spec): void {
+  sim.preferSpec = spec;
+  if (buy(sim, (s) => s.kind === kind && s.tier === 0)) return;
+  buy(sim, (s) => s.kind === kind && s.tier > 0 && s.tier < 3);
+}
+
+function spendWalls(sim: Siege): void {
+  buy(sim, (s) => s.kind === "wall" && (s.tier < 3 || !s.alive));
 }
 
 function chase(sim: Siege): void {
@@ -114,7 +159,7 @@ function dist(t: { x: number; y: number }): number {
   return Math.hypot(t.x - SUN.x, t.y - SUN.y);
 }
 
-function bot(world: number): void {
+function bot(world: number): Cell {
   const sim = new Siege(world);
   const dt = 1 / 20;
   let t = 0;
@@ -139,13 +184,9 @@ function bot(world: number): void {
     sim.fx.length = 0;
     t += dt;
   }
-  if (sim.phase !== "victory") {
-    fail(`bot lost world ${world} at wave ${sim.wave} integrity ${sim.integrity} jade ${sim.jade} towers ${sim.towers.length} after ${t.toFixed(1)}s`);
-  }
-  if (starsFor(sim.integrity) < 2) {
-    fail(`bot scraped world ${world} with integrity ${sim.integrity}`);
-  }
-  console.log(`bot victory world ${world} in ${t.toFixed(1)}s integrity ${sim.integrity} stars ${starsFor(sim.integrity)} towers ${sim.towers.length}`);
+  const cell = cellOf(sim.phase, sim.integrity, t);
+  console.log(`bot world ${world}: ${cell.kind} integrity ${sim.integrity.toFixed(1)} stars ${starsFor(sim.integrity)} towers ${sim.towers.length} in ${t.toFixed(1)}s`);
+  return cell;
 }
 
 function rules(): void {
@@ -261,7 +302,7 @@ function heroLoop(): void {
   if (!bug.alive) fail("a lone skitter should still be chewing the wall");
   if (bug.dist > wall.dist - 10) fail(`skitter walked through the wall at ${bug.dist.toFixed(1)} vs ${wall.dist.toFixed(1)}`);
 
-  for (const world of [0, 1, 2]) {
+  for (let world = 0; world < worldCount(); world++) {
     const idle = play(world, "idle");
     const kite = play(world, "kite");
     if (idle.phase !== "defeat") fail(`world ${world} idle should lose, got ${idle.phase}`);
@@ -313,10 +354,111 @@ function play(world: number, style: "idle" | "kite"): { phase: string; kills: nu
   return { phase: sim.phase, kills: sim.guardianKills, t };
 }
 
+function familyRun(world: number, label: string, spend: (sim: Siege) => void): Cell {
+  const sim = new Siege(world);
+  const dt = 1 / 20;
+  let t = 0;
+  // Long valleys keep leaking past three minutes. A stone still up at the horizon is a hold, not a loss.
+  while (sim.phase !== "victory" && sim.phase !== "defeat" && t < 720) {
+    if (sim.pendingOffer?.length) sim.chooseRelic(sim.pendingOffer[0]);
+    if (sim.phase === "build") {
+      spend(sim);
+      sim.callWave();
+    } else spend(sim);
+    sim.tick(dt);
+    sim.fx.length = 0;
+    t += dt;
+  }
+  const cell = cellOf(sim.phase, sim.integrity, t);
+  console.log(`${label} world ${world}: ${cell.kind} integrity ${sim.integrity.toFixed(1)} in ${t.toFixed(1)}s`);
+  return cell;
+}
+
+const SEEDS = [11, 29, 47, 71, 97];
+
+function worst(cells: Cell[], favor: "defense" | "attack"): Cell {
+  return cells.reduce((best, cell) => {
+    const left = defenseRank(best);
+    const right = defenseRank(cell);
+    if (favor === "defense") return right > left ? cell : best;
+    return right < left ? cell : best;
+  });
+}
+
+function formatCell(cell: Cell): string {
+  const integrity = Math.round(cell.integrity);
+  const seconds = Math.round(cell.t);
+  if (cell.kind === "win") return `win ${integrity} / ${seconds}s`;
+  if (cell.kind === "hold") return `hold ${integrity} / ${seconds}s`;
+  return `lose ${seconds}s`;
+}
+
 afk();
 rules();
 heroLoop();
-bot(0);
-bot(1);
-bot(2);
+
+const worlds = worldCount();
+const mixed: Cell[][] = [];
+for (let world = 0; world < worlds; world++) {
+  const runs = SEEDS.map((seed) => withSeed(seed * 100 + world, () => bot(world)));
+  mixed.push(runs);
+}
+
+const families: { label: string; spend: (sim: Siege) => void }[] = [
+  { label: "archer", spend: (sim) => spendFamily(sim, "dart", "rain") },
+  { label: "siege", spend: (sim) => spendFamily(sim, "lens", "ballista") },
+  { label: "mystic", spend: (sim) => spendFamily(sim, "drum", "snare") },
+  { label: "barracks", spend: (sim) => spendFamily(sim, "barracks", "spears") },
+  { label: "wall", spend: (sim) => spendWalls(sim) },
+];
+const familyCells = new Map<string, Cell[]>();
+for (const family of families) {
+  for (let world = 0; world < worlds; world++) {
+    const runs = SEEDS.map((seed, n) => withSeed(seed * 100 + world * 8 + n + 3, () => familyRun(world, family.label, family.spend)));
+    familyCells.set(`${family.label}:${world}`, runs);
+  }
+}
+
+const countered: [string, number, string][] = [
+  ["siege", 0, "the swarm valley"],
+  ["siege", 1, "the runner ridge"],
+  ["archer", 3, "the brute valley"],
+  ["archer", 5, "the boulder valley"],
+  ["barracks", 4, "the flyer valley"],
+  ["mystic", 0, "the swarm valley"],
+  ["wall", 0, "the swarm valley"],
+  ["wall", 5, "the boulder valley"],
+];
+
+let broken = false;
+for (let world = 0; world < worlds; world++) {
+  const runs = mixed[world];
+  const bad = runs.filter((cell) => cell.kind !== "win" || starsFor(cell.integrity) < 2);
+  if (bad.length) {
+    broken = true;
+    console.error(`mixed world ${world} failed a seed: ${runs.map(formatCell).join(" | ")}`);
+  }
+}
+for (const [label, world, name] of countered) {
+  const runs = familyCells.get(`${label}:${world}`) ?? [];
+  const slipped = runs.filter((cell) => cell.kind !== "lose");
+  if (slipped.length) {
+    broken = true;
+    console.error(`${label}-only should lose ${name}. Seeds: ${runs.map(formatCell).join(" | ")}`);
+  }
+}
+
+console.log("worst of 5 seeds");
+console.log("| Valley | Mixed | Archer | Siege | Mystic | Barracks | Walls |");
+console.log("| --- | --- | --- | --- | --- | --- | --- |");
+for (let world = 0; world < worlds; world++) {
+  const name = `${world} ${BALANCE.worlds[world].name}`;
+  const row = [
+    formatCell(worst(mixed[world], "attack")),
+    ...families.map((family) => formatCell(worst(familyCells.get(`${family.label}:${world}`) ?? [], "defense"))),
+  ];
+  console.log(`| ${name} | ${row.join(" | ")} |`);
+}
+if (broken) fail("a countered family held or won, or the mixed bot missed a valley");
+console.log("counters: mixed wins every valley on every seed; a countered family loses, and a hold does not pass");
 console.log("sim-check ok");

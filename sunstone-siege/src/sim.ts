@@ -2,19 +2,27 @@
  * Combat simulation. No rendering and no storage, so a valley can be played
  * forward in a test without a browser.
  */
-import { BALANCE, TOWER_HUE, towerCost, towerRange, type RelicDef } from "./balance";
+import { autoSpec, BALANCE, familyUnlocked, specChoices, TOWER_HUE, towerCost, towerRange, type RelicDef } from "./balance";
 import { carryLaunch } from "./carry";
 import { poseAt, type Route } from "./geom";
 import { clearStationGaps, MAP_H, MAP_W, mapDef, type MapDef } from "./maps";
-import type { EnemyKind, Phase, RelicId, TowerKind, Vec } from "./types";
+import type { EnemyKind, Phase, RelicId, Spec, TowerKind, Vec } from "./types";
 
-export type StationKind = TowerKind | "wall" | "barracks";
+export type StationKind = TowerKind | "wall" | "barracks" | "recruit" | "base";
 
 export interface Station {
   index: number;
   x: number;
   y: number;
   kind: StationKind;
+  /** What this empty pad will let the hero build. Walls are not a choice. */
+  offers: StationKind[];
+  /** False until the hero picks an offer. Standing does not pour before that. */
+  chosen: boolean;
+  /** Tier-2 branch. `none` until the hero (or the bot) picks one. */
+  spec: Spec;
+  /** Seconds the wall's HP bar stays up after a hit. */
+  hurt: number;
   path: number;
   /** Distance along the route. Walls block here. Tower pads only use it for layout. */
   dist: number;
@@ -94,6 +102,8 @@ export interface Enemy {
   emote: number;
   /** Shots left in the boulder a Golem is pushing. Zero means the rock is gone. */
   boulder: number;
+  /** Frost has the legs pinned. Runners and boulder crews take the hard snare. */
+  snareUntil: number;
 }
 
 export interface Ally {
@@ -107,6 +117,7 @@ export interface Ally {
   maxHp: number;
   cool: number;
   alive: boolean;
+  role: "squad" | "spear" | "knight" | "recruit";
 }
 
 export interface Tower {
@@ -124,6 +135,7 @@ export interface Tower {
   angle: number;
   /** Damage this totem has actually dealt in the valley. */
   dealt: number;
+  spec: Spec;
 }
 
 export interface Shot {
@@ -142,6 +154,11 @@ export interface Shot {
   /** Who painted this bolt, so the trail can wear that family's color. */
   family: TowerKind | "hero";
   tier: number;
+  /** Arrow Rain blankets this radius. 0 is a single hit. */
+  splash: number;
+  /** Extra bodies a ballista may catch along the bolt. */
+  pierce: number;
+  rain: boolean;
 }
 
 export interface Puddle {
@@ -169,7 +186,7 @@ export interface Spear {
   alive: boolean;
 }
 
-export type FxKind = "impact" | "death" | "jade" | "drum" | "chain" | "crack" | "flare" | "slam" | "boss" | "place" | "streak" | "relic" | "aegis" | "rally" | "banner" | "multi" | "callout" | "collect" | "num" | "rubble" | "pay" | "tick";
+export type FxKind = "impact" | "death" | "jade" | "drum" | "chain" | "crack" | "flare" | "slam" | "boss" | "place" | "streak" | "relic" | "aegis" | "rally" | "banner" | "multi" | "callout" | "collect" | "num" | "rubble" | "pay" | "tick" | "volley" | "intro" | "loom" | "splinter";
 
 /** How long a carried gem takes to arc from the hero onto a pad. */
 export const PAY_FLIGHT = 0.34;
@@ -213,8 +230,22 @@ export function stealthed(kind: EnemyKind, age: number): boolean {
 }
 
 /** How much trail a body wants. Bigger sprites need a wider crowd. */
+function padOffers(kind: StationKind, world: number): StationKind[] {
+  if (kind === "wall") return ["wall"];
+  if (kind === "recruit") return ["recruit"];
+  if (kind === "base") return ["base"];
+  const open: StationKind[] = ["dart"];
+  if (familyUnlocked("lens", world)) open.push("lens");
+  if (familyUnlocked("drum", world)) open.push("drum");
+  if (kind === "barracks" && familyUnlocked("barracks", world)) open.unshift("barracks");
+  if (open.includes(kind)) return [kind, ...open.filter((k) => k !== kind)];
+  return open;
+}
+
 function girth(kind: EnemyKind): number {
   if (kind === "boss") return 86;
+  if (kind === "roller") return 96;
+  if (kind === "giant") return 84;
   if (kind === "golem") return 72;
   if (kind === "shield" || kind === "glider") return 58;
   return 62;
@@ -226,6 +257,13 @@ export class Siege {
   time = 0;
   jade: number;
   integrity: number = BALANCE.integrity;
+  integrityMax: number = BALANCE.integrity;
+  /** 0 until the heart pad is bought. Each step grows the crater and its bolt. */
+  baseTier = 0;
+  /** Family bot override for the tier-2 branch. */
+  preferSpec: Spec | null = null;
+  private baseCool = 0;
+  private recruitBank = 0;
   phase: Phase = "build";
   /** Index of the wave in progress, or the next wave during a build. */
   wave = 0;
@@ -261,6 +299,7 @@ export class Siege {
   pendingOffer: RelicId[] | null = null;
   offerLeft = 0;
   readonly relics: RelicId[] = [];
+  private readonly seen = new Set<EnemyKind>();
   private dartMul = 1;
   private lensDpsMul = 1;
   private lensRampMul = 1;
@@ -300,7 +339,7 @@ export class Siege {
     for (let i = 0; i < SHOTS; i++) {
       this.shots.push({
         id: 0, x: 0, y: 0, px: 0, py: 0, tx: 0, ty: 0, targetId: 0, damage: 0, speed: 0, alive: false, towerId: 0,
-        family: "hero", tier: 0,
+        family: "hero", tier: 0, splash: 0, pierce: 0, rain: false,
       });
     }
   }
@@ -360,6 +399,7 @@ export class Siege {
       ramp: 0,
       angle: Math.atan2(this.map.sun.y - at.y, this.map.sun.x - at.x),
       dealt: 0,
+      spec: "none",
     });
     const station = this.stations.find((s) => s.kind !== "wall" && s.index === pad);
     if (station) station.tier = Math.max(station.tier, 1);
@@ -393,6 +433,7 @@ export class Siege {
     if (station) {
       station.tier = 0;
       station.paid = 0;
+      station.spec = "none";
     }
     this.towers.splice(i, 1);
     this.fx.push({ kind: "jade", x: tower.x, y: tower.y, text: `+${refund}`, n: refund });
@@ -459,11 +500,17 @@ export class Siege {
 
   /** Price of the next tier on this station, or 0 when it is finished. */
   stationCost(station: Station): number {
+    if (station.kind === "recruit") return 0;
+    if (station.kind === "wall") {
+      if (station.tier > 0 && !station.alive) return BALANCE.wall.repair[station.tier - 1];
+      if (station.tier >= 3) return 0;
+      return BALANCE.wall.cost[station.tier];
+    }
     if (station.tier >= 3) return 0;
-    if (station.kind === "wall") return BALANCE.wall.cost[station.tier];
+    if (station.kind === "base") return BALANCE.base.cost[station.tier];
     if (station.kind === "barracks") {
       if (station.tier === 0) return BALANCE.barracks.squad;
-      if (station.tier === 1) return BALANCE.barracks.tower;
+      if (station.tier === 1) return station.spec === "knights" ? BALANCE.barracks.knight : BALANCE.barracks.spear;
       return 0;
     }
     return towerCost(station.kind, station.tier);
@@ -475,13 +522,42 @@ export class Siege {
    */
   fundNow(index: number): boolean {
     const station = this.stations[index];
-    if (!station || station.tier >= 3) return false;
+    if (!station || station.kind === "recruit") return false;
     if (this.phase === "victory" || this.phase === "defeat") return false;
+    const repairing = station.kind === "wall" && station.tier > 0 && !station.alive;
+    if (station.tier >= 3 && !repairing) return false;
+    if (station.tier === 1 && station.spec === "none" && specChoices(station.kind)) {
+      station.spec = this.preferSpec && specChoices(station.kind)?.includes(this.preferSpec)
+        ? this.preferSpec
+        : autoSpec(station.kind, this.world);
+    }
     const left = this.stationCost(station) - station.paid;
     if (left <= 0 || this.jade < left) return false;
+    station.chosen = true;
     this.jade -= left;
     station.paid = 0;
     this.finishStation(station, left);
+    return true;
+  }
+
+  /** Pick the tier-2 branch. The pour starts once the hero stands on the pad. */
+  chooseSpec(index: number, spec: Spec): boolean {
+    const station = this.stations[index];
+    const choices = station ? specChoices(station.kind) : null;
+    if (!station || !choices || station.tier !== 1 || station.spec !== "none") return false;
+    if (!choices.includes(spec)) return false;
+    station.spec = spec;
+    return true;
+  }
+
+  /** Lock an empty pad to one of its offers. The pour starts once the hero stands still. */
+  chooseStation(index: number, kind: StationKind): boolean {
+    const station = this.stations[index];
+    if (!station || station.chosen || station.tier > 0) return false;
+    if (!station.offers.includes(kind)) return false;
+    station.kind = kind;
+    station.chosen = true;
+    station.paid = 0;
     return true;
   }
 
@@ -511,6 +587,7 @@ export class Siege {
       ramp: 0,
       angle: 0,
       dealt: 0,
+      spec: "none",
     };
     this.towers.push(tower);
     return tower;
@@ -545,8 +622,11 @@ export class Siege {
       return;
     }
     this.towersAct(dt);
+    this.baseAct(dt);
     this.shotsAct(dt);
     this.allyAct(dt);
+    this.recruitAct(dt);
+    for (const station of this.stations) if (station.hurt > 0) station.hurt = Math.max(0, station.hurt - dt);
     this.puddleAct(dt);
     this.spearAct(dt);
     this.compact();
@@ -584,7 +664,7 @@ export class Siege {
         // picks them off one at a time and the wave stops being a fight.
         // A long pack is one red snake. Short packs stay in clumps.
         const line = g.count >= 20;
-        const step = 0.14;
+        const step = line ? 0.07 : 0.14;
         const clump = line ? 10000 : 4;
         const breathe = line ? 0 : 0.55;
         for (let i = 0; i < g.count; i++) {
@@ -657,12 +737,17 @@ export class Siege {
     e.hop = 0;
     e.emote = 0;
     e.boulder = kind === "golem" ? BALANCE.boulder.hp : 0;
+    e.snareUntil = 0;
     const pose = poseAt(e.flying ? this.map.flights[path] : this.map.routes[path], dist);
     e.x = pose.x;
     e.y = pose.y;
     e.angle = pose.angle;
     this.enemies.push(e);
     if (kind === "boss") this.fx.push({ kind: "boss", x: e.x, y: e.y, text: stat.name });
+    if (!this.seen.has(kind)) {
+      this.seen.add(kind);
+      this.fx.push({ kind: "intro", x: e.x, y: e.y, text: stat.name, enemy: kind });
+    }
     return e;
   }
 
@@ -671,7 +756,7 @@ export class Siege {
       id: 0, kind: "runner", path: 0, dist: 0, x: 0, y: 0, angle: 0, hp: 1, maxHp: 1,
       armor: 0, speed: 0, reward: 0, leak: 1, charge: 0, flying: false, boss: false,
       age: 0, slowUntil: 0, stunUntil: 0, slam: 0, aegis: 0, aegisUntil: 0, rally: 0, rushUntil: 0, flash: 0, alive: false,
-      lane: 0, striking: false, strikeLeft: 0, guard: 0, react: "", reactLeft: 0, knockX: 0, knockY: 0, hop: 0, emote: 0, boulder: 0,
+      lane: 0, striking: false, strikeLeft: 0, guard: 0, react: "", reactLeft: 0, knockX: 0, knockY: 0, hop: 0, emote: 0, boulder: 0, snareUntil: 0,
     };
   }
 
@@ -683,6 +768,7 @@ export class Siege {
       e.age += dt;
       let mul = 1;
       if (e.stunUntil > this.time) mul = 0;
+      else if (e.snareUntil > this.time) mul = BALANCE.snare.mul;
       else if (e.slowUntil > this.time) mul = BALANCE.slowMul;
       if (mul > 0 && e.rushUntil > this.time) mul *= BALANCE.boss.rallySpeed;
       e.reactLeft = Math.max(0, e.reactLeft - dt);
@@ -694,7 +780,7 @@ export class Siege {
       e.knockX *= knock;
       e.knockY *= knock;
       const route = e.flying ? this.map.flights[e.path] : this.map.routes[e.path];
-      const blocked = this.pressWall(e, dt);
+      const blocked = this.pressWall(e, dt) || this.pressAlly(e);
       if (blocked) e.striking = true;
       else if (e.dist < route.len) e.striking = false;
       if (!e.striking) e.dist += e.speed * mul * dt;
@@ -758,15 +844,13 @@ export class Siege {
   private towersAct(dt: number): void {
     for (const tower of this.towers) {
       if (tower.stunnedUntil > this.time) continue;
-      if (tower.kind === "lens") this.lens(tower, dt);
-      else {
-        tower.cooldown -= dt;
-        if (tower.cooldown > 0) continue;
-        if (tower.kind === "dart") this.dart(tower);
-        else if (tower.kind === "drum") this.drum(tower);
-        else this.spire(tower);
-        if (tower.cooldown < 0) tower.cooldown = 0;
-      }
+      tower.cooldown -= dt;
+      if (tower.cooldown > 0) continue;
+      if (tower.kind === "dart") this.dart(tower);
+      else if (tower.kind === "lens") this.lens(tower);
+      else if (tower.kind === "drum") this.drum(tower);
+      else this.spire(tower);
+      if (tower.cooldown < 0) tower.cooldown = 0;
     }
   }
 
@@ -775,7 +859,7 @@ export class Siege {
     const rangeSq = range * range;
     if (keep) {
       const held = this.enemies.find((e) => e.id === keep && e.alive && !stealthed(e.kind, e.age));
-      if (held) {
+      if (held && !(held.flying && tower.kind !== "dart" && tower.kind !== "drum")) {
         const dx = held.x - tower.x;
         const dy = held.y - tower.y;
         if (dx * dx + dy * dy <= rangeSq) return held;
@@ -785,6 +869,7 @@ export class Siege {
     let progress = -1;
     for (const e of this.enemies) {
       if (!e.alive || stealthed(e.kind, e.age)) continue;
+      if (e.flying && tower.kind !== "dart" && tower.kind !== "drum") continue;
       const dx = e.x - tower.x;
       const dy = e.y - tower.y;
       if (dx * dx + dy * dy > rangeSq) continue;
@@ -801,11 +886,40 @@ export class Siege {
   private dart(tower: Tower): void {
     const target = this.acquire(tower, 0);
     if (!target) return;
-    const tier = BALANCE.dart[tower.tier];
     const slowed = target.slowUntil > this.time;
-    tower.cooldown += tier.interval * (slowed ? BALANCE.synergy.slowDart : 1);
     tower.angle = Math.atan2(target.y - tower.y, target.x - tower.x);
     tower.targetId = target.id;
+    if (tower.spec === "rain") {
+      const tier = Math.min(2, tower.tier);
+      tower.cooldown += BALANCE.rain.interval[tier] * (slowed ? BALANCE.synergy.slowDart : 1);
+      this.fx.push({
+        kind: "loom",
+        x: target.x,
+        y: target.y,
+        tx: tower.x,
+        ty: tower.y,
+        n: BALANCE.shower.radius,
+        color: 0xffd24a,
+      });
+      this.arm(tower, target, BALANCE.rain.damage[tier] * this.dartMul, 640, { rain: true });
+      return;
+    }
+    if (tower.spec === "volley") {
+      tower.cooldown += BALANCE.volley.interval;
+      const pack = this.enemies
+        .filter((e) => e.alive && !stealthed(e.kind, e.age) && Math.hypot(e.x - tower.x, e.y - tower.y) <= towerRange(tower.kind, tower.tier) * this.rangeMul)
+        .sort((a, b) => b.dist - a.dist)
+        .slice(0, BALANCE.volley.count);
+      const shots = pack.length ? pack : [target];
+      for (const e of shots) this.arm(tower, e, BALANCE.volley.damage * this.dartMul, BALANCE.volley.speed, {});
+      return;
+    }
+    const tier = Math.min(2, tower.tier);
+    tower.cooldown += BALANCE.bolt.interval[tier] * (slowed ? BALANCE.synergy.slowDart : 1);
+    this.arm(tower, target, BALANCE.bolt.damage[tier] * this.dartMul, BALANCE.bolt.speed, {});
+  }
+
+  private arm(tower: Tower, target: Enemy, damage: number, speed: number, style: { rain?: boolean; splash?: number; pierce?: number }): void {
     const shot = this.shots[this.shotCursor];
     this.shotCursor = (this.shotCursor + 1) % this.shots.length;
     shot.id = this.nextId();
@@ -816,43 +930,45 @@ export class Siege {
     shot.tx = target.x;
     shot.ty = target.y;
     shot.targetId = target.id;
-    shot.damage = tier.damage * this.dartMul;
-    shot.speed = tier.shotSpeed;
+    shot.damage = damage;
+    shot.speed = speed;
     shot.towerId = tower.id;
-    shot.family = "dart";
+    shot.family = tower.kind;
     shot.tier = tower.tier;
+    shot.splash = style.splash ?? 0;
+    shot.pierce = style.pierce ?? 0;
+    shot.rain = style.rain ?? false;
     shot.alive = true;
   }
 
-  private lens(tower: Tower, dt: number): void {
+  /** One slow bolt. The number on the lens tier is the hit, not a beam. */
+  private lens(tower: Tower): void {
     const target = this.acquire(tower, tower.targetId);
     if (!target) {
       tower.targetId = 0;
-      tower.ramp = 0;
       return;
     }
-    if (target.id !== tower.targetId) {
-      tower.targetId = target.id;
-      tower.ramp = 0;
-    }
     const tier = BALANCE.lens[tower.tier];
-    tower.ramp = Math.min(tier.rampMax, tower.ramp + tier.ramp * this.lensRampMul * dt);
+    const catapult = tower.spec === "catapult";
+    tower.cooldown += catapult ? BALANCE.catapult.interval : BALANCE.heavy.interval[tower.tier];
+    tower.targetId = target.id;
     tower.angle = Math.atan2(target.y - tower.y, target.x - tower.x);
-    let dps = tier.dps * this.lensDpsMul + tower.ramp;
-    if (target.stunUntil > this.time) dps *= BALANCE.synergy.stunnedLens;
-    dps = Math.max(BALANCE.minDps, dps - target.armor);
-    tower.cooldown -= dt;
-    if (tower.cooldown <= 0) {
-      target.flash = 0.07;
-      tower.cooldown = 0.22;
-      this.fx.push({ kind: "impact", x: target.x, y: target.y, color: TOWER_HUE.lens });
-    }
-    this.hurt(target, dps * dt, false, tower);
+    let damage = tier.dps * this.lensDpsMul * (this.lensRampMul > 1 ? 1.08 : 1);
+    if (tower.spec === "none") damage *= 0.72;
+    if (target.stunUntil > this.time) damage *= BALANCE.synergy.stunnedLens;
+    this.arm(tower, target, damage, catapult ? BALANCE.catapult.speed : BALANCE.heavy.speed, {
+      splash: catapult ? BALANCE.catapult.radius : 0,
+      pierce: tower.spec === "ballista" ? BALANCE.ballista.extra : 0,
+    });
   }
 
   private drum(tower: Tower): void {
+    if (tower.spec === "beam") {
+      this.beam(tower);
+      return;
+    }
     const tier = BALANCE.drum[tower.tier];
-    const radius = tier.radius * this.rangeMul;
+    const radius = (tower.spec === "snare" ? tier.radius * 1.15 : tier.radius) * this.rangeMul;
     const r2 = radius * radius;
     let hit = false;
     let killed = 0;
@@ -868,6 +984,11 @@ export class Siege {
       const stun = (e.boss ? tier.stun * 0.35 : tier.stun) * this.drumStunMul;
       e.stunUntil = Math.max(e.stunUntil, this.time + stun);
       e.slowUntil = Math.max(e.slowUntil, this.time + tier.slow);
+      if (tower.spec === "snare" && (e.kind === "runner" || e.kind === "roller" || e.kind === "giant")) {
+        e.snareUntil = Math.max(e.snareUntil, this.time + BALANCE.snare.dur);
+      } else if (e.kind === "runner" || e.kind === "roller") {
+        e.snareUntil = Math.max(e.snareUntil, this.time + BALANCE.snare.dur * 0.45);
+      }
       if (e.kind === "skitter") {
         const d = Math.hypot(dx, dy) || 1;
         e.knockX += (dx / d) * 9;
@@ -904,7 +1025,29 @@ export class Siege {
     shot.towerId = tower.id;
     shot.family = "spire";
     shot.tier = tower.tier;
+    shot.splash = 0;
+    shot.pierce = 0;
+    shot.rain = false;
     shot.alive = true;
+  }
+
+  /** A beam that stays hotter the longer it holds one body. Bosses melt. */
+  private beam(tower: Tower): void {
+    const target = this.acquire(tower, tower.targetId);
+    if (!target) {
+      tower.targetId = 0;
+      tower.ramp = Math.max(0, tower.ramp - 20);
+      return;
+    }
+    const tier = Math.min(2, tower.tier);
+    if (tower.targetId !== target.id) tower.ramp = 0;
+    tower.targetId = target.id;
+    tower.ramp = Math.min(BALANCE.beam.cap, tower.ramp + BALANCE.beam.ramp);
+    tower.cooldown += 0.28;
+    tower.angle = Math.atan2(target.y - tower.y, target.x - tower.x);
+    const raw = (BALANCE.beam.dps[tier] + tower.ramp) * 0.28 * this.lensDpsMul;
+    this.hurt(target, raw, true, tower, tower.x, tower.y);
+    this.fx.push({ kind: "impact", x: target.x, y: target.y, color: 0xffe08a, n: 2 });
   }
 
   /** Chain damage, unchanged numbers, then a slowing puddle at the landing. */
@@ -1047,12 +1190,19 @@ export class Siege {
           const owner = this.towers.find((t) => t.id === shot.towerId);
           if (owner && target) this.venom(owner, target, shot.x, shot.y);
           else this.spill(shot.x, shot.y, BALANCE.venom.radius[shot.tier] ?? 56, BALANCE.venom.life, "spire");
-        } else if (target) {
+        } else if (shot.rain) {
+          this.shower(shot);
+        } else if (shot.splash > 0) {
+          this.splash(shot);
+        } else if (shot.pierce > 0) {
+          this.pierce(shot);
+        } else if (target && !(target.flying && shot.family !== "dart" && shot.family !== "drum")) {
           const owner = shot.towerId > 0 ? this.towers.find((t) => t.id === shot.towerId) : undefined;
-          const killed = this.hurt(target, shot.damage, true, owner, shot.px, shot.py);
+          const heavy = shot.family === "lens";
+          const killed = this.hurt(target, shot.damage, !heavy, owner, shot.px, shot.py, heavy);
           if (killed && shot.towerId < 0) this.guardianKills += 1;
           const color = shot.family === "hero" ? 0xffe08a : TOWER_HUE[shot.family];
-          this.fx.push({ kind: "impact", x: target.x, y: target.y, color, n: shot.family === "hero" ? 2 : 0 });
+          this.fx.push({ kind: "impact", x: target.x, y: target.y, color, n: heavy ? 4 : shot.family === "hero" ? 2 : 0 });
         }
       } else {
         shot.x += (dx / dist) * step;
@@ -1061,27 +1211,115 @@ export class Siege {
     }
   }
 
-  /** `mitigate` subtracts armor. Beams pass false because they already did. Returns true when the hit kills. */
-  private hurt(e: Enemy, raw: number, mitigate: boolean, tower?: Tower, fromX?: number, fromY?: number): boolean {
+  /**
+   * Arrow Shower. One logical shot blankets the circle. Armor at the gate
+   * takes nothing. A golem's boulder only chips, so the soak test still holds.
+   */
+  private shower(shot: Shot): void {
+    const owner = shot.towerId > 0 ? this.towers.find((t) => t.id === shot.towerId) : undefined;
+    const radius = BALANCE.shower.radius;
+    const r2 = radius * radius;
+    const caught = this.enemies.filter((e) => e.alive && (e.x - shot.x) ** 2 + (e.y - shot.y) ** 2 <= r2);
+    let killed = 0;
+    for (const e of caught) {
+      if (this.hurt(e, shot.damage, true, owner, shot.px, shot.py, false, true)) killed += 1;
+    }
+    this.fx.push({ kind: "volley", x: shot.x, y: shot.y, n: radius });
+    this.noteMulti(shot.x, shot.y, killed);
+  }
+
+  /** Catapult. A short heavy splash. It breaks a boulder instead of chipping it. */
+  private splash(shot: Shot): void {
+    const owner = shot.towerId > 0 ? this.towers.find((t) => t.id === shot.towerId) : undefined;
+    const r2 = shot.splash * shot.splash;
+    let killed = 0;
+    for (const e of this.enemies) {
+      if (!e.alive || e.flying) continue;
+      if ((e.x - shot.x) ** 2 + (e.y - shot.y) ** 2 > r2) continue;
+      if (this.hurt(e, shot.damage, false, owner, shot.px, shot.py, true, false)) killed += 1;
+    }
+    this.fx.push({ kind: "impact", x: shot.x, y: shot.y, color: 0xffc14a, n: 4 });
+    this.noteMulti(shot.x, shot.y, killed);
+  }
+
+  /** Ballista. The bolt and a couple of bodies standing along it. */
+  private pierce(shot: Shot): void {
+    const owner = shot.towerId > 0 ? this.towers.find((t) => t.id === shot.towerId) : undefined;
+    const ax = shot.px;
+    const ay = shot.py;
+    const bx = shot.x;
+    const by = shot.y;
+    const abx = bx - ax;
+    const aby = by - ay;
+    const ab2 = abx * abx + aby * aby || 1;
+    const width = BALANCE.ballista.width;
+    const lined = this.enemies
+      .filter((e) => {
+        if (!e.alive || e.flying) return false;
+        const t = Math.max(0, Math.min(1, ((e.x - ax) * abx + (e.y - ay) * aby) / ab2));
+        const px = ax + abx * t;
+        const py = ay + aby * t;
+        return Math.hypot(e.x - px, e.y - py) <= width;
+      })
+      .sort((a, b) => Math.hypot(a.x - ax, a.y - ay) - Math.hypot(b.x - ax, b.y - ay))
+      .slice(0, 1 + shot.pierce);
+    for (const e of lined) this.hurt(e, shot.damage, false, owner, shot.px, shot.py, true, false);
+    this.fx.push({ kind: "impact", x: shot.x, y: shot.y, color: 0xffe2a8, n: 4 });
+  }
+
+  /**
+   * `mitigate` subtracts armor. A heavy bolt passes false and only shaves a
+   * fraction of the plate. `shower` is the arrow volley. Returns true on a kill.
+   */
+  private hurt(
+    e: Enemy,
+    raw: number,
+    mitigate: boolean,
+    tower?: Tower,
+    fromX?: number,
+    fromY?: number,
+    heavy = false,
+    shower = false,
+  ): boolean {
     if (!e.alive || raw <= 0) return false;
     if (e.boulder > 0) {
-      const chip = Math.min(e.boulder, Math.max(BALANCE.minHit, raw));
+      const chip = shower
+        ? Math.min(e.boulder, BALANCE.shower.boulderChip)
+        : Math.min(e.boulder, Math.max(BALANCE.minHit, raw));
       e.boulder -= chip;
       e.flash = 0.12;
-      this.fx.push({ kind: "num", x: e.x + 18, y: e.y - 36, text: String(Math.round(chip)) });
       if (e.boulder <= 0) {
         e.boulder = 0;
         this.fx.push({ kind: "rubble", x: e.x + 22, y: e.y - 8 });
       }
       return false;
     }
-    let dealt = mitigate ? Math.max(BALANCE.minHit, raw - e.armor) : raw;
+    let dealt = heavy
+      ? Math.max(BALANCE.minHit, raw - e.armor * BALANCE.heavy.armorMul)
+      : mitigate
+        ? Math.max(BALANCE.minHit, raw - e.armor)
+        : raw;
+    if (shower && e.armor >= BALANCE.shower.armorGate) {
+      dealt = BALANCE.minHit;
+      e.react = "hit";
+      e.reactLeft = 0.22;
+      e.knockX += (Math.random() - 0.5) * 22;
+      e.knockY -= 8;
+    }
     if (e.boss && e.aegisUntil > this.time) dealt *= BALANCE.boss.aegisMul;
+    if (dealt <= 0) {
+      e.flash = 0.08;
+      e.react = "block";
+      e.reactLeft = 0.32;
+      e.guard = 0.32;
+      return false;
+    }
     const applied = Math.min(e.hp, dealt);
     e.hp -= applied;
     if (tower) tower.dealt += applied;
-    e.flash = e.kind === "skitter" || e.kind === "runner" ? 0.16 : 0.12;
-    this.fx.push({ kind: "num", x: e.x, y: e.y - 30, text: String(Math.max(1, Math.round(applied))) });
+    const fodder = e.kind === "skitter" || e.kind === "runner" || e.kind === "shard" || e.kind === "jaguar" || e.kind === "glider" || e.kind === "sapper";
+    e.flash = fodder ? 0.1 : 0.12;
+    if (!fodder && e.kind !== "roller") this.fx.push({ kind: "num", x: e.x, y: e.y - 30, text: String(Math.max(1, Math.round(applied))) });
     if (mitigate && (e.kind === "shield" || e.kind === "boss") && fromX !== undefined && fromY !== undefined) {
       const fx = Math.cos(e.angle);
       const fy = Math.sin(e.angle);
@@ -1101,7 +1339,7 @@ export class Siege {
     if (e.hp > 0) return false;
     e.alive = false;
     const reward = Math.max(1, Math.round(e.reward * this.jadeMul));
-    this.dropGem(e.x, e.y, reward);
+    this.scatterGem(e.x, e.y, reward, e.kind);
     if (this.time >= this.flareLock) this.flare = Math.min(BALANCE.flare.need, this.flare + e.charge);
     this.fx.push({ kind: "death", x: e.x, y: e.y, enemy: e.kind, n: e.angle });
     this.noteStreak(e);
@@ -1155,7 +1393,7 @@ export class Siege {
     if (spec.jade) this.jadeMul *= spec.jade;
     if (spec.flare) this.flareMul *= spec.flare;
     if (spec.range) this.rangeMul *= spec.range;
-    if (spec.heal) this.integrity = Math.min(BALANCE.integrity, this.integrity + spec.heal);
+    if (spec.heal) this.integrity = Math.min(this.integrityMax, this.integrity + spec.heal);
   }
 
   /** Who a selected totem would shoot, plus the serpent's next jumps. */
@@ -1334,7 +1572,7 @@ export class Siege {
     let best: Enemy | null = null;
     let bestD: number = BALANCE.hero.range;
     for (const e of this.enemies) {
-      if (!e.alive || stealthed(e.kind, e.age)) continue;
+      if (!e.alive || e.flying || stealthed(e.kind, e.age)) continue;
       const d = Math.hypot(e.x - this.heroX, e.y - this.heroY);
       if (d < bestD) {
         bestD = d;
@@ -1360,6 +1598,9 @@ export class Siege {
     shot.towerId = -1;
     shot.family = "hero";
     shot.tier = 0;
+    shot.splash = 0;
+    shot.pierce = 0;
+    shot.rain = false;
     shot.alive = true;
   }
 
@@ -1395,6 +1636,20 @@ export class Siege {
         gem.vx = 0;
         gem.vy = 0;
       }
+    }
+  }
+
+  /** A few coins for a swarmer, a cluster for a brute. The total still equals the reward. */
+  private scatterGem(x: number, y: number, reward: number, kind: EnemyKind): void {
+    const brute = kind === "golem" || kind === "boss" || kind === "shield" || kind === "roller" || kind === "giant";
+    const pieces = brute ? Math.min(5, reward) : Math.min(2, reward);
+    const base = Math.floor(reward / pieces);
+    let extra = reward - base * pieces;
+    for (let i = 0; i < pieces; i++) {
+      const share = base + (extra > 0 ? 1 : 0);
+      if (extra > 0) extra -= 1;
+      const spread = (i - (pieces - 1) / 2) * 10;
+      this.dropGem(x + spread, y + ((i % 2) - 0.5) * 8, share);
     }
   }
 
@@ -1449,7 +1704,10 @@ export class Siege {
     let bestD: number = BALANCE.fund.radius;
     for (let i = 0; i < this.stations.length; i++) {
       const station = this.stations[i];
-      if (station.tier >= 3) continue;
+      const repairing = station.kind === "wall" && station.tier > 0 && !station.alive;
+      if (!station.chosen || station.kind === "recruit") continue;
+      if (station.tier === 1 && station.spec === "none" && specChoices(station.kind)) continue;
+      if (station.tier >= 3 && !repairing) continue;
       if (this.stationCost(station) - station.paid <= 0) continue;
       const d = Math.hypot(station.x - this.heroX, station.y - this.heroY);
       if (d < bestD) {
@@ -1476,23 +1734,37 @@ export class Siege {
   }
 
   private finishStation(station: Station, spent: number): void {
-    station.tier += 1;
     station.paid = 0;
     if (station.kind === "wall") {
+      if (station.tier > 0 && !station.alive) {
+        station.hp = station.maxHp;
+        station.alive = true;
+        this.fx.push({ kind: "place", x: station.x, y: station.y });
+        return;
+      }
+      station.tier += 1;
       station.maxHp = BALANCE.wall.hp[station.tier - 1];
       station.hp = station.maxHp;
       station.alive = true;
-      this.fx.push({ kind: "place", x: station.x, y: station.y });
+      this.fx.push({ kind: "place", x: station.x, y: station.y, n: station.tier });
       return;
     }
-    if (station.kind === "barracks" && station.tier === 1) {
-      this.muster(station);
-      this.fx.push({ kind: "place", x: station.x, y: station.y });
+    if (station.kind === "base") {
+      station.tier += 1;
+      const bonus = BALANCE.base.hp[station.tier - 1];
+      this.baseTier = station.tier;
+      this.integrityMax += bonus;
+      this.integrity = Math.min(this.integrityMax, this.integrity + bonus);
+      this.fx.push({ kind: "place", x: station.x, y: station.y, n: station.tier });
       return;
     }
+    if (station.kind === "recruit") return;
+    station.tier += 1;
     if (station.kind === "barracks") {
-      station.kind = "dart";
-      station.tier = 1;
+      const role = station.spec === "knights" ? "knight" : station.spec === "spears" ? "spear" : "squad";
+      this.muster(station, role);
+      this.fx.push({ kind: "place", x: station.x, y: station.y, n: station.tier });
+      return;
     }
     const kind: TowerKind = station.kind;
     const existing = this.towers.find((t) => t.pad === station.index);
@@ -1512,30 +1784,35 @@ export class Siege {
         ramp: 0,
         angle: Math.atan2(this.map.sun.y - station.y, this.map.sun.x - station.x),
         dealt: 0,
+        spec: "none",
       });
     } else {
       existing.tier = Math.min(2, existing.tier + 1);
+      existing.spec = station.spec;
       existing.spent += spent;
       existing.cooldown = Math.max(existing.cooldown, 0.12);
     }
-    this.fx.push({ kind: "place", x: station.x, y: station.y });
+    this.fx.push({ kind: "place", x: station.x, y: station.y, n: station.tier });
   }
 
   /** Blue soldiers march toward the entrance and hold the first raider they meet. */
-  private muster(station: Station): void {
+  private muster(station: Station, role: Ally["role"]): void {
     const spec = BALANCE.barracks;
-    for (let i = 0; i < spec.count; i++) {
+    const count = role === "spear" ? spec.spearCount : role === "knight" ? spec.knightCount : role === "recruit" ? BALANCE.recruit.count : spec.count;
+    const hp = role === "spear" ? spec.spearHp : role === "knight" ? spec.knightHp : role === "recruit" ? BALANCE.recruit.hp : spec.hp;
+    for (let i = 0; i < count; i++) {
       let ally = this.allies.find((a) => !a.alive);
       if (!ally) {
         if (this.allies.length >= 48) return;
-        ally = { id: 0, path: 0, dist: 0, x: 0, y: 0, angle: 0, hp: 0, maxHp: 0, cool: 0, alive: false };
+        ally = { id: 0, path: 0, dist: 0, x: 0, y: 0, angle: 0, hp: 0, maxHp: 0, cool: 0, alive: false, role };
         this.allies.push(ally);
       }
       ally.id = this.nextId();
+      ally.role = role;
       ally.path = station.path;
       ally.dist = Math.max(8, station.dist - i * 26);
-      ally.hp = spec.hp;
-      ally.maxHp = spec.hp;
+      ally.hp = hp;
+      ally.maxHp = hp;
       ally.cool = i * 0.08;
       ally.alive = true;
       const pose = poseAt(this.map.routes[station.path], ally.dist);
@@ -1550,8 +1827,9 @@ export class Siege {
     for (const ally of this.allies) {
       if (!ally.alive) continue;
       ally.cool -= dt;
+      const reach = ally.role === "knight" ? 96 : 52;
       let foe: Enemy | null = null;
-      let gap = 52;
+      let gap = reach;
       for (const e of this.enemies) {
         if (!e.alive || e.flying || e.path !== ally.path) continue;
         const d = ally.dist - e.dist;
@@ -1560,23 +1838,68 @@ export class Siege {
         foe = e;
       }
       if (foe) {
-        if (ally.cool <= 0) {
-          ally.cool = spec.interval;
-          this.hurt(foe, spec.damage, true, undefined, ally.x, ally.y);
+        if (foe.kind === "roller" && ally.role !== "spear") {
+          ally.alive = false;
+          this.fx.push({ kind: "rubble", x: ally.x, y: ally.y });
+          continue;
         }
-        ally.hp -= (foe.boss ? 22 : foe.kind === "golem" ? 12 : 7) * dt;
+        if (ally.cool <= 0) {
+          const damage = ally.role === "spear" ? spec.spearDamage : ally.role === "knight" ? spec.knightDamage : ally.role === "recruit" ? BALANCE.recruit.damage : spec.damage;
+          const interval = ally.role === "recruit" ? BALANCE.recruit.interval : spec.interval;
+          ally.cool = interval;
+          this.hurt(foe, damage, true, undefined, ally.x, ally.y);
+        }
+        const bite = foe.boss ? 22 : foe.kind === "giant" ? 16 : foe.kind === "golem" ? 12 : foe.kind === "runner" ? 16 : 7;
+        ally.hp -= bite * dt;
         if (ally.hp <= 0) {
           ally.alive = false;
           this.fx.push({ kind: "rubble", x: ally.x, y: ally.y });
         }
       } else {
-        ally.dist = Math.max(0, ally.dist - spec.speed * dt);
+        const speed = ally.role === "knight" ? spec.knightSpeed : ally.role === "recruit" ? BALANCE.recruit.speed : spec.speed;
+        ally.dist = Math.max(0, ally.dist - speed * dt);
       }
       const pose = poseAt(this.map.routes[ally.path], ally.dist);
       ally.x = pose.x;
       ally.y = pose.y;
       ally.angle = pose.angle + Math.PI;
     }
+  }
+
+  /**
+   * Barracks troops stand in the lane. Ordinary raiders stop and fight.
+   * A boulder crew rolls through them. Gliders fly over.
+   */
+  private pressAlly(e: Enemy): boolean {
+    if (e.flying) return false;
+    let held = false;
+    for (const ally of this.allies) {
+      if (!ally.alive || ally.path !== e.path) continue;
+      const ahead = ally.dist - e.dist;
+      if (ahead < -12 || ahead > (ally.role === "knight" ? 48 : 36)) continue;
+      if (e.kind === "roller" && ally.role !== "spear") {
+        ally.alive = false;
+        this.fx.push({ kind: "rubble", x: ally.x, y: ally.y });
+        continue;
+      }
+      const stop = ally.dist - 22;
+      if (e.dist > stop) e.dist = stop;
+      held = true;
+    }
+    return held;
+  }
+
+  /** A catapult on the lane, or a living spear wall, keeps a boulder from deleting the palisade. */
+  private wallHeld(path: number): boolean {
+    if (this.allies.some((a) => a.alive && a.role === "spear" && a.path === path)) return true;
+    return this.towers.some((t) => t.spec === "catapult" && this.stations.some((s) => s.index === t.pad && s.path === path));
+  }
+
+  private breakWall(wall: Station): void {
+    wall.hp = 0;
+    wall.alive = false;
+    wall.hurt = 0;
+    this.fx.push({ kind: "splinter", x: wall.x, y: wall.y, n: wall.tier });
   }
 
   /** Ground raiders chew a barricade instead of walking through it. */
@@ -1592,27 +1915,102 @@ export class Siege {
       wall = station;
     }
     if (!wall) return false;
+    if (e.kind === "roller" && !this.wallHeld(e.path)) {
+      this.breakWall(wall);
+      return false;
+    }
+    if (e.kind === "sapper") {
+      wall.hp -= BALANCE.sapper.blast;
+      wall.hurt = 1.2;
+      e.alive = false;
+      this.scatterGem(e.x, e.y, e.reward, e.kind);
+      this.fx.push({ kind: "death", x: e.x, y: e.y, enemy: e.kind, n: e.angle });
+      this.fx.push({ kind: "splinter", x: wall.x, y: wall.y, n: 1 });
+      if (wall.hp <= 0) this.breakWall(wall);
+      return true;
+    }
     const stop = wall.dist - 26;
     if (e.dist > stop) e.dist = stop;
-    const bite = (e.boss ? 26 : e.kind === "golem" ? 14 : e.kind === "shield" ? 9 : 6.5) * dt;
+    const bite = (e.boss ? 26 : e.kind === "giant" ? 78 : e.kind === "golem" ? 14 : e.kind === "shield" ? 9 : 6.5) * dt;
     wall.hp -= bite;
-    if (wall.hp <= 0) {
-      wall.hp = 0;
-      wall.alive = false;
-      this.fx.push({ kind: "rubble", x: wall.x, y: wall.y });
+    wall.hurt = 1.2;
+    if (wall.tier >= 2 && Math.floor(this.time * 2) !== Math.floor((this.time - dt) * 2)) {
+      this.hurt(e, BALANCE.wall.thorn * 0.5, false);
     }
+    if (wall.hp <= 0) this.breakWall(wall);
     return true;
+  }
+
+  /** The heart fires a small bolt of its own once it has been bought. */
+  private baseAct(dt: number): void {
+    if (this.baseTier <= 0) return;
+    this.baseCool -= dt;
+    if (this.baseCool > 0) return;
+    let best: Enemy | null = null;
+    let bestD: number = BALANCE.base.range;
+    for (const e of this.enemies) {
+      if (!e.alive || e.flying || stealthed(e.kind, e.age)) continue;
+      const d = Math.hypot(e.x - this.map.sun.x, e.y - this.map.sun.y);
+      if (d < bestD) {
+        bestD = d;
+        best = e;
+      }
+    }
+    if (!best) return;
+    this.baseCool = BALANCE.base.interval;
+    const shot = this.shots[this.shotCursor];
+    this.shotCursor = (this.shotCursor + 1) % this.shots.length;
+    shot.id = this.nextId();
+    shot.x = this.map.sun.x;
+    shot.y = this.map.sun.y - 20;
+    shot.px = shot.x;
+    shot.py = shot.y;
+    shot.tx = best.x;
+    shot.ty = best.y;
+    shot.targetId = best.id;
+    shot.damage = BALANCE.base.damage[this.baseTier - 1];
+    shot.speed = 700;
+    shot.towerId = -2;
+    shot.family = "hero";
+    shot.tier = this.baseTier - 1;
+    shot.splash = 0;
+    shot.pierce = 0;
+    shot.rain = false;
+    shot.alive = true;
+  }
+
+  /** Standing on the soldier pad keeps spending Jade and keeps sending swords. */
+  private recruitAct(dt: number): void {
+    const pad = this.stations.find((s) => s.kind === "recruit");
+    if (!pad || !familyUnlocked("recruit", this.world)) return;
+    const moving = this.goal !== null || Math.hypot(this.steerX, this.steerY) > 0.35;
+    const standing = !moving && Math.hypot(pad.x - this.heroX, pad.y - this.heroY) < BALANCE.fund.radius;
+    if (!standing || this.jade < 0.2) return;
+    const pay = Math.min(this.jade, BALANCE.recruit.rate * dt);
+    const before = Math.floor(this.recruitBank);
+    this.jade -= pay;
+    this.recruitBank += pay;
+    if (Math.floor(this.recruitBank) !== before) {
+      const from = carryLaunch(this.jade + 1);
+      this.fx.push({ kind: "pay", x: this.heroX + from.x, y: this.heroY + from.y, tx: pad.x, ty: pad.y });
+    }
+    if (this.recruitBank < BALANCE.recruit.groupCost) return;
+    this.recruitBank -= BALANCE.recruit.groupCost;
+    this.muster(pad, "recruit");
   }
 
   private buildStations(): Station[] {
     const stations: Station[] = this.map.pads.map((pad, index) => {
       const near = this.nearestProgress(pad.x, pad.y);
       let kind: StationKind = "dart";
-      if (near.frac < 0.34) kind = index % 3 === 2 ? "drum" : "dart";
-      else if (near.frac < 0.64) kind = index % 2 === 0 ? "lens" : "drum";
-      else kind = index % 2 === 0 ? "spire" : "lens";
+      if (near.frac < 0.38) kind = "dart";
+      else if (near.frac < 0.68) kind = index % 2 === 0 ? "drum" : "dart";
+      else kind = "lens";
+      if (!familyUnlocked(kind, this.world)) kind = "dart";
       return {
-        index, x: pad.x, y: pad.y, kind, path: near.path, dist: near.dist,
+        index, x: pad.x, y: pad.y, kind, offers: padOffers(kind, this.world), chosen: false,
+        spec: "none", hurt: 0,
+        path: near.path, dist: near.dist,
         paid: 0, tier: 0, hp: 0, maxHp: 0, alive: false,
       };
     });
@@ -1632,16 +2030,74 @@ export class Siege {
       const entrance = onPath.slice().sort((a, b) => a.dist - b.dist)[0];
       if (entrance) entrance.kind = "dart";
     }
-    const musterRoute = this.map.routes[0];
-    const musterDist = musterRoute.len * 0.62;
-    const musterAt = poseAt(musterRoute, musterDist);
+    if (familyUnlocked("lens", this.world)) {
+      for (let path = 0; path < this.map.routes.length; path++) {
+        const onPath = stations.filter((s) => s.path === path);
+        if (onPath.some((s) => s.kind === "lens")) continue;
+        const last = onPath.slice().sort((a, b) => b.dist - a.dist)[0];
+        if (last && last.kind !== "dart") last.kind = "lens";
+        else if (onPath.length > 1) {
+          const other = onPath.filter((s) => s.kind !== "dart").sort((a, b) => b.dist - a.dist)[0];
+          if (other) other.kind = "lens";
+        }
+      }
+    }
+    for (const station of stations) station.offers = padOffers(station.kind, this.world);
+    let extra = this.map.pads.length + this.map.routes.length;
+    if (familyUnlocked("barracks", this.world)) {
+      const musterRoute = this.map.routes[0];
+      const musterDist = musterRoute.len * 0.62;
+      const musterAt = poseAt(musterRoute, musterDist);
+      stations.push({
+        index: extra,
+        x: musterAt.x + Math.cos(musterAt.angle + Math.PI / 2) * 78,
+        y: musterAt.y + Math.sin(musterAt.angle + Math.PI / 2) * 78,
+        kind: "barracks",
+        offers: padOffers("barracks", this.world),
+        chosen: false,
+        spec: "none",
+        hurt: 0,
+        path: 0,
+        dist: musterDist,
+        paid: 0,
+        tier: 0,
+        hp: 0,
+        maxHp: 0,
+        alive: false,
+      });
+      extra += 1;
+    }
+    if (familyUnlocked("recruit", this.world)) {
+      stations.push({
+        index: extra,
+        x: this.map.sun.x - 150,
+        y: this.map.sun.y + 90,
+        kind: "recruit",
+        offers: ["recruit"],
+        chosen: true,
+        spec: "none",
+        hurt: 0,
+        path: 0,
+        dist: this.map.routes[0].len * 0.9,
+        paid: 0,
+        tier: 0,
+        hp: 0,
+        maxHp: 0,
+        alive: false,
+      });
+      extra += 1;
+    }
     stations.push({
-      index: this.map.pads.length + this.map.routes.length,
-      x: musterAt.x + Math.cos(musterAt.angle + Math.PI / 2) * 78,
-      y: musterAt.y + Math.sin(musterAt.angle + Math.PI / 2) * 78,
-      kind: "barracks",
+      index: extra,
+      x: this.map.sun.x + 130,
+      y: this.map.sun.y + 80,
+      kind: "base",
+      offers: ["base"],
+      chosen: true,
+      spec: "none",
+      hurt: 0,
       path: 0,
-      dist: musterDist,
+      dist: this.map.routes[0].len,
       paid: 0,
       tier: 0,
       hp: 0,
@@ -1649,13 +2105,17 @@ export class Siege {
       alive: false,
     });
     this.map.routes.forEach((route, path) => {
-      const dist = route.len * 0.46;
+      const dist = route.len * 0.28;
       const at = poseAt(route, dist);
       stations.push({
         index: this.map.pads.length + path,
         x: at.x,
         y: at.y,
         kind: "wall",
+        offers: ["wall"],
+        chosen: true,
+        spec: "none",
+        hurt: 0,
         path,
         dist,
         paid: 0,

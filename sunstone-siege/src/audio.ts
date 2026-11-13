@@ -25,11 +25,14 @@ export type SfxName =
   | "defeat"
   | "relic"
   | "streak"
-  | "roar";
+  | "roar"
+  | "shower"
+  | "crunch"
+  | "warn";
 
 const NAMES: SfxName[] = [
   "click", "deny", "place", "sell", "dart", "beam", "drum", "chain",
-  "death", "horn", "crack", "flare", "jade", "victory", "defeat", "relic", "streak", "roar",
+  "death", "horn", "crack", "flare", "jade", "victory", "defeat", "relic", "streak", "roar", "shower", "crunch", "warn",
 ];
 
 function wavUrl(samples: Float32Array): string {
@@ -123,6 +126,17 @@ function synthSfx(): { url: string; sprite: Record<SfxName, [number, number]> } 
     { name: "relic", dur: 0.36, draw: (b, t) => { [523, 659, 784].forEach((f, i) => tone(b, t + i * 0.07, f, 0.16, 0.2, 0.35)); } },
     { name: "streak", dur: 0.22, draw: (b, t) => { tone(b, t, 660, 0.08, 0.2, 0.4); tone(b, t + 0.06, 880, 0.1, 0.18, 0.3); tone(b, t + 0.12, 1320, 0.08, 0.12, 0); } },
     { name: "roar", dur: 0.48, draw: (b, t) => { noise(b, t, 0.32, 0.4, 6); tone(b, t, 80, 0.4, 0.4, 0.2); tone(b, t, 140, 0.28, 0.18, 0); } },
+    { name: "shower", dur: 0.34, draw: (b, t) => {
+      for (let i = 0; i < 6; i++) {
+        const at = t + i * 0.032;
+        noise(b, at, 0.028, 0.42, 110);
+        tone(b, at, 1120 - i * 50, 0.04, 0.18, 0.55);
+        tone(b, at, 1680, 0.02, 0.07, 0.15);
+      }
+      noise(b, t + 0.14, 0.14, 0.32, 16);
+    } },
+    { name: "crunch", dur: 0.28, draw: (b, t) => { noise(b, t, 0.16, 0.7, 18); kick(b, t, 0.55); tone(b, t, 90, 0.18, 0.3, 0); } },
+    { name: "warn", dur: 0.42, draw: (b, t) => { tone(b, t, 520, 0.12, 0.28, 0.2); tone(b, t + 0.16, 390, 0.16, 0.3, 0); tone(b, t + 0.28, 520, 0.1, 0.2, 0); } },
   ];
   let total = 0;
   for (const p of plan) total += p.dur + gap;

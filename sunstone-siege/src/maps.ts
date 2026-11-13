@@ -1,60 +1,43 @@
 /**
- * Cartoon valleys. Waypoints come from map_paths.json and stop at the plaza
- * rim, so raiders arrive at the Sunstone instead of walking through it.
- * Combat numbers stay in balance.ts.
+ * Eight portrait valleys. The painter and these polylines share one generator,
+ * so the road in the picture is the road the raiders walk.
  */
 import type { Biome, Vec } from "./types";
 import { flightOf, routeOf, type Route } from "./geom";
+import { LEVELS } from "./levels";
 
-export const MAP_W = 1920;
-export const MAP_H = 1080;
-export const SUN: Vec = { x: 960, y: 540 };
-
-/**
- * The Sunstone disc and the rim raiders strike. Half the old plaza, so the
- * base stays readable next to a Skitter without covering the junction.
- */
-export const SUN_SCALE = 0.5;
+export const MAP_W = 960;
+export const MAP_H = 1800;
+export const SUN: Vec = { x: 480, y: 1040 };
+/** The stored plaza is already the rim. */
+export const SUN_SCALE = 1;
 
 export interface MapDef {
+  name: string;
   biome: Biome;
   sun: Vec;
+  /** Stone rim around the sunstone, in world pixels. */
   plaza: number;
+  pathWidth: number;
   routes: Route[];
   flights: Route[];
   pads: Vec[];
 }
 
-/** Pull the last waypoint in to the smaller rim, along the same approach. */
-function arrive(route: Route, sun: Vec, rim: number): Route {
-  const pts = route.pts.map((p) => ({ x: p.x, y: p.y }));
-  const last = pts[pts.length - 1];
-  const dx = last.x - sun.x;
-  const dy = last.y - sun.y;
-  const dist = Math.hypot(dx, dy) || 1;
-  if (dist > rim + 1) {
-    pts[pts.length - 1] = { x: sun.x + (dx / dist) * rim, y: sun.y + (dy / dist) * rim };
-  }
-  return routeOf(pts);
-}
-
-function build(biome: Biome, sun: Vec, plaza: number, routes: Route[], pads: readonly Vec[]): MapDef {
-  const rim = plaza * SUN_SCALE;
-  const arrived = routes.map((route) => arrive(route, sun, rim));
-  return {
-    biome,
-    sun,
-    plaza: rim,
-    routes: arrived,
-    flights: arrived.map((route) => flightOf(route, sun)),
-    pads: pads.slice(),
-  };
-}
+const NAMES = [
+  "Green Cut",
+  "Runner Ridge",
+  "Twin Canyon",
+  "Brute Steps",
+  "High Wind",
+  "Boulder Bend",
+  "Three Gates",
+  "Colossus Stair",
+];
 
 /**
  * A pad's dashed square plus the cost pill under it.
  * Walls only reserve the barricade and its short pill, so a pad can sit beside the trail.
- * The gap is the air that has to stay clear between one label and the next.
  */
 const PAD_BOX = { left: 52, right: 52, top: 50, bottom: 94 };
 const WALL_BOX = { left: 44, right: 44, top: 22, bottom: 58 };
@@ -67,14 +50,11 @@ export interface GapSpot {
   wall?: boolean;
 }
 
-/**
- * Nudge stations until no cost pill touches another pad, a wall label, or the
- * Sunstone. Walls stay on the trail. Every pad is kept, only moved.
- */
 function boxOf(spot: GapSpot): { left: number; right: number; top: number; bottom: number } {
   return spot.wall ? WALL_BOX : PAD_BOX;
 }
 
+/** Nudge stations until no cost pill covers another. Walls stay on the trail. */
 export function clearStationGaps(spots: GapSpot[], sun: Vec, plaza: number): void {
   const home = spots.map((s) => ({ x: s.x, y: s.y }));
   const reach = plaza + 56;
@@ -88,8 +68,8 @@ export function clearStationGaps(spots: GapSpot[], sun: Vec, plaza: number): voi
         spot.x = sun.x + (dx / dist) * reach;
         spot.y = sun.y + (dy / dist) * reach;
       }
-      spot.x = Math.max(78, Math.min(MAP_W - 78, spot.x));
-      spot.y = Math.max(78, Math.min(MAP_H - 120, spot.y));
+      spot.x = Math.max(48, Math.min(MAP_W - 48, spot.x));
+      spot.y = Math.max(48, Math.min(MAP_H - 80, spot.y));
     }
     for (let i = 0; i < spots.length; i++) {
       for (let j = i + 1; j < spots.length; j++) {
@@ -142,178 +122,24 @@ export function clearStationGaps(spots: GapSpot[], sun: Vec, plaza: number): voi
   }
 }
 
-const valley: MapDef = build("valley", { x: 960.0, y: 541.0 }, 162.0, [
-    routeOf([
-      { x: 0.0, y: 502.0 },
-      { x: 130.0, y: 502.0 },
-      { x: 313.9, y: 438.0 },
-      { x: 446.0, y: 438.0 },
-      { x: 514.0, y: 498.0 },
-      { x: 577.9, y: 537.9 },
-      { x: 714.0, y: 546.0 },
-      { x: 798.0, y: 544.3 },
-    ]),
-    routeOf([
-      { x: 982.1, y: 0.0 },
-      { x: 985.9, y: 346.0 },
-      { x: 981.4, y: 380.4 },
-    ]),
-    routeOf([
-      { x: 1920.0, y: 634.0 },
-      { x: 1849.9, y: 638.0 },
-      { x: 1786.0, y: 670.0 },
-      { x: 1554.0, y: 670.0 },
-      { x: 1518.0, y: 654.0 },
-      { x: 1454.0, y: 594.0 },
-      { x: 1374.0, y: 562.0 },
-      { x: 1270.1, y: 562.0 },
-      { x: 1210.0, y: 534.0 },
-      { x: 1121.9, y: 536.4 },
-    ]),
-    routeOf([
-      { x: 978.0, y: 1080.0 },
-      { x: 974.0, y: 770.0 },
-      { x: 969.9, y: 702.7 },
-    ]),
-], [
-    { x: 877.1, y: 130.0 },
-    { x: 1086.0, y: 198.0 },
-    { x: 875.9, y: 269.0 },
-    { x: 1090.9, y: 327.0 },
-    { x: 366.9, y: 329.0 },
-    { x: 628.0, y: 438.0 },
-    { x: 1488.0, y: 496.0 },
-    { x: 421.1, y: 551.0 },
-    { x: 1714.9, y: 567.0 },
-    { x: 250.9, y: 575.0 },
-    { x: 1300.0, y: 665.0 },
-    { x: 1541.0, y: 773.0 },
-    { x: 869.0, y: 777.0 },
-    { x: 1076.9, y: 834.9 },
-    { x: 869.0, y: 905.0 },
-    { x: 1081.0, y: 955.0 },
-]);
+function build(index: number): MapDef {
+  const level = LEVELS[index] ?? LEVELS[LEVELS.length - 1];
+  const plaza = 46;
+  const routes = level.routes.map((pts) => routeOf(pts.map((p) => ({ ...p }))));
+  return {
+    name: NAMES[index] ?? `Valley ${index + 1}`,
+    biome: level.biome,
+    sun: { ...SUN },
+    plaza,
+    pathWidth: level.pathWidth,
+    routes,
+    flights: routes.map((route) => flightOf(route, SUN)),
+    pads: level.pads.map((p) => ({ ...p })),
+  };
+}
 
-const ruins: MapDef = build("ruins", { x: 958.1, y: 539.0 }, 164.0, [
-    routeOf([
-      { x: 0.0, y: 178.0 },
-      { x: 106.0, y: 182.0 },
-      { x: 158.0, y: 206.0 },
-      { x: 210.0, y: 210.0 },
-      { x: 350.0, y: 198.0 },
-      { x: 414.0, y: 234.0 },
-      { x: 478.1, y: 254.0 },
-      { x: 550.1, y: 298.0 },
-      { x: 590.0, y: 310.0 },
-      { x: 718.1, y: 426.0 },
-      { x: 809.7, y: 469.1 },
-    ]),
-    routeOf([
-      { x: 1920.0, y: 486.0 },
-      { x: 1798.1, y: 482.0 },
-      { x: 1710.0, y: 438.0 },
-      { x: 1574.0, y: 438.0 },
-      { x: 1522.0, y: 450.0 },
-      { x: 1330.0, y: 450.0 },
-      { x: 1116.0, y: 494.8 },
-    ]),
-    routeOf([
-      { x: 702.0, y: 0.0 },
-      { x: 718.1, y: 42.0 },
-      { x: 769.9, y: 114.0 },
-      { x: 778.0, y: 210.0 },
-      { x: 934.1, y: 358.0 },
-      { x: 936.5, y: 376.5 },
-    ]),
-    routeOf([
-      { x: 970.0, y: 1080.0 },
-      { x: 967.0, y: 702.8 },
-    ]),
-], [
-    { x: 447.0, y: 129.0 },
-    { x: 663.0, y: 135.0 },
-    { x: 874.9, y: 159.0 },
-    { x: 942.0, y: 215.0 },
-    { x: 706.9, y: 293.0 },
-    { x: 197.0, y: 311.0 },
-    { x: 1699.0, y: 324.0 },
-    { x: 1409.1, y: 341.0 },
-    { x: 490.9, y: 372.0 },
-    { x: 1573.1, y: 539.0 },
-    { x: 1299.1, y: 563.0 },
-    { x: 862.1, y: 774.0 },
-    { x: 1071.9, y: 829.0 },
-    { x: 865.0, y: 892.0 },
-    { x: 1073.1, y: 963.0 },
-]);
-
-const crater: MapDef = build("crater", { x: 955.0, y: 540.0 }, 168.0, [
-    routeOf([
-      { x: 0.0, y: 486.0 },
-      { x: 82.0, y: 486.0 },
-      { x: 162.0, y: 454.0 },
-      { x: 238.1, y: 454.0 },
-      { x: 313.9, y: 486.0 },
-      { x: 505.9, y: 506.0 },
-      { x: 562.0, y: 526.0 },
-      { x: 610.0, y: 562.0 },
-      { x: 694.1, y: 562.0 },
-      { x: 714.0, y: 574.0 },
-      { x: 790.1, y: 574.0 },
-      { x: 790.5, y: 573.9 },
-    ]),
-    routeOf([
-      { x: 1374.0, y: 0.0 },
-      { x: 1382.0, y: 158.0 },
-      { x: 1378.0, y: 278.0 },
-      { x: 1369.9, y: 298.0 },
-      { x: 1286.0, y: 382.0 },
-      { x: 1218.0, y: 398.0 },
-      { x: 1129.9, y: 486.0 },
-      { x: 1115.9, y: 491.8 },
-    ]),
-    routeOf([
-      { x: 1920.0, y: 550.0 },
-      { x: 1646.0, y: 554.0 },
-      { x: 1618.0, y: 562.0 },
-      { x: 1441.9, y: 558.0 },
-      { x: 1414.1, y: 546.0 },
-      { x: 1366.1, y: 498.0 },
-      { x: 1326.0, y: 434.1 },
-      { x: 1282.0, y: 390.0 },
-      { x: 1218.0, y: 398.0 },
-      { x: 1129.9, y: 486.0 },
-      { x: 1115.9, y: 491.8 },
-    ]),
-    routeOf([
-      { x: 1330.0, y: 1080.0 },
-      { x: 1330.0, y: 938.0 },
-      { x: 1345.9, y: 902.0 },
-      { x: 1342.1, y: 830.0 },
-      { x: 1201.9, y: 686.0 },
-      { x: 1105.9, y: 634.0 },
-      { x: 1096.4, y: 630.7 },
-    ]),
-], [
-    { x: 1481.1, y: 191.1 },
-    { x: 1239.0, y: 277.0 },
-    { x: 1143.0, y: 324.0 },
-    { x: 1459.0, y: 342.0 },
-    { x: 1446.0, y: 427.0 },
-    { x: 1649.1, y: 451.0 },
-    { x: 641.1, y: 454.0 },
-    { x: 1254.0, y: 519.0 },
-    { x: 227.9, y: 558.0 },
-    { x: 349.1, y: 591.0 },
-    { x: 1272.0, y: 611.0 },
-    { x: 495.0, y: 612.0 },
-    { x: 1344.0, y: 684.0 },
-    { x: 1422.9, y: 760.0 },
-    { x: 1229.0, y: 895.0 },
-]);
-
-const MAPS = [valley, ruins, crater];
+export const MAPS: MapDef[] = LEVELS.map((_, i) => build(i));
 
 export function mapDef(world: number): MapDef {
-  return MAPS[Math.max(0, Math.min(MAPS.length - 1, world))];
+  return MAPS[Math.max(0, Math.min(MAPS.length - 1, world))] ?? MAPS[0];
 }
