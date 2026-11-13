@@ -217,7 +217,7 @@ export class WorldView {
   private readonly pickerHits: Container[] = [];
   private pickerFor = -1;
   private onChoose: ((index: number, kind: StationKind) => void) | null = null;
-  private readonly puffs: { x: number; y: number; life: number; max: number }[] = [];
+  private readonly puffs: { x: number; y: number; life: number; max: number; color?: number }[] = [];
   private readonly menuButtons: Container[] = [];
   private readonly menuCosts: Text[] = [];
   private readonly menuStats: Text[] = [];
@@ -265,7 +265,9 @@ export class WorldView {
   private readonly labels = new Container();
   private readonly stationLabels: Text[] = [];
   private readonly stationCosts: Text[] = [];
+  private readonly stationCoins: Sprite[] = [];
   private readonly stationHints: Text[] = [];
+  private readonly dropBorn = new Map<number, number>();
   private readonly padGhosts: Sprite[] = [];
   private readonly rains: {
     s: Sprite;
@@ -286,7 +288,7 @@ export class WorldView {
   }[] = [];
   private readonly rainPool: Sprite[] = [];
   private readonly marks: { x: number; y: number; r: number; life: number; hot: boolean }[] = [];
-  private readonly flings: { body: Sprite; outline: Sprite; vx: number; vy: number; life: number; hold: number }[] = [];
+  private readonly flings: { body: Sprite; outline: Sprite; vx: number; vy: number; life: number; hold: number; scale: number }[] = [];
   private readonly shotBolts: Sprite[] = [];
   private shotUsed = 0;
   private readonly dropSprites: Sprite[] = [];
@@ -784,31 +786,58 @@ export class WorldView {
       piece.shadow.destroy();
     }
     this.scenery.length = 0;
-    const names = ["tree_kapok", "tree_palm", "tree_canopy", "bush", "rock_big", "rock_small"];
-    const road: { x: number; y: number }[] = [];
+    const desert = map.name === "Boulder Bend" || map.name === "Runner Ridge" || map.name === "Brute Steps" || map.name === "Colossus Stair";
+    const names = desert
+      ? ["rock_big", "rock_small", "rock_small", "bush", "tree_palm", "rock_big", "bush", "tree_palm"]
+      : ["tree_canopy", "tree_kapok", "tree_palm", "tree_canopy", "bush", "tree_kapok", "tree_palm", "rock_small", "bush"];
+    const rim: { x: number; y: number; nx: number; ny: number }[] = [];
     for (const route of map.routes) {
-      for (let dist = 0; dist < route.len; dist += 36) road.push(poseAt(route, dist));
+      for (let dist = 0; dist < route.len; dist += 32) {
+        const here = poseAt(route, dist);
+        const ahead = poseAt(route, Math.min(route.len - 1, dist + 16));
+        const ang = Math.atan2(ahead.y - here.y, ahead.x - here.x);
+        rim.push({ x: here.x, y: here.y, nx: -Math.sin(ang), ny: Math.cos(ang) });
+      }
     }
     let seed = 19 + map.routes.length * 13 + Math.round(map.sun.x);
     const rnd = (): number => {
       seed = (seed * 16807) % 2147483647;
       return seed / 2147483647;
     };
+    const taken: { x: number; y: number }[] = [];
     let placed = 0;
     let tries = 0;
-    while (placed < 40 && tries < 500) {
+    const want = 120;
+    while (placed < want && tries < rim.length * 6 && rim.length > 0) {
+      const spot = rim[tries % rim.length];
       tries += 1;
-      const x = 48 + rnd() * (MAP_W - 96);
-      const y = 48 + rnd() * (MAP_H - 96);
-      if (Math.hypot(x - map.sun.x, y - map.sun.y) < 170) continue;
-      if (road.some((point) => Math.hypot(point.x - x, point.y - y) < map.pathWidth * 0.72 + 28)) continue;
+      const side = tries % 2 === 0 ? 1 : -1;
+      const reach = map.pathWidth * 0.46 + 54 + rnd() * 36;
+      const x = spot.x + spot.nx * reach * side + (rnd() - 0.5) * 16;
+      const y = spot.y + spot.ny * reach * side + (rnd() - 0.5) * 12;
+      if (x < 24 || y < 24 || x > MAP_W - 24 || y > MAP_H - 24) continue;
+      if (Math.hypot(x - map.sun.x, y - map.sun.y) < 168) continue;
+      if (map.pads.some((pad) => Math.hypot(pad.x - x, pad.y - y) < 58)) continue;
+      let onRoad = false;
+      for (const route of map.routes) {
+        for (let dist = 0; dist < route.len; dist += 28) {
+          const point = poseAt(route, dist);
+          if (Math.hypot(point.x - x, point.y - y) < map.pathWidth * 0.42 + 18) {
+            onRoad = true;
+            break;
+          }
+        }
+        if (onRoad) break;
+      }
+      if (onRoad) continue;
+      if (taken.some((point) => Math.hypot(point.x - x, point.y - y) < 30)) continue;
       const name = names[Math.floor(rnd() * names.length)];
       const texture = this.art.prop(name);
       if (!texture) continue;
       const body = new Sprite(texture);
       const anchor = texture.defaultAnchor;
       body.anchor.set(anchor?.x ?? 0.5, anchor?.y ?? 0.8);
-      const scale = this.art.propScale(name) * (0.86 + rnd() * 0.28);
+      const scale = this.art.propScale(name) * (0.82 + rnd() * 0.34);
       body.scale.set(name === "bush" || name === "rock_small" ? scale * 0.85 : scale);
       body.position.set(x, y);
       body.zIndex = y;
@@ -819,6 +848,7 @@ export class WorldView {
       this.shadowLayer.addChild(shadow);
       this.actors.addChild(body);
       this.scenery.push({ body, shadow });
+      taken.push({ x, y });
       placed += 1;
     }
   }
@@ -1061,7 +1091,8 @@ export class WorldView {
       if (!clip) continue;
       const row = facingRow(e.angle, clip.frames.length);
       const draw = bodyScale(e.kind, clip.draw);
-      const punch = e.flash > 0 ? 1 + Math.min(0.34, e.flash * 1.6) : 1;
+      const fodder = e.kind === "skitter" || e.kind === "runner" || e.kind === "shard" || e.kind === "jaguar" || e.kind === "glider" || e.kind === "sapper";
+      const punch = e.flash > 0 ? 1 + Math.min(fodder ? 0.5 : 0.34, e.flash * (fodder ? 2.6 : 1.6)) : 1;
       this.paint(actor, clip, row, actor.clip, draw * punch);
       const hop = e.hop > 0 ? Math.sin((0.16 - e.hop) * 40) * 6 : 0;
       const lift = e.flying ? 18 + Math.sin(this.time * 6 + e.id) * 6 : 0;
@@ -1073,9 +1104,19 @@ export class WorldView {
       actor.body.zIndex = e.y;
       actor.outline.zIndex = e.y - 0.2;
       const rock = e.kind === "roller" || e.kind === "shard";
+      const fodderFlash = fodder && e.flash > 0.02;
       actor.body.blendMode = !rock && e.flash > 0 ? "add" : "normal";
       actor.body.tint = rock ? (e.flash > 0 ? 0xffe2b8 : 0xe8a86a) : e.flash > 0 ? 0xffffff : enemyTint(e.kind);
       actor.body.alpha = stealthedFade(e);
+      if (fodderFlash) {
+        actor.outline.texture = actor.body.texture;
+        actor.outline.anchor.copyFrom(actor.body.anchor);
+        actor.outline.visible = true;
+        actor.outline.blendMode = "add";
+        actor.outline.tint = 0xffffff;
+        actor.outline.alpha = Math.min(0.95, e.flash * 6);
+        actor.outline.scale.set(draw * punch * 1.16);
+      }
       if (e.kind === "roller") actor.body.rotation = e.dist / 46;
       this.dressShadow(actor.shadow, asset, draw, e.flying ? 0.4 : 0.92);
       actor.shadow.position.set(e.x + ox, e.y + oy);
@@ -1208,19 +1249,23 @@ export class WorldView {
     sim.stations.forEach((station, i) => {
       const color = padHue(station.kind);
       const hot = i === near;
-      if (station.kind === "wall") this.drawWall(sim, station, i);
+      const away = Math.hypot(station.x - hero.x, station.y - hero.y);
+      const fade = away < 170 ? 1 : away > 480 ? 0.26 : 1 - ((away - 170) / 310) * 0.74;
+      const plot = this.padSize();
+      if (station.kind === "wall") this.drawWall(sim, station, i, fade);
       else if (station.kind === "barracks" && station.tier > 0) this.drawBarracks(station, i);
       else if (station.tier === 0) {
         this.hideBuilt(i);
-        this.padPlot(station.x, station.y, hot ? 62 : 54);
+        this.padPlot(station.x, station.y, plot, fade);
       }
       const next = station.tier < 3 ? sim.stationCost(station) : 0;
       const remain = next > 0 ? Math.max(0, Math.ceil(next - station.paid)) : 0;
       const broke = sim.funding === i && sim.jade < 1 && remain > 0;
       if (sim.funding === i && next > 0) {
         const u = Math.max(0, Math.min(1, station.paid / next));
-        this.pads.circle(station.x, station.y, 46).stroke({ width: 8, color: 0x3a2414, alpha: 0.55 });
-        this.pads.arc(station.x, station.y, 46, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * u).stroke({ width: 8, color: 0xffe08a, alpha: 1 });
+        const ring = plot * 0.72;
+        this.pads.circle(station.x, station.y, ring).stroke({ width: 3, color: 0x3a2414, alpha: 0.4 * fade });
+        this.pads.arc(station.x, station.y, ring, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * u).stroke({ width: 3, color: 0xffe08a, alpha: fade });
       }
       if (broke && this.time - this.needAt > 1.05) {
         this.needAt = this.time;
@@ -1243,15 +1288,24 @@ export class WorldView {
       icon.position.set(station.x, station.y - 46);
       icon.zIndex = station.y + 4;
       const cost = this.stationCostLabel(i);
-      cost.text = open ? String(shown) : next > 0 ? String(remain) : "MAX";
-      cost.style.fontSize = 26;
+      const coin = this.stationCoin(i);
+      const showPrice = fade > 0.62 && next > 0;
+      cost.text = open ? String(shown) : next > 0 ? String(remain) : "";
+      cost.style.fontSize = Math.max(11, plot * 0.42);
       cost.style.fill = broke ? 0xffb089 : 0xfff6df;
-      const covered = Math.hypot(station.x - hero.x, station.y - hero.y) < 48;
-      cost.visible = !covered;
+      const covered = Math.hypot(station.x - hero.x, station.y - hero.y) < plot * 0.7;
+      cost.visible = showPrice && !covered;
+      coin.visible = cost.visible;
       if (covered) icon.visible = false;
-      const shake = broke && !this.reduced ? Math.sin(this.time * 48) * 3.5 : 0;
-      cost.position.set(station.x + shake, station.y - 16);
+      const shake = broke && !this.reduced ? Math.sin(this.time * 48) * 2 : 0;
+      cost.position.set(station.x + shake - plot * 0.12, station.y + shake * 0.2);
+      cost.alpha = fade;
       cost.zIndex = station.y + 5;
+      const coinPx = Math.max(7, plot * 0.28);
+      coin.scale.set(coinPx / Math.max(1, coin.texture.width));
+      coin.position.set(station.x + plot * 0.28 + shake, station.y + 1);
+      coin.alpha = fade;
+      coin.zIndex = station.y + 5;
       const empty = station.tier === 0 && station.chosen && station.kind !== "wall";
       const ghost = this.padGhost(i);
       if (empty && close && isTower(station.kind)) {
@@ -1285,6 +1339,7 @@ export class WorldView {
     });
     for (let i = sim.stations.length; i < this.stationLabels.length; i++) this.stationLabels[i].visible = false;
     for (let i = sim.stations.length; i < this.stationCosts.length; i++) this.stationCosts[i].visible = false;
+    for (let i = sim.stations.length; i < this.stationCoins.length; i++) this.stationCoins[i].visible = false;
     for (let i = sim.stations.length; i < this.stationHints.length; i++) this.stationHints[i].visible = false;
     for (let i = sim.stations.length; i < this.padGhosts.length; i++) this.padGhosts[i].visible = false;
   }
@@ -1337,9 +1392,9 @@ export class WorldView {
     if (!label) {
       label = new Text({
         text: "",
-        style: { fontFamily: SANS, fontSize: 28, fill: 0xfff6df, fontWeight: "bold", align: "center" },
+        style: { fontFamily: SANS, fontSize: 12, fill: 0xfff6df, fontWeight: "bold", align: "center", stroke: { color: 0x14301c, width: 3 } },
       });
-      label.anchor.set(0.5, 0);
+      label.anchor.set(0.5);
       label.eventMode = "none";
       this.labels.addChild(label);
       this.stationCosts[i] = label;
@@ -1347,33 +1402,56 @@ export class WorldView {
     return label;
   }
 
-  private padPlot(x: number, y: number, size: number): void {
-    const w = size;
-    const h = size * 0.78;
-    this.pads.roundRect(x - w / 2 + 3, y - h / 2 + 6, w, h, 8).fill({ color: 0x0c3a18, alpha: 0.28 });
-    this.pads.roundRect(x - w / 2, y - h / 2, w, h, 8).fill({ color: 0x157a38, alpha: 0.94 });
-    this.pads.roundRect(x - w / 2, y - h / 2, w, h, 8).stroke({ width: 3, color: 0x0d4a22, alpha: 0.95 });
-    this.pads.circle(x + w * 0.28, y + h * 0.18, 8).fill({ color: 0xf0c14a });
-    this.pads.circle(x + w * 0.28, y + h * 0.18, 8).stroke({ width: 2, color: 0x8a5a12, alpha: 1 });
-    this.pads.circle(x + w * 0.22, y + h * 0.1, 2.4).fill({ color: 0xfff6df, alpha: 0.9 });
-    this.brackets(x, y, size * 0.92);
+  private stationCoin(i: number): Sprite {
+    let coin = this.stationCoins[i];
+    if (!coin) {
+      coin = new Sprite(this.art.frame("jade"));
+      coin.anchor.set(0.5);
+      coin.eventMode = "none";
+      this.labels.addChild(coin);
+      this.stationCoins[i] = coin;
+    }
+    return coin;
   }
 
-  private brackets(x: number, y: number, size: number): void {
-    const h = size / 2;
-    const arm = size * 0.32;
-    const corners: [number, number, number, number][] = [
-      [x - h, y - h, 1, 1],
-      [x + h, y - h, -1, 1],
-      [x + h, y + h, -1, -1],
-      [x - h, y + h, 1, -1],
+  /** About 7.5% of the portrait width, in world units. */
+  private padSize(): number {
+    const zoom = Math.max(0.35, this.zoom);
+    return Math.max(16, (this.viewW / zoom) * 0.075);
+  }
+
+  private padPlot(x: number, y: number, size: number, alpha = 1): void {
+    const w = size;
+    const h = size * 0.86;
+    const left = x - w / 2;
+    const top = y - h / 2;
+    this.pads.roundRect(left, top + 2, w, h, 3).fill({ color: 0x0c3a18, alpha: 0.18 * alpha });
+    this.pads.roundRect(left, top, w, h, 3).fill({ color: 0x1c8a40, alpha: 0.82 * alpha });
+    this.dashBox(left, top, w, h, alpha);
+  }
+
+  private dashBox(x: number, y: number, w: number, h: number, alpha: number): void {
+    const dash = Math.max(3.2, w * 0.16);
+    const gap = dash * 0.7;
+    const edges: [number, number, number, number][] = [
+      [x, y, x + w, y],
+      [x + w, y, x + w, y + h],
+      [x + w, y + h, x, y + h],
+      [x, y + h, x, y],
     ];
-    for (const [cx, cy, sx, sy] of corners) {
-      this.pads.moveTo(cx, cy + arm * sy);
-      this.pads.lineTo(cx, cy);
-      this.pads.lineTo(cx + arm * sx, cy);
+    for (const [x0, y0, x1, y1] of edges) {
+      const len = Math.hypot(x1 - x0, y1 - y0) || 1;
+      const dx = (x1 - x0) / len;
+      const dy = (y1 - y0) / len;
+      let t = 0;
+      while (t < len - 0.5) {
+        const end = Math.min(len, t + dash);
+        this.pads.moveTo(x0 + dx * t, y0 + dy * t);
+        this.pads.lineTo(x0 + dx * end, y0 + dy * end);
+        this.pads.stroke({ width: 1.6, color: 0xfff6ea, alpha: 0.95 * alpha });
+        t += dash + gap;
+      }
     }
-    this.pads.stroke({ width: 5, color: 0xfff6ea, alpha: 0.95 });
   }
 
   private paintChevrons(map: MapDef): void {
@@ -1409,12 +1487,12 @@ export class WorldView {
     }
   }
 
-  private drawWall(sim: Siege, station: Station, index: number): void {
+  private drawWall(sim: Siege, station: Station, index: number, fade = 1): void {
     const route = sim.map.routes[station.path];
     const pose = route ? poseAt(route, station.dist) : { x: station.x, y: station.y, angle: 0 };
     if (station.tier <= 0) {
       this.hideBuilt(index);
-      this.padPlot(pose.x, pose.y, 54);
+      this.padPlot(pose.x, pose.y, this.padSize(), fade);
       return;
     }
     const asset = station.tier >= 3 ? "wall_stone" : station.tier >= 2 ? "wall_spiked" : "wall_wood";
@@ -1570,28 +1648,7 @@ export class WorldView {
       s.scale.set(CARRY_SCALE * pop);
       s.rotation = wobble * 0.04;
     }
-    if (total > CARRY_CAP) {
-      if (!this.carryBadge) {
-        this.carryBadge = new Text({
-          text: "",
-          style: {
-            fontFamily: SANS,
-            fontSize: 11,
-            fill: 0xf4ffe8,
-            fontWeight: "bold",
-            stroke: { color: 0x14301c, width: 4 },
-          },
-        });
-        this.carryBadge.anchor.set(0.5, 1);
-        this.carryBadge.eventMode = "none";
-        this.actors.addChild(this.carryBadge);
-      }
-      const top = slots[slots.length - 1];
-      this.carryBadge.visible = true;
-      this.carryBadge.text = `x${total}`;
-      this.carryBadge.position.set(hero.x + lean, hero.y + top.y - 20);
-      this.carryBadge.zIndex = hero.y + 48;
-    } else if (this.carryBadge) this.carryBadge.visible = false;
+    if (this.carryBadge) this.carryBadge.visible = false;
     const dt = step > 0 ? step : 0.016;
     for (let i = this.payGems.length - 1; i >= 0; i--) {
       const gem = this.payGems[i];
@@ -1615,9 +1672,17 @@ export class WorldView {
   }
 
   private drawDrops(sim: Siege): void {
+    const hero = sim.heroAt();
+    const alive = sim.drops.filter((gem) => gem.alive);
+    const shown = alive.length <= 40
+      ? alive
+      : [...alive].sort((a, b) => Math.hypot(a.x - hero.x, a.y - hero.y) - Math.hypot(b.x - hero.x, b.y - hero.y)).slice(0, 40);
+    const seen = new Set<number>();
     let n = 0;
-    for (const gem of sim.drops) {
-      if (!gem.alive) continue;
+    const gemScale = 0.064;
+    for (const gem of shown) {
+      seen.add(gem.id);
+      if (!this.dropBorn.has(gem.id)) this.dropBorn.set(gem.id, this.time);
       let sprite = this.dropSprites[n];
       if (!sprite) {
         sprite = new Sprite(this.art.frame("jade"));
@@ -1626,13 +1691,35 @@ export class WorldView {
         this.fxLayer.addChild(sprite);
         this.dropSprites.push(sprite);
       }
-      sprite.visible = true;
-      sprite.position.set(gem.x, gem.y);
-      const bob = Math.sin(this.time * 6 + gem.id) * 3;
-      sprite.y = gem.y + bob;
-      sprite.scale.set(0.16);
-      sprite.alpha = gem.life < 1.6 ? 0.35 + Math.sin(this.time * 14) * 0.35 : 1;
+      const age = this.time - (this.dropBorn.get(gem.id) ?? this.time);
+      const ang = ((gem.id * 47) % 360) * (Math.PI / 180);
+      const scatter = 18 + (gem.id % 5) * 7;
+      const popped = Math.sin(Math.min(1, age / 0.2) * Math.PI);
+      const spread = Math.min(1, age / 0.2);
+      let x = gem.x + Math.cos(ang) * scatter * spread;
+      let y = gem.y + Math.sin(ang) * scatter * 0.62 * spread - popped * 28;
+      let alpha = gem.life < 1.6 ? 0.45 + Math.sin(this.time * 14) * 0.25 : 1;
+      const dist = Math.hypot(gem.x - hero.x, gem.y - hero.y);
+      if (age >= 0.18 && dist < 280) {
+        const u = Math.min(1, (age - 0.18) / 0.38);
+        const e = u * u * (3 - 2 * u);
+        const sx = gem.x + Math.cos(ang) * scatter;
+        const sy = gem.y + Math.sin(ang) * scatter * 0.62;
+        x = sx + (hero.x - sx) * e;
+        y = sy + (hero.y - 34 - sy) * e - Math.sin(u * Math.PI) * 16;
+        if (u >= 1) alpha = 0;
+      } else if (age >= 0.2) {
+        y += Math.sin(this.time * 6 + gem.id) * 2;
+      }
+      sprite.visible = alpha > 0.02;
+      sprite.alpha = alpha;
+      sprite.position.set(x, y);
+      const pop = age < 0.16 ? 0.65 + Math.sin((age / 0.16) * Math.PI) * 0.45 : 1;
+      sprite.scale.set(gemScale * pop);
       n += 1;
+    }
+    if (this.dropBorn.size > 80) {
+      for (const id of this.dropBorn.keys()) if (!seen.has(id)) this.dropBorn.delete(id);
     }
     for (let i = n; i < this.dropSprites.length; i++) this.dropSprites[i].visible = false;
   }
@@ -1665,7 +1752,7 @@ export class WorldView {
     bolt.rotation = Math.atan2(shot.y - shot.py, shot.x - shot.px);
     const fat = shot.family === "lens" ? 2.4 : shot.family === "spire" ? 0.7 + shot.tier * 0.22 : 0.85 + shot.tier * 0.12;
     if (arrow) {
-      const length = (head ? 28 : 22) + shot.tier * 2;
+      const length = (head ? 56 : 44) + shot.tier * 4;
       const scale = length / Math.max(1, bolt.texture.width);
       bolt.anchor.set(0.5, 0.5);
       bolt.scale.set(scale);
@@ -1690,10 +1777,10 @@ export class WorldView {
     trail.rotation = bolt.rotation;
     if (arrow) {
       trail.anchor.set(0.85, 0.5);
-      trail.scale.set(bolt.scale.x * 1.7, bolt.scale.y * 0.55);
-      trail.tint = 0xffe2a0;
-      trail.alpha = 0.35;
-      trail.blendMode = "normal";
+      trail.scale.set(bolt.scale.x * 1.8, bolt.scale.y * 0.42);
+      trail.tint = 0xfff3b0;
+      trail.alpha = 0.8;
+      trail.blendMode = "add";
     } else {
       trail.anchor.set(0.15, 0.5);
       trail.scale.set(0.22, 0.16);
@@ -2041,7 +2128,7 @@ export class WorldView {
         this.puffs.splice(i, 1);
         continue;
       }
-      this.pads.circle(puff.x, puff.y - 4, 4 + u * 8).fill({ color: 0xfff8f4, alpha: (1 - u) * 0.85 });
+      this.pads.circle(puff.x, puff.y - 4, 4 + u * 10).fill({ color: puff.color ?? 0xfff8f4, alpha: (1 - u) * 0.8 });
     }
   }
 
@@ -2146,13 +2233,17 @@ export class WorldView {
     if (!actor) return;
     this.enemies.delete(id);
     actor.shadow.visible = false;
+    actor.body.tint = 0xffffff;
+    actor.body.blendMode = "add";
+    actor.outline.visible = false;
     this.flings.push({
       body: actor.body,
       outline: actor.outline,
       vx: (Math.random() - 0.5) * 140,
-      vy: -120 - Math.random() * 50,
+      vy: -150 - Math.random() * 70,
       life: 0.36,
       hold,
+      scale: actor.body.scale.x * 1.35,
     });
   }
 
@@ -2169,10 +2260,11 @@ export class WorldView {
     made.eventMode = "none";
     const streak = new Sprite(arrow);
     streak.anchor.set(0.5, 0.5);
-    streak.position.set(-20, 0);
-    streak.scale.set(1.7, 0.5);
-    streak.alpha = 0.4;
-    streak.tint = 0xffe2a0;
+    streak.position.set(-28, 0);
+    streak.scale.set(2.4, 0.38);
+    streak.alpha = 0.9;
+    streak.tint = 0xfff6c4;
+    streak.blendMode = "add";
     streak.eventMode = "none";
     made.addChild(streak);
     this.fxLayer.addChild(made);
@@ -2203,11 +2295,13 @@ export class WorldView {
       const streak = s.children[0] as Sprite | undefined;
       if (streak) streak.visible = true;
       s.tint = golden ? 0xfff0a8 : 0xfff8e6;
-      const hy = gy - 70 - Math.random() * 36;
-      const hx = gx + (Math.random() - 0.5) * 10;
-      const fall = Math.atan2(gy - hy, gx - hx);
+      const drop = 156 + Math.random() * 40;
+      const run = drop * (3 / 4);
+      const hx = gx - run;
+      const hy = gy - drop;
+      const fall = Math.atan2(drop, run);
       s.rotation = fall;
-      const length = (golden ? 34 : 26) + Math.random() * 4;
+      const length = (golden ? 68 : 52) + Math.random() * 8;
       s.scale.set(length / Math.max(1, s.texture.width));
       s.position.set(hx, hy);
       this.rains.push({
@@ -2470,14 +2564,22 @@ export class WorldView {
             if (streak) streak.visible = false;
             if (!rain.dusted) {
               rain.dusted = true;
-              if (this.puffs.length < 28) this.puffs.push({ x: rain.x, y: rain.y, life: 0, max: 0.22 });
+              for (let k = 0; k < 3; k++) {
+                if (this.puffs.length > 96) break;
+                this.puffs.push({
+                  x: rain.x + (Math.random() - 0.5) * 12,
+                  y: rain.y + (Math.random() - 0.5) * 6,
+                  life: 0,
+                  max: 0.26,
+                  color: k === 0 ? 0xf3efe4 : 0xcbb892,
+                });
+              }
             }
           }
         }
       } else {
-        if (rain.t < 0.07) this.pads.circle(rain.x, rain.y, 7).fill({ color: 0xffffff, alpha: 0.85 });
-        rain.s.alpha = rain.t < 0.35 ? 1 : Math.max(0, 1 - (rain.t - 0.35) / 0.4);
-        if (rain.t > 0.75) {
+        rain.s.alpha = rain.t < 0.3 ? 1 : Math.max(0, 1 - (rain.t - 0.3) / 0.08);
+        if (rain.t > 0.38) {
           this.dropRain(rain.s);
           this.rains.splice(i, 1);
           continue;
@@ -2491,6 +2593,10 @@ export class WorldView {
   private drawFlings(step: number): void {
     for (let i = this.flings.length - 1; i >= 0; i--) {
       const fling = this.flings[i];
+      const pop = fling.hold > 0 ? 1.2 : 0.55 + Math.max(0, fling.life / 0.36);
+      fling.body.scale.set(fling.scale * pop);
+      fling.body.tint = 0xffffff;
+      fling.body.blendMode = "add";
       if (fling.hold > 0) {
         fling.hold -= step;
         continue;

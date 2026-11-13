@@ -1,6 +1,6 @@
 /**
  * Jade the guardian is carrying, drawn as a short brick heap above his head.
- * Four courses, then a count badge. The heap stays about as wide as the
+ * The count lives in the HUD pill. The heap stays about as wide as the
  * guardian and shorter than he is tall.
  */
 

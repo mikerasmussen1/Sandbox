@@ -1288,7 +1288,6 @@ export class Siege {
         : Math.min(e.boulder, Math.max(BALANCE.minHit, raw));
       e.boulder -= chip;
       e.flash = 0.12;
-      this.fx.push({ kind: "num", x: e.x + 18, y: e.y - 36, text: String(Math.round(chip)) });
       if (e.boulder <= 0) {
         e.boulder = 0;
         this.fx.push({ kind: "rubble", x: e.x + 22, y: e.y - 8 });
@@ -1318,8 +1317,9 @@ export class Siege {
     const applied = Math.min(e.hp, dealt);
     e.hp -= applied;
     if (tower) tower.dealt += applied;
-    e.flash = e.kind === "skitter" || e.kind === "runner" ? 0.16 : 0.12;
-    this.fx.push({ kind: "num", x: e.x, y: e.y - 30, text: String(Math.max(1, Math.round(applied))) });
+    const fodder = e.kind === "skitter" || e.kind === "runner" || e.kind === "shard" || e.kind === "jaguar" || e.kind === "glider" || e.kind === "sapper";
+    e.flash = fodder ? 0.2 : 0.12;
+    if (!fodder && e.kind !== "roller") this.fx.push({ kind: "num", x: e.x, y: e.y - 30, text: String(Math.max(1, Math.round(applied))) });
     if (mitigate && (e.kind === "shield" || e.kind === "boss") && fromX !== undefined && fromY !== undefined) {
       const fx = Math.cos(e.angle);
       const fy = Math.sin(e.angle);
@@ -1655,7 +1655,35 @@ export class Siege {
 
   private dropGem(x: number, y: number, value: number): void {
     let alive = 0;
-    for (const gem of this.drops) if (gem.alive) alive += 1;
+    let host: Drop | null = null;
+    let hostD = 96;
+    for (const gem of this.drops) {
+      if (!gem.alive) continue;
+      alive += 1;
+      const d = Math.hypot(gem.x - x, gem.y - y);
+      if (d < hostD) {
+        hostD = d;
+        host = gem;
+      }
+    }
+    if (alive >= 40) {
+      let nearest = host;
+      if (!nearest) {
+        let best = Infinity;
+        for (const gem of this.drops) {
+          if (!gem.alive) continue;
+          const d = Math.hypot(gem.x - x, gem.y - y);
+          if (d < best) {
+            best = d;
+            nearest = gem;
+          }
+        }
+      }
+      if (nearest) {
+        nearest.value += value;
+        return;
+      }
+    }
     if (alive > 220) {
       this.jade += value;
       this.purse.kills += value;

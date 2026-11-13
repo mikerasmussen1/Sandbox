@@ -23,7 +23,7 @@ THEMES = [
     ((36, 112, 74), (42, 86, 64), (168, 188, 146), (24, 88, 108)),
     ((168, 102, 54), (128, 68, 40), (210, 164, 108), (132, 48, 28)),
     ((34, 102, 56), (36, 74, 48), (176, 150, 96), (16, 72, 38)),
-    ((188, 142, 78), (150, 96, 52), (224, 190, 136), (64, 108, 40)),
+    ((214, 168, 104), (176, 92, 54), (236, 204, 150), (150, 78, 44)),
     ((122, 110, 82), (92, 78, 62), (196, 174, 136), (82, 74, 58)),
     ((142, 78, 48), (102, 52, 42), (198, 146, 96), (148, 40, 28)),
 ]
@@ -155,10 +155,46 @@ def sample(routes: list[list[tuple[float, float]]]) -> list[tuple[float, float]]
 
 
 def stone_for(index: int) -> tuple[tuple[int, int, int], tuple[int, int, int], tuple[int, int, int]]:
-    """Face, shadowed face, and the deep drop. Grey stone in the green valleys, sandstone in the desert."""
+    """Face, shadowed face, and the deep drop. Grey stone in the green valleys, red rock in the desert."""
     if index in DESERT:
-        return (196, 150, 102), (132, 88, 52), (78, 50, 30)
+        return (214, 118, 74), (168, 74, 46), (112, 46, 32)
     return (138, 142, 146), (86, 90, 96), (52, 56, 62)
+
+
+def texture_ground(img: Image.Image, mask: np.ndarray, rng: np.random.Generator, desert: bool) -> None:
+    """Tufts, blotches, and flowers on the plateau. The path is painted afterwards and covers the road."""
+    overlay = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    draw = ImageDraw.Draw(overlay)
+    ys, xs = np.where(mask)
+    if len(xs) == 0:
+        return
+    count = 520 if desert else 1600
+    pick = rng.choice(len(xs), size=min(count, len(xs)), replace=False)
+    flowers = ((236, 208, 86, 230), (244, 246, 236, 220), (232, 126, 156, 220), (186, 210, 96, 220))
+    for n, i in enumerate(pick):
+        x = int(xs[i])
+        y = int(ys[i])
+        if desert:
+            if n % 7 == 0:
+                draw.ellipse((x - 3, y - 2, x + 4, y + 2), fill=(132, 72, 46, 170))
+            elif n % 3 == 0:
+                draw.ellipse((x - 8, y - 5, x + 9, y + 5), fill=(150, 96, 58, 70))
+            else:
+                draw.line((x, y, x + int(rng.integers(-2, 3)), y - int(rng.integers(2, 5))), fill=(120, 86, 48, 150), width=1)
+            continue
+        kind = int(rng.integers(0, 14))
+        if kind < 8:
+            lean = int(rng.integers(-3, 4))
+            tall = int(rng.integers(4, 8))
+            draw.line((x, y, x + lean, y - tall), fill=(22, 86, 34, 190), width=1)
+            draw.line((x + 1, y, x + lean + 2, y - tall + 2), fill=(78, 156, 62, 170), width=1)
+        elif kind < 11:
+            draw.ellipse((x - 14, y - 8, x + 14, y + 8), fill=(16, 64, 24, 80))
+        else:
+            petal = flowers[kind % len(flowers)]
+            draw.ellipse((x - 2, y - 2, x + 2, y + 2), fill=petal)
+            draw.ellipse((x - 1, y - 1, x + 1, y + 1), fill=(255, 236, 170, 230))
+    img.alpha_composite(overlay)
 
 
 def paint(level: dict, theme: tuple, index: int) -> None:
@@ -220,17 +256,24 @@ def paint(level: dict, theme: tuple, index: int) -> None:
             lit = stone[c] * 1.08
             shade = stone_dark[c] * 0.72 + stone_deep[c] * 0.28
             rgb[..., c] = np.where(face, lit * (1 - t) + shade * t, rgb[..., c])
-    grass_lit = tuple(min(255, int(c) + 38) for c in top)
+    grass_lit = tuple(min(255, int(c) + 18) for c in top)
     top_rim = mask & ~above
-    lit_band = top_rim.copy()
-    for k in range(1, 6):
+    # A soft lit lip, blurred so the plateau edge does not cut a hard diagonal stripe.
+    rim = np.zeros_like(mask)
+    for k in range(1, 8):
         band = np.zeros_like(mask)
         band[k:] = top_rim[:-k]
-        lit_band |= band & mask
+        rim |= band & mask
+    rim_img = Image.fromarray(np.where(rim, np.uint8(255), np.uint8(0)), "L").filter(ImageFilter.GaussianBlur(8))
+    lip = np.asarray(rim_img).astype(np.float32) / 255
+    blot = rng.random((H // 28 + 1, W // 28 + 1)).astype(np.float32)
+    blot = np.asarray(Image.fromarray((blot * 255).astype(np.uint8), "L").resize((W, H), Image.BILINEAR)).astype(np.float32) / 255
     for c in range(3):
-        field = top[c] * (0.9 + noise * 0.14)
+        field = top[c] * (0.84 + noise * 0.22)
+        shade = 0.82 + blot * 0.28
+        field = field * shade
         rgb[..., c] = np.where(mask, field, rgb[..., c])
-        rgb[..., c] = np.where(lit_band, field * 0.55 + grass_lit[c] * 0.45, rgb[..., c])
+        rgb[..., c] = np.where(mask, rgb[..., c] * (1 - 0.16 * lip) + grass_lit[c] * 0.16 * lip, rgb[..., c])
     # A dark contact where the grass meets the drop.
     foot = np.zeros_like(mask)
     for k in range(1, 6):
@@ -240,6 +283,7 @@ def paint(level: dict, theme: tuple, index: int) -> None:
     for c in range(3):
         rgb[..., c] = np.where(foot, rgb[..., c] * 0.7, rgb[..., c])
     img = Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8), "RGB").convert("RGBA")
+    texture_ground(img, mask, rng, index in DESERT)
     half = max(16, int(width * 0.34))
     if road:
         # Disks, not a thick polyline: a stroked line miters into diagonal stripes.

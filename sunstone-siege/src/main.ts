@@ -220,6 +220,8 @@ async function boot(): Promise<void> {
       __steer?: (x: number, y: number) => void;
       __hero?: (x: number, y: number) => void;
       __skip?: () => void;
+      __begin?: (index: number) => void;
+      __tower?: (kind: string, x: number, y: number) => boolean;
       __choose?: (index: number, kind: string) => boolean;
       __spec?: (index: number, spec: string) => boolean;
     };
@@ -247,6 +249,19 @@ async function boot(): Promise<void> {
     act.__steer = (x, y) => { hold = Math.hypot(x, y) < 0.05 ? null : { x, y }; };
     act.__hero = (x, y) => { if (sim) { sim.heroX = x; sim.heroY = y; } };
     act.__skip = () => { if (sim) sim.time = 30; };
+    act.__begin = (index: number) => begin(index);
+    act.__tower = (kind: string, x: number, y: number) => {
+      if (!sim) return false;
+      if (kind === "barracks") {
+        const station = sim.stations.find((s) => s.kind === "barracks");
+        if (!station) return false;
+        station.x = x;
+        station.y = y;
+        return sim.fundNow(sim.stations.indexOf(station));
+      }
+      sim.forceTower(kind as never, x, y);
+      return true;
+    };
   }
   let fpsFrames = 0;
   let fpsStamp = performance.now();
