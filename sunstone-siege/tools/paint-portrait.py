@@ -251,11 +251,28 @@ def paint(level: dict, theme: tuple, index: int) -> None:
         rgb[..., c] = stone_deep[c]
     if np.any(face):
         t = np.clip(dist.astype(np.float32) / drop, 0, 1)
-        t = t * t
-        for c in range(3):
-            lit = stone[c] * 1.08
-            shade = stone_dark[c] * 0.72 + stone_deep[c] * 0.28
-            rgb[..., c] = np.where(face, lit * (1 - t) + shade * t, rgb[..., c])
+        if index in DESERT:
+            # Layered red-rock: light caps, darker bases, and a ledge on each band.
+            yy = np.arange(H, dtype=np.float32)[:, None]
+            yb = yy + (noise - 0.5) * 14
+            period = 18.0
+            phase = np.mod(yb, period) / period
+            cap = np.clip((0.42 - phase) / 0.42, 0, 1)
+            ledge = np.clip((phase - 0.78) / 0.22, 0, 1)
+            light_rgb = np.array([236, 176, 118], np.float32)
+            mid_rgb = np.array([186, 86, 52], np.float32)
+            dark_rgb = np.array([92, 38, 26], np.float32)
+            for c in range(3):
+                band = light_rgb[c] * cap + mid_rgb[c] * (1 - cap)
+                band = band * (1 - 0.62 * t) + dark_rgb[c] * (0.62 * t)
+                band = band * (1 - 0.55 * ledge) + (dark_rgb[c] * 0.7) * ledge
+                rgb[..., c] = np.where(face, band, rgb[..., c])
+        else:
+            t = t * t
+            for c in range(3):
+                lit = stone[c] * 1.08
+                shade = stone_dark[c] * 0.72 + stone_deep[c] * 0.28
+                rgb[..., c] = np.where(face, lit * (1 - t) + shade * t, rgb[..., c])
     grass_lit = tuple(min(255, int(c) + 18) for c in top)
     top_rim = mask & ~above
     # A soft lit lip, blurred so the plateau edge does not cut a hard diagonal stripe.

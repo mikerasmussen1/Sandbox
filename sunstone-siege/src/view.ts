@@ -590,9 +590,20 @@ export class WorldView {
 
   showRange(x: number, y: number, radius: number, color: number): void {
     this.range.clear();
-    this.range.circle(x, y, radius).fill({ color, alpha: 0.14 });
-    this.range.circle(x, y, radius).stroke({ width: 3, color, alpha: 0.9 });
+    this.dashRing(this.range, x, y, radius, color, 0.5);
     this.range.visible = true;
+  }
+
+  /** A soft dashed ring. One stroke per dash, so a fill elsewhere on the path is not retraced. */
+  private dashRing(g: Graphics, x: number, y: number, radius: number, color: number, alpha: number): void {
+    const steps = 40;
+    for (let i = 0; i < steps; i += 2) {
+      const a0 = (i / steps) * Math.PI * 2;
+      const a1 = ((i + 0.85) / steps) * Math.PI * 2;
+      g.moveTo(x + Math.cos(a0) * radius, y + Math.sin(a0) * radius);
+      g.lineTo(x + Math.cos(a1) * radius, y + Math.sin(a1) * radius);
+      g.stroke({ width: 2, color, alpha });
+    }
   }
 
   /** A ring where the player tapped. It pulses, then stays until he arrives. */
@@ -1092,7 +1103,7 @@ export class WorldView {
       const row = facingRow(e.angle, clip.frames.length);
       const draw = bodyScale(e.kind, clip.draw);
       const fodder = e.kind === "skitter" || e.kind === "runner" || e.kind === "shard" || e.kind === "jaguar" || e.kind === "glider" || e.kind === "sapper";
-      const punch = e.flash > 0 ? 1 + Math.min(fodder ? 0.5 : 0.34, e.flash * (fodder ? 2.6 : 1.6)) : 1;
+      const punch = fodder && e.flash > 0 ? 1 + Math.min(0.5, e.flash * 5) : 1;
       this.paint(actor, clip, row, actor.clip, draw * punch);
       const hop = e.hop > 0 ? Math.sin((0.16 - e.hop) * 40) * 6 : 0;
       const lift = e.flying ? 18 + Math.sin(this.time * 6 + e.id) * 6 : 0;
@@ -1104,19 +1115,10 @@ export class WorldView {
       actor.body.zIndex = e.y;
       actor.outline.zIndex = e.y - 0.2;
       const rock = e.kind === "roller" || e.kind === "shard";
-      const fodderFlash = fodder && e.flash > 0.02;
-      actor.body.blendMode = !rock && e.flash > 0 ? "add" : "normal";
-      actor.body.tint = rock ? (e.flash > 0 ? 0xffe2b8 : 0xe8a86a) : e.flash > 0 ? 0xffffff : enemyTint(e.kind);
+      actor.outline.visible = false;
+      actor.body.blendMode = "normal";
+      actor.body.tint = rock ? (e.flash > 0 ? 0xffe2b8 : 0xe8a86a) : fodder && e.flash > 0.02 ? 0xfff6ee : e.flash > 0 ? 0xfff6ee : enemyTint(e.kind);
       actor.body.alpha = stealthedFade(e);
-      if (fodderFlash) {
-        actor.outline.texture = actor.body.texture;
-        actor.outline.anchor.copyFrom(actor.body.anchor);
-        actor.outline.visible = true;
-        actor.outline.blendMode = "add";
-        actor.outline.tint = 0xffffff;
-        actor.outline.alpha = Math.min(0.95, e.flash * 6);
-        actor.outline.scale.set(draw * punch * 1.16);
-      }
       if (e.kind === "roller") actor.body.rotation = e.dist / 46;
       this.dressShadow(actor.shadow, asset, draw, e.flying ? 0.4 : 0.92);
       actor.shadow.position.set(e.x + ox, e.y + oy);
@@ -1233,22 +1235,11 @@ export class WorldView {
       if (puddle.life <= 0) continue;
       const fade = Math.max(0, puddle.life / puddle.max);
       const color = puddle.kind === "drum" ? TOWER_HUE.drum : TOWER_HUE.spire;
-      this.pads.circle(puddle.x, puddle.y, puddle.radius).fill({ color, alpha: 0.22 * fade });
-      this.pads.circle(puddle.x, puddle.y, puddle.radius).stroke({ width: 4, color, alpha: 0.85 * fade });
+      this.pads.circle(puddle.x, puddle.y, puddle.radius).fill({ color, alpha: 0.06 * fade });
     }
     const hero = sim.heroAt();
-    let near = -1;
-    let nearD: number = BALANCE.fund.preview;
-    sim.stations.forEach((station, i) => {
-      const d = Math.hypot(station.x - hero.x, station.y - hero.y);
-      if (d < nearD && station.tier < 3) {
-        nearD = d;
-        near = i;
-      }
-    });
     sim.stations.forEach((station, i) => {
       const color = padHue(station.kind);
-      const hot = i === near;
       const away = Math.hypot(station.x - hero.x, station.y - hero.y);
       const fade = away < 170 ? 1 : away > 480 ? 0.26 : 1 - ((away - 170) / 310) * 0.74;
       const plot = this.padSize();
@@ -1291,7 +1282,10 @@ export class WorldView {
       const coin = this.stationCoin(i);
       const showPrice = fade > 0.62 && next > 0;
       cost.text = open ? String(shown) : next > 0 ? String(remain) : "";
-      cost.style.fontSize = Math.max(11, plot * 0.42);
+      const zoom = Math.max(0.35, this.zoom);
+      const pricePx = 18 / zoom;
+      cost.style.fontSize = pricePx;
+      cost.style.stroke = { color: 0x14301c, width: Math.max(1.25, pricePx * 0.1) };
       cost.style.fill = broke ? 0xffb089 : 0xfff6df;
       const covered = Math.hypot(station.x - hero.x, station.y - hero.y) < plot * 0.7;
       cost.visible = showPrice && !covered;
@@ -1323,7 +1317,7 @@ export class WorldView {
         ghost.zIndex = station.y - 1;
         ghost.visible = true;
         const radius = towerRange(kind, 0) * sim.rangeScale;
-        this.pads.circle(station.x, station.y, radius).stroke({ width: 2, color, alpha: 0.16 });
+        this.dashRing(this.pads, station.x, station.y, radius, color, 0.38);
       } else {
         ghost.visible = false;
       }
@@ -1332,9 +1326,10 @@ export class WorldView {
       hint.visible = hint.text.length > 0 && Math.hypot(station.x - hero.x, station.y - hero.y) > 100;
       hint.position.set(station.x, station.y - 46);
       hint.zIndex = station.y + 6;
-      if (hot && isTower(station.kind) && station.tier < 3) {
+      const standing = away < BALANCE.fund.radius;
+      if (standing && isTower(station.kind) && station.tier < 3 && !this.menu.visible) {
         const radius = towerRange(station.kind, Math.min(2, station.tier)) * sim.rangeScale;
-        this.pads.circle(station.x, station.y, radius).stroke({ width: 3, color, alpha: 0.7 });
+        this.dashRing(this.pads, station.x, station.y, radius, color, 0.45);
       }
     });
     for (let i = sim.stations.length; i < this.stationLabels.length; i++) this.stationLabels[i].visible = false;
@@ -1756,7 +1751,12 @@ export class WorldView {
       const scale = length / Math.max(1, bolt.texture.width);
       bolt.anchor.set(0.5, 0.5);
       bolt.scale.set(scale);
-      bolt.tint = 0xfff6df;
+      bolt.tint = 0xffffff;
+      bolt.blendMode = "normal";
+    } else if (shot.family === "hero") {
+      bolt.anchor.set(0.2, 0.5);
+      bolt.scale.set(0.42, 0.28);
+      bolt.tint = 0xffe2a0;
       bolt.blendMode = "normal";
     } else if (shot.family === "lens") {
       bolt.anchor.set(0.15, 0.5);
@@ -1776,11 +1776,13 @@ export class WorldView {
     trail.position.set(shot.x + ox - ((shot.x - shot.px) / inv) * span, shot.y + oy - ((shot.y - shot.py) / inv) * span);
     trail.rotation = bolt.rotation;
     if (arrow) {
-      trail.anchor.set(0.85, 0.5);
-      trail.scale.set(bolt.scale.x * 1.8, bolt.scale.y * 0.42);
-      trail.tint = 0xfff3b0;
-      trail.alpha = 0.8;
+      trail.anchor.set(1, 0.5);
+      trail.scale.set(bolt.scale.x * 0.34, bolt.scale.y * 0.3);
+      trail.tint = 0xfff1c0;
+      trail.alpha = 0.28;
       trail.blendMode = "add";
+    } else if (shot.family === "hero") {
+      trail.visible = false;
     } else {
       trail.anchor.set(0.15, 0.5);
       trail.scale.set(0.22, 0.16);
@@ -2211,10 +2213,14 @@ export class WorldView {
 
   private onDeath(event: Fx): void {
     const small = event.enemy === "skitter" || event.enemy === "runner" || event.enemy === "shard" || event.enemy === "glider" || event.enemy === "jaguar";
-    this.burst(event.x, event.y, 0xffffff, small ? 4 : 8);
-    if (this.puffs.length < 28) this.puffs.push({ x: event.x, y: event.y, life: 0, max: small ? 0.16 : 0.28 });
-    if (small) this.flingNearest(event.x, event.y, Math.random() * 0.16);
-    else this.bump(0.2);
+    if (small) {
+      this.flingNearest(event.x, event.y, 0.05);
+      return;
+    }
+    this.burst(event.x, event.y, 0xffffff, 6);
+    this.burst(event.x, event.y, 0xfff0c2, 5);
+    if (this.puffs.length < 28) this.puffs.push({ x: event.x, y: event.y, life: 0, max: 0.28 });
+    this.bump(0.2);
   }
 
   /** Pop the body off the road so a swarm death reads as a fling, not a fade. */
@@ -2234,16 +2240,16 @@ export class WorldView {
     this.enemies.delete(id);
     actor.shadow.visible = false;
     actor.body.tint = 0xffffff;
-    actor.body.blendMode = "add";
+    actor.body.blendMode = "normal";
     actor.outline.visible = false;
     this.flings.push({
       body: actor.body,
       outline: actor.outline,
-      vx: (Math.random() - 0.5) * 140,
-      vy: -150 - Math.random() * 70,
-      life: 0.36,
+      vx: (Math.random() - 0.5) * 90,
+      vy: -80 - Math.random() * 40,
+      life: 0.18,
       hold,
-      scale: actor.body.scale.x * 1.35,
+      scale: actor.body.scale.x,
     });
   }
 
@@ -2252,6 +2258,7 @@ export class WorldView {
     if (s) {
       s.visible = true;
       s.alpha = 1;
+      this.dressRain(s);
       return s;
     }
     const arrow = this.art.prop("arrow") ?? this.art.frame("fx-dart");
@@ -2259,16 +2266,27 @@ export class WorldView {
     made.anchor.set(0.5, 0.5);
     made.eventMode = "none";
     const streak = new Sprite(arrow);
-    streak.anchor.set(0.5, 0.5);
-    streak.position.set(-28, 0);
-    streak.scale.set(2.4, 0.38);
-    streak.alpha = 0.9;
-    streak.tint = 0xfff6c4;
-    streak.blendMode = "add";
     streak.eventMode = "none";
     made.addChild(streak);
+    this.dressRain(made);
     this.fxLayer.addChild(made);
     return made;
+  }
+
+  /** The shaft keeps its painted fletching. The streak is a short faint tail, about a third of the arrow. */
+  private dressRain(s: Sprite): void {
+    s.blendMode = "normal";
+    s.tint = 0xffffff;
+    const streak = s.children[0] as Sprite | undefined;
+    if (!streak) return;
+    const w = Math.max(1, s.texture.width);
+    streak.anchor.set(1, 0.5);
+    streak.position.set(-w * 0.42, 0);
+    streak.scale.set(1 / 3, 0.22);
+    streak.alpha = 0.28;
+    streak.tint = 0xfff1c0;
+    streak.blendMode = "add";
+    streak.visible = true;
   }
 
   private dropRain(s: Sprite): void {
@@ -2279,7 +2297,7 @@ export class WorldView {
   /** A dense cloud of small arrows hangs over the spot the volley has chosen. */
   private loom(x: number, y: number, radius: number, golden = false): void {
     this.marks.push({ x, y, r: radius, life: 0, hot: false });
-    const count = this.reduced ? 24 : golden ? 96 : 64;
+    const count = this.reduced ? 24 : golden ? 88 : 76;
     while (this.rains.length + count > 140) {
       const old = this.rains.findIndex((rain) => rain.phase === "stuck");
       if (old < 0) break;
@@ -2292,9 +2310,7 @@ export class WorldView {
       const gx = x + Math.cos(ang) * dist;
       const gy = y + Math.sin(ang) * dist * 0.86;
       const s = this.takeRain();
-      const streak = s.children[0] as Sprite | undefined;
-      if (streak) streak.visible = true;
-      s.tint = golden ? 0xfff0a8 : 0xfff8e6;
+      s.tint = 0xffffff;
       const drop = 156 + Math.random() * 40;
       const run = drop * (3 / 4);
       const hx = gx - run;
@@ -2334,7 +2350,6 @@ export class WorldView {
     for (const mark of this.marks) {
       if (Math.hypot(mark.x - x, mark.y - y) < radius) mark.hot = true;
     }
-    this.ringFx(x, y, radius * 0.55, 0xfffdf6);
   }
 
   private spawnGhost(actor: Actor, name: string, fodder: boolean): void {
@@ -2526,9 +2541,9 @@ export class WorldView {
       mark.life += step;
       const pulse = 0.28 + Math.sin(mark.life * 16) * 0.12;
       this.pads.circle(mark.x, mark.y, mark.r * (mark.hot ? 1 : 0.92)).stroke({
-        width: mark.hot ? 7 : 4,
+        width: 1.5,
         color: 0xfff6df,
-        alpha: mark.hot ? Math.max(0, 0.85 - mark.life * 1.4) : pulse,
+        alpha: mark.hot ? Math.max(0, 0.28 - mark.life) : pulse * 0.35,
       });
       if (mark.life > (mark.hot ? 0.45 : 1.4)) this.marks.splice(i, 1);
     }
@@ -2564,14 +2579,13 @@ export class WorldView {
             if (streak) streak.visible = false;
             if (!rain.dusted) {
               rain.dusted = true;
-              for (let k = 0; k < 3; k++) {
-                if (this.puffs.length > 96) break;
+              if (this.puffs.length < 140) {
                 this.puffs.push({
-                  x: rain.x + (Math.random() - 0.5) * 12,
-                  y: rain.y + (Math.random() - 0.5) * 6,
+                  x: rain.x,
+                  y: rain.y,
                   life: 0,
-                  max: 0.26,
-                  color: k === 0 ? 0xf3efe4 : 0xcbb892,
+                  max: 0.22,
+                  color: 0xd9c4a2,
                 });
               }
             }
@@ -2593,10 +2607,10 @@ export class WorldView {
   private drawFlings(step: number): void {
     for (let i = this.flings.length - 1; i >= 0; i--) {
       const fling = this.flings[i];
-      const pop = fling.hold > 0 ? 1.2 : 0.55 + Math.max(0, fling.life / 0.36);
+      const pop = fling.hold > 0 ? 1 : Math.max(0.35, fling.life / 0.18);
       fling.body.scale.set(fling.scale * pop);
       fling.body.tint = 0xffffff;
-      fling.body.blendMode = "add";
+      fling.body.blendMode = "normal";
       if (fling.hold > 0) {
         fling.hold -= step;
         continue;
@@ -2608,7 +2622,7 @@ export class WorldView {
       fling.outline.position.set(fling.body.x, fling.body.y + 2);
       fling.body.rotation += fling.vx * step * 0.01;
       fling.outline.rotation = fling.body.rotation;
-      const fade = Math.max(0, fling.life / 0.42);
+      const fade = Math.max(0, fling.life / 0.18);
       fling.body.alpha = fade;
       fling.outline.alpha = fade * 0.8;
       if (fling.life <= 0) {
