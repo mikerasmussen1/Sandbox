@@ -17,15 +17,15 @@ SUN = (480, 1040)
 RIM = 46
 
 THEMES = [
-    # top, cliff, path, accent
-    ((96, 196, 78), (86, 98, 70), (228, 196, 132), (46, 140, 52)),
-    ((214, 170, 96), (150, 92, 58), (236, 210, 150), (90, 150, 56)),
-    ((78, 168, 96), (64, 96, 70), (186, 214, 170), (40, 110, 130)),
-    ((176, 132, 70), (120, 72, 46), (228, 196, 140), (160, 70, 40)),
-    ((70, 158, 86), (52, 90, 58), (200, 176, 110), (30, 100, 60)),
-    ((188, 140, 72), (130, 78, 44), (236, 210, 156), (70, 120, 48)),
-    ((150, 124, 78), (96, 70, 52), (210, 188, 140), (90, 80, 50)),
-    ((168, 110, 64), (110, 62, 48), (220, 180, 130), (150, 50, 36)),
+    # top, cliff, path, accent. Jungle, sandstone, river, canyon, pine, dunes, ruins, ember.
+    ((72, 168, 58), (48, 86, 42), (214, 176, 114), (28, 118, 40)),
+    ((214, 176, 108), (168, 112, 64), (236, 214, 168), (110, 132, 58)),
+    ((58, 148, 96), (42, 86, 64), (176, 204, 164), (32, 108, 132)),
+    ((186, 118, 62), (128, 68, 40), (220, 176, 124), (156, 58, 34)),
+    ((48, 128, 74), (36, 74, 48), (186, 164, 108), (22, 88, 48)),
+    ((206, 158, 84), (150, 96, 52), (232, 206, 150), (78, 124, 46)),
+    ((142, 128, 96), (92, 78, 62), (204, 186, 150), (96, 86, 68)),
+    ((158, 90, 56), (102, 52, 42), (210, 158, 108), (168, 46, 32)),
 ]
 
 
@@ -168,94 +168,112 @@ def paint(level: dict, theme: tuple, index: int) -> None:
     face = tuple(max(0, int(c) - 28) for c in cliff)
     lip = tuple(min(255, int(c) + 48) for c in top)
 
-    def shift(pts: list[tuple[float, float]], dist: float) -> list[tuple[float, float]]:
-        out: list[tuple[float, float]] = []
-        n = len(pts)
-        for i, (x, y) in enumerate(pts):
-            a = pts[max(0, i - 1)]
-            b = pts[min(n - 1, i + 1)]
-            dx, dy = b[0] - a[0], b[1] - a[1]
-            length = math.hypot(dx, dy) or 1
-            out.append((x - dy / length * dist, y + dx / length * dist))
-        return out
-
-    # Raised plateaus: a shaded cliff beside the road, and a lit lip on the grass edge.
-    cliffs = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    cd = ImageDraw.Draw(cliffs)
+    # Soft plateaus and a blurred dirt path. No stroked cliff, so the road has no diagonal bands.
     half = max(16, int(width * 0.34))
+    plateaus = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    pd = ImageDraw.Draw(plateaus)
+    tops = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    td = ImageDraw.Draw(tops)
+    for n in range(8):
+        cx = int(rng.integers(80, W - 80))
+        cy = int(rng.integers(90, H - 140))
+        rx = int(rng.integers(70, 150))
+        ry = int(rng.integers(46, 100))
+        pd.ellipse((cx - rx, cy - ry + 16, cx + rx, cy + ry + 22), fill=face + (210,))
+        cap = tuple(min(255, c + 28) for c in top)
+        td.ellipse((cx - rx, cy - ry, cx + rx, cy + ry), fill=cap + (235,))
+        td.ellipse((cx - rx * 0.45, cy - ry * 0.55, cx + rx * 0.15, cy - ry * 0.05), fill=lip + (90,))
+    plateaus = plateaus.filter(ImageFilter.GaussianBlur(10))
+    tops = tops.filter(ImageFilter.GaussianBlur(3))
+    img.alpha_composite(plateaus)
+    img.alpha_composite(tops)
     if road:
-        cd.line(shift(road, -(half + 16)), fill=face + (220,), width=36)
-    cd.rectangle((0, H - 90, W, H), fill=face + (230,))
-    cliffs = cliffs.filter(ImageFilter.GaussianBlur(4))
-    img.alpha_composite(cliffs)
-    if road:
+        # Disks, not a thick polyline: a stroked line miters into diagonal stripes.
+        stamps = []
+        for i in range(len(road) - 1):
+            x0, y0 = road[i]
+            x1, y1 = road[i + 1]
+            steps = max(1, int(math.hypot(x1 - x0, y1 - y0) / 10))
+            for s in range(steps + 1):
+                t = s / steps
+                stamps.append((x0 + (x1 - x0) * t, y0 + (y1 - y0) * t))
         edge = Image.new("RGBA", (W, H), (0, 0, 0, 0))
         ed = ImageDraw.Draw(edge)
-        dirt_edge = tuple(max(0, int(c) - 30) for c in path_c)
-        ed.line(road, fill=dirt_edge + (190,), width=half * 2 + 28)
-        edge = edge.filter(ImageFilter.GaussianBlur(7))
+        dirt_edge = tuple(max(0, int(c) - 18) for c in path_c)
+        rim = half + 18
+        for x, y in stamps:
+            ed.ellipse((x - rim, y - rim * 0.72, x + rim, y + rim * 0.72), fill=dirt_edge + (150,))
+        edge = edge.filter(ImageFilter.GaussianBlur(11))
         img.alpha_composite(edge)
         path = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-        pd = ImageDraw.Draw(path)
-        pd.line(road, fill=path_c + (255,), width=half * 2)
+        path_draw = ImageDraw.Draw(path)
+        core = half * 0.86
+        for x, y in stamps:
+            path_draw.ellipse((x - core, y - core * 0.7, x + core, y + core * 0.7), fill=path_c + (230,))
+        path = path.filter(ImageFilter.GaussianBlur(4))
         img.alpha_composite(path)
-        lit = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-        ld = ImageDraw.Draw(lit)
-        ld.line(shift(road, half + 14), fill=lip + (120,), width=10)
-        lit = lit.filter(ImageFilter.GaussianBlur(4))
-        img.alpha_composite(lit)
     shadows = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     sd = ImageDraw.Draw(shadows)
     props = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     pr = ImageDraw.Draw(props)
-    hi = tuple(min(255, int(c) + 48) for c in accent)
-    dark = tuple(max(0, int(c) - 40) for c in accent)
-    for _ in range(42):
-        x = int(rng.integers(48, W - 48))
-        y = int(rng.integers(48, H - 48))
-        if math.hypot(x - SUN[0], y - SUN[1]) < 130:
+    hi = tuple(min(255, int(c) + 55) for c in accent)
+    dark = tuple(max(0, int(c) - 36) for c in accent)
+    rock = (168, 140, 104) if index in (1, 3, 5, 7) else (132, 124, 112)
+    for _ in range(46):
+        x = int(rng.integers(40, W - 40))
+        y = int(rng.integers(40, H - 40))
+        if math.hypot(x - SUN[0], y - SUN[1]) < 150:
             continue
-        if any(math.hypot(x - px, y - py) < level["width"] * 0.72 for px, py in road[::6]):
+        if any(math.hypot(x - px, y - py) < level["width"] * 0.7 for px, py in road[::6]):
             continue
         kind = int(rng.integers(0, 5))
-        sd.ellipse((x - 18, y + 4, x + 20, y + 16), fill=(20, 16, 10, 90))
         if kind <= 1:
-            rad = int(rng.integers(16, 30))
-            pr.polygon([(x, y - rad * 1.35), (x - rad * 0.72, y + 2), (x + rad * 0.72, y + 2)], fill=dark + (255,))
-            pr.polygon([(x, y - rad * 1.35), (x - rad * 0.2, y - rad * 0.2), (x + rad * 0.55, y + 2)], fill=accent + (255,))
-            pr.polygon([(x - rad * 0.15, y - rad * 1.05), (x - rad * 0.45, y - rad * 0.35), (x + rad * 0.05, y - rad * 0.45)], fill=hi + (255,))
-            pr.rectangle((x - 3, y + 2, x + 3, y + 12), fill=(92, 58, 32, 255))
-        elif kind == 2 and index % 3 != 1:
-            pr.rounded_rectangle((x - 26, y - 16, x + 26, y + 18), radius=4, fill=(176, 118, 68, 255))
-            pr.polygon([(x - 32, y - 12), (x, y - 40), (x + 32, y - 12)], fill=(148, 64, 40, 255))
-            pr.polygon([(x - 8, y - 34), (x, y - 40), (x + 6, y - 18)], fill=(196, 110, 70, 255))
-            pr.rectangle((x - 6, y - 2, x + 6, y + 18), fill=(78, 46, 30, 255))
-        elif kind == 3:
-            pr.rounded_rectangle((x - 5, y - 24, x + 5, y + 8), radius=4, fill=accent + (255,))
-            pr.rounded_rectangle((x - 16, y - 14, x - 6, y - 2), radius=4, fill=dark + (255,))
-            pr.rounded_rectangle((x + 6, y - 10, x + 16, y + 2), radius=4, fill=hi + (255,))
+            rad = int(rng.integers(18, 32))
+            sd.ellipse((x - rad, y + 2, x + rad + 8, y + rad * 0.55), fill=(20, 16, 10, 80))
+            pr.rectangle((x - 4, y - 2, x + 4, y + 14), fill=(92, 58, 32, 255))
+            pr.ellipse((x - rad * 0.7, y - rad * 0.2, x + rad * 0.75, y + rad * 0.55), fill=dark + (255,))
+            pr.ellipse((x - rad * 0.85, y - rad * 1.15, x + rad * 0.7, y + rad * 0.15), fill=accent + (255,))
+            pr.ellipse((x - rad * 0.35, y - rad * 0.95, x + rad * 0.15, y - rad * 0.35), fill=hi + (230,))
+        elif kind == 2:
+            sd.ellipse((x - 22, y + 4, x + 26, y + 16), fill=(20, 16, 10, 70))
+            pr.ellipse((x - 20, y - 4, x + 22, y + 12), fill=dark + (255,))
+            pr.ellipse((x - 16, y - 14, x + 18, y + 4), fill=accent + (255,))
+            pr.ellipse((x - 8, y - 12, x + 4, y - 2), fill=hi + (200,))
         else:
-            rock = (128, 118, 104)
-            pr.ellipse((x - 16, y - 8, x + 18, y + 12), fill=tuple(max(0, c - 36) for c in rock) + (255,))
-            pr.ellipse((x - 16, y - 14, x + 16, y + 6), fill=rock + (255,))
-            pr.ellipse((x - 8, y - 12, x + 2, y - 2), fill=(186, 176, 160, 255))
-    shadows = shadows.filter(ImageFilter.GaussianBlur(7))
+            sd.ellipse((x - 20, y + 2, x + 22, y + 14), fill=(20, 16, 10, 75))
+            pr.ellipse((x - 16, y - 2, x + 20, y + 12), fill=tuple(max(0, c - 40) for c in rock) + (255,))
+            pr.ellipse((x - 18, y - 14, x + 14, y + 4), fill=rock + (255,))
+            pr.ellipse((x - 10, y - 12, x + 1, y - 2), fill=tuple(min(255, c + 40) for c in rock) + (255,))
+    shadows = shadows.filter(ImageFilter.GaussianBlur(8))
     img.alpha_composite(shadows)
     img.alpha_composite(props)
     sx, sy = SUN
+    keep = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+    kd = ImageDraw.Draw(keep)
+    kd.ellipse((sx - 96, sy - 18, sx + 108, sy + 64), fill=(30, 22, 14, 90))
+    keep = keep.filter(ImageFilter.GaussianBlur(8))
+    img.alpha_composite(keep)
     plaza = ImageDraw.Draw(img)
-    plaza.ellipse((sx - 40, sy - 10, sx + 42, sy + 22), fill=(40, 28, 16, 70))
-    plaza.ellipse((sx - RIM, sy - RIM * 0.72, sx + RIM, sy + RIM * 0.62), fill=(214, 168, 78, 255))
-    plaza.ellipse((sx - RIM + 8, sy - RIM * 0.55, sx + RIM - 10, sy + RIM * 0.2), fill=(255, 214, 120, 255))
-    plaza.ellipse((sx - 10, sy - 8, sx + 8, sy + 6), fill=(255, 244, 200, 255))
-    for i in range(22):
-        ang = i / 22 * math.pi * 2
-        fx = sx + math.cos(ang) * 168
-        fy = sy + math.sin(ang) * 120
-        if any(math.hypot(fx - px, fy - py) < level["width"] * 0.55 for px, py in road[::4]):
+    plaza.ellipse((sx - 86, sy - 8, sx + 90, sy + 46), fill=face + (255,))
+    plaza.ellipse((sx - 84, sy - 28, sx + 84, sy + 24), fill=(196, 168, 122, 255))
+    plaza.ellipse((sx - 36, sy - 22, sx + 8, sy - 2), fill=(232, 214, 170, 160))
+    plaza.ellipse((sx - RIM, sy - RIM * 0.62, sx + RIM, sy + RIM * 0.4), fill=(214, 168, 78, 255))
+    plaza.ellipse((sx - RIM + 8, sy - RIM * 0.48, sx + RIM - 10, sy + RIM * 0.08), fill=(255, 214, 120, 255))
+    for i in range(18):
+        ang = i / 18 * math.pi * 2
+        fx = sx + math.cos(ang) * 150
+        fy = sy + math.sin(ang) * 108
+        if any(math.hypot(fx - px, fy - py) < level["width"] * 0.5 for px, py in road[::4]):
             continue
-        plaza.rectangle((fx - 4, fy - 14, fx + 4, fy + 8), fill=(92, 58, 32, 255))
-        plaza.rectangle((fx - 12, fy - 8, fx + 12, fy - 4), fill=(150, 98, 54, 255))
+        plaza.rectangle((fx - 5, fy - 16, fx + 5, fy + 10), fill=(92, 58, 32, 255))
+        plaza.rectangle((fx - 3, fy - 16, fx - 1, fy + 4), fill=(150, 104, 62, 255))
+        plaza.rectangle((fx - 16, fy - 10, fx + 16, fy - 4), fill=(168, 112, 62, 255))
+        nxt = (i + 1) / 18 * math.pi * 2
+        nx = sx + math.cos(nxt) * 150
+        ny = sy + math.sin(nxt) * 108
+        if any(math.hypot(nx - px, ny - py) < level["width"] * 0.5 for px, py in road[::4]):
+            continue
+        plaza.line([(fx, fy - 7), (nx, ny - 7)], fill=(140, 90, 48, 255), width=4)
     arr = np.asarray(img).astype(np.float32)
     rgb_arr = arr[..., :3]
     yy, xx = np.mgrid[0:H, 0:W]

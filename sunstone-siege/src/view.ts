@@ -24,7 +24,7 @@ const ELITE: ReadonlySet<EnemyKind> = new Set(["shield", "golem", "boss"]);
 /** Sheets are authored large. This lands a swarmer at a few percent of a phone screen. */
 const ENEMY_DRAW = 0.48;
 /** About 7% of a portrait screen once the camera shows a third of the valley, and still taller than a swarmer. */
-const HERO_DRAW = 0.25;
+const HERO_DRAW = 0.31;
 const TOWER_DRAW = 0.34;
 /** Screen-pixel radius of the build cards. The menu is scaled by 1/zoom so this stays constant. */
 const MENU_REACH = 220;
@@ -55,9 +55,9 @@ function isTower(kind: StationKind): kind is TowerKind {
 function bodyScale(kind: EnemyKind, clipDraw: number): number {
   let scale = clipDraw * ENEMY_DRAW;
   if (kind === "shard" || kind === "roller") scale *= 0.28;
-  else if (kind === "skitter") scale *= 0.58;
-  else if (kind === "sapper") scale *= 0.7;
-  else if (kind === "runner") scale *= 0.72;
+  else if (kind === "skitter") scale *= 1.16;
+  else if (kind === "sapper") scale *= 0.9;
+  else if (kind === "runner") scale *= 0.92;
   else if (kind === "giant") scale *= 1.08;
   else if (ELITE.has(kind)) scale *= 1.1;
   return scale;
@@ -111,8 +111,9 @@ function towerAsset(kind: TowerKind, tier: number): string {
 
 function enemyAsset(kind: EnemyKind): string {
   if (kind === "shield") return "enemy_shieldbearer";
-  if (kind === "shard" || kind === "roller" || kind === "giant") return "enemy_golem";
-  if (kind === "sapper") return "enemy_runner";
+  if (kind === "giant") return "enemy_giant";
+  if (kind === "sapper") return "enemy_sapper";
+  if (kind === "shard" || kind === "roller") return "enemy_golem";
   return `enemy_${kind}`;
 }
 
@@ -950,11 +951,9 @@ export class WorldView {
       actor.body.zIndex = e.y;
       actor.outline.zIndex = e.y - 0.2;
       actor.body.blendMode = e.flash > 0 ? "add" : "normal";
-      const brute = e.kind === "golem" || e.kind === "shield";
-      const coat = e.kind === "giant" ? 0x8d7b6a : e.kind === "sapper" ? 0xff8844 : brute ? 0xc8c4bc : 0xff5a62;
-      actor.body.tint = e.flash > 0 ? 0xffffff : coat;
-      actor.outline.scale.set(draw * punch * 1.22);
-      actor.outline.tint = e.flash > 0 ? 0xffffff : 0x0c0608;
+      actor.body.tint = 0xffffff;
+      actor.outline.scale.set(draw * punch * 1.08);
+      actor.outline.tint = e.flash > 0 ? 0xffffff : 0x140c08;
       actor.body.alpha = e.kind === "roller" ? 0 : stealthedFade(e);
       actor.outline.alpha = e.kind === "roller" ? 0 : 1;
       actor.shadow.position.set(e.x, e.y + (e.flying ? 14 : 6));
@@ -1018,27 +1017,22 @@ export class WorldView {
     this.pads.clear();
     for (const e of sim.enemies) {
       if (!e.alive) continue;
-      if (e.kind === "giant") {
-        const cx = e.x + Math.cos(e.angle + 1.1) * 14;
-        const cy = e.y - 18;
-        this.pads.roundRect(cx - 2, cy, 4, 16, 2).fill({ color: 0x6b4a2a });
-        this.pads.circle(cx, cy - 2, 5).fill({ color: 0x3a2a1c });
-      }
       if (e.kind === "roller") {
-        const x = e.x + Math.cos(e.angle) * 18;
-        const y = e.y + Math.sin(e.angle) * 18;
-        this.pads.ellipse(x + 8, y + 14, 70, 28).fill({ color: 0x1a120c, alpha: 0.2 });
-        this.pads.circle(x, y - 6, 48).fill({ color: 0x6e6258 });
-        this.pads.circle(x - 8, y - 14, 48).fill({ color: 0x9a8b7c });
-        this.pads.circle(x - 18, y - 22, 18).fill({ color: 0xd5c7b6 });
-        this.pads.circle(x - 8, y - 14, 48).stroke({ width: 3, color: 0x3a3028, alpha: 0.9 });
+        const x = e.x + Math.cos(e.angle) * 16;
+        const y = e.y + Math.sin(e.angle) * 16;
+        this.pads.ellipse(x + 8, y + 22, 62, 22).fill({ color: 0x1a120c, alpha: 0.3 });
+        this.pads.ellipse(x + 6, y + 8, 46, 32).fill({ color: 0x5a4e44 });
+        this.pads.ellipse(x - 8, y - 12, 42, 30).fill({ color: 0x9a8874 });
+        this.pads.ellipse(x - 20, y - 26, 20, 14).fill({ color: 0xe6d8c6 });
+        this.pads.ellipse(x - 8, y - 12, 42, 30).stroke({ width: 3, color: 0x3a3028, alpha: 0.9 });
         for (let k = 0; k < 4; k++) {
-          const back = 34 + (k % 2) * 12;
-          const side = (k - 1.5) * 12;
+          const back = 44 + (k % 2) * 12;
+          const side = (k - 1.5) * 16;
           const px = e.x - Math.cos(e.angle) * back + Math.cos(e.angle + Math.PI / 2) * side;
           const py = e.y - Math.sin(e.angle) * back + Math.sin(e.angle + Math.PI / 2) * side;
-          this.pads.circle(px, py + 3, 8).fill({ color: 0x1a120c, alpha: 0.22 });
-          this.pads.circle(px, py, 7).fill({ color: 0xe23b3b });
+          this.pads.ellipse(px, py + 8, 9, 4).fill({ color: 0x1a120c, alpha: 0.28 });
+          this.pads.roundRect(px - 5, py - 4, 10, 14, 4).fill({ color: 0xc43434 });
+          this.pads.circle(px, py - 12, 5).fill({ color: 0xe24a42 });
         }
         continue;
       }
@@ -1262,16 +1256,26 @@ export class WorldView {
     const alive = station.alive;
     const span = 78 + Math.max(0, tier) * 8;
     const posts = tier >= 3 ? 7 : 5;
-    const color = !alive ? 0x6a5348 : tier >= 3 ? 0xb9c4ce : tier >= 2 ? 0x8d5a32 : 0xc4844e;
+    const wood = !alive ? 0x6a5348 : tier >= 3 ? 0xb7c0ca : tier >= 2 ? 0x8a4e2c : 0xc4844e;
+    const shade = !alive ? 0x4a3a32 : tier >= 3 ? 0x8d98a4 : tier >= 2 ? 0x5c3218 : 0x8a5a32;
+    const lit = tier >= 3 ? 0xe7eef4 : 0xe0b07a;
     const px = Math.cos(across);
     const py = Math.sin(across);
+    this.pads.moveTo(pose.x - px * span, pose.y - py * span - 8);
+    this.pads.lineTo(pose.x + px * span, pose.y + py * span - 8);
+    this.pads.stroke({ width: tier >= 3 ? 8 : 6, color: wood, alpha: alive ? 0.95 : 0.4 });
     for (let i = 0; i < posts; i++) {
       const t = (i / (posts - 1) - 0.5) * 2;
       const x = pose.x + px * span * t;
       const y = pose.y + py * span * t;
       const broken = !alive && Math.abs(t) < 0.34;
-      this.pads.roundRect(x - 5, y - 16, 10, broken ? 8 : 28, 2).fill({ color, alpha: broken ? 0.45 : 0.95 });
-      if (tier >= 2 && alive) this.pads.poly([x, y - 22, x - 7, y - 12, x + 7, y - 12]).fill({ color: 0xd7dde6, alpha: 0.9 });
+      const h = broken ? 10 : tier >= 3 ? 34 : 40;
+      this.pads.roundRect(x - 7, y - h + 16, 14, h, 3).fill({ color: shade, alpha: broken ? 0.45 : 1 });
+      this.pads.roundRect(x - 7, y - h + 16, 6, h, 3).fill({ color: wood, alpha: broken ? 0.4 : 1 });
+      this.pads.rect(x - 5, y - h + 16, 4, 5).fill({ color: lit, alpha: broken ? 0.3 : 0.9 });
+      if (tier >= 2 && alive && !broken) {
+        this.pads.poly([x, y - h + 6, x - 6, y - h + 18, x + 6, y - h + 18]).fill({ color: tier >= 3 ? 0xd5dee8 : 0xf2f6fb });
+      }
     }
     const heroOn = Math.hypot(pose.x - sim.heroX, pose.y - sim.heroY) < 56;
     if (alive && station.hurt > 0 && station.maxHp > 0 && !heroOn) {
@@ -1431,7 +1435,7 @@ export class WorldView {
       sprite.position.set(gem.x, gem.y);
       const bob = Math.sin(this.time * 6 + gem.id) * 3;
       sprite.y = gem.y + bob;
-      sprite.scale.set(0.11);
+      sprite.scale.set(0.16);
       sprite.alpha = gem.life < 1.6 ? 0.35 + Math.sin(this.time * 14) * 0.35 : 1;
       n += 1;
     }
@@ -1972,9 +1976,9 @@ export class WorldView {
       const gx = x + Math.cos(ang) * dist;
       const gy = y + Math.sin(ang) * dist * 0.86;
       const s = this.takeRain();
-      s.tint = golden ? 0xffd24a : 0xfff6e0;
-      s.rotation = Math.PI / 2 + (Math.random() - 0.5) * 0.25;
-      s.scale.set(0.1 + Math.random() * 0.03, 0.11 + Math.random() * 0.03);
+      s.tint = golden ? 0xfff0a8 : 0xfff8e6;
+      s.rotation = Math.PI / 2 + (Math.random() - 0.5) * 0.2;
+      s.scale.set(0.3 + Math.random() * 0.06, 0.42 + Math.random() * 0.08);
       const hy = gy - 64 - Math.random() * 48;
       s.position.set(gx + (Math.random() - 0.5) * 6, hy);
       this.rains.push({
@@ -2095,7 +2099,7 @@ export class WorldView {
     gem.life = -Math.random() * 0.16;
     gem.s.visible = true;
     gem.s.alpha = 0;
-    gem.s.scale.set(0.11);
+    gem.s.scale.set(0.16);
     gem.s.position.set(gem.x, gem.y);
     this.gems.push(gem);
   }
@@ -2103,7 +2107,7 @@ export class WorldView {
   private makeGem(): Gem {
     const s = new Sprite(this.art.frame("jade"));
     s.anchor.set(0.5);
-    s.scale.set(0.11);
+    s.scale.set(0.16);
     s.eventMode = "none";
     this.fxLayer.addChild(s);
     return { s, x: 0, y: 0, vx: 0, vy: 0, life: 0, n: 0 };
@@ -2228,13 +2232,14 @@ export class WorldView {
             rain.t = 0;
             rain.s.position.set(rain.x, rain.y);
             rain.s.rotation = Math.PI / 2 + (Math.random() - 0.5) * 0.4;
-            if (!rain.dusted && this.puffs.length < 24 && Math.random() < 0.35) {
+            if (!rain.dusted) {
               rain.dusted = true;
-              this.puffs.push({ x: rain.x, y: rain.y, life: 0, max: 0.16 });
+              if (this.puffs.length < 28) this.puffs.push({ x: rain.x, y: rain.y, life: 0, max: 0.22 });
             }
           }
         }
       } else {
+        if (rain.t < 0.07) this.pads.circle(rain.x, rain.y, 7).fill({ color: 0xffffff, alpha: 0.85 });
         rain.s.alpha = rain.t < 0.35 ? 1 : Math.max(0, 1 - (rain.t - 0.35) / 0.4);
         if (rain.t > 0.75) {
           this.dropRain(rain.s);
