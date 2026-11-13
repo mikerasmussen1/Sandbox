@@ -70,7 +70,16 @@ async function boot(): Promise<void> {
   let beamAcc = 0;
 
   const hud = new Hud(art, {
-    play: () => { click(); setMode("levels"); },
+    play: () => {
+      try {
+        click();
+        audio.unlock();
+        audio.play("click");
+      } catch {
+        // Howler can throw on iOS Safari before the audio context unlocks.
+      }
+      setMode("levels");
+    },
     openSettings: () => {
       click();
       pausedBefore = paused;
@@ -461,8 +470,12 @@ async function boot(): Promise<void> {
   app.renderer.on("resize", layout);
 
   function click(): void {
-    audio.unlock();
-    audio.play("click");
+    try {
+      audio.unlock();
+      audio.play("click");
+    } catch {
+      // Howler can throw on iOS Safari before the audio context unlocks.
+    }
   }
 
   function setMode(next: "title" | "levels" | "play"): void {
