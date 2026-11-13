@@ -496,7 +496,7 @@ export class Hud {
 
   announce(text: string): void {
     this.banner.text = text;
-    this.bannerLife = 1.7;
+    this.bannerLife = 1.05;
     this.banner.alpha = 1;
     this.banner.visible = true;
   }
@@ -507,14 +507,11 @@ export class Hud {
     this.safeBottom = bottom;
   }
 
-  /** First time a raider appears. The second line is which tower answers it. */
+  /** First time a raider appears. It uses the bottom toast so the plate never sits on the fight. */
   showIntro(name: string, weak: string): void {
-    if (!this.intro) return;
-    this.introTitle.text = name;
-    this.introBody.text = weak;
-    this.introLife = 3.1;
-    this.intro.alpha = 1;
-    this.intro.visible = true;
+    this.announce(`${name} · ${weak}`);
+    this.bannerLife = 1.5;
+    if (this.intro) this.intro.visible = false;
   }
 
   tick(dt: number): void {
@@ -735,16 +732,16 @@ export class Hud {
     this.intro = new Container();
     this.intro.visible = false;
     this.intro.eventMode = "none";
-    const introPlate = this.panel(280, 108);
+    const introPlate = this.panel(200, 46);
     introPlate.position.set(0, 0);
     introPlate.eventMode = "none";
-    this.introTitle = new Text({ text: "", style: { fontFamily: SERIF, fontSize: 22, fill: 0xfff6df, fontWeight: "bold", align: "center" } });
+    this.introTitle = new Text({ text: "", style: { fontFamily: SERIF, fontSize: 15, fill: 0xfff6df, fontWeight: "bold", align: "center" } });
     this.introTitle.anchor.set(0.5, 0);
-    this.introTitle.position.set(0, -36);
+    this.introTitle.position.set(0, -16);
     this.introTitle.eventMode = "none";
-    this.introBody = new Text({ text: "", style: { fontFamily: SANS, fontSize: 16, fill: 0xffe08a, fontWeight: "bold", align: "center", wordWrap: true, wordWrapWidth: 250 } });
+    this.introBody = new Text({ text: "", style: { fontFamily: SANS, fontSize: 12, fill: 0xffe08a, fontWeight: "bold", align: "center", wordWrap: true, wordWrapWidth: 180 } });
     this.introBody.anchor.set(0.5, 0);
-    this.introBody.position.set(0, 0);
+    this.introBody.position.set(0, 4);
     this.introBody.eventMode = "none";
     this.intro.addChild(introPlate, this.introTitle, this.introBody);
     this.hintPlate = new Graphics();
@@ -810,7 +807,7 @@ export class Hud {
       this.hintPlate.roundRect(-tw / 2, -16, tw, 32, 12).fill({ color: 0x140e0a, alpha: 0.88 });
       this.hintPlate.position.set(w / 2, toastY);
     }
-    this.banner.style.fontSize = narrow ? 16 : 28;
+    this.banner.style.fontSize = narrow ? 13 : 18;
     this.banner.style.wordWrap = true;
     this.banner.style.wordWrapWidth = Math.max(160, w - 80);
     this.banner.style.align = "center";
@@ -818,8 +815,8 @@ export class Hud {
     const cardScale = Math.min(1, (w - 8) / 600, Math.max(0.62, (h * 0.5) / 400));
     this.card.scale.set(cardScale);
     this.card.position.set(8, h - 400 * cardScale - 8 - bottom);
-    this.intro.scale.set(narrow ? 0.55 : 0.8);
-    this.intro.position.set(w / 2, top + row + (narrow ? 64 : 90));
+    this.intro.scale.set(narrow ? 0.7 : 0.88);
+    this.intro.position.set(w - (narrow ? 86 : 130), top + row + (narrow ? 96 : 112));
     this.bossText.style.fontSize = 12;
     this.bossText.anchor.set(0.5, 0);
     this.bossText.position.set(w / 2, top + row + 4);

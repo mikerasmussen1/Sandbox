@@ -104,7 +104,7 @@ interface Ghost {
 }
 
 interface Bit { s: Sprite; vx: number; vy: number; life: number; max: number }
-interface Floater { t: Text; life: number; vy: number }
+interface Floater { t: Text; life: number; max: number; vy: number }
 interface Gem { s: Sprite; x: number; y: number; vx: number; vy: number; life: number; n: number }
 interface Bucket { x: number; y: number; n: number; age: number }
 interface RingFx { s: Sprite; life: number; max: number; grow: number }
@@ -279,13 +279,14 @@ export class WorldView {
     this.art = art;
     this.mapSprite.eventMode = "none";
     this.ground.eventMode = "none";
-    this.ground.rect(-1200, -1200, 1920 + 2400, 1080 + 2400).fill({ color: 0x2f9a3a });
+    this.ground.rect(-1200, -1200, 1920 + 2400, 1080 + 2400).fill({ color: 0x2c3034 });
     this.pads.eventMode = "none";
     this.range.eventMode = "none";
     this.link.eventMode = "none";
     this.bars.eventMode = "none";
     this.shadowLayer.eventMode = "none";
     this.fxLayer.eventMode = "none";
+    // Feet y, painter's order. Atlas frames stay Sprites on one texture, so this sort does not break the batch.
     this.actors.sortableChildren = true;
     this.actors.eventMode = "none";
     this.glow = this.makeSun(art.glow, "add");
@@ -314,7 +315,7 @@ export class WorldView {
       text: "",
       style: {
         fontFamily: SANS,
-        fontSize: 20,
+        fontSize: 13,
         fill: 0xfff1c2,
         fontWeight: "bold",
         align: "center",
@@ -335,7 +336,7 @@ export class WorldView {
   }
 
   setMap(texture: Texture, map: MapDef): void {
-    const field = map.biome === "crater" ? 0x4d7a38 : map.biome === "ruins" ? 0x3aaa48 : 0x2f9a3a;
+    const field = map.biome === "crater" ? 0x3a2a22 : 0x2c3034;
     this.ground.clear();
     this.ground.rect(-400, -400, MAP_W + 800, MAP_H + 800).fill({ color: field });
     this.mapSprite.texture = texture;
@@ -360,7 +361,7 @@ export class WorldView {
   layout(w: number, h: number): void {
     this.viewW = w;
     this.viewH = h;
-    this.callout.position.set(w / 2, w < 760 ? 320 : 248);
+    this.callout.position.set(w / 2, w < 760 ? 108 : 88);
     this.flashRect.clear();
     this.flashRect.rect(0, 0, w, h).fill({ color: 0xffe0a0 });
   }
@@ -648,11 +649,11 @@ export class WorldView {
       }
       else if (event.kind === "jade" && event.n) this.onJade(event.x, event.y, event.n);
       else if (event.kind === "multi" && event.text) {
-        this.floatText(event.x, event.y - 36, event.text, 0xfff1c2, event.n && event.n >= 10 ? 18 : 15);
+        this.showCallout(event.text);
         this.bump(event.n && event.n >= 8 ? 0.2 : 0.08);
       } else if (event.kind === "callout" && event.text) {
         this.showCallout(event.text);
-      } else if (event.kind === "relic" && event.text) this.floatText(event.x, event.y, event.text, 0xfff1c8, 26);
+      } else if (event.kind === "relic" && event.text) this.floatText(event.x, event.y, event.text, 0xfff1c8, 18);
       else if (event.kind === "drum" && event.n) this.ringFx(event.x, event.y, event.n, 0xb9a0ff);
       else if (event.kind === "slam" && event.n) {
         this.ringFx(event.x, event.y, event.n, 0xff7a4a);
@@ -663,7 +664,7 @@ export class WorldView {
       else if (event.kind === "crack") {
         this.bump(0.18 + Math.min(0.35, event.n ?? 1) * 0.2);
         this.sunFlash = 0.28;
-        this.floatText(event.x, event.y - 78, `-${Math.max(1, Math.round(event.n ?? 1))}`, 0xff5a3c, 30);
+        this.floatText(event.x, event.y - 78, `-${Math.max(1, Math.round(event.n ?? 1))}`, 0xff5a3c, 14);
       }
       else if (event.kind === "splinter") {
         this.burst(event.x, event.y, 0xf0d7a2, 10);
@@ -1134,7 +1135,7 @@ export class WorldView {
       const hint = this.stationHint(i);
       hint.text = empty && close && station.chosen && station.kind !== "wall" ? ROLE_HINT[station.kind] : "";
       hint.visible = hint.text.length > 0 && Math.hypot(station.x - hero.x, station.y - hero.y) > 100;
-      hint.position.set(station.x, station.y - 62);
+      hint.position.set(station.x, station.y - 46);
       hint.zIndex = station.y + 6;
       if (hot && isTower(station.kind) && station.tier < 3) {
         const radius = towerRange(station.kind, Math.min(2, station.tier)) * sim.rangeScale;
@@ -1165,7 +1166,7 @@ export class WorldView {
     if (!label) {
       label = new Text({
         text: "",
-        style: { fontFamily: SANS, fontSize: 15, fill: 0xfff6df, fontWeight: "bold", align: "center", stroke: { color: 0x140e0a, width: 4 } },
+        style: { fontFamily: SANS, fontSize: 12, fill: 0xfff6df, fontWeight: "bold", align: "center", stroke: { color: 0x140e0a, width: 3 } },
       });
       label.anchor.set(0.5, 1);
       label.eventMode = "none";
@@ -2137,7 +2138,7 @@ export class WorldView {
       const bucket = this.buckets[i];
       bucket.age += 0.016;
       if (bucket.age < 0.22) continue;
-      this.floatText(bucket.x, bucket.y - 18, `+${bucket.n}`, 0xc8ffd8, bucket.n >= 12 ? 22 : 16);
+      this.floatText(bucket.x, bucket.y - 18, `+${bucket.n}`, 0xc8ffd8, bucket.n >= 12 ? 13 : 11);
       this.buckets.splice(i, 1);
     }
   }
@@ -2364,47 +2365,39 @@ export class WorldView {
     this.callout.text = text;
     this.callout.visible = true;
     this.callout.alpha = 1;
-    this.callout.scale.set(1.12);
-    this.calloutLife = 1.2;
+    this.callout.scale.set(1);
+    this.calloutLife = 0.7;
   }
 
   private drawCallout(dt: number): void {
     if (this.calloutLife <= 0) return;
     this.calloutLife -= dt;
-    const t = Math.max(0, this.calloutLife / 1.2);
-    this.callout.alpha = Math.min(1, t * 2.2);
-    this.callout.scale.set(1 + (1 - t) * 0.08);
+    const t = Math.max(0, this.calloutLife / 0.7);
+    this.callout.alpha = Math.min(1, t * 3);
     if (this.calloutLife <= 0) this.callout.visible = false;
   }
 
-  /** A small white number that hops off a hit. Each hit keeps its own so a pack stays readable. */
+  /** A small white number that hops off a hit and is gone before the next swing. */
   private popNumber(x: number, y: number, text: string): void {
-    if (this.floats.length > 10) return;
-    if (this.floats.length > 72) {
-      const oldest = this.floats.shift();
-      if (oldest) {
-        oldest.t.visible = false;
-        oldest.life = 0;
-        this.floatPool.push(oldest);
-      }
-    }
+    if (this.floats.length > 6) return;
     const floater = this.floatPool.pop() ?? this.makeFloat();
     floater.t.text = text;
     const big = Number(text) >= 80;
-    floater.t.style.fontSize = big ? 26 : 16;
+    floater.t.style.fontSize = big ? 14 : 11;
     floater.t.style.fill = 0xffffff;
-    floater.t.position.set(x + ((this.floats.length % 5) - 2) * 4, y);
+    floater.t.position.set(x + ((this.floats.length % 5) - 2) * 3, y - 10);
     floater.t.alpha = 1;
     floater.t.visible = true;
-    floater.life = 0.55;
-    floater.vy = -92;
+    floater.life = 0.28;
+    floater.max = 0.28;
+    floater.vy = -70;
     this.floats.push(floater);
   }
 
   private floatText(x: number, y: number, text: string, fill: number, size: number): void {
     const near = this.floats.find((f) => f.t.visible && f.t.text === text && Math.hypot(f.t.x - x, f.t.y - y) < 140);
     if (near) {
-      near.life = 0.9;
+      near.life = near.max;
       near.t.position.set(x, y);
       near.t.alpha = 1;
       return;
@@ -2416,20 +2409,21 @@ export class WorldView {
     floater.t.position.set(x, y);
     floater.t.alpha = 1;
     floater.t.visible = true;
-    floater.life = 0.8;
-    floater.vy = -36;
+    floater.life = 0.5;
+    floater.max = 0.5;
+    floater.vy = -28;
     this.floats.push(floater);
   }
 
   private makeFloat(): Floater {
     const t = new Text({
       text: "",
-      style: { fontFamily: SANS, fontSize: 16, fill: 0xffffff, fontWeight: "bold", dropShadow: shadowStyle() },
+      style: { fontFamily: SANS, fontSize: 11, fill: 0xffffff, fontWeight: "bold", dropShadow: shadowStyle() },
     });
     t.anchor.set(0.5);
     t.eventMode = "none";
     this.fxLayer.addChild(t);
-    return { t, life: 0, vy: -30 };
+    return { t, life: 0, max: 0.5, vy: -30 };
   }
 
   private drawFloats(step: number): void {
@@ -2439,7 +2433,7 @@ export class WorldView {
       const floater = this.floats[i];
       floater.life -= dt;
       floater.t.y += floater.vy * dt;
-      floater.t.alpha = Math.max(0, floater.life / 0.8);
+      floater.t.alpha = Math.max(0, floater.life / floater.max);
       if (floater.life <= 0) {
         floater.t.visible = false;
         this.floats.splice(i, 1);

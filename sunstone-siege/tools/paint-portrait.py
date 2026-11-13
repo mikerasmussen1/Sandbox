@@ -17,16 +17,18 @@ SUN = (480, 1040)
 RIM = 46
 
 THEMES = [
-    # top, cliff, path, accent. Jungle, sandstone, river, canyon, pine, dunes, ruins, ember.
-    ((72, 168, 58), (48, 86, 42), (214, 176, 114), (28, 118, 40)),
-    ((214, 176, 108), (168, 112, 64), (236, 214, 168), (110, 132, 58)),
-    ((58, 148, 96), (42, 86, 64), (176, 204, 164), (32, 108, 132)),
-    ((186, 118, 62), (128, 68, 40), (220, 176, 124), (156, 58, 34)),
-    ((48, 128, 74), (36, 74, 48), (186, 164, 108), (22, 88, 48)),
-    ((206, 158, 84), (150, 96, 52), (232, 206, 150), (78, 124, 46)),
-    ((142, 128, 96), (92, 78, 62), (204, 186, 150), (96, 86, 68)),
-    ((158, 90, 56), (102, 52, 42), (210, 158, 108), (168, 46, 32)),
+    # top, cliff, path, accent. Deeper greens. Jungle, sandstone, river, canyon, pine, dunes, ruins, ember.
+    ((42, 118, 46), (48, 86, 42), (198, 158, 96), (22, 92, 32)),
+    ((196, 150, 92), (168, 112, 64), (228, 198, 146), (96, 118, 48)),
+    ((36, 112, 74), (42, 86, 64), (168, 188, 146), (24, 88, 108)),
+    ((168, 102, 54), (128, 68, 40), (210, 164, 108), (132, 48, 28)),
+    ((34, 102, 56), (36, 74, 48), (176, 150, 96), (16, 72, 38)),
+    ((188, 142, 78), (150, 96, 52), (224, 190, 136), (64, 108, 40)),
+    ((122, 110, 82), (92, 78, 62), (196, 174, 136), (82, 74, 58)),
+    ((142, 78, 48), (102, 52, 42), (198, 146, 96), (148, 40, 28)),
 ]
+# Jungle valleys drop off grey stone. Desert valleys drop off sandstone.
+DESERT = {1, 3, 5, 7}
 
 
 def clamp(v: float, a: float, b: float) -> float:
@@ -152,49 +154,93 @@ def sample(routes: list[list[tuple[float, float]]]) -> list[tuple[float, float]]
     return pts
 
 
+def stone_for(index: int) -> tuple[tuple[int, int, int], tuple[int, int, int], tuple[int, int, int]]:
+    """Face, shadowed face, and the deep drop. Grey stone in the green valleys, sandstone in the desert."""
+    if index in DESERT:
+        return (196, 150, 102), (132, 88, 52), (78, 50, 30)
+    return (138, 142, 146), (86, 90, 96), (52, 56, 62)
+
+
 def paint(level: dict, theme: tuple, index: int) -> None:
-    top, cliff, path_c, accent = theme
+    top, _cliff, path_c, accent = theme
     rng = np.random.default_rng(100 + index)
-    # Soft grass with a little variation, upscaled so it stays chunky but not pixel-stepped.
-    noise = rng.random((H // 10, W // 10)).astype(np.float32)
-    noise = np.asarray(Image.fromarray((noise * 255).astype(np.uint8), "L").resize((W, H), Image.BILINEAR)).astype(np.float32) / 255
-    shade = 0.9 + noise * 0.16
-    grass = np.zeros((H, W, 3), np.float32)
-    for c in range(3):
-        grass[..., c] = top[c] * shade
-    img = Image.fromarray(np.clip(grass, 0, 255).astype(np.uint8), "RGB").convert("RGBA")
     road = sample(level["routes"])
     width = int(level["width"])
-    face = tuple(max(0, int(c) - 28) for c in cliff)
-    lip = tuple(min(255, int(c) + 48) for c in top)
+    stone, stone_dark, stone_deep = stone_for(index)
+    drop = 46
 
-    # Soft plateaus and a blurred dirt path. No stroked cliff, so the road has no diagonal bands.
-    half = max(16, int(width * 0.34))
-    plateaus = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    pd = ImageDraw.Draw(plateaus)
-    tops = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-    td = ImageDraw.Draw(tops)
-    # Valley walls along both long edges, then raised shelves in the field.
-    for side in (0, 1):
-        edge_x = 8 if side == 0 else W - 8
-        pd.rectangle((edge_x - 70, 0, edge_x + 70, H), fill=face + (230,))
-        lip_x = 78 if side == 0 else W - 78
-        td.rectangle((lip_x - 18, 0, lip_x + 10, H), fill=lip + (150,))
-    for n in range(16):
-        cx = int(rng.integers(70, W - 70))
+    # The play surface is a raised plateau. Everything else is the cliff drop.
+    mask_img = Image.new("L", (W, H), 0)
+    md = ImageDraw.Draw(mask_img)
+    # Narrow enough that a portrait view (about 280 world px wide) shows the drop.
+    span = 116
+    for x, y in road[::2]:
+        md.ellipse((x - span, y - span * 0.78, x + span, y + span * 0.78), fill=255)
+    sx0, sy0 = SUN
+    md.ellipse((sx0 - 230, sy0 - 180, sx0 + 230, sy0 + 160), fill=255)
+    for _n in range(7):
+        cx = int(rng.integers(90, W - 90))
         cy = int(rng.integers(80, H - 120))
-        if math.hypot(cx - SUN[0], cy - SUN[1]) < 240:
+        if math.hypot(cx - sx0, cy - sy0) < 220:
             continue
-        rx = int(rng.integers(80, 170))
-        ry = int(rng.integers(48, 110))
-        pd.ellipse((cx - rx, cy - ry + 18, cx + rx, cy + ry + 28), fill=face + (225,))
-        cap = tuple(min(255, c + 22) for c in top)
-        td.ellipse((cx - rx, cy - ry, cx + rx, cy + ry), fill=cap + (240,))
-        td.ellipse((cx - rx * 0.72, cy - ry * 0.72, cx + rx * 0.2, cy - ry * 0.35), fill=lip + (120,))
-    plateaus = plateaus.filter(ImageFilter.GaussianBlur(6))
-    tops = tops.filter(ImageFilter.GaussianBlur(2))
-    img.alpha_composite(plateaus)
-    img.alpha_composite(tops)
+        if any(math.hypot(cx - px, cy - py) < span * 0.7 for px, py in road[::8]):
+            continue
+        rx = int(rng.integers(70, 130))
+        ry = int(rng.integers(48, 90))
+        md.ellipse((cx - rx, cy - ry, cx + rx, cy + ry), fill=255)
+    mask_img = mask_img.filter(ImageFilter.GaussianBlur(1.4))
+    mask = np.asarray(mask_img) > 96
+
+    above = np.zeros_like(mask)
+    above[1:] = mask[:-1]
+    # Extrude the plateau downward, widening a little each step so the sides drop too.
+    cover = mask.copy()
+    face = np.zeros_like(mask)
+    dist = np.zeros((H, W), np.int16)
+    for k in range(1, drop + 1):
+        nxt = np.zeros_like(mask)
+        nxt[1:] = cover[:-1]
+        if k % 2 == 0:
+            nxt[:, 1:] |= nxt[:, :-1]
+            nxt[:, :-1] |= nxt[:, 1:]
+        fresh = nxt & ~mask & (dist == 0)
+        dist[fresh] = k
+        face |= fresh
+        cover = nxt | mask
+
+    noise = rng.random((H // 8, W // 8)).astype(np.float32)
+    noise = np.asarray(Image.fromarray((noise * 255).astype(np.uint8), "L").resize((W, H), Image.BILINEAR)).astype(np.float32) / 255
+    rgb = np.zeros((H, W, 3), np.float32)
+    for c in range(3):
+        rgb[..., c] = stone_deep[c]
+    if np.any(face):
+        t = np.clip(dist.astype(np.float32) / drop, 0, 1)
+        t = t * t
+        for c in range(3):
+            lit = stone[c] * 1.08
+            shade = stone_dark[c] * 0.72 + stone_deep[c] * 0.28
+            rgb[..., c] = np.where(face, lit * (1 - t) + shade * t, rgb[..., c])
+    grass_lit = tuple(min(255, int(c) + 38) for c in top)
+    top_rim = mask & ~above
+    lit_band = top_rim.copy()
+    for k in range(1, 6):
+        band = np.zeros_like(mask)
+        band[k:] = top_rim[:-k]
+        lit_band |= band & mask
+    for c in range(3):
+        field = top[c] * (0.9 + noise * 0.14)
+        rgb[..., c] = np.where(mask, field, rgb[..., c])
+        rgb[..., c] = np.where(lit_band, field * 0.55 + grass_lit[c] * 0.45, rgb[..., c])
+    # A dark contact where the grass meets the drop.
+    foot = np.zeros_like(mask)
+    for k in range(1, 6):
+        below = np.zeros_like(mask)
+        below[:-k] = face[k:]
+        foot |= mask & below
+    for c in range(3):
+        rgb[..., c] = np.where(foot, rgb[..., c] * 0.7, rgb[..., c])
+    img = Image.fromarray(np.clip(rgb, 0, 255).astype(np.uint8), "RGB").convert("RGBA")
+    half = max(16, int(width * 0.34))
     if road:
         # Disks, not a thick polyline: a stroked line miters into diagonal stripes.
         stamps = []
@@ -220,6 +266,10 @@ def paint(level: dict, theme: tuple, index: int) -> None:
             path_draw.ellipse((x - core, y - core * 0.7, x + core, y + core * 0.7), fill=path_c + (230,))
         path = path.filter(ImageFilter.GaussianBlur(4))
         img.alpha_composite(path)
+        # The soft edge stays on the grass. The cliff face keeps its stone.
+        painted = np.array(img)
+        painted[~mask, :3] = np.clip(rgb[~mask], 0, 255).astype(np.uint8)
+        img = Image.fromarray(painted, "RGBA")
     shadows = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     sd = ImageDraw.Draw(shadows)
     props = Image.new("RGBA", (W, H), (0, 0, 0, 0))
@@ -232,28 +282,30 @@ def paint(level: dict, theme: tuple, index: int) -> None:
         y = int(rng.integers(36, H - 36))
         if math.hypot(x - SUN[0], y - SUN[1]) < 190:
             continue
+        if not mask[y, x]:
+            continue
         if any(math.hypot(x - px, y - py) < level["width"] * 0.62 for px, py in road[::6]):
             continue
         kind = int(rng.integers(0, 6))
         if kind <= 2:
             rad = int(rng.integers(22, 46))
-            sd.ellipse((x - rad, y + 4, x + rad + 10, y + rad * 0.7), fill=(20, 16, 10, 110))
+            sd.ellipse((x - rad, y + 6, x + rad + 14, y + rad * 0.85), fill=(12, 14, 10, 170))
             pr.rectangle((x - 5, y - 4, x + 5, y + 18), fill=(92, 58, 32, 255))
             pr.rectangle((x - 3, y - 4, x - 1, y + 10), fill=(140, 96, 58, 255))
             pr.ellipse((x - rad * 0.72, y - rad * 0.15, x + rad * 0.78, y + rad * 0.6), fill=dark + (255,))
             pr.ellipse((x - rad * 0.9, y - rad * 1.25, x + rad * 0.75, y + rad * 0.12), fill=accent + (255,))
             pr.ellipse((x - rad * 0.4, y - rad * 1.05, x + rad * 0.12, y - rad * 0.4), fill=hi + (235,))
         elif kind == 3:
-            sd.ellipse((x - 26, y + 6, x + 30, y + 20), fill=(20, 16, 10, 100))
+            sd.ellipse((x - 28, y + 8, x + 34, y + 26), fill=(12, 14, 10, 165))
             pr.ellipse((x - 24, y - 2, x + 26, y + 16), fill=dark + (255,))
             pr.ellipse((x - 20, y - 18, x + 22, y + 6), fill=accent + (255,))
             pr.ellipse((x - 8, y - 16, x + 4, y - 2), fill=hi + (220,))
         else:
-            sd.ellipse((x - 24, y + 4, x + 28, y + 18), fill=(20, 16, 10, 105))
+            sd.ellipse((x - 28, y + 8, x + 32, y + 24), fill=(12, 14, 10, 170))
             pr.ellipse((x - 18, y - 2, x + 24, y + 14), fill=tuple(max(0, c - 48) for c in rock) + (255,))
             pr.ellipse((x - 22, y - 18, x + 16, y + 4), fill=rock + (255,))
             pr.ellipse((x - 12, y - 16, x + 2, y - 4), fill=tuple(min(255, c + 48) for c in rock) + (255,))
-    shadows = shadows.filter(ImageFilter.GaussianBlur(8))
+    shadows = shadows.filter(ImageFilter.GaussianBlur(5))
     img.alpha_composite(shadows)
     img.alpha_composite(props)
     sx, sy = SUN
@@ -265,7 +317,7 @@ def paint(level: dict, theme: tuple, index: int) -> None:
     img.alpha_composite(keep)
     plaza = ImageDraw.Draw(img)
     # Courtyard under the sun, then a timber hall just north of it.
-    plaza.ellipse((sx - 120, sy - 6, sx + 128, sy + 62), fill=face + (255,))
+    plaza.ellipse((sx - 120, sy - 6, sx + 128, sy + 62), fill=(118, 96, 68, 255))
     plaza.ellipse((sx - 114, sy - 36, sx + 114, sy + 32), fill=(196, 168, 122, 255))
     plaza.ellipse((sx - 48, sy - 30, sx + 10, sy - 4), fill=(232, 214, 170, 170))
     hall_x, hall_y = sx, sy - 118
