@@ -99,6 +99,7 @@ export class Hud {
   private hpLag: number = BALANCE.integrity;
   private hpW = 220;
   private readonly backdrop: Sprite;
+  private readonly wordmark: Sprite;
   private readonly integrityText: Text;
   private readonly integrityFill: Graphics;
   private readonly jadeText: Text;
@@ -201,7 +202,11 @@ export class Hud {
   constructor(private readonly art: ArtSet, private readonly hooks: HudHooks, save: SaveData) {
     this.backdrop = new Sprite();
     this.backdrop.eventMode = "none";
-    this.root.addChild(this.backdrop, this.title, this.levels, this.play, this.pauseLayer, this.endLayer, this.settingsLayer, this.treeLayer);
+    this.wordmark = new Sprite();
+    this.wordmark.anchor.set(0.5, 0);
+    this.wordmark.eventMode = "none";
+    this.wordmark.visible = false;
+    this.root.addChild(this.backdrop, this.wordmark, this.title, this.levels, this.play, this.pauseLayer, this.endLayer, this.settingsLayer, this.treeLayer);
 
     this.integrityText = label("Sunstone 0", 16, 0xf6e7c1);
     this.integrityFill = new Graphics();
@@ -263,6 +268,7 @@ export class Hud {
   show(screen: "title" | "levels" | "play"): void {
     this.screen = screen;
     this.title.visible = screen === "title";
+    this.wordmark.visible = screen === "title";
     this.levels.visible = screen === "levels";
     this.play.visible = screen === "play";
     this.backdrop.visible = screen === "title" || screen === "levels";
@@ -279,15 +285,37 @@ export class Hud {
   layout(w: number, h: number): void {
     this.w = w;
     this.h = h;
+    const portrait = h > w * 1.05;
     if (this.backdrop.texture) {
       const tw = this.backdrop.texture.width || 1;
       const th = this.backdrop.texture.height || 1;
-      const k = Math.max(w / tw, h / th);
+      let k = Math.max(w / tw, h / th);
+      let y = (h - th * k) / 2;
+      // title.webp bakes the wordmark into its top ~340px. A phone cover-crop
+      // leaves only the middle of that line ("NSTONE SI"). Frame below it so
+      // the screen stays filled, and draw the full logo over the sky.
+      if (portrait && this.screen === "title") {
+        const band = 340;
+        k = Math.max(k, h / Math.max(1, th - band));
+        y = -band * k;
+      }
       this.backdrop.scale.set(k);
-      this.backdrop.position.set((w - tw * k) / 2, (h - th * k) / 2);
+      this.backdrop.position.set((w - tw * k) / 2, y);
     }
     this.title.position.set(w / 2, h / 2);
-    this.title.scale.set(Math.max(0.62, Math.min(1, Math.min(w / 980, h / 640))));
+    let titleScale = Math.max(0.62, Math.min(1, Math.min(w / 980, h / 640)));
+    if (portrait) {
+      // Settings is 50 local px. Keep every title plate at least 44 CSS px tall.
+      titleScale = Math.min(Math.max(titleScale, 44 / 50), (w - 24) / 240);
+    }
+    this.title.scale.set(titleScale);
+    const showLogo = portrait && this.screen === "title" && !this.settingsLayer.visible && !!this.wordmark.texture?.width;
+    if (showLogo) {
+      const fit = w / this.wordmark.texture.width;
+      this.wordmark.scale.set(fit);
+      this.wordmark.position.set(w / 2, Math.max(4, h * 0.012));
+    }
+    this.wordmark.visible = showLogo;
     const cols = w < 800 ? 2 : 4;
     const gapX = 184;
     const gapY = 168;
@@ -552,9 +580,11 @@ export class Hud {
     this.reducedText.text = this.reducedLine();
     if (open) {
       this.title.visible = false;
+      this.wordmark.visible = false;
       this.levels.visible = false;
     } else if (this.screen !== "play") {
       this.title.visible = this.screen === "title";
+      this.wordmark.visible = this.screen === "title" && this.h > this.w * 1.05;
       this.levels.visible = this.screen === "levels";
     }
   }
@@ -574,7 +604,8 @@ export class Hud {
     this.nextButton.visible = kind === "victory" && hasNext;
   }
 
-  private buildTitle(_art: ArtSet): void {
+  private buildTitle(art: ArtSet): void {
+    this.wordmark.texture = art.logo;
     const sub = wrap("Hold the crater. Jade is a demo token and has no cash value.", 460, 18, 0xfff6df);
     sub.position.set(0, 168);
     const play = this.button(label("Play", 22, INK), 240, 58, () => this.hooks.play());
@@ -1111,6 +1142,7 @@ export class Hud {
     pressed.visible = false;
     text.style.fill = INK;
     text.anchor.set(0.5);
+    text.eventMode = "none";
     c.addChild(face, pressed, text);
     const down = () => {
       face.visible = false;
@@ -1129,6 +1161,7 @@ export class Hud {
     c.on("pointerupoutside", up);
     c.eventMode = "static";
     c.cursor = "pointer";
+    c.hitArea = new Rectangle(-w / 2, -h / 2, w, h);
     c.on("pointertap", (e) => {
       e.stopPropagation();
       onClick();
