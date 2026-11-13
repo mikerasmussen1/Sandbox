@@ -34,13 +34,9 @@ const MENU_REACH = 220;
 const MENU_TOP = 168;
 const MENU_BOTTOM = 96;
 
-function offerPrice(kind: StationKind): number {
-  if (kind === "barracks") return BALANCE.barracks.squad;
-  if (kind === "wall") return BALANCE.wall.cost[0];
-  if (kind === "base") return BALANCE.base.cost[0];
-  if (kind === "recruit") return BALANCE.recruit.groupCost;
-  return towerCost(kind, 0);
-}
+/** Archer bolts and Arrow Rain shafts, relative to the previous sprite length. */
+/** 45% of the bolt and rain length from before this shrink. */
+const ARROW_DRAW = 0.45;
 
 function padHue(kind: StationKind): number {
   if (kind === "wall") return 0xc46a3a;
@@ -181,6 +177,7 @@ export class WorldView {
   private zoom = 1;
   private readonly art: ArtSet;
   private readonly mapSprite = new Sprite();
+  private readonly waterGfx = new Graphics();
   private readonly ground = new Graphics();
   private readonly pads = new Graphics();
   private readonly chevronGfx = new Graphics();
@@ -216,7 +213,7 @@ export class WorldView {
   private readonly picker = new Container();
   private readonly pickerHits: Container[] = [];
   private pickerFor = -1;
-  private onChoose: ((index: number, kind: StationKind) => void) | null = null;
+  private payEpoch = 0;
   private readonly puffs: { x: number; y: number; life: number; max: number; color?: number }[] = [];
   private readonly menuButtons: Container[] = [];
   private readonly menuCosts: Text[] = [];
@@ -243,6 +240,7 @@ export class WorldView {
   private sunFlash = 0;
   private onBranch: ((index: number, spec: Spec) => void) | null = null;
   private reduced = false;
+  private waters: Vec[][] = [];
   private plaza = 160;
   private sunAt = { x: 960, y: 540 };
   private beamCursor = 0;
@@ -307,6 +305,7 @@ export class WorldView {
   constructor(art: ArtSet) {
     this.art = art;
     this.mapSprite.eventMode = "none";
+    this.waterGfx.eventMode = "none";
     this.ground.eventMode = "none";
     this.ground.rect(-1200, -1200, 1920 + 2400, 1080 + 2400).fill({ color: 0x2c3034 });
     this.pads.eventMode = "none";
@@ -335,7 +334,7 @@ export class WorldView {
     this.mark.eventMode = "none";
     this.picker.eventMode = "passive";
     this.picker.visible = false;
-    this.world.addChild(this.ground, this.mapSprite, this.chevronGfx, this.pads, this.shadowLayer, this.range, this.actors, this.link, this.bars, this.mark, this.fxLayer, this.labels, this.picker, this.tag, this.menu);
+    this.world.addChild(this.ground, this.mapSprite, this.waterGfx, this.chevronGfx, this.pads, this.shadowLayer, this.range, this.actors, this.link, this.bars, this.mark, this.fxLayer, this.labels, this.picker, this.tag, this.menu);
     this.actors.addChild(this.sun);
     this.flashRect.eventMode = "none";
     this.flashRect.blendMode = "add";
@@ -371,6 +370,8 @@ export class WorldView {
     this.mapSprite.texture = texture;
     this.mapSprite.width = MAP_W;
     this.mapSprite.height = MAP_H;
+    this.waters = map.water;
+    this.drawWater();
     this.paintChevrons(map);
     this.plaza = map.plaza;
     this.sunAt = map.sun;
@@ -565,10 +566,6 @@ export class WorldView {
     this.placeGhost.visible = false;
   }
 
-  setChoose(fn: (index: number, kind: StationKind) => void): void {
-    this.onChoose = fn;
-  }
-
   setBranch(fn: (index: number, spec: Spec) => void): void {
     this.onBranch = fn;
   }
@@ -624,6 +621,7 @@ export class WorldView {
   update(dt: number, sim: Siege, hold = false): void {
     const step = hold ? 0 : dt;
     this.time += step > 0 ? step : 0.016;
+    this.drawWater();
     for (const [kind, left] of this.fresh) {
       const next = left - (step || 0.016);
       if (next <= 0) this.fresh.delete(kind);
@@ -848,19 +846,101 @@ export class WorldView {
       const body = new Sprite(texture);
       const anchor = texture.defaultAnchor;
       body.anchor.set(anchor?.x ?? 0.5, anchor?.y ?? 0.8);
-      const scale = this.art.propScale(name) * (0.82 + rnd() * 0.34);
+      const scale = this.art.propScale(name) * (0.72 + rnd() * 0.55);
       body.scale.set(name === "bush" || name === "rock_small" ? scale * 0.85 : scale);
+      const spin = name.startsWith("tree") ? 0.22 : 1.1;
+      body.rotation = (rnd() - 0.5) * spin;
+      const warm = [0xffffff, 0xfff1dc, 0xf3e6cf, 0xfff8ee];
+      const cool = [0xffffff, 0xe7f3dc, 0xf4f7ea, 0xfff6e4];
+      body.tint = (desert ? warm : cool)[Math.floor(rnd() * 4)];
       body.position.set(x, y);
       body.zIndex = y;
       body.eventMode = "none";
       const shadow = this.shadowSprite();
       this.dressShadow(shadow, `prop_${name}`, body.scale.x, 0.85);
+      shadow.rotation = body.rotation;
       shadow.position.set(x, y);
       this.shadowLayer.addChild(shadow);
       this.actors.addChild(body);
       this.scenery.push({ body, shadow });
       taken.push({ x, y });
       placed += 1;
+      if ((name === "bush" || name === "rock_small") && rnd() > 0.62 && placed < want) {
+        const texture2 = this.art.prop(name);
+        if (!texture2) continue;
+        const extra = new Sprite(texture2);
+        const extraAnchor = texture2.defaultAnchor;
+        extra.anchor.set(extraAnchor?.x ?? 0.5, extraAnchor?.y ?? 0.8);
+        extra.scale.set(body.scale.x * 0.72);
+        extra.rotation = (rnd() - 0.5) * 1.2;
+        extra.tint = body.tint;
+        extra.position.set(x + (rnd() - 0.5) * 22, y + (rnd() - 0.4) * 16);
+        extra.zIndex = extra.y;
+        extra.eventMode = "none";
+        const extraShadow = this.shadowSprite();
+        this.dressShadow(extraShadow, `prop_${name}`, extra.scale.x, 0.7);
+        extraShadow.rotation = extra.rotation;
+        extraShadow.position.set(extra.x, extra.y);
+        this.shadowLayer.addChild(extraShadow);
+        this.actors.addChild(extra);
+        this.scenery.push({ body: extra, shadow: extraShadow });
+        taken.push({ x: extra.x, y: extra.y });
+        placed += 1;
+      }
+    }
+    const placeProp = (name: string, x: number, y: number, scaleMul: number, rot: number): void => {
+      if (x < 16 || y < 16 || x > MAP_W - 16 || y > MAP_H - 16) return;
+      if (Math.hypot(x - map.sun.x, y - map.sun.y) < 168) return;
+      if (map.pads.some((pad) => Math.hypot(pad.x - x, pad.y - y) < 58)) return;
+      for (const route of map.routes) {
+        for (let dist = 0; dist < route.len; dist += 36) {
+          const point = poseAt(route, dist);
+          const need = map.pathWidth * 0.4 + (scaleMul > 1.1 ? 54 : 18);
+          if (Math.hypot(point.x - x, point.y - y) < need) return;
+        }
+      }
+      const texture = this.art.prop(name);
+      if (!texture) return;
+      const body = new Sprite(texture);
+      const anchor = texture.defaultAnchor;
+      body.anchor.set(anchor?.x ?? 0.5, anchor?.y ?? 0.8);
+      body.scale.set(this.art.propScale(name) * scaleMul);
+      body.rotation = rot;
+      body.tint = desert ? 0xfff0dc : 0xe9f4df;
+      body.position.set(x, y);
+      body.zIndex = y + (scaleMul > 1.2 ? 40 : 0);
+      body.eventMode = "none";
+      const shadow = this.shadowSprite();
+      this.dressShadow(shadow, `prop_${name}`, body.scale.x, 0.8);
+      shadow.rotation = rot;
+      shadow.position.set(x, y);
+      this.shadowLayer.addChild(shadow);
+      this.actors.addChild(body);
+      this.scenery.push({ body, shadow });
+    };
+    for (let dist = 80; dist < (map.routes[0]?.len ?? 0); dist += 150) {
+      const here = poseAt(map.routes[0], dist);
+      const ahead = poseAt(map.routes[0], Math.min(map.routes[0].len - 1, dist + 20));
+      const ang = Math.atan2(ahead.y - here.y, ahead.x - here.x);
+      const nx = -Math.sin(ang);
+      const ny = Math.cos(ang);
+      const reach = map.pathWidth * 0.55 + 28;
+      placeProp("cliff_edge", here.x + nx * reach, here.y + ny * reach, 0.7 + rnd() * 0.35, ang);
+      if (dist % 300 < 150) {
+        placeProp("cliff_edge", here.x - nx * reach, here.y - ny * reach, 0.62 + rnd() * 0.3, ang + Math.PI);
+      }
+    }
+    const frameNames = desert ? ["tree_palm", "bush", "rock_big", "bush"] : ["tree_canopy", "tree_kapok", "bush", "tree_palm"];
+    for (let i = 0; i < 12; i++) {
+      const y = 36 + i * 145;
+      const name = frameNames[i % frameNames.length];
+      placeProp(name, 36 + (i % 3) * 10, y, 1.2 + (i % 2) * 0.22, (i - 4) * 0.08);
+      placeProp(name, MAP_W - 40 - (i % 3) * 10, y + 60, 1.25 + (i % 2) * 0.18, (i - 3) * 0.07);
+    }
+    for (let i = 0; i < 5; i++) {
+      const name = frameNames[i % frameNames.length];
+      placeProp(name, 140 + i * 160, 28, 1.15, (i - 2) * 0.1);
+      placeProp(name, 160 + i * 150, MAP_H - 36, 1.2, (i - 2) * 0.08);
     }
   }
 
@@ -1250,49 +1330,50 @@ export class WorldView {
         this.padPlot(station.x, station.y, plot, fade);
       }
       const next = station.tier < 3 ? sim.stationCost(station) : 0;
-      const remain = next > 0 ? Math.max(0, Math.ceil(next - station.paid)) : 0;
-      const broke = sim.funding === i && sim.jade < 1 && remain > 0;
-      if (sim.funding === i && next > 0) {
-        const u = Math.max(0, Math.min(1, station.paid / next));
-        const ring = plot * 0.72;
-        this.pads.circle(station.x, station.y, ring).stroke({ width: 3, color: 0x3a2414, alpha: 0.4 * fade });
-        this.pads.arc(station.x, station.y, ring, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * u).stroke({ width: 3, color: 0xffe08a, alpha: fade });
+      const remain = next > 0 ? Math.max(0, Math.ceil(next)) : 0;
+      const dwelling = sim.funding === i && sim.dwell > 0;
+      const broke = sim.funding === i && sim.shortJade && remain > 0;
+      if (dwelling) {
+        const u = Math.max(0, Math.min(1, sim.dwell));
+        const ring = plot * 1.15;
+        this.pads.circle(station.x, station.y, ring).stroke({ width: 7, color: 0x2a160c, alpha: 0.72 * fade });
+        const start = -Math.PI / 2;
+        const end = start + Math.PI * 2 * u;
+        this.pads.moveTo(station.x, station.y);
+        this.pads.arc(station.x, station.y, ring, start, end);
+        this.pads.lineTo(station.x, station.y);
+        this.pads.fill({ color: 0xffc14a, alpha: 0.78 * fade });
+        this.pads.arc(station.x, station.y, ring, start, end).stroke({ width: 7, color: 0xffe08a, alpha: fade });
       }
       if (broke && this.time - this.needAt > 1.05) {
         this.needAt = this.time;
         this.floatText(station.x, station.y - 78, "need more", 0xffd0a0, 18);
       }
-      const close = Math.hypot(station.x - sim.heroX, station.y - sim.heroY) < 210;
-      const open = station.tier === 0 && !station.chosen && station.kind !== "wall";
-      let shown = remain;
-      if (open) {
-        const prices = station.offers.filter((k) => k !== "wall").map((k) => offerPrice(k));
-        shown = prices.length ? Math.min(...prices) : remain;
-      }
+      const close = Math.hypot(station.x - sim.heroX, station.y - sim.heroY) < BALANCE.fund.preview;
       const glyph = station.kind === "wall" ? "▮" : station.kind === "barracks" || station.kind === "recruit" ? "⚑" : station.kind === "base" ? "☀" : TOWER_ICON[station.kind];
       const icon = this.stationLabel(i);
       icon.text = glyph;
       icon.style.fontSize = 16;
       icon.style.fill = 0xfff8e8;
-      icon.visible = station.chosen && station.kind !== "wall" && close;
+      icon.visible = station.tier === 0 && station.kind !== "wall" && close;
       icon.anchor.set(0.5);
       icon.position.set(station.x, station.y - 46);
       icon.zIndex = station.y + 4;
       const cost = this.stationCostLabel(i);
       const coin = this.stationCoin(i);
       const showPrice = fade > 0.62 && next > 0;
-      cost.text = open ? String(shown) : next > 0 ? String(remain) : "";
+      cost.text = next > 0 ? String(remain) : "";
       const zoom = Math.max(0.35, this.zoom);
       const pricePx = 18 / zoom;
       cost.style.fontSize = pricePx;
-      cost.style.stroke = { color: 0x14301c, width: Math.max(1.25, pricePx * 0.1) };
-      cost.style.fill = broke ? 0xffb089 : 0xfff6df;
+      cost.style.stroke = { color: broke ? 0x3a0c08 : 0x14301c, width: Math.max(1.25, pricePx * 0.1) };
+      cost.style.fill = broke ? 0xff3b30 : 0xfff6df;
       const covered = Math.hypot(station.x - hero.x, station.y - hero.y) < plot * 0.7;
-      cost.visible = showPrice && !covered;
-      coin.visible = cost.visible;
-      if (covered) icon.visible = false;
-      const shake = broke && !this.reduced ? Math.sin(this.time * 48) * 2 : 0;
-      cost.position.set(station.x + shake - plot * 0.12, station.y + shake * 0.2);
+      cost.visible = (showPrice && !covered) || dwelling || broke;
+      coin.visible = showPrice && !covered && !dwelling;
+      if (covered && !broke) icon.visible = false;
+      const shake = broke && !this.reduced ? Math.sin(this.time * 14) * 1.7 : 0;
+      cost.position.set(station.x + shake - (dwelling || broke ? 0 : plot * 0.12), (dwelling || broke ? station.y - plot * 1.05 : station.y) + shake * 0.2);
       cost.alpha = fade;
       cost.zIndex = station.y + 5;
       const coinPx = Math.max(7, plot * 0.28);
@@ -1300,7 +1381,7 @@ export class WorldView {
       coin.position.set(station.x + plot * 0.28 + shake, station.y + 1);
       coin.alpha = fade;
       coin.zIndex = station.y + 5;
-      const empty = station.tier === 0 && station.chosen && station.kind !== "wall";
+      const empty = station.tier === 0 && station.kind !== "wall";
       const ghost = this.padGhost(i);
       if (empty && close && isTower(station.kind)) {
         const kind = station.kind;
@@ -1322,7 +1403,7 @@ export class WorldView {
         ghost.visible = false;
       }
       const hint = this.stationHint(i);
-      hint.text = empty && close && station.chosen && station.kind !== "wall" ? ROLE_HINT[station.kind] : "";
+      hint.text = empty && close && station.kind !== "wall" ? ROLE_HINT[station.kind] : "";
       hint.visible = hint.text.length > 0 && Math.hypot(station.x - hero.x, station.y - hero.y) > 100;
       hint.position.set(station.x, station.y - 46);
       hint.zIndex = station.y + 6;
@@ -1449,6 +1530,41 @@ export class WorldView {
     }
   }
 
+  /** A readable wash plus streaks that travel with the current. Still when motion is reduced. */
+  private drawWater(): void {
+    this.waterGfx.clear();
+    if (!this.waters.length) return;
+    const t = this.reduced ? 0 : this.time;
+    for (const poly of this.waters) {
+      if (poly.length < 3) continue;
+      const flat: number[] = [];
+      let minX = Infinity;
+      let maxX = -Infinity;
+      let minY = Infinity;
+      let maxY = -Infinity;
+      for (const p of poly) {
+        flat.push(p.x, p.y);
+        minX = Math.min(minX, p.x);
+        maxX = Math.max(maxX, p.x);
+        minY = Math.min(minY, p.y);
+        maxY = Math.max(maxY, p.y);
+      }
+      this.waterGfx.poly(flat).fill({ color: 0x3ec0e4, alpha: 0.2 });
+      const tall = maxY - minY;
+      const wide = maxX - minX;
+      const down = tall >= wide;
+      const span = Math.max(1, down ? tall : wide);
+      const streaks = this.reduced ? 2 : 6;
+      for (let i = 0; i < streaks; i++) {
+        const u = (t * 0.16 + i / streaks) % 1;
+        const sway = Math.sin(t * 1.6 + i * 1.4) * 0.16;
+        const x = down ? (minX + maxX) / 2 + sway * wide : minX + u * span;
+        const y = down ? minY + u * span : (minY + maxY) / 2 + sway * tall;
+        this.waterGfx.ellipse(x, y, down ? 11 : 16, down ? 4 : 7).fill({ color: 0xf7fdff, alpha: 0.5 });
+      }
+    }
+  }
+
   private paintChevrons(map: MapDef): void {
     this.chevronGfx.clear();
     for (const route of map.routes) {
@@ -1463,9 +1579,9 @@ export class WorldView {
           const x = a.x + (b.x - a.x) * t;
           const y = a.y + (b.y - a.y) * t;
           const ang = Math.atan2(b.y - a.y, b.x - a.x);
-          const tip = 14;
-          const back = 9;
-          const wide = 8;
+          const tip = 7;
+          const back = 4.5;
+          const wide = 4;
           const nx = Math.cos(ang);
           const ny = Math.sin(ang);
           const px = -ny;
@@ -1474,7 +1590,7 @@ export class WorldView {
             x + nx * tip, y + ny * tip,
             x - nx * back + px * wide, y - ny * back + py * wide,
             x - nx * back - px * wide, y - ny * back - py * wide,
-          ]).fill({ color: 0xfff6df, alpha: 0.9 });
+          ]).fill({ color: 0xf3ead4, alpha: 0.38 });
           next += 210;
         }
         walked += sl;
@@ -1614,6 +1730,14 @@ export class WorldView {
       this.carryCount = total;
       while (this.carryBorn.length > shown) this.carryBorn.pop();
     }
+    if (sim.payEpoch !== this.payEpoch) {
+      this.payEpoch = sim.payEpoch;
+      for (const gem of this.payGems) {
+        gem.s.visible = false;
+        this.payPool.push(gem.s);
+      }
+      this.payGems.length = 0;
+    }
     const hero = sim.heroAt();
     const moving = sim.heroMoving;
     const slots = carrySlots(shown);
@@ -1747,7 +1871,7 @@ export class WorldView {
     bolt.rotation = Math.atan2(shot.y - shot.py, shot.x - shot.px);
     const fat = shot.family === "lens" ? 2.4 : shot.family === "spire" ? 0.7 + shot.tier * 0.22 : 0.85 + shot.tier * 0.12;
     if (arrow) {
-      const length = (head ? 56 : 44) + shot.tier * 4;
+      const length = ((head ? 56 : 44) + shot.tier * 4) * ARROW_DRAW;
       const scale = length / Math.max(1, bolt.texture.width);
       bolt.anchor.set(0.5, 0.5);
       bolt.scale.set(scale);
@@ -1777,9 +1901,9 @@ export class WorldView {
     trail.rotation = bolt.rotation;
     if (arrow) {
       trail.anchor.set(1, 0.5);
-      trail.scale.set(bolt.scale.x * 0.34, bolt.scale.y * 0.3);
+      trail.scale.set(bolt.scale.x * 0.2, bolt.scale.y * 0.12);
       trail.tint = 0xfff1c0;
-      trail.alpha = 0.28;
+      trail.alpha = 0.16;
       trail.blendMode = "add";
     } else if (shot.family === "hero") {
       trail.visible = false;
@@ -2018,36 +2142,8 @@ export class WorldView {
       this.picker.zIndex = station.y + 80;
       return;
     }
-    let best = -1;
-    let bestD = BALANCE.fund.radius + 8;
-    sim.stations.forEach((station, i) => {
-      if (station.chosen || station.kind === "wall" || station.tier > 0) return;
-      const d = Math.hypot(station.x - sim.heroX, station.y - sim.heroY);
-      if (d < bestD) {
-        bestD = d;
-        best = i;
-      }
-    });
-    if (best < 0 || sim.heroMoving) {
-      this.picker.visible = false;
-      this.pickerFor = -1;
-      return;
-    }
-    const station = sim.stations[best];
-    const offers = station.offers.filter((kind) => kind !== "wall");
-    if (this.pickerFor !== best) {
-      this.picker.removeChildren();
-      this.pickerHits.length = 0;
-      offers.forEach((kind, n) => {
-        const button = this.makePick(kind, n, offers.length, best);
-        this.picker.addChild(button);
-        this.pickerHits.push(button);
-      });
-      this.pickerFor = best;
-    }
-    this.picker.visible = true;
-    this.picker.position.set(station.x, station.y);
-    this.picker.zIndex = station.y + 80;
+    this.picker.visible = false;
+    this.pickerFor = -1;
   }
 
   private makeSpec(spec: Spec, n: number, total: number, index: number): Container {
@@ -2077,45 +2173,6 @@ export class WorldView {
     button.on("pointertap", (e) => {
       e.stopPropagation();
       this.onBranch?.(index, spec);
-      this.pickerFor = -1;
-    });
-    return button;
-  }
-
-  private makePick(kind: StationKind, n: number, total: number, index: number): Container {
-    const button = new Container();
-    const spread = 0.7;
-    const ang = -Math.PI / 2 + (n - (total - 1) / 2) * spread;
-    button.position.set(Math.cos(ang) * 86, Math.sin(ang) * 78 - 8);
-    const plate = new Graphics();
-    const hue = padHue(kind);
-    plate.circle(0, 0, 34).fill({ color: 0x1c140e, alpha: 0.94 });
-    plate.circle(0, 0, 34).stroke({ width: 4, color: hue });
-    const icon = new Text({
-      text: kind === "barracks" || kind === "recruit" ? "⚑" : kind === "wall" ? "▮" : kind === "base" ? "☀" : TOWER_ICON[kind],
-      style: { fontFamily: SANS, fontSize: 22, fill: 0xfff6df, fontWeight: "700" },
-    });
-    icon.anchor.set(0.5);
-    icon.position.set(0, -10);
-    const price = new Text({
-      text: String(offerPrice(kind)),
-      style: { fontFamily: SANS, fontSize: 15, fill: 0xffe08a, fontWeight: "700" },
-    });
-    price.anchor.set(0.5);
-    price.position.set(0, 12);
-    const role = new Text({
-      text: ROLE_HINT[kind],
-      style: { fontFamily: SANS, fontSize: 13, fill: 0xfff6df, align: "center" },
-    });
-    role.anchor.set(0.5, 0);
-    role.position.set(0, 38);
-    button.addChild(plate, icon, price, role);
-    button.eventMode = "static";
-    button.cursor = "pointer";
-    button.hitArea = new Circle(0, 8, 46);
-    button.on("pointertap", (e) => {
-      e.stopPropagation();
-      this.onChoose?.(index, kind);
       this.pickerFor = -1;
     });
     return button;
@@ -2282,8 +2339,8 @@ export class WorldView {
     const w = Math.max(1, s.texture.width);
     streak.anchor.set(1, 0.5);
     streak.position.set(-w * 0.42, 0);
-    streak.scale.set(1 / 3, 0.22);
-    streak.alpha = 0.28;
+    streak.scale.set(0.22, 0.1);
+    streak.alpha = 0.16;
     streak.tint = 0xfff1c0;
     streak.blendMode = "add";
     streak.visible = true;
@@ -2317,7 +2374,7 @@ export class WorldView {
       const hy = gy - drop;
       const fall = Math.atan2(drop, run);
       s.rotation = fall;
-      const length = (golden ? 68 : 52) + Math.random() * 8;
+      const length = ((golden ? 68 : 52) + Math.random() * 8) * ARROW_DRAW;
       s.scale.set(length / Math.max(1, s.texture.width));
       s.position.set(hx, hy);
       this.rains.push({

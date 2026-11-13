@@ -2,7 +2,7 @@
  * Headless proof that the valley can be lost and won, and that the special
  * rules behave. Combat numbers are the invented placeholders in balance.ts.
  */
-import { BALANCE, starsFor, towerCost, worldCount } from "../src/balance";
+import { BALANCE, autoSpec, specChoices, starsFor, towerCost, worldCount } from "../src/balance";
 import { SUN } from "../src/maps";
 import { Siege, stealthed, type Station } from "../src/sim";
 import type { RelicId, Spec, TowerKind } from "../src/types";
@@ -69,55 +69,86 @@ function afk(): void {
   console.log(`afk defeat in ${t.toFixed(1)}s`);
 }
 
-function buy(sim: Siege, pred: (s: Station) => boolean): boolean {
+function affordable(sim: Siege, pred: (s: Station) => boolean): Station | null {
   const list = sim.stations
-    .map((s, i) => ({ s, i }))
-    .filter(({ s }) => pred(s) && sim.stationCost(s) > 0 && sim.jade >= sim.stationCost(s))
-    .sort((a, b) => sim.stationCost(a.s) - sim.stationCost(b.s) || dist(a.s) - dist(b.s));
-  if (!list.length) return false;
-  return sim.fundNow(list[0].i);
+    .filter((s) => pred(s) && sim.stationCost(s) > 0 && sim.jade >= sim.stationCost(s))
+    .sort((a, b) => sim.stationCost(a) - sim.stationCost(b) || dist(a) - dist(b));
+  return list[0] ?? null;
 }
 
-/** Hold Jade until every trail has a tower, then buy the cheapest pad, then upgrade. */
-function cover(sim: Siege): boolean {
+/** The bot taps a branch, then the dwell spends it. Players still tap these themselves. */
+function armBranch(sim: Siege, station: Station): void {
+  if (station.tier !== 1 || station.spec !== "none") return;
+  const choices = specChoices(station.kind);
+  if (!choices) return;
+  const spec = sim.preferSpec && choices.includes(sim.preferSpec) ? sim.preferSpec : autoSpec(station.kind, sim.world);
+  sim.chooseSpec(sim.stations.indexOf(station), spec);
+}
+
+function park(sim: Siege, station: Station): void {
+  armBranch(sim, station);
+  sim.clearGoal();
+  sim.setSteer(0, 0);
+  sim.heroX = station.x;
+  sim.heroY = station.y;
+}
+
+/** Stand through the dwell when a buy is ready. Otherwise call the wave or chase. */
+function act(sim: Siege, wish: (sim: Siege) => Station | null, chaseToo: boolean): void {
+  const pinned = sim.funding >= 0 && sim.dwell > 0 ? sim.stations[sim.funding] : null;
+  if (pinned && sim.jade + 0.001 >= sim.stationCost(pinned)) {
+    park(sim, pinned);
+    return;
+  }
+  const next = wish(sim);
+  const room = sim.phase !== "build" || sim.buildLeft > BALANCE.fund.dwell + 0.2;
+  if (next && room) {
+    park(sim, next);
+    return;
+  }
+  sim.setSteer(0, 0);
+  if (sim.phase === "build") sim.callWave();
+  if (chaseToo) chase(sim);
+}
+
+function uncovered(sim: Siege): Station[] {
   const covered = new Set<number>();
   for (const tower of sim.towers) {
     const station = sim.stations.find((s) => s.kind !== "wall" && s.index === tower.pad);
     if (station) covered.add(station.path);
   }
-  if (covered.size >= sim.map.routes.length) return false;
-  const open = sim.stations.filter((s) => (s.kind === "dart" || s.kind === "lens") && s.tier === 0 && !covered.has(s.path));
-  if (!open.length) return false;
-  open.sort((a, b) => (a.kind === "dart" ? 0 : 1) - (b.kind === "dart" ? 0 : 1) || dist(a) - dist(b));
-  const pick = open[0];
-  if (sim.jade >= sim.stationCost(pick)) sim.fundNow(sim.stations.indexOf(pick));
-  return true;
+  if (covered.size >= sim.map.routes.length) return [];
+  return sim.stations.filter((s) => (s.kind === "dart" || s.kind === "lens") && s.tier === 0 && !covered.has(s.path));
 }
 
-function spend(sim: Siege): void {
-  if (cover(sim)) return;
-  if (buy(sim, (s) => s.kind === "dart" && s.tier === 1)) return;
-  if (buy(sim, (s) => s.kind === "lens" && s.tier === 0)) return;
-  if (buy(sim, (s) => s.kind === "lens" && s.tier === 1)) return;
-  if (buy(sim, (s) => s.kind === "dart" && s.tier === 0)) return;
-  if (buy(sim, (s) => s.kind === "drum" && s.tier === 0)) return;
-  if (buy(sim, (s) => s.kind === "barracks" && s.tier === 0)) return;
-  if (buy(sim, (s) => s.kind === "barracks" && s.tier === 1)) return;
-  if (buy(sim, (s) => s.kind === "drum" && s.tier === 1)) return;
-  if (buy(sim, (s) => s.kind === "wall" && s.tier === 0)) return;
-  if (buy(sim, (s) => s.kind === "base" && s.tier < 3)) return;
-  buy(sim, (s) => (s.kind === "dart" || s.kind === "lens" || s.kind === "drum" || s.kind === "wall") && s.tier > 0 && s.tier < 3);
+function wishMixed(sim: Siege): Station | null {
+  const open = uncovered(sim);
+  if (open.length) {
+    open.sort((a, b) => (a.kind === "dart" ? 0 : 1) - (b.kind === "dart" ? 0 : 1) || dist(a) - dist(b));
+    const pick = open[0];
+    return sim.jade >= sim.stationCost(pick) ? pick : null;
+  }
+  return affordable(sim, (s) => s.kind === "dart" && s.tier === 1)
+    ?? affordable(sim, (s) => s.kind === "lens" && s.tier === 0)
+    ?? affordable(sim, (s) => s.kind === "lens" && s.tier === 1)
+    ?? affordable(sim, (s) => s.kind === "dart" && s.tier === 0)
+    ?? affordable(sim, (s) => s.kind === "drum" && s.tier === 0)
+    ?? affordable(sim, (s) => s.kind === "barracks" && s.tier === 0)
+    ?? affordable(sim, (s) => s.kind === "barracks" && s.tier === 1)
+    ?? affordable(sim, (s) => s.kind === "drum" && s.tier === 1)
+    ?? affordable(sim, (s) => s.kind === "wall" && s.tier === 0)
+    ?? affordable(sim, (s) => s.kind === "base" && s.tier < 3)
+    ?? affordable(sim, (s) => (s.kind === "dart" || s.kind === "lens" || s.kind === "drum" || s.kind === "wall") && s.tier > 0 && s.tier < 3);
 }
 
-/** Funds one family and takes one branch, so a countered valley can show the gap. */
-function spendFamily(sim: Siege, kind: TowerKind | "barracks", spec: Spec): void {
+function wishFamily(sim: Siege, kind: TowerKind | "barracks", spec: Spec): Station | null {
   sim.preferSpec = spec;
-  if (buy(sim, (s) => s.kind === kind && s.tier === 0)) return;
-  buy(sim, (s) => s.kind === kind && s.tier > 0 && s.tier < 3);
+  return affordable(sim, (s) => s.kind === kind && s.tier === 0)
+    ?? affordable(sim, (s) => s.kind === kind && s.tier > 0 && s.tier < 3);
 }
 
-function spendWalls(sim: Siege): void {
-  buy(sim, (s) => s.kind === "wall" && (s.tier < 3 || !s.alive));
+function wishWalls(sim: Siege): Station | null {
+  return affordable(sim, (s) => s.kind === "wall" && (s.tier < 3 || !s.alive));
 }
 
 function chase(sim: Siege): void {
@@ -171,15 +202,7 @@ function bot(world: number): Cell {
       const pick = order.find((id) => sim.pendingOffer?.includes(id)) ?? sim.pendingOffer[0];
       sim.chooseRelic(pick);
     }
-    if (sim.phase === "build") {
-      for (let n = 0; n < 24; n++) {
-        const before = sim.jade;
-        spend(sim);
-        if (sim.jade === before) break;
-      }
-      sim.callWave();
-    } else spend(sim);
-    chase(sim);
+    act(sim, wishMixed, true);
     sim.tick(dt);
     sim.fx.length = 0;
     t += dt;
@@ -297,6 +320,36 @@ function heroLoop(): void {
   if (!wall) fail("missing wall station");
   const wallIndex = gate.stations.indexOf(wall);
   if (!gate.fundNow(wallIndex) || !wall.alive) fail("funding a wall");
+
+  const dwell = new Siege(0);
+  const pad = dwell.stations.find((s) => s.kind === "dart" && s.tier === 0);
+  if (!pad) fail("no dart pad");
+  const cost = dwell.stationCost(pad);
+  const jade0 = dwell.jade;
+  dwell.heroX = pad.x;
+  dwell.heroY = pad.y;
+  dwell.setSteer(0, 0);
+  tickUntil(dwell, 0.45);
+  if (pad.tier !== 0 || dwell.jade !== jade0) fail("the ring charged before it finished");
+  if (dwell.dwell < 0.3 || dwell.dwell > 0.7) fail(`dwell progress ${dwell.dwell.toFixed(2)}`);
+  dwell.setSteer(1, 0);
+  tickUntil(dwell, 0.45);
+  if (pad.tier !== 0 || dwell.jade !== jade0 || dwell.dwell !== 0) fail("walking off should cancel with no charge");
+  dwell.setSteer(0, 0);
+  dwell.heroX = pad.x;
+  dwell.heroY = pad.y;
+  tickUntil(dwell, BALANCE.fund.dwell + 0.12);
+  if (pad.tier !== 1) fail("standing should build the previewed tower");
+  if (dwell.jade !== jade0 - cost) fail(`jade ${dwell.jade} expected ${jade0 - cost}`);
+  const poor = new Siege(0);
+  const poorPad = poor.stations.find((s) => s.kind === "dart" && s.tier === 0);
+  if (!poorPad) fail("no poor pad");
+  poor.jade = 1;
+  poor.heroX = poorPad.x;
+  poor.heroY = poorPad.y;
+  poor.setSteer(0, 0);
+  tickUntil(poor, 1.2);
+  if (poorPad.tier !== 0 || poor.jade !== 1 || !poor.shortJade) fail("short jade must not build");
   const bug = gate.forceEnemy("skitter", 0, Math.max(0, wall.dist - 180));
   tickUntil(gate, 3.2);
   if (!bug.alive) fail("a lone skitter should still be chewing the wall");
@@ -354,17 +407,14 @@ function play(world: number, style: "idle" | "kite"): { phase: string; kills: nu
   return { phase: sim.phase, kills: sim.guardianKills, t };
 }
 
-function familyRun(world: number, label: string, spend: (sim: Siege) => void): Cell {
+function familyRun(world: number, label: string, spend: (sim: Siege) => Station | null): Cell {
   const sim = new Siege(world);
   const dt = 1 / 20;
   let t = 0;
   // Long valleys keep leaking past three minutes. A stone still up at the horizon is a hold, not a loss.
   while (sim.phase !== "victory" && sim.phase !== "defeat" && t < 720) {
     if (sim.pendingOffer?.length) sim.chooseRelic(sim.pendingOffer[0]);
-    if (sim.phase === "build") {
-      spend(sim);
-      sim.callWave();
-    } else spend(sim);
+    act(sim, spend, false);
     sim.tick(dt);
     sim.fx.length = 0;
     t += dt;
@@ -404,12 +454,12 @@ for (let world = 0; world < worlds; world++) {
   mixed.push(runs);
 }
 
-const families: { label: string; spend: (sim: Siege) => void }[] = [
-  { label: "archer", spend: (sim) => spendFamily(sim, "dart", "rain") },
-  { label: "siege", spend: (sim) => spendFamily(sim, "lens", "ballista") },
-  { label: "mystic", spend: (sim) => spendFamily(sim, "drum", "snare") },
-  { label: "barracks", spend: (sim) => spendFamily(sim, "barracks", "spears") },
-  { label: "wall", spend: (sim) => spendWalls(sim) },
+const families: { label: string; spend: (sim: Siege) => Station | null }[] = [
+  { label: "archer", spend: (sim) => wishFamily(sim, "dart", "rain") },
+  { label: "siege", spend: (sim) => wishFamily(sim, "lens", "ballista") },
+  { label: "mystic", spend: (sim) => wishFamily(sim, "drum", "snare") },
+  { label: "barracks", spend: (sim) => wishFamily(sim, "barracks", "spears") },
+  { label: "wall", spend: (sim) => wishWalls(sim) },
 ];
 const familyCells = new Map<string, Cell[]>();
 for (const family of families) {
@@ -422,18 +472,22 @@ for (const family of families) {
 const countered: [string, number, string][] = [
   ["siege", 0, "the swarm valley"],
   ["siege", 1, "the runner ridge"],
+  ["archer", 2, "the twin canyon"],
   ["archer", 3, "the brute valley"],
   ["archer", 5, "the boulder valley"],
   ["barracks", 4, "the flyer valley"],
   ["mystic", 0, "the swarm valley"],
   ["wall", 0, "the swarm valley"],
+  ["wall", 2, "the twin canyon"],
+  ["wall", 3, "the brute valley"],
   ["wall", 5, "the boulder valley"],
+  ["wall", 7, "the colossus stair"],
 ];
 
 let broken = false;
 for (let world = 0; world < worlds; world++) {
   const runs = mixed[world];
-  const bad = runs.filter((cell) => cell.kind !== "win" || starsFor(cell.integrity) < 2);
+  const bad = runs.filter((cell) => cell.kind !== "win" || starsFor(cell.integrity) < 3);
   if (bad.length) {
     broken = true;
     console.error(`mixed world ${world} failed a seed: ${runs.map(formatCell).join(" | ")}`);

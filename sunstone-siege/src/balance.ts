@@ -123,12 +123,12 @@ export const BALANCE = {
     /** How long the attack pose holds after a shot. */
     cast: 0.2,
   },
-  /** Standing on a station pours Jade into it until the price is met. */
+  /** Standing still on a station fills a ring, then spends the price. */
   fund: {
     radius: 48,
-    /** Jade per second while the hero stands on the pad. */
-    rate: 62,
-    /** How close the hero must be before the pad previews its range. */
+    /** How long the hero must stay before the pad builds or upgrades. */
+    dwell: 0.9,
+    /** How close the hero must be before the pad previews its tower. */
     preview: 150,
   },
   /** Kill gems sit on the ground until the hero walks into the magnet. */
@@ -142,7 +142,7 @@ export const BALANCE = {
   wall: {
     cost: [40, 65, 100] as const,
     repair: [24, 36, 48] as const,
-    hp: [420, 700, 1100] as const,
+    hp: [320, 540, 860] as const,
     /** Light damage per second to whoever is chewing spiked wood or stone. */
     thorn: 0.8,
   },
@@ -336,10 +336,10 @@ export const BALANCE = {
       speed: 1,
       waves: [
         { bonus: 30, groups: [skitter(16, 0), skitter(16, 1, 0.4)] },
-        { bonus: 36, groups: [group("shield", 3, 1.1, 0), skitter(10, 1, 0.6)] },
-        { bonus: 40, groups: [group("shield", 3, 1.05, 0), group("shield", 3, 1.05, 1, 0.3)] },
-        { bonus: 44, groups: [group("shield", 3, 1, 0), group("sapper", 3, 0.45, 1, 0.4), group("runner", 8, 0.3, 1, 0.8)] },
-        { bonus: 48, groups: [group("shield", 4, 0.95, 0), group("shield", 3, 1, 1, 0.4), skitter(10, 0, 1)] },
+        { bonus: 36, groups: [group("shield", 4, 1.05, 0), group("sapper", 2, 0.4, 1, 0.5)] },
+        { bonus: 40, groups: [group("shield", 4, 1, 0), group("shield", 3, 1.05, 1, 0.3), group("sapper", 2, 0.4, 0, 0.8)] },
+        { bonus: 44, groups: [group("giant", 1, 0.4, 0), group("sapper", 4, 0.4, 1, 0.3), group("shield", 2, 1, 1, 0.8)] },
+        { bonus: 48, groups: [group("giant", 2, 1.3, 1, 0.2), group("shield", 3, 0.95, 0, 0.5), group("sapper", 3, 0.4, 0, 0.9)] },
       ],
     },
     {
@@ -351,8 +351,8 @@ export const BALANCE = {
         { bonus: 30, groups: [skitter(14, 0), skitter(12, 1, 0.5)] },
         { bonus: 36, groups: [group("golem", 2, 2.4, 0), skitter(10, 1, 0.8)] },
         { bonus: 42, groups: [group("golem", 2, 2.2, 0), group("golem", 2, 2.2, 1, 0.6)] },
-        { bonus: 46, groups: [group("golem", 3, 2, 0), group("shield", 3, 0.9, 1, 0.5)] },
-        { bonus: 52, groups: [group("golem", 2, 2, 0), group("giant", 1, 0.4, 1, 0.6), skitter(14, 0, 1)] },
+        { bonus: 46, groups: [group("golem", 3, 2, 0), group("sapper", 4, 0.4, 1, 0.3), group("shield", 2, 0.9, 1, 0.8)] },
+        { bonus: 52, groups: [group("roller", 1, 0.2, 0), group("roller", 1, 0.2, 1, 0.6), group("giant", 1, 0.4, 0, 1.1)] },
       ],
     },
     {
@@ -402,9 +402,9 @@ export const BALANCE = {
       waves: [
         { bonus: 32, groups: [skitter(16, 0), skitter(12, 1, 0.4)] },
         { bonus: 38, groups: [group("shield", 4, 0.85, 0), group("runner", 8, 0.28, 1, 0.4)] },
-        { bonus: 44, groups: [group("golem", 2, 2.2, 0), skitter(10, 1, 0.6)] },
-        { bonus: 50, groups: [group("roller", 1, 0.2, 1), group("shield", 3, 0.9, 0, 0.8)] },
-        { bonus: 80, groups: [group("boss", 1, 0.2, 0), skitter(12, 1, 1.2)] },
+        { bonus: 44, groups: [group("golem", 2, 2.2, 0), group("sapper", 3, 0.4, 1, 0.4)] },
+        { bonus: 50, groups: [group("roller", 1, 0.2, 1), group("giant", 1, 0.4, 0, 0.6), group("sapper", 2, 0.4, 0, 0.9)] },
+        { bonus: 80, groups: [group("boss", 1, 0.2, 0), skitter(40, 0, 0.12), skitter(40, 1, 0.16)] },
       ],
     },
   ] as const satisfies readonly WorldBalance[],
