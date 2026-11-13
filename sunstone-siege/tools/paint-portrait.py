@@ -17,16 +17,19 @@ SUN = (480, 1040)
 RIM = 46
 
 THEMES = [
-    # top, cliff, path, accent. Deeper greens. Jungle, sandstone, river, canyon, pine, dunes, ruins, ember.
-    ((42, 118, 46), (48, 86, 42), (198, 158, 96), (22, 92, 32)),
-    ((196, 150, 92), (168, 112, 64), (228, 198, 146), (96, 118, 48)),
-    ((36, 112, 74), (42, 86, 64), (168, 188, 146), (24, 88, 108)),
-    ((168, 102, 54), (128, 68, 40), (210, 164, 108), (132, 48, 28)),
-    ((34, 102, 56), (36, 74, 48), (176, 150, 96), (16, 72, 38)),
-    ((214, 168, 104), (176, 92, 54), (236, 204, 150), (150, 78, 44)),
-    ((122, 110, 82), (92, 78, 62), (196, 174, 136), (82, 74, 58)),
-    ((142, 78, 48), (102, 52, 42), (198, 146, 96), (148, 40, 28)),
+    # top, cliff, path, accent. Roads stay warm and saturated so they read on a phone.
+    # Jungle dirt, red clay, canyon dirt, flagstone, forest loam, packed sand, court stone, flagstone.
+    ((42, 118, 46), (48, 86, 42), (196, 138, 66), (22, 92, 32)),
+    ((150, 96, 54), (168, 112, 64), (184, 74, 40), (96, 118, 48)),
+    ((36, 112, 74), (42, 86, 64), (188, 122, 58), (24, 88, 108)),
+    ((168, 102, 54), (128, 68, 40), (168, 150, 124), (132, 48, 28)),
+    ((34, 102, 56), (36, 74, 48), (176, 114, 54), (16, 72, 38)),
+    ((164, 112, 62), (176, 92, 54), (198, 128, 58), (150, 78, 44)),
+    ((112, 98, 70), (92, 78, 62), (186, 130, 70), (82, 74, 58)),
+    ((142, 78, 48), (102, 52, 42), (166, 146, 118), (148, 40, 28)),
 ]
+# Stair valleys wear warm gray flagstone. The others are dirt, clay, or packed sand.
+FLAGSTONE = {3, 7}
 # Jungle valleys drop off grey stone. Desert valleys drop off sandstone.
 DESERT = {1, 3, 5, 7}
 
@@ -658,6 +661,63 @@ def unique_spans(spans: list[tuple[float, float, float, float]], gap: float = 36
     return kept
 
 
+def paint_road(img: Image.Image, stamps: list[tuple[float, float, float]], half: float, base: tuple, index: int, rng: np.random.Generator) -> None:
+    """A saturated cartoony road: a soft shadow, a worn edge, ruts or joints, pebbles, and edge tufts."""
+    if not stamps:
+        return
+    stone = index in FLAGSTONE
+    desert = index in DESERT
+    edge_c = tuple(max(0, int(c * 0.52)) for c in base)
+    rut_c = tuple(max(0, int(c * 0.62)) for c in base)
+    lite = tuple(min(255, int(c * 1.16 + 8)) for c in base)
+    shadow = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    sd = ImageDraw.Draw(shadow)
+    rim = half + 8
+    for x, y, _ang in stamps:
+        sd.ellipse((x - rim + 7, y - rim * 0.72 + 11, x + rim + 7, y + rim * 0.72 + 11), fill=(42, 26, 14, 120))
+    img.alpha_composite(shadow.filter(ImageFilter.GaussianBlur(5)))
+    edge = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    ed = ImageDraw.Draw(edge)
+    for x, y, _ang in stamps:
+        ed.ellipse((x - rim, y - rim * 0.72, x + rim, y + rim * 0.72), fill=edge_c + (255,))
+    img.alpha_composite(edge.filter(ImageFilter.GaussianBlur(1.6)))
+    bed = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    bd = ImageDraw.Draw(bed)
+    core = half * 0.78
+    for x, y, _ang in stamps:
+        bd.ellipse((x - core, y - core * 0.7, x + core, y + core * 0.7), fill=base + (255,))
+    img.alpha_composite(bed.filter(ImageFilter.GaussianBlur(0.8)))
+    detail = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    dd = ImageDraw.Draw(detail)
+    for n, (x, y, ang) in enumerate(stamps):
+        nx, ny = -math.sin(ang), math.cos(ang)
+        dx, dy = math.cos(ang), math.sin(ang)
+        if stone and n % 4 == 0:
+            span = core * 0.85
+            dd.line((x - nx * span, y - ny * span, x + nx * span, y + ny * span), fill=edge_c + (170,), width=2)
+        elif not stone and n % 3 == 0:
+            for side in (-0.22, 0.24):
+                ox, oy = nx * core * side, ny * core * side
+                dd.line((x + ox - dx * 11, y + oy - dy * 11, x + ox + dx * 12, y + oy + dy * 12), fill=rut_c + (150,), width=3)
+        if n % 5 == 0:
+            for _k in range(2):
+                px = x + nx * float(rng.uniform(-core * 0.55, core * 0.55)) + dx * float(rng.uniform(-8, 8))
+                py = y + ny * float(rng.uniform(-core * 0.4, core * 0.4)) + dy * float(rng.uniform(-8, 8))
+                peb = lite if rng.random() > 0.45 else edge_c
+                rad = int(rng.integers(2, 5))
+                dd.ellipse((px - rad, py - rad * 0.7, px + rad, py + rad * 0.7), fill=peb + (210,))
+        if n % 4 == 0:
+            tuft = (168, 132, 58, 220) if desert else (48, 128, 46, 220)
+            tuft2 = (214, 176, 86, 200) if desert else (96, 168, 62, 200)
+            for side in (-1, 1):
+                ox = x + nx * core * 0.92 * side
+                oy = y + ny * core * 0.72 * side
+                lean = int(rng.integers(-4, 5))
+                dd.line((ox, oy, ox + lean, oy - 9), fill=tuft, width=2)
+                dd.line((ox + 2, oy, ox + lean + 3, oy - 7), fill=tuft2, width=2)
+    img.alpha_composite(detail)
+
+
 def stamp_road(draw: ImageDraw.ImageDraw, routes: list[list[tuple[float, float]]], half: int, color: tuple, around: tuple[float, float], reach: float) -> None:
     """Put the dirt back over a landmark so the road stays the brightest shape."""
     core = half * 0.86
@@ -687,7 +747,7 @@ def paint_late(img: Image.Image, index: int, level: dict, half: int) -> None:
     elif index == 2:
         # The fall drops into the pool, below the sun. The road is stamped back on top.
         paint_fall(draw, 520, 1410)
-        stamp_road(draw, routes, half, (168, 188, 146), (520, 1410), 320)
+        stamp_road(draw, routes, half, (188, 122, 58), (520, 1410), 320)
     elif index == 3:
         paint_steps(draw, [280, 560, 860, 1160, 1420], (150, 112, 74), (214, 176, 124), routes, 28, 3)
     elif index == 4:
@@ -781,7 +841,7 @@ def paint_rim(img: Image.Image, mask: np.ndarray, index: int) -> None:
 
 
 def paint(level: dict, theme: tuple, index: int) -> None:
-    top, _cliff, path_c, accent = theme
+    top, _cliff, path_c, _accent = theme
     rng = np.random.default_rng(100 + index)
     road = sample(level["routes"])
     width = int(level["width"])
@@ -893,33 +953,12 @@ def paint(level: dict, theme: tuple, index: int) -> None:
             x0, y0 = road[i]
             x1, y1 = road[i + 1]
             steps = max(1, int(math.hypot(x1 - x0, y1 - y0) / 10))
+            ang = math.atan2(y1 - y0, x1 - x0)
             for s in range(steps + 1):
                 t = s / steps
-                stamps.append((x0 + (x1 - x0) * t, y0 + (y1 - y0) * t))
-        fringe = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-        fd = ImageDraw.Draw(fringe)
-        grass_fringe = (accent[0], min(255, accent[1] + 24), accent[2], 80)
-        reach = half + 36
-        for x, y in stamps[::2]:
-            fd.ellipse((x - reach, y - reach * 0.7, x + reach, y + reach * 0.7), fill=grass_fringe)
-        fringe = fringe.filter(ImageFilter.GaussianBlur(16))
-        img.alpha_composite(fringe)
-        edge = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-        ed = ImageDraw.Draw(edge)
-        dirt_edge = tuple(max(0, int(c) - 18) for c in path_c)
-        rim = half + 18
-        for x, y in stamps:
-            ed.ellipse((x - rim, y - rim * 0.72, x + rim, y + rim * 0.72), fill=dirt_edge + (150,))
-        edge = edge.filter(ImageFilter.GaussianBlur(14))
-        img.alpha_composite(edge)
-        path = Image.new("RGBA", (W, H), (0, 0, 0, 0))
-        path_draw = ImageDraw.Draw(path)
-        core = half * 0.86
-        for x, y in stamps:
-            path_draw.ellipse((x - core, y - core * 0.7, x + core, y + core * 0.7), fill=path_c + (230,))
-        path = path.filter(ImageFilter.GaussianBlur(4))
-        img.alpha_composite(path)
-        # The soft edge stays on the grass. The cliff face keeps its stone.
+                stamps.append((x0 + (x1 - x0) * t, y0 + (y1 - y0) * t, ang))
+        paint_road(img, stamps, half, path_c, index, rng)
+        # The cliff face keeps its stone. The road stays on the plateau.
         painted = np.array(img)
         painted[~mask, :3] = np.clip(rgb[~mask], 0, 255).astype(np.uint8)
         img = Image.fromarray(painted, "RGBA")
