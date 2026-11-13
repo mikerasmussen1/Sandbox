@@ -1,0 +1,383 @@
+{
+ "formats": [
+  "ogg",
+  "mp3"
+ ],
+ "title": "Gilded Deck",
+ "sounds": {
+  "mus_base": {
+   "file": "mus_base",
+   "src": [
+    "mus_base.ogg",
+    "mus_base.mp3"
+   ],
+   "bus": "music",
+   "volume": 0.42,
+   "loop": true,
+   "duration": 0
+  },
+  "mus_free": {
+   "file": "mus_free",
+   "src": [
+    "mus_free.ogg",
+    "mus_free.mp3"
+   ],
+   "bus": "music",
+   "volume": 0.46,
+   "loop": true,
+   "duration": 15.8
+  },
+  "sfx_reel_stop": {
+   "file": "sfx_reel_stop",
+   "src": [
+    "sfx_reel_stop.ogg",
+    "sfx_reel_stop.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.55,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_reel_stop2": {
+   "file": "sfx_reel_stop2",
+   "src": [
+    "sfx_reel_stop2.ogg",
+    "sfx_reel_stop2.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.55,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_reel_stop3": {
+   "file": "sfx_reel_stop3",
+   "src": [
+    "sfx_reel_stop3.ogg",
+    "sfx_reel_stop3.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.55,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_scatter_land": {
+   "file": "sfx_scatter_land",
+   "src": [
+    "sfx_scatter_land.ogg",
+    "sfx_scatter_land.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.7,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_golden_land": {
+   "file": "sfx_golden_land",
+   "src": [
+    "sfx_golden_land.ogg",
+    "sfx_golden_land.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.7,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_shatter_1": {
+   "file": "sfx_shatter_1",
+   "src": [
+    "sfx_shatter_1.ogg",
+    "sfx_shatter_1.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.5,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_shatter_2": {
+   "file": "sfx_shatter_2",
+   "src": [
+    "sfx_shatter_2.ogg",
+    "sfx_shatter_2.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.52,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_shatter_3": {
+   "file": "sfx_shatter_3",
+   "src": [
+    "sfx_shatter_3.ogg",
+    "sfx_shatter_3.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.55,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_shatter_4": {
+   "file": "sfx_shatter_4",
+   "src": [
+    "sfx_shatter_4.ogg",
+    "sfx_shatter_4.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.58,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_shatter_5": {
+   "file": "sfx_shatter_5",
+   "src": [
+    "sfx_shatter_5.ogg",
+    "sfx_shatter_5.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.62,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_praise_fine": {
+   "file": "sfx_praise_fine",
+   "src": [
+    "sfx_praise_fine.ogg",
+    "sfx_praise_fine.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.7,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_praise_brilliant": {
+   "file": "sfx_praise_brilliant",
+   "src": [
+    "sfx_praise_brilliant.ogg",
+    "sfx_praise_brilliant.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.7,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_praise_superb": {
+   "file": "sfx_praise_superb",
+   "src": [
+    "sfx_praise_superb.ogg",
+    "sfx_praise_superb.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.7,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_praise_glorious": {
+   "file": "sfx_praise_glorious",
+   "src": [
+    "sfx_praise_glorious.ogg",
+    "sfx_praise_glorious.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.7,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_praise_majestic": {
+   "file": "sfx_praise_majestic",
+   "src": [
+    "sfx_praise_majestic.ogg",
+    "sfx_praise_majestic.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.7,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_mult_single": {
+   "file": "sfx_mult_single",
+   "src": [
+    "sfx_mult_single.ogg",
+    "sfx_mult_single.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.7,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_mult_double": {
+   "file": "sfx_mult_double",
+   "src": [
+    "sfx_mult_double.ogg",
+    "sfx_mult_double.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.7,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_mult_triple": {
+   "file": "sfx_mult_triple",
+   "src": [
+    "sfx_mult_triple.ogg",
+    "sfx_mult_triple.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.7,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_mult_fivefold": {
+   "file": "sfx_mult_fivefold",
+   "src": [
+    "sfx_mult_fivefold.ogg",
+    "sfx_mult_fivefold.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.7,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_mult_sixfold": {
+   "file": "sfx_mult_sixfold",
+   "src": [
+    "sfx_mult_sixfold.ogg",
+    "sfx_mult_sixfold.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.7,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_mult_ninefold": {
+   "file": "sfx_mult_ninefold",
+   "src": [
+    "sfx_mult_ninefold.ogg",
+    "sfx_mult_ninefold.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.7,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_mult_fifteenfold": {
+   "file": "sfx_mult_fifteenfold",
+   "src": [
+    "sfx_mult_fifteenfold.ogg",
+    "sfx_mult_fifteenfold.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.7,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_fanfare_flush": {
+   "file": "sfx_fanfare_flush",
+   "src": [
+    "sfx_fanfare_flush.ogg",
+    "sfx_fanfare_flush.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.7,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_fanfare_stack": {
+   "file": "sfx_fanfare_stack",
+   "src": [
+    "sfx_fanfare_stack.ogg",
+    "sfx_fanfare_stack.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.7,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_fanfare_crown": {
+   "file": "sfx_fanfare_crown",
+   "src": [
+    "sfx_fanfare_crown.ogg",
+    "sfx_fanfare_crown.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.7,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_coins": {
+   "file": "sfx_coins",
+   "src": [
+    "sfx_coins.ogg",
+    "sfx_coins.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.5,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_house_card": {
+   "file": "sfx_house_card",
+   "src": [
+    "sfx_house_card.ogg",
+    "sfx_house_card.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.7,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_pot_light": {
+   "file": "sfx_pot_light",
+   "src": [
+    "sfx_pot_light.ogg",
+    "sfx_pot_light.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.7,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_ui_tap": {
+   "file": "sfx_ui_tap",
+   "src": [
+    "sfx_ui_tap.ogg",
+    "sfx_ui_tap.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.45,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_spin": {
+   "file": "sfx_spin",
+   "src": [
+    "sfx_spin.ogg",
+    "sfx_spin.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.5,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_whoosh": {
+   "file": "sfx_whoosh",
+   "src": [
+    "sfx_whoosh.ogg",
+    "sfx_whoosh.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.7,
+   "loop": false,
+   "duration": 0
+  },
+  "sfx_summary": {
+   "file": "sfx_summary",
+   "src": [
+    "sfx_summary.ogg",
+    "sfx_summary.mp3"
+   ],
+   "bus": "sfx",
+   "volume": 0.7,
+   "loop": false,
+   "duration": 0
+  }
+ }
+}
