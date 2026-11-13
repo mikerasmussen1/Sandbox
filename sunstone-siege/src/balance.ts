@@ -123,12 +123,12 @@ export const BALANCE = {
     /** How long the attack pose holds after a shot. */
     cast: 0.2,
   },
-  /** Standing on a station pours Jade into it until the price is met. */
+  /** Standing still on a station fills a ring, then spends the price. */
   fund: {
     radius: 48,
-    /** Jade per second while the hero stands on the pad. */
-    rate: 62,
-    /** How close the hero must be before the pad previews its range. */
+    /** How long the hero must stay before the pad builds or upgrades. */
+    dwell: 0.9,
+    /** How close the hero must be before the pad previews its tower. */
     preview: 150,
   },
   /** Kill gems sit on the ground until the hero walks into the magnet. */

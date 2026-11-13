@@ -41,9 +41,6 @@ async function boot(): Promise<void> {
   });
   document.getElementById("boot")?.remove();
   const view = new WorldView(art);
-  view.setChoose((index, kind) => {
-    if (sim) sim.chooseStation(index, kind);
-  });
   view.setBranch((index, spec) => {
     if (sim) sim.chooseSpec(index, spec);
   });
@@ -218,6 +215,8 @@ async function boot(): Promise<void> {
         leaker,
         hero: sim.heroAt(),
         funding: sim.funding,
+        dwell: sim.dwell,
+        short: sim.shortJade,
         stations: sim.stations.map((s) => ({ i: s.index, kind: s.kind, tier: s.tier, spec: s.spec, x: s.x, y: s.y, paid: s.paid, alive: s.alive, hp: s.hp, hurt: s.hurt, path: s.path, dist: s.dist })),
         towersAt: sim.towers.map((t) => ({ kind: t.kind, tier: t.tier, spec: t.spec, x: t.x, y: t.y, cool: t.cooldown })),
       };
@@ -765,7 +764,7 @@ async function boot(): Promise<void> {
       seenWave = live.wave;
       audio.play("horn");
       const firstStrike = live.world === 0 && live.wave === 0 && save.taught < 3;
-      hud.announce(firstStrike ? "Tap to move. Stand on a station to fund a tower." : `Wave ${live.wave + 1}`);
+      hud.announce(firstStrike ? "Tap to move. Stand on a pad to build." : `Wave ${live.wave + 1}`);
       teach(2);
     }
     if (finished) return;
@@ -791,9 +790,9 @@ function hintFor(save: SaveData, live: Siege): string {
   if (live.world === 3 && live.wave === 0 && live.phase === "build") return "Brutes shrug off arrows. Fund a Heavy Bolt.";
   if (live.world === 5 && live.wave === 0 && live.phase === "build") return "The boulder crushes troops. It wants a Heavy Bolt.";
   if (live.world !== 0) return "";
-  if (live.phase === "wave" && live.wave === 0) return "Tap to move. Stand on a station to fund the next tower.";
+  if (live.phase === "wave" && live.wave === 0) return "Tap to move. Stand on a pad and wait to build.";
   if (!live.stations.some((s) => s.tier > 0) && live.phase === "build") {
-    return "Fund an Arrow Shower.";
+    return "Stand on a pad to build an Arrow Shower.";
   }
   if (save.taught < 3 && live.phase === "wave") return "Walk over the Jade gems before they fade.";
   if (save.taught <= 1 && live.phase === "build") return `Call early +${BALANCE.earlyCall} Jade, or wait out the timer.`;

@@ -286,8 +286,14 @@ export class Siege {
   heroMoved = false;
   /** True once a ground gem has reached the hero. */
   heroCollected = false;
-  /** Station index currently being funded, or -1. */
+  /** Station index the hero is standing on, or -1. */
   funding = -1;
+  /** 0..1 radial fill. The price is spent only when this reaches 1. */
+  dwell = 0;
+  /** The hero is on a pad and does not have the price. */
+  shortJade = false;
+  /** Bumps when a dwell is cancelled so gems already in the air vanish. */
+  payEpoch = 0;
   readonly stations: Station[] = [];
   readonly drops: Drop[] = [];
   readonly puddles: Puddle[] = [];
@@ -325,8 +331,7 @@ export class Siege {
   private readonly freeEnemies: Enemy[] = [];
   private shotCursor = 0;
   private goal: { x: number; y: number } | null = null;
-  private fundBank = 0;
-  private readonly pours: { index: number; left: number; tier: number }[] = [];
+  private payClock = 0;
 
   constructor(world: number) {
     this.world = world;
@@ -1680,35 +1685,33 @@ export class Siege {
     return { id: 0, x: 0, y: 0, vx: 0, vy: 0, value: 0, life: 0, alive: false };
   }
 
+  /** A pad can be built or upgraded by standing on it. Branch picks stay a tap. */
+  private canFund(station: Station): boolean {
+    if (station.kind === "recruit") return false;
+    const repairing = station.kind === "wall" && station.tier > 0 && !station.alive;
+    if (station.tier >= 3 && !repairing) return false;
+    if (station.tier === 1 && station.spec === "none" && specChoices(station.kind)) return false;
+    return this.stationCost(station) > 0;
+  }
+
+  private cancelDwell(): void {
+    if (this.dwell > 0) this.payEpoch += 1;
+    this.dwell = 0;
+    this.funding = -1;
+    this.shortJade = false;
+    this.payClock = 0;
+  }
+
+  /**
+   * Standing still fills a ring. Jade flies toward the pad while it fills and
+   * is spent only when the ring completes. Walking off cancels the charge.
+   */
   private fundAct(dt: number): void {
-    for (let i = this.pours.length - 1; i >= 0; i--) {
-      const pour = this.pours[i];
-      pour.left -= dt;
-      if (pour.left > 0) continue;
-      this.pours.splice(i, 1);
-      const station = this.stations[pour.index];
-      const cost = station && station.tier === pour.tier ? this.stationCost(station) : 0;
-      if (!station || station.tier !== pour.tier || cost <= 0 || station.paid >= cost) {
-        this.jade += 1;
-        continue;
-      }
-      station.paid += 1;
-      this.fx.push({ kind: "tick", x: station.x, y: station.y - 24 });
-      if (station.paid >= cost - 0.001) {
-        const spent = station.paid;
-        station.paid = 0;
-        this.finishStation(station, spent);
-      }
-    }
     let best = -1;
     let bestD: number = BALANCE.fund.radius;
     for (let i = 0; i < this.stations.length; i++) {
       const station = this.stations[i];
-      const repairing = station.kind === "wall" && station.tier > 0 && !station.alive;
-      if (!station.chosen || station.kind === "recruit") continue;
-      if (station.tier === 1 && station.spec === "none" && specChoices(station.kind)) continue;
-      if (station.tier >= 3 && !repairing) continue;
-      if (this.stationCost(station) - station.paid <= 0) continue;
+      if (!this.canFund(station)) continue;
       const d = Math.hypot(station.x - this.heroX, station.y - this.heroY);
       if (d < bestD) {
         bestD = d;
@@ -1716,21 +1719,40 @@ export class Siege {
       }
     }
     const moving = this.goal !== null || Math.hypot(this.steerX, this.steerY) > 0.35;
-    this.funding = moving ? -1 : best;
-    if (moving || best < 0 || this.jade < 1) return;
+    if (moving || best < 0) {
+      this.cancelDwell();
+      return;
+    }
+    if (best !== this.funding) {
+      if (this.dwell > 0) this.payEpoch += 1;
+      this.dwell = 0;
+      this.payClock = 0;
+    }
     const station = this.stations[best];
     const cost = this.stationCost(station);
-    this.fundBank += BALANCE.fund.rate * dt;
-    let inFlight = 0;
-    for (const pour of this.pours) if (pour.index === best) inFlight += 1;
-    while (this.fundBank >= 1 && this.jade >= 1 && cost - station.paid - inFlight >= 1) {
-      this.fundBank -= 1;
-      this.jade -= 1;
-      inFlight += 1;
-      const from = carryLaunch(this.jade + 1);
-      this.pours.push({ index: best, left: PAY_FLIGHT, tier: station.tier });
+    this.funding = best;
+    if (this.jade < cost) {
+      if (this.dwell > 0) this.payEpoch += 1;
+      this.dwell = 0;
+      this.shortJade = true;
+      this.payClock = 0;
+      return;
+    }
+    this.shortJade = false;
+    this.dwell = Math.min(1, this.dwell + dt / BALANCE.fund.dwell);
+    this.payClock -= dt;
+    if (this.payClock <= 0) {
+      this.payClock = 0.1;
+      const from = carryLaunch(Math.max(1, Math.floor(this.jade)));
       this.fx.push({ kind: "pay", x: this.heroX + from.x, y: this.heroY + from.y, tx: station.x, ty: station.y });
     }
+    if (this.dwell < 1) return;
+    this.jade -= cost;
+    this.dwell = 0;
+    this.payClock = 0;
+    this.funding = -1;
+    if (!station.chosen) station.chosen = true;
+    this.finishStation(station, cost);
   }
 
   private finishStation(station: Station, spent: number): void {

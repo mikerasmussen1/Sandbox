@@ -34,13 +34,8 @@ const MENU_REACH = 220;
 const MENU_TOP = 168;
 const MENU_BOTTOM = 96;
 
-function offerPrice(kind: StationKind): number {
-  if (kind === "barracks") return BALANCE.barracks.squad;
-  if (kind === "wall") return BALANCE.wall.cost[0];
-  if (kind === "base") return BALANCE.base.cost[0];
-  if (kind === "recruit") return BALANCE.recruit.groupCost;
-  return towerCost(kind, 0);
-}
+/** Archer bolts and Arrow Rain shafts, relative to the previous sprite length. */
+const ARROW_DRAW = 0.45;
 
 function padHue(kind: StationKind): number {
   if (kind === "wall") return 0xc46a3a;
@@ -216,7 +211,7 @@ export class WorldView {
   private readonly picker = new Container();
   private readonly pickerHits: Container[] = [];
   private pickerFor = -1;
-  private onChoose: ((index: number, kind: StationKind) => void) | null = null;
+  private payEpoch = 0;
   private readonly puffs: { x: number; y: number; life: number; max: number; color?: number }[] = [];
   private readonly menuButtons: Container[] = [];
   private readonly menuCosts: Text[] = [];
@@ -563,10 +558,6 @@ export class WorldView {
     this.onPlace = null;
     this.onShort = null;
     this.placeGhost.visible = false;
-  }
-
-  setChoose(fn: (index: number, kind: StationKind) => void): void {
-    this.onChoose = fn;
   }
 
   setBranch(fn: (index: number, spec: Spec) => void): void {
@@ -1250,49 +1241,50 @@ export class WorldView {
         this.padPlot(station.x, station.y, plot, fade);
       }
       const next = station.tier < 3 ? sim.stationCost(station) : 0;
-      const remain = next > 0 ? Math.max(0, Math.ceil(next - station.paid)) : 0;
-      const broke = sim.funding === i && sim.jade < 1 && remain > 0;
-      if (sim.funding === i && next > 0) {
-        const u = Math.max(0, Math.min(1, station.paid / next));
-        const ring = plot * 0.72;
-        this.pads.circle(station.x, station.y, ring).stroke({ width: 3, color: 0x3a2414, alpha: 0.4 * fade });
-        this.pads.arc(station.x, station.y, ring, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * u).stroke({ width: 3, color: 0xffe08a, alpha: fade });
+      const remain = next > 0 ? Math.max(0, Math.ceil(next)) : 0;
+      const dwelling = sim.funding === i && sim.dwell > 0;
+      const broke = sim.funding === i && sim.shortJade && remain > 0;
+      if (dwelling) {
+        const u = Math.max(0, Math.min(1, sim.dwell));
+        const ring = plot * 1.15;
+        this.pads.circle(station.x, station.y, ring).stroke({ width: 7, color: 0x2a160c, alpha: 0.72 * fade });
+        const start = -Math.PI / 2;
+        const end = start + Math.PI * 2 * u;
+        this.pads.moveTo(station.x, station.y);
+        this.pads.arc(station.x, station.y, ring, start, end);
+        this.pads.lineTo(station.x, station.y);
+        this.pads.fill({ color: 0xffc14a, alpha: 0.78 * fade });
+        this.pads.arc(station.x, station.y, ring, start, end).stroke({ width: 7, color: 0xffe08a, alpha: fade });
       }
       if (broke && this.time - this.needAt > 1.05) {
         this.needAt = this.time;
         this.floatText(station.x, station.y - 78, "need more", 0xffd0a0, 18);
       }
-      const close = Math.hypot(station.x - sim.heroX, station.y - sim.heroY) < 210;
-      const open = station.tier === 0 && !station.chosen && station.kind !== "wall";
-      let shown = remain;
-      if (open) {
-        const prices = station.offers.filter((k) => k !== "wall").map((k) => offerPrice(k));
-        shown = prices.length ? Math.min(...prices) : remain;
-      }
+      const close = Math.hypot(station.x - sim.heroX, station.y - sim.heroY) < BALANCE.fund.preview;
       const glyph = station.kind === "wall" ? "▮" : station.kind === "barracks" || station.kind === "recruit" ? "⚑" : station.kind === "base" ? "☀" : TOWER_ICON[station.kind];
       const icon = this.stationLabel(i);
       icon.text = glyph;
       icon.style.fontSize = 16;
       icon.style.fill = 0xfff8e8;
-      icon.visible = station.chosen && station.kind !== "wall" && close;
+      icon.visible = station.tier === 0 && station.kind !== "wall" && close;
       icon.anchor.set(0.5);
       icon.position.set(station.x, station.y - 46);
       icon.zIndex = station.y + 4;
       const cost = this.stationCostLabel(i);
       const coin = this.stationCoin(i);
       const showPrice = fade > 0.62 && next > 0;
-      cost.text = open ? String(shown) : next > 0 ? String(remain) : "";
+      cost.text = next > 0 ? String(remain) : "";
       const zoom = Math.max(0.35, this.zoom);
       const pricePx = 18 / zoom;
       cost.style.fontSize = pricePx;
-      cost.style.stroke = { color: 0x14301c, width: Math.max(1.25, pricePx * 0.1) };
-      cost.style.fill = broke ? 0xffb089 : 0xfff6df;
+      cost.style.stroke = { color: broke ? 0x3a0c08 : 0x14301c, width: Math.max(1.25, pricePx * 0.1) };
+      cost.style.fill = broke ? 0xff3b30 : 0xfff6df;
       const covered = Math.hypot(station.x - hero.x, station.y - hero.y) < plot * 0.7;
-      cost.visible = showPrice && !covered;
-      coin.visible = cost.visible;
-      if (covered) icon.visible = false;
-      const shake = broke && !this.reduced ? Math.sin(this.time * 48) * 2 : 0;
-      cost.position.set(station.x + shake - plot * 0.12, station.y + shake * 0.2);
+      cost.visible = (showPrice && !covered) || dwelling || broke;
+      coin.visible = showPrice && !covered && !dwelling;
+      if (covered && !broke) icon.visible = false;
+      const shake = broke && !this.reduced ? Math.sin(this.time * 14) * 1.7 : 0;
+      cost.position.set(station.x + shake - (dwelling || broke ? 0 : plot * 0.12), (dwelling || broke ? station.y - plot * 1.05 : station.y) + shake * 0.2);
       cost.alpha = fade;
       cost.zIndex = station.y + 5;
       const coinPx = Math.max(7, plot * 0.28);
@@ -1300,7 +1292,7 @@ export class WorldView {
       coin.position.set(station.x + plot * 0.28 + shake, station.y + 1);
       coin.alpha = fade;
       coin.zIndex = station.y + 5;
-      const empty = station.tier === 0 && station.chosen && station.kind !== "wall";
+      const empty = station.tier === 0 && station.kind !== "wall";
       const ghost = this.padGhost(i);
       if (empty && close && isTower(station.kind)) {
         const kind = station.kind;
@@ -1322,7 +1314,7 @@ export class WorldView {
         ghost.visible = false;
       }
       const hint = this.stationHint(i);
-      hint.text = empty && close && station.chosen && station.kind !== "wall" ? ROLE_HINT[station.kind] : "";
+      hint.text = empty && close && station.kind !== "wall" ? ROLE_HINT[station.kind] : "";
       hint.visible = hint.text.length > 0 && Math.hypot(station.x - hero.x, station.y - hero.y) > 100;
       hint.position.set(station.x, station.y - 46);
       hint.zIndex = station.y + 6;
@@ -1614,6 +1606,14 @@ export class WorldView {
       this.carryCount = total;
       while (this.carryBorn.length > shown) this.carryBorn.pop();
     }
+    if (sim.payEpoch !== this.payEpoch) {
+      this.payEpoch = sim.payEpoch;
+      for (const gem of this.payGems) {
+        gem.s.visible = false;
+        this.payPool.push(gem.s);
+      }
+      this.payGems.length = 0;
+    }
     const hero = sim.heroAt();
     const moving = sim.heroMoving;
     const slots = carrySlots(shown);
@@ -1747,7 +1747,7 @@ export class WorldView {
     bolt.rotation = Math.atan2(shot.y - shot.py, shot.x - shot.px);
     const fat = shot.family === "lens" ? 2.4 : shot.family === "spire" ? 0.7 + shot.tier * 0.22 : 0.85 + shot.tier * 0.12;
     if (arrow) {
-      const length = (head ? 56 : 44) + shot.tier * 4;
+      const length = ((head ? 56 : 44) + shot.tier * 4) * ARROW_DRAW;
       const scale = length / Math.max(1, bolt.texture.width);
       bolt.anchor.set(0.5, 0.5);
       bolt.scale.set(scale);
@@ -1777,9 +1777,9 @@ export class WorldView {
     trail.rotation = bolt.rotation;
     if (arrow) {
       trail.anchor.set(1, 0.5);
-      trail.scale.set(bolt.scale.x * 0.34, bolt.scale.y * 0.3);
+      trail.scale.set(bolt.scale.x * 0.2, bolt.scale.y * 0.12);
       trail.tint = 0xfff1c0;
-      trail.alpha = 0.28;
+      trail.alpha = 0.16;
       trail.blendMode = "add";
     } else if (shot.family === "hero") {
       trail.visible = false;
@@ -2018,36 +2018,8 @@ export class WorldView {
       this.picker.zIndex = station.y + 80;
       return;
     }
-    let best = -1;
-    let bestD = BALANCE.fund.radius + 8;
-    sim.stations.forEach((station, i) => {
-      if (station.chosen || station.kind === "wall" || station.tier > 0) return;
-      const d = Math.hypot(station.x - sim.heroX, station.y - sim.heroY);
-      if (d < bestD) {
-        bestD = d;
-        best = i;
-      }
-    });
-    if (best < 0 || sim.heroMoving) {
-      this.picker.visible = false;
-      this.pickerFor = -1;
-      return;
-    }
-    const station = sim.stations[best];
-    const offers = station.offers.filter((kind) => kind !== "wall");
-    if (this.pickerFor !== best) {
-      this.picker.removeChildren();
-      this.pickerHits.length = 0;
-      offers.forEach((kind, n) => {
-        const button = this.makePick(kind, n, offers.length, best);
-        this.picker.addChild(button);
-        this.pickerHits.push(button);
-      });
-      this.pickerFor = best;
-    }
-    this.picker.visible = true;
-    this.picker.position.set(station.x, station.y);
-    this.picker.zIndex = station.y + 80;
+    this.picker.visible = false;
+    this.pickerFor = -1;
   }
 
   private makeSpec(spec: Spec, n: number, total: number, index: number): Container {
@@ -2077,45 +2049,6 @@ export class WorldView {
     button.on("pointertap", (e) => {
       e.stopPropagation();
       this.onBranch?.(index, spec);
-      this.pickerFor = -1;
-    });
-    return button;
-  }
-
-  private makePick(kind: StationKind, n: number, total: number, index: number): Container {
-    const button = new Container();
-    const spread = 0.7;
-    const ang = -Math.PI / 2 + (n - (total - 1) / 2) * spread;
-    button.position.set(Math.cos(ang) * 86, Math.sin(ang) * 78 - 8);
-    const plate = new Graphics();
-    const hue = padHue(kind);
-    plate.circle(0, 0, 34).fill({ color: 0x1c140e, alpha: 0.94 });
-    plate.circle(0, 0, 34).stroke({ width: 4, color: hue });
-    const icon = new Text({
-      text: kind === "barracks" || kind === "recruit" ? "⚑" : kind === "wall" ? "▮" : kind === "base" ? "☀" : TOWER_ICON[kind],
-      style: { fontFamily: SANS, fontSize: 22, fill: 0xfff6df, fontWeight: "700" },
-    });
-    icon.anchor.set(0.5);
-    icon.position.set(0, -10);
-    const price = new Text({
-      text: String(offerPrice(kind)),
-      style: { fontFamily: SANS, fontSize: 15, fill: 0xffe08a, fontWeight: "700" },
-    });
-    price.anchor.set(0.5);
-    price.position.set(0, 12);
-    const role = new Text({
-      text: ROLE_HINT[kind],
-      style: { fontFamily: SANS, fontSize: 13, fill: 0xfff6df, align: "center" },
-    });
-    role.anchor.set(0.5, 0);
-    role.position.set(0, 38);
-    button.addChild(plate, icon, price, role);
-    button.eventMode = "static";
-    button.cursor = "pointer";
-    button.hitArea = new Circle(0, 8, 46);
-    button.on("pointertap", (e) => {
-      e.stopPropagation();
-      this.onChoose?.(index, kind);
       this.pickerFor = -1;
     });
     return button;
@@ -2282,8 +2215,8 @@ export class WorldView {
     const w = Math.max(1, s.texture.width);
     streak.anchor.set(1, 0.5);
     streak.position.set(-w * 0.42, 0);
-    streak.scale.set(1 / 3, 0.22);
-    streak.alpha = 0.28;
+    streak.scale.set(0.22, 0.1);
+    streak.alpha = 0.16;
     streak.tint = 0xfff1c0;
     streak.blendMode = "add";
     streak.visible = true;
@@ -2317,7 +2250,7 @@ export class WorldView {
       const hy = gy - drop;
       const fall = Math.atan2(drop, run);
       s.rotation = fall;
-      const length = (golden ? 68 : 52) + Math.random() * 8;
+      const length = ((golden ? 68 : 52) + Math.random() * 8) * ARROW_DRAW;
       s.scale.set(length / Math.max(1, s.texture.width));
       s.position.set(hx, hy);
       this.rains.push({

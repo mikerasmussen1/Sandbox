@@ -718,7 +718,7 @@ export class Hud {
     this.guardianButton.addChild(guardianPlate, guardianMask, this.guardianFace, this.guardianRing, guardianLabel);
     this.guardianButton.eventMode = "static";
     this.guardianButton.on("pointertap", (e) => e.stopPropagation());
-    this.hint.text = "Tap a stone pad beside a trail.";
+    this.hint.text = "Stand on a stone pad to build.";
     this.cardName.position.set(96, 28);
     this.cardChip.position.set(96, 64);
     this.cardLine.position.set(96, 96);
