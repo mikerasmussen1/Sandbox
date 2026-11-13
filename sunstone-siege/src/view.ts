@@ -35,6 +35,7 @@ const MENU_TOP = 168;
 const MENU_BOTTOM = 96;
 
 /** Archer bolts and Arrow Rain shafts, relative to the previous sprite length. */
+/** 45% of the bolt and rain length from before this shrink. */
 const ARROW_DRAW = 0.45;
 
 function padHue(kind: StationKind): number {
@@ -929,12 +930,17 @@ export class WorldView {
         placeProp("cliff_edge", here.x - nx * reach, here.y - ny * reach, 0.62 + rnd() * 0.3, ang + Math.PI);
       }
     }
-    const frameNames = desert ? ["tree_palm", "rock_big", "bush"] : ["tree_canopy", "tree_kapok", "bush"];
-    for (let i = 0; i < 8; i++) {
-      const y = 80 + i * 190;
+    const frameNames = desert ? ["tree_palm", "bush", "rock_big", "bush"] : ["tree_canopy", "tree_kapok", "bush", "tree_palm"];
+    for (let i = 0; i < 12; i++) {
+      const y = 36 + i * 145;
       const name = frameNames[i % frameNames.length];
-      placeProp(name, 42 + (i % 3) * 8, y, 1.25 + (i % 2) * 0.2, (i - 4) * 0.04);
-      placeProp(name, MAP_W - 46 - (i % 3) * 8, y + 70, 1.3 + (i % 2) * 0.15, (i - 3) * 0.05);
+      placeProp(name, 36 + (i % 3) * 10, y, 1.2 + (i % 2) * 0.22, (i - 4) * 0.08);
+      placeProp(name, MAP_W - 40 - (i % 3) * 10, y + 60, 1.25 + (i % 2) * 0.18, (i - 3) * 0.07);
+    }
+    for (let i = 0; i < 5; i++) {
+      const name = frameNames[i % frameNames.length];
+      placeProp(name, 140 + i * 160, 28, 1.15, (i - 2) * 0.1);
+      placeProp(name, 160 + i * 150, MAP_H - 36, 1.2, (i - 2) * 0.08);
     }
   }
 
@@ -1524,26 +1530,37 @@ export class WorldView {
     }
   }
 
-  /** A quiet moving sheen on the painted water. Still when motion is reduced. */
+  /** A readable wash plus streaks that travel with the current. Still when motion is reduced. */
   private drawWater(): void {
     this.waterGfx.clear();
     if (!this.waters.length) return;
-    const t = this.reduced ? 0.4 : this.time;
+    const t = this.reduced ? 0 : this.time;
     for (const poly of this.waters) {
       if (poly.length < 3) continue;
-      let cx = 0;
-      let cy = 0;
+      const flat: number[] = [];
+      let minX = Infinity;
+      let maxX = -Infinity;
+      let minY = Infinity;
+      let maxY = -Infinity;
       for (const p of poly) {
-        cx += p.x;
-        cy += p.y;
+        flat.push(p.x, p.y);
+        minX = Math.min(minX, p.x);
+        maxX = Math.max(maxX, p.x);
+        minY = Math.min(minY, p.y);
+        maxY = Math.max(maxY, p.y);
       }
-      cx /= poly.length;
-      cy /= poly.length;
-      const glints = this.reduced ? 1 : 4;
-      for (let i = 0; i < glints; i++) {
-        const v = poly[i % poly.length];
-        const u = 0.32 + 0.38 * (0.5 + 0.5 * Math.sin(t * 1.5 + i * 1.8));
-        this.waterGfx.ellipse(cx + (v.x - cx) * u, cy + (v.y - cy) * u, 20, 5).fill({ color: 0xf7fdff, alpha: 0.32 });
+      this.waterGfx.poly(flat).fill({ color: 0x3ec0e4, alpha: 0.2 });
+      const tall = maxY - minY;
+      const wide = maxX - minX;
+      const down = tall >= wide;
+      const span = Math.max(1, down ? tall : wide);
+      const streaks = this.reduced ? 2 : 6;
+      for (let i = 0; i < streaks; i++) {
+        const u = (t * 0.16 + i / streaks) % 1;
+        const sway = Math.sin(t * 1.6 + i * 1.4) * 0.16;
+        const x = down ? (minX + maxX) / 2 + sway * wide : minX + u * span;
+        const y = down ? minY + u * span : (minY + maxY) / 2 + sway * tall;
+        this.waterGfx.ellipse(x, y, down ? 11 : 16, down ? 4 : 7).fill({ color: 0xf7fdff, alpha: 0.5 });
       }
     }
   }
@@ -1562,9 +1579,9 @@ export class WorldView {
           const x = a.x + (b.x - a.x) * t;
           const y = a.y + (b.y - a.y) * t;
           const ang = Math.atan2(b.y - a.y, b.x - a.x);
-          const tip = 14;
-          const back = 9;
-          const wide = 8;
+          const tip = 7;
+          const back = 4.5;
+          const wide = 4;
           const nx = Math.cos(ang);
           const ny = Math.sin(ang);
           const px = -ny;
@@ -1573,7 +1590,7 @@ export class WorldView {
             x + nx * tip, y + ny * tip,
             x - nx * back + px * wide, y - ny * back + py * wide,
             x - nx * back - px * wide, y - ny * back - py * wide,
-          ]).fill({ color: 0xfff6df, alpha: 0.9 });
+          ]).fill({ color: 0xf3ead4, alpha: 0.38 });
           next += 210;
         }
         walked += sl;

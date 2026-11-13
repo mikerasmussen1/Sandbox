@@ -229,10 +229,10 @@ def layouts() -> list[dict]:
     """
     # (biome, heads, tail, width, pad count, water polygons)
     # The river sits between the lanes. Each road fords it once, up high, then comes home down the middle.
-    river = [
+    river = grow_poly([
         (400, 80), (560, 60), (600, 240), (520, 420), (560, 600), (470, 760),
         (350, 760), (390, 560), (340, 380), (420, 200), (360, 80),
-    ]
+    ], 26)
     pool = [(340, 1460), (620, 1440), (640, 1620), (320, 1630)]
     chasm = [(360, 1240), (680, 1210), (710, 1290), (640, 1380), (390, 1400), (330, 1310)]
     plaza = [(340, 1400), (630, 1380), (650, 1560), (320, 1570)]
@@ -354,10 +354,20 @@ def sample(routes: list[list[tuple[float, float]]]) -> list[tuple[float, float]]
 
 
 def stone_for(index: int) -> tuple[tuple[int, int, int], tuple[int, int, int], tuple[int, int, int]]:
-    """Face, shadowed face, and the deep drop. Grey stone in the green valleys, red rock in the desert."""
+    """Lit cap, mid face, and the deep drop. Mossy stone in the green valleys, red rock in the desert."""
     if index in DESERT:
-        return (214, 118, 74), (168, 74, 46), (112, 46, 32)
-    return (138, 142, 146), (86, 90, 96), (52, 56, 62)
+        return (244, 196, 132), (196, 102, 58), (110, 48, 32)
+    return (214, 206, 168), (126, 146, 108), (58, 78, 62)
+
+
+def grow_poly(poly: list[tuple[float, float]], pad: float) -> list[tuple[float, float]]:
+    cx = sum(p[0] for p in poly) / len(poly)
+    cy = sum(p[1] for p in poly) / len(poly)
+    out = []
+    for x, y in poly:
+        d = math.hypot(x - cx, y - cy) or 1
+        out.append((x + (x - cx) / d * pad, y + (y - cy) / d * pad))
+    return out
 
 
 def texture_ground(img: Image.Image, mask: np.ndarray, rng: np.random.Generator, desert: bool) -> None:
@@ -432,21 +442,26 @@ def crossings(route: list[tuple[float, float]], poly: list[tuple[float, float]])
 
 
 def paint_water(draw: ImageDraw.ImageDraw, poly: list[tuple[float, float]], deep: tuple, lite: tuple) -> None:
-    draw.polygon(poly, fill=deep + (210,))
+    draw.polygon(poly, fill=deep + (230,))
     xs = [p[0] for p in poly]
     ys = [p[1] for p in poly]
     cx = sum(xs) / len(xs)
     cy = sum(ys) / len(ys)
     inner = [(cx + (x - cx) * 0.72, cy + (y - cy) * 0.72) for x, y in poly]
-    draw.polygon(inner, fill=lite + (180,))
-    # A bright thread so the surface reads as water even before the shimmer.
-    for i in range(4):
-        t = 0.2 + i * 0.18
-        draw.line(
-            [(cx + (xs[0] - cx) * t, ys[0] * 0.15 + cy * 0.85), (cx + (xs[len(xs) // 2] - cx) * t, ys[len(ys) // 2] * 0.2 + cy * 0.8)],
-            fill=(232, 248, 255, 90),
-            width=2,
-        )
+    draw.polygon(inner, fill=lite + (200,))
+    # Foam along the banks, nudged inward so it sits on the water.
+    ring = poly + [poly[0]]
+    for a, b in zip(ring, ring[1:]):
+        span = math.hypot(b[0] - a[0], b[1] - a[1])
+        steps = max(2, int(span / 16))
+        for i in range(steps):
+            t = i / steps
+            x = a[0] + (b[0] - a[0]) * t
+            y = a[1] + (b[1] - a[1]) * t
+            x = x * 0.9 + cx * 0.1
+            y = y * 0.9 + cy * 0.1
+            draw.ellipse((x - 8, y - 3, x + 9, y + 4), fill=(214, 242, 250, 210))
+            draw.ellipse((x - 3, y - 2, x + 4, y + 2), fill=(255, 255, 255, 230))
 
 
 def wooden_bridge(draw: ImageDraw.ImageDraw, x: float, y: float, ang: float, length: float, width: float) -> None:
@@ -591,7 +606,7 @@ def paint_early(img: Image.Image, index: int, level: dict) -> None:
     routes = level["routes"]
     if index == 0:
         for poly in level["water"]:
-            paint_water(draw, poly, (36, 108, 128), (92, 168, 176))
+            paint_water(draw, poly, (16, 118, 176), (62, 196, 224))
         # Reeds along the bank.
         for poly in level["water"]:
             for x, y in poly[::2]:
@@ -721,6 +736,50 @@ def paint_late(img: Image.Image, index: int, level: dict, half: int) -> None:
     img.alpha_composite(overlay)
 
 
+def paint_rim(img: Image.Image, mask: np.ndarray, index: int) -> None:
+    """Vines and leaf clumps hanging off the lit lip, onto the cliff, never onto the road."""
+    overlay = Image.new("RGBA", img.size, (0, 0, 0, 0))
+    draw = ImageDraw.Draw(overlay)
+    above = np.zeros_like(mask)
+    above[1:] = mask[:-1]
+    rim = mask & ~above
+    ys, xs = np.where(rim)
+    if len(xs) == 0:
+        return
+    rng = np.random.default_rng(90 + index)
+    jungle = index not in DESERT
+    vine = (34, 96, 46, 235) if jungle else (96, 84, 42, 220)
+    leaf = (52, 156, 64, 235) if jungle else (132, 156, 62, 220)
+    leaf2 = (168, 196, 86, 220) if jungle else (186, 160, 72, 210)
+    step = max(1, len(xs) // 280)
+    for n in range(0, len(xs), step):
+        if rng.random() > 0.62:
+            continue
+        x = int(xs[n])
+        y = int(ys[n])
+        hang = int(rng.integers(16, 48))
+        sway = int(rng.integers(-14, 15))
+        pts = []
+        clear = True
+        for k in range(7):
+            t = k / 6
+            px = x + sway * t * t
+            py = y + hang * t
+            if not (0 <= px < W and 0 <= py < H) or mask[int(py), int(px)]:
+                clear = False
+                break
+            pts.append((px, py))
+        if not clear or len(pts) < 4:
+            continue
+        draw.line(pts, fill=vine, width=2)
+        ex, ey = pts[-1]
+        draw.ellipse((ex - 6, ey - 3, ex + 7, ey + 4), fill=leaf)
+        draw.ellipse((ex - 9, ey - 8, ex - 1, ey - 1), fill=leaf2)
+        if rng.random() > 0.55:
+            draw.ellipse((ex + 2, ey - 6, ex + 9, ey + 1), fill=leaf)
+    img.alpha_composite(overlay)
+
+
 def paint(level: dict, theme: tuple, index: int) -> None:
     top, _cliff, path_c, accent = theme
     rng = np.random.default_rng(100 + index)
@@ -748,6 +807,9 @@ def paint(level: dict, theme: tuple, index: int) -> None:
         rx = int(rng.integers(70, 130))
         ry = int(rng.integers(48, 90))
         md.ellipse((cx - rx, cy - ry, cx + rx, cy + ry), fill=255)
+    if index == 0 and level["water"]:
+        # The river is water on the plateau, not a hole that paints as flat cliff.
+        md.polygon(level["water"][0], fill=255)
     if index == 4:
         # The gorge is a hole in the plateau. The rope bridge is painted back over it.
         md.polygon(level["water"][0], fill=0)
@@ -773,36 +835,27 @@ def paint(level: dict, theme: tuple, index: int) -> None:
 
     noise = rng.random((H // 8, W // 8)).astype(np.float32)
     noise = np.asarray(Image.fromarray((noise * 255).astype(np.uint8), "L").resize((W, H), Image.BILINEAR)).astype(np.float32) / 255
+    # Every off-plateau pixel is layered rock, lit at the lip. No flat gray slab.
     rgb = np.zeros((H, W, 3), np.float32)
+    yy = np.arange(H, dtype=np.float32)[:, None]
+    yb = yy + (noise - 0.5) * 16
+    period = 20.0 if index in DESERT else 15.0
+    phase = np.mod(yb, period) / period
+    capband = np.clip((0.34 - phase) / 0.34, 0, 1)
+    ledge = np.clip((phase - 0.76) / 0.24, 0, 1)
+    far = np.where(face, dist.astype(np.float32), float(drop) + 10 + noise * 12)
+    shade_t = np.clip(far / (drop + 20), 0, 1)
+    lip_cap = np.clip(1 - dist.astype(np.float32) / 11, 0, 1) * face.astype(np.float32)
+    light_rgb = np.array(stone, np.float32)
+    mid_rgb = np.array(stone_dark, np.float32)
+    dark_rgb = np.array(stone_deep, np.float32)
     for c in range(3):
-        rgb[..., c] = stone_deep[c]
-    if np.any(face):
-        t = np.clip(dist.astype(np.float32) / drop, 0, 1)
-        if index in DESERT:
-            # Layered red-rock: light caps, darker bases, and a ledge on each band.
-            yy = np.arange(H, dtype=np.float32)[:, None]
-            yb = yy + (noise - 0.5) * 14
-            period = 18.0
-            phase = np.mod(yb, period) / period
-            cap = np.clip((0.42 - phase) / 0.42, 0, 1)
-            ledge = np.clip((phase - 0.78) / 0.22, 0, 1)
-            light_rgb = np.array([236, 176, 118], np.float32)
-            mid_rgb = np.array([186, 86, 52], np.float32)
-            dark_rgb = np.array([92, 38, 26], np.float32)
-            for c in range(3):
-                band = light_rgb[c] * cap + mid_rgb[c] * (1 - cap)
-                band = band * (1 - 0.62 * t) + dark_rgb[c] * (0.62 * t)
-                band = band * (1 - 0.55 * ledge) + (dark_rgb[c] * 0.7) * ledge
-                rgb[..., c] = np.where(face, band, rgb[..., c])
-        else:
-            t = t * t
-            cap = np.clip(1 - dist.astype(np.float32) / 10, 0, 1)
-            light_top = (198, 202, 194)
-            for c in range(3):
-                lit = stone[c] * 1.08
-                shade = stone_dark[c] * 0.62 + stone_deep[c] * 0.38
-                body = lit * (1 - t) + shade * t
-                rgb[..., c] = np.where(face, body * (1 - cap) + light_top[c] * cap, rgb[..., c])
+        band = light_rgb[c] * capband + mid_rgb[c] * (1 - capband)
+        band = band * (1 - 0.58 * shade_t) + dark_rgb[c] * (0.58 * shade_t)
+        band = band * (1 - 0.5 * ledge) + (dark_rgb[c] * 0.62) * ledge
+        band = band * (1 - lip_cap) + light_rgb[c] * lip_cap
+        band = band * (0.9 + noise * 0.18)
+        rgb[..., c] = np.where(~mask, band, rgb[..., c])
     grass_lit = tuple(min(255, int(c) + 18) for c in top)
     top_rim = mask & ~above
     # A soft lit lip, blurred so the plateau edge does not cut a hard diagonal stripe.
@@ -870,6 +923,7 @@ def paint(level: dict, theme: tuple, index: int) -> None:
         painted = np.array(img)
         painted[~mask, :3] = np.clip(rgb[~mask], 0, 255).astype(np.uint8)
         img = Image.fromarray(painted, "RGBA")
+    paint_rim(img, mask, index)
     paint_late(img, index, level, half)
     sx, sy = SUN
     keep = Image.new("RGBA", (W, H), (0, 0, 0, 0))

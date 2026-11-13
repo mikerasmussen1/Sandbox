@@ -190,6 +190,7 @@ async function boot(): Promise<void> {
         saves: number; kills: number; ready: number;
         leaker: { x: number; y: number; d: number } | null;
         hero: { x: number; y: number };
+        shots: { family: string; x: number; y: number }[];
       } | null;
     };
     debug.__cam = () => ({ zoom, camX, camY, w: app.screen.width, h: app.screen.height });
@@ -220,6 +221,7 @@ async function boot(): Promise<void> {
         short: sim.shortJade,
         stations: sim.stations.map((s) => ({ i: s.index, kind: s.kind, tier: s.tier, spec: s.spec, x: s.x, y: s.y, paid: s.paid, alive: s.alive, hp: s.hp, hurt: s.hurt, path: s.path, dist: s.dist })),
         towersAt: sim.towers.map((t) => ({ kind: t.kind, tier: t.tier, spec: t.spec, x: t.x, y: t.y, cool: t.cooldown })),
+        shots: sim.shots.filter((s) => s.alive).map((s) => ({ family: s.family, x: s.x, y: s.y })),
       };
     };
     const act = window as unknown as {
@@ -232,6 +234,7 @@ async function boot(): Promise<void> {
       __begin?: (index: number) => void;
       __look?: (z: number, x: number, y: number) => void;
       __tower?: (kind: string, x: number, y: number) => boolean;
+      __freeze?: (on: boolean) => void;
       __choose?: (index: number, kind: string) => boolean;
       __spec?: (index: number, spec: string) => boolean;
     };
@@ -271,6 +274,7 @@ async function boot(): Promise<void> {
       hud.root.visible = z < 0.8 ? false : hud.root.visible;
       view.overlay.visible = z < 0.8 ? false : view.overlay.visible;
     };
+    act.__freeze = (on: boolean) => { paused = on; };
     act.__tower = (kind: string, x: number, y: number) => {
       if (!sim) return false;
       if (kind === "barracks") {

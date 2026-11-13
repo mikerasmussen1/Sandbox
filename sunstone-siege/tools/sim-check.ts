@@ -472,12 +472,16 @@ for (const family of families) {
 const countered: [string, number, string][] = [
   ["siege", 0, "the swarm valley"],
   ["siege", 1, "the runner ridge"],
+  ["archer", 2, "the twin canyon"],
   ["archer", 3, "the brute valley"],
   ["archer", 5, "the boulder valley"],
   ["barracks", 4, "the flyer valley"],
   ["mystic", 0, "the swarm valley"],
   ["wall", 0, "the swarm valley"],
+  ["wall", 2, "the twin canyon"],
+  ["wall", 3, "the brute valley"],
   ["wall", 5, "the boulder valley"],
+  ["wall", 7, "the colossus stair"],
 ];
 
 let broken = false;
