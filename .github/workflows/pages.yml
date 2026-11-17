@@ -35,6 +35,7 @@ jobs:
           cp -a thunderscale-depths sunstone-siege/dist/thunderscale-depths
           cp -a starlift-fever sunstone-siege/dist/starlift-fever
           cp -a gilded-deck sunstone-siege/dist/gilded-deck
+          cp -a groove-reef sunstone-siege/dist/groove-reef
       - uses: actions/upload-pages-artifact@v3
         with:
           path: sunstone-siege/dist
