@@ -1,0 +1,47 @@
+{
+ "master": [
+  2400,
+  1080
+ ],
+ "landscape_crop": {
+  "x": 240,
+  "y": 0,
+  "w": 1920,
+  "h": 1080
+ },
+ "portrait": {
+  "file_suffix": "_p",
+  "size": [
+   1080,
+   2400
+  ],
+  "safe_area": {
+   "x": 0,
+   "y": 240,
+   "w": 1080,
+   "h": 1920
+  },
+  "note": "field is rotated 90 deg in portrait (doc 4.3); the centre 1080 x 1920 is always visible, the ends show on taller phones"
+ },
+ "scenes": {
+  "T1": "coral_dance_floor",
+  "T2": "velvet_kelp_lounge",
+  "T3": "sunken_ballroom",
+  "bonus": "encore"
+ },
+ "format": "webp",
+ "files": [
+  "bg_coral_dance_floor_l.webp",
+  "bg_coral_dance_floor_p.webp",
+  "bg_coral_dance_floor_w.webp",
+  "bg_encore_l.webp",
+  "bg_encore_p.webp",
+  "bg_encore_w.webp",
+  "bg_sunken_ballroom_l.webp",
+  "bg_sunken_ballroom_p.webp",
+  "bg_sunken_ballroom_w.webp",
+  "bg_velvet_kelp_lounge_l.webp",
+  "bg_velvet_kelp_lounge_p.webp",
+  "bg_velvet_kelp_lounge_w.webp"
+ ]
+}

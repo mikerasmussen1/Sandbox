@@ -1,0 +1,284 @@
+{
+  "slug": "groove-reef",
+  "name": "Groove Reef",
+  "returnPercent": "96.50",
+  "entryLevelsCents": [
+    1,
+    2,
+    5,
+    10,
+    20,
+    50,
+    100
+  ],
+  "defaultLevelIndex": 2,
+  "stakeCents": 1,
+  "hotMultiple": 20,
+  "funkyMultiple": 100,
+  "showstopperMultiple": 250,
+  "cannonByIndex": [
+    "C1",
+    "C1",
+    "C2",
+    "C2",
+    "C2",
+    "C3",
+    "C3"
+  ],
+  "fireIntervalMs": 160,
+  "sceneSeconds": 48,
+  "formationSeconds": 22,
+  "bossSeconds": 70,
+  "maxWinMultiplier": 1000,
+  "maxPayoutCents": 400000,
+  "encorePicks": [
+    0,
+    1,
+    2,
+    3,
+    4
+  ],
+  "species": [
+    {
+      "id": "S1",
+      "name": "Strobe Fry",
+      "tier": "S",
+      "multiplier": 2,
+      "feature": null,
+      "thresholdPpm": 482500
+    },
+    {
+      "id": "S2",
+      "name": "Twirl Tang",
+      "tier": "S",
+      "multiplier": 4,
+      "feature": null,
+      "thresholdPpm": 241250
+    },
+    {
+      "id": "S3",
+      "name": "Conga Krill",
+      "tier": "S",
+      "multiplier": 5,
+      "feature": null,
+      "thresholdPpm": 193000
+    },
+    {
+      "id": "S4",
+      "name": "Bop Puffer",
+      "tier": "S",
+      "multiplier": 8,
+      "feature": null,
+      "thresholdPpm": 120625
+    },
+    {
+      "id": "S5",
+      "name": "Sequin Seahorse",
+      "tier": "S",
+      "multiplier": 10,
+      "feature": null,
+      "thresholdPpm": 96500
+    },
+    {
+      "id": "M1",
+      "name": "Go-Go Squid",
+      "tier": "M",
+      "multiplier": 20,
+      "feature": null,
+      "thresholdPpm": 48250
+    },
+    {
+      "id": "M2",
+      "name": "Roller Turtle",
+      "tier": "M",
+      "multiplier": 25,
+      "feature": null,
+      "thresholdPpm": 38600
+    },
+    {
+      "id": "M3",
+      "name": "Funkfin Angel",
+      "tier": "M",
+      "multiplier": 40,
+      "feature": null,
+      "thresholdPpm": 24125
+    },
+    {
+      "id": "M4",
+      "name": "Neon Velvet Ray",
+      "tier": "M",
+      "multiplier": 50,
+      "feature": null,
+      "thresholdPpm": 19300
+    },
+    {
+      "id": "L1",
+      "name": "Boombox Shark",
+      "tier": "L",
+      "multiplier": 100,
+      "feature": null,
+      "thresholdPpm": 9650
+    },
+    {
+      "id": "L2",
+      "name": "DJ Ripple",
+      "tier": "L",
+      "multiplier": 125,
+      "feature": null,
+      "thresholdPpm": 7720
+    },
+    {
+      "id": "L3",
+      "name": "Crooner Grouper",
+      "tier": "L",
+      "multiplier": 200,
+      "feature": null,
+      "thresholdPpm": 4825
+    },
+    {
+      "id": "L4",
+      "name": "Jukebox Clam",
+      "tier": "L",
+      "multiplier": 250,
+      "feature": null,
+      "thresholdPpm": 3860
+    },
+    {
+      "id": "X1",
+      "name": "Subwoofer Crab",
+      "tier": "X",
+      "multiplier": 100,
+      "feature": "bassdrop",
+      "thresholdPpm": 9650
+    },
+    {
+      "id": "X2",
+      "name": "Laser Lobster",
+      "tier": "X",
+      "multiplier": 200,
+      "feature": "lightshow",
+      "thresholdPpm": 4825
+    },
+    {
+      "id": "X3",
+      "name": "Spotlight Shrimp",
+      "tier": "X",
+      "multiplier": 250,
+      "feature": "spotlight",
+      "thresholdPpm": 3860
+    },
+    {
+      "id": "X4",
+      "name": "Mirror Puffer",
+      "tier": "X",
+      "multiplier": 50,
+      "feature": "whirl",
+      "thresholdPpm": 19300
+    },
+    {
+      "id": "X5",
+      "name": "Vinyl Hermit",
+      "tier": "X",
+      "multiplier": 40,
+      "feature": "vinyl",
+      "thresholdPpm": 24125
+    },
+    {
+      "id": "X6",
+      "name": "Golden Deck",
+      "tier": "X",
+      "multiplier": 100,
+      "feature": "encore",
+      "thresholdPpm": 9650
+    },
+    {
+      "id": "B1",
+      "name": "Baron Glitterjaw",
+      "tier": "B",
+      "multiplier": 1000,
+      "feature": "lure",
+      "thresholdPpm": 965
+    }
+  ],
+  "features": {
+    "bassdrop": {
+      "counter": null,
+      "shares": [
+        10,
+        12,
+        14,
+        16,
+        18,
+        30
+      ]
+    },
+    "lightshow": {
+      "counter": null,
+      "shares": [
+        20,
+        30,
+        40,
+        50,
+        60
+      ]
+    },
+    "spotlight": {
+      "counter": null,
+      "shares": [
+        20,
+        30,
+        40,
+        50,
+        50,
+        60
+      ]
+    },
+    "whirl": {
+      "counter": null,
+      "shares": [
+        4,
+        6,
+        8,
+        8,
+        10,
+        14
+      ]
+    },
+    "vinyl": {
+      "counter": 8,
+      "shares": [
+        4,
+        4,
+        4,
+        4,
+        6,
+        6,
+        6,
+        6
+      ]
+    },
+    "encore": {
+      "counter": null,
+      "shares": [
+        8,
+        12,
+        16,
+        24,
+        40
+      ]
+    },
+    "lure": {
+      "counter": null,
+      "shares": [
+        40,
+        60,
+        80,
+        100,
+        120,
+        140,
+        160,
+        300
+      ]
+    }
+  }
+}

@@ -1,0 +1,33 @@
+{
+  "fireIntervalMs": 160,
+  "maxBounces": 4,
+  "bulletSpeed": 980,
+  "sceneSeconds": 48,
+  "formationSeconds": 22,
+  "bossSeconds": 70,
+  "species": [
+    { "id": "S1", "name": "Strobe Fry", "tier": "S", "multiplier": 2, "feature": null },
+    { "id": "S2", "name": "Twirl Tang", "tier": "S", "multiplier": 4, "feature": null },
+    { "id": "S3", "name": "Conga Krill", "tier": "S", "multiplier": 5, "feature": null },
+    { "id": "S4", "name": "Bop Puffer", "tier": "S", "multiplier": 8, "feature": null },
+    { "id": "S5", "name": "Sequin Seahorse", "tier": "S", "multiplier": 10, "feature": null },
+    { "id": "M1", "name": "Go-Go Squid", "tier": "M", "multiplier": 20, "feature": null },
+    { "id": "M2", "name": "Roller Turtle", "tier": "M", "multiplier": 25, "feature": null },
+    { "id": "M3", "name": "Funkfin Angel", "tier": "M", "multiplier": 40, "feature": null },
+    { "id": "M4", "name": "Neon Velvet Ray", "tier": "M", "multiplier": 50, "feature": null },
+    { "id": "L1", "name": "Boombox Shark", "tier": "L", "multiplier": 100, "feature": null },
+    { "id": "L2", "name": "DJ Ripple", "tier": "L", "multiplier": 125, "feature": null },
+    { "id": "L3", "name": "Crooner Grouper", "tier": "L", "multiplier": 200, "feature": null },
+    { "id": "L4", "name": "Jukebox Clam", "tier": "L", "multiplier": 250, "feature": null },
+    { "id": "X1", "name": "Subwoofer Crab", "tier": "X", "multiplier": 100, "feature": "bassdrop" },
+    { "id": "X2", "name": "Laser Lobster", "tier": "X", "multiplier": 200, "feature": "lightshow" },
+    { "id": "X3", "name": "Spotlight Shrimp", "tier": "X", "multiplier": 250, "feature": "spotlight" },
+    { "id": "X4", "name": "Mirror Puffer", "tier": "X", "multiplier": 50, "feature": "whirl" },
+    { "id": "X5", "name": "Vinyl Hermit", "tier": "X", "multiplier": 40, "feature": "vinyl" },
+    { "id": "X6", "name": "Golden Deck", "tier": "X", "multiplier": 100, "feature": "encore" },
+    { "id": "B1", "name": "Baron Glitterjaw", "tier": "B", "multiplier": 1000, "feature": "lure" }
+  ],
+  "weapons": {
+    "ring": { "costFactor": 1, "maxHits": 1 }
+  }
+}

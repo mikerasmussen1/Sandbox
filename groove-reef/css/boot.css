@@ -1,0 +1,71 @@
+/* First paint for every framed game. Visible before the bundle runs. */
+#biab-boot {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--biab-shell, #071018);
+  color: var(--biab-ink, #f4efe4);
+  text-align: center;
+}
+#biab-boot[hidden] { display: none; }
+.biab-boot-card { width: min(420px, 100%); }
+.biab-boot-title {
+  margin: 0 0 12px;
+  font: 700 28px/1.2 "Exo 2", "Trebuchet MS", sans-serif;
+}
+.biab-boot-label {
+  margin: 0 0 16px;
+  font: 600 16px/1.4 "Exo 2", "Trebuchet MS", sans-serif;
+}
+.biab-boot-track {
+  height: 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+  overflow: hidden;
+}
+.biab-boot-fill {
+  height: 100%;
+  width: 0%;
+  background: var(--biab-cta, #f0c14a);
+}
+.biab-boot-error {
+  margin: 16px 0 0;
+  font: 600 16px/1.4 "Exo 2", "Trebuchet MS", sans-serif;
+}
+#biab-boot-retry {
+  margin-top: 18px;
+  min-width: 140px;
+  min-height: 44px;
+  padding: 10px 18px;
+  border: 0;
+  border-radius: 8px;
+  background: #f0c14a;
+  color: #1a1208;
+  font: 700 16px/1 "Exo 2", "Trebuchet MS", sans-serif;
+  cursor: pointer;
+}
+#biab-boot-retry[hidden] { display: none; }
+
+/* Framed in the brand shell: the shell owns lobby, coin, sound, info, settings, and full screen. */
+html.biab-framed #btn-close,
+html.biab-framed #btn-sound,
+html.biab-framed #btn-info,
+html.biab-framed #btn-help,
+html.biab-framed #btn-settings,
+html.biab-framed #btn-full,
+html.biab-framed #sound-btn,
+html.biab-framed #settings-open,
+html.biab-framed #cur-gc,
+html.biab-framed #cur-sc,
+html.biab-framed #cur-switch,
+html.biab-framed #currency,
+html.biab-framed #help-open,
+html.biab-framed #sf-top,
+html.biab-framed #sf-title .sf-btn.ghost,
+html.biab-framed #sf-title .sf-note {
+  display: none !important;
+}

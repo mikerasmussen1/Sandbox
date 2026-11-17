@@ -1,0 +1,2554 @@
+{
+ "slug": "groove-reef",
+ "root": "apps/player/public/games/groove-reef",
+ "files": [
+  {
+   "path": "art/tile.jpg",
+   "bytes": 276199,
+   "sha256": "a6907d90fdf0c38a1ce6b6ab1a19ea27d95d050a0a57bce7a3aaa2a8339454bf",
+   "size": [
+    900,
+    1200
+   ],
+   "purpose": "lobby tile 900x1200, no words"
+  },
+  {
+   "path": "assets/audio/audio_manifest.json",
+   "bytes": 16826,
+   "sha256": "2da08e251a7223036846d31e5fb970f6a750fea87ca1154edaf2f1693c5a189b",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/mus_ballroom.mp3",
+   "bytes": 521656,
+   "sha256": "7fa897f98331a7b123df173a9049fa97112051adc40a3f86720ccac02793b5c8",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/mus_ballroom.ogg",
+   "bytes": 447151,
+   "sha256": "bd7df3a380b5021f6018b7bb3367eaab02988ab41d4874305becf09bd7852cd1",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/mus_boss.mp3",
+   "bytes": 481114,
+   "sha256": "7adffe8687fbe48c7b756c43c99ec63aed198f8ad0783dc3ab716f0653d6c890",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/mus_boss.ogg",
+   "bytes": 422621,
+   "sha256": "7952020e2e87319d898d5e9cdd51612ff859281bcfdcce37c0de9d25e8b5e473",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/mus_dancefloor.mp3",
+   "bytes": 504519,
+   "sha256": "1b859236eb06f1ef1ac52bac61a9a100e274734e7f6d5bafe83a86b5c91392df",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/mus_dancefloor.ogg",
+   "bytes": 447062,
+   "sha256": "f6f2ca42eafa928bf7724134f09f4dcc3d8b739eda2c3153ea23e2da6fd98b52",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/mus_encore.mp3",
+   "bytes": 257087,
+   "sha256": "5ab590011d66fdffda48172cea1074c7da06609b0357be9bbd37e1f85a9c52f8",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/mus_encore.ogg",
+   "bytes": 233185,
+   "sha256": "bf09280afccd4f17ef0a10a7508a83db082b239f2132f434eb39e974598de184",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/mus_lounge.mp3",
+   "bytes": 549659,
+   "sha256": "9d8dd10c5ddfa77db4c15d743d92240c28cbfdee5453579dddf215fbf69accbd",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/mus_lounge.ogg",
+   "bytes": 487460,
+   "sha256": "078dbd8b670b31bce0545dac4338bb5c06dbd029c5a59841b0cc418be49b17ab",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/mus_showstopper.mp3",
+   "bytes": 65350,
+   "sha256": "65d3276e813184ced800b28f6be7290f44d1e180e8b6e655b34cf25d942b4477",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/mus_showstopper.ogg",
+   "bytes": 59199,
+   "sha256": "32d5369883927370c9752a5966a0c2edc8bdedbd94a8c696f2d5ad6a4554d9d4",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_aim_lock.mp3",
+   "bytes": 6313,
+   "sha256": "e182d202b1b2da7c19a5c78bc5aa715292a344ba1723ab208648fa735dc03a0f",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_aim_lock.ogg",
+   "bytes": 6936,
+   "sha256": "00a7d5f5c7fee8f20b74160468d117afe91ea4b30f42c6556b32ae53db57209b",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_auto_off.mp3",
+   "bytes": 6835,
+   "sha256": "c4413e8e625acf1e804d392620bdeaf35e47149789bacca3ce1c0911d3e2cfbc",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_auto_off.ogg",
+   "bytes": 8388,
+   "sha256": "837092f345a4a83b9723849ef10cd2db99844800bc5bc3c7a9cefc99211c40c4",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_auto_on.mp3",
+   "bytes": 6835,
+   "sha256": "4bed6555b0b2a52743455b187059334627fbef13a3b46f7308f17dccd1f48004",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_auto_on.ogg",
+   "bytes": 7853,
+   "sha256": "493f903366f7c6365818df3bb201b2a1f9f621830e956ddeff2309732abc3696",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_ball_drop.mp3",
+   "bytes": 13105,
+   "sha256": "e795e5a16a864e490d8d0a44b1316993e52597182c318b9f4d0b3a7daa18f2d7",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_ball_drop.ogg",
+   "bytes": 12533,
+   "sha256": "e48d9996673665d4f8c7de9b0b53870d9cb628a9721abb3aab33251425a3804c",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_ball_open.mp3",
+   "bytes": 13105,
+   "sha256": "82eea6519dabb7d2412717004dabe04d423a4655c1e7d0dbde1935f4c23ae50d",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_ball_open.ogg",
+   "bytes": 15718,
+   "sha256": "54ca995a3cfc4e5e5bf039624e7f0d1702400584aa23197ead914172d70f9ba5",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_bassdrop_pump.mp3",
+   "bytes": 23554,
+   "sha256": "3f71581c9f064e8dbe226a2b071d4dabeb1ece685d4df068c770a552e4fc776c",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_bassdrop_pump.ogg",
+   "bytes": 13688,
+   "sha256": "30bb77b5ea007d2f85d311a05023b88090a1b474b194654ee5b6aee1a5ec0499",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_bassdrop_wave.mp3",
+   "bytes": 29301,
+   "sha256": "f803b842b1fe8270c17f0fd3702e4f3b191d39dc1990f5cbe3313ebc1e9e32e4",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_bassdrop_wave.ogg",
+   "bytes": 24992,
+   "sha256": "82f07f89415da0e192b23c9f4a7aeda63f2bba04a62c70e59017ada7be87309c",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_beat_drop.mp3",
+   "bytes": 73186,
+   "sha256": "3e3a07e000ea59486875d07b88b9bb6f32d3a57a44c52adf0046f4a2aeb03251",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_beat_drop.ogg",
+   "bytes": 48140,
+   "sha256": "c05160743a63e6d6d13eafcb9f0a1d491ffc2dc3edc429cb9c8b90930ec31925",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_bonus_enter.mp3",
+   "bytes": 37137,
+   "sha256": "55405b3fd76daa3fd61bde71b0bb6d924648e19224ccba3bc0fe8e7053f5f14d",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_bonus_enter.ogg",
+   "bytes": 37452,
+   "sha256": "295aea2857e2b8679050e2b07bfac42769a63895263d786f8392d1c54be443ce",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_boss_burst.mp3",
+   "bytes": 33480,
+   "sha256": "6e300dd26fce4954774662eb3d41107c10c6bb65cf3c8bdcc2683aa90e5c3284",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_boss_burst.ogg",
+   "bytes": 32171,
+   "sha256": "ddb23dbe21386aadc18e7a552fdeb504e2bf01161e49bba9f948c65e0573f6f8",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_boss_drumroll.mp3",
+   "bytes": 55423,
+   "sha256": "ad56b78329816adac211cef8399064d4fc08657e4acf9e72536c3da0675d7dff",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_boss_drumroll.ogg",
+   "bytes": 41129,
+   "sha256": "5c034070ac5d537861cc65f60244668a521e0407859bcb1c2cac8b2b4e26ff58",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_boss_enter.mp3",
+   "bytes": 69529,
+   "sha256": "3c1c0300f8fe18a4e3b60e0c1a6f6df347e8269af3c6ac64cb8750224ecd6c14",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_boss_enter.ogg",
+   "bytes": 52756,
+   "sha256": "970e5f53e33a0a614a8486244014869b020d98ff20ed48af40552b212cbc6ef7",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_boss_siren.mp3",
+   "bytes": 41317,
+   "sha256": "bdb750e9602c86d4eb52dc11223cb2628218c4d90af693048d7199fcb1e50d5a",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_boss_siren.ogg",
+   "bytes": 40229,
+   "sha256": "0dfab1681376fe1fd2fad42bd875f78780c50c88fb77b8aca0c2999a306083c0",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_bounce.mp3",
+   "bytes": 2656,
+   "sha256": "630f3f26a7f27a82431e30a29352731bd7f51137296e66f7307ba63cba44786a",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_bounce.ogg",
+   "bytes": 5596,
+   "sha256": "97b8ec2c462c8a8f2e4c60f0c2adbe385fea5a41d6ad4bf7e4daed8070115fc4",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_capture_l.mp3",
+   "bytes": 19374,
+   "sha256": "7d5c59ccaaa7cb55f49aba5ce23cde6302af6f46fd1d8e75fde39f7190b79f84",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_capture_l.ogg",
+   "bytes": 20165,
+   "sha256": "b32e62fa1371e7e5e3cce992a3731be9a6ae131a93991c9f3cf78e28144b6d2b",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_capture_m.mp3",
+   "bytes": 11537,
+   "sha256": "fa6e82512c0b69c6b649676f2015ecbc7a222d412f036ff332b924810477c032",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_capture_m.ogg",
+   "bytes": 12723,
+   "sha256": "12a7ed430494b7e947caf2f591319c93d0bff363f034d857a754f46b412d0b87",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_capture_s.mp3",
+   "bytes": 7880,
+   "sha256": "c8e6fe28a7016cc4f30e7193a8971d66f13e34c5d82a57432ef2f4d7cd3c50c0",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_capture_s.ogg",
+   "bytes": 10843,
+   "sha256": "84ec3b265b738a723e31d8a5c81cdde715abc17a025ccf9703d26a9d279feb3e",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_catch_funky.mp3",
+   "bytes": 35570,
+   "sha256": "02b81f1c7d5bca5a0c227f0b089170b3ffdc7e15439e3ec8f0747786a52a0cdc",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_catch_funky.ogg",
+   "bytes": 35111,
+   "sha256": "915ad8d51da12586d232e9794c2ce707cd2e47fccd71e4ae8b59bf6ba3de1d05",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_catch_hot.mp3",
+   "bytes": 23554,
+   "sha256": "dccb3ce8eeb181804b647b81410b194fbf68996657ed0d07b100c0309eec6228",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_catch_hot.ogg",
+   "bytes": 24286,
+   "sha256": "8f0e36bcdc904637919c5ad69888228815501f07a66cd97bba2c93c933c912e8",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_catch_showstopper.mp3",
+   "bytes": 65350,
+   "sha256": "0d27647178b63037d151c48007ecb3efbbc1145decb4b022bcc1db8db03e51d8",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_catch_showstopper.ogg",
+   "bytes": 59200,
+   "sha256": "b1b2dd07cacc2a65e9d31bd0c1f43d11f8edead38e0820572733c16798d43f82",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_coin_tick.mp3",
+   "bytes": 3701,
+   "sha256": "8d01cf4a6f20e5e76def4d75b4b443e0e8d856681187c81a7a02f939244c19fa",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_coin_tick.ogg",
+   "bytes": 7078,
+   "sha256": "ada7b292ee1d742f8beb3760f72fb6d1d2fe711e27a8e8d95d3e95bca6668d8d",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_coins.mp3",
+   "bytes": 17284,
+   "sha256": "42c66a53e49ef1887309944468e367a3e35a0877d21f0d3e58e67f61a951873f",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_coins.ogg",
+   "bytes": 17026,
+   "sha256": "2557d49c2bb6165c7cca9fe2db3de9d302d7742516d52d56a73e0bb6656b0af5",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_deck_spinup.mp3",
+   "bytes": 25121,
+   "sha256": "21898f5cd928a66b4fcf7838a850689505a7cc9b62aa6130234a153016fc2737",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_deck_spinup.ogg",
+   "bytes": 27144,
+   "sha256": "36d8703cc08908b8e5a136163e4fc9e622935dda67cfb7ed57311f4a8ed56e77",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_encore_total.mp3",
+   "bytes": 43929,
+   "sha256": "4ba304fe120e71ea9aa7590239a94c4099588f201f6ff26d3a8118a10665f418",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_encore_total.ogg",
+   "bytes": 40147,
+   "sha256": "75d3e41c343d0821db63e5cce7de02f55662f81a640e3465bd6e8bbe51ae393a",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_error.mp3",
+   "bytes": 9448,
+   "sha256": "dfddb285dda2634a6ba7bd125c27546be1ca3b474d072004ed984b7842afe21e",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_error.ogg",
+   "bytes": 13537,
+   "sha256": "cd92d58068fd826e7c569ff59741a5e80db9bfa2eb5915ef879cd89e3471d0d4",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_fire_1.mp3",
+   "bytes": 5791,
+   "sha256": "33dbd0df5a33782d4c862d1ac0bb4bf618c92a27b7e31eecc6f7a5dffeddf949",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_fire_1.ogg",
+   "bytes": 8361,
+   "sha256": "bd8770817e15916248ac3ce0575b7ec5f196df20096d382b9466805244f32c77",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_fire_2.mp3",
+   "bytes": 5791,
+   "sha256": "63d14a2d15d6c5478e844f2870e2b8da0bbf72ff036e79ecd9b1ad36b38f56c5",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_fire_2.ogg",
+   "bytes": 8507,
+   "sha256": "d831e8e38802f9825dc9bfef1a563aa03a394c21d34def6dde40ca5b5ed3a1c6",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_fire_3.mp3",
+   "bytes": 6313,
+   "sha256": "c3fc726e6a38184edbee0892e2293e501a38516a99c3e8adf2358c60ad085de3",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_fire_3.ogg",
+   "bytes": 8481,
+   "sha256": "39c263a8fa55208b4fe8e338ae24e7693ae16063fd9770a4738df7ac1239707f",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_flash.mp3",
+   "bytes": 13105,
+   "sha256": "5cdce9378929de068d4fde8c4c264441c3b7c1b8106c56b402974785ef0d43fd",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_flash.ogg",
+   "bytes": 16123,
+   "sha256": "56ae617f2d88feeea9da6e4cefcda9a203ead9fe9235c37d1806661f058dbc84",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_hit.mp3",
+   "bytes": 3701,
+   "sha256": "d853ab7978cd2f5398f1715a0d7f9d6f08a282959864ebdf7d8ef0f937cc24c0",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_hit.ogg",
+   "bytes": 6764,
+   "sha256": "7056af7810e4a82658091c13c3153a7fa709411c1350f65f4e76268e4cf4f349",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_level_down.mp3",
+   "bytes": 10493,
+   "sha256": "79d4497b69cfab6dfc29885644352b1f961f3da770e92dbb905dc8529d12155d",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_level_down.ogg",
+   "bytes": 12857,
+   "sha256": "24d7814fc33f62cf7965efd7aeaed6ac4be33e0baf41abfbb1904be279310081",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_level_up.mp3",
+   "bytes": 10493,
+   "sha256": "d19451c0cc64127be5ca477868497a255090cffe80d45abfd54d762b96dbe071",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_level_up.ogg",
+   "bytes": 12300,
+   "sha256": "73a89f357687cdd01130cdc34987bd05bae346aea74f00268dd10cc3e03ca197",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_lightshow_loop.mp3",
+   "bytes": 41317,
+   "sha256": "7bc399abd129487785951da2901223bd0d6f155797ee2eced15da2d1d3c6b455",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_lightshow_loop.ogg",
+   "bytes": 44629,
+   "sha256": "3dcac823b27fef768be51dd639f52ebc1ef39f7e4f7e6c584f2723c5745430d3",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_lure_snap.mp3",
+   "bytes": 19374,
+   "sha256": "6a53ce3fa939d75cf02143dcd92dc9d151100428c93bc984df792ea189e37ddc",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_lure_snap.ogg",
+   "bytes": 18547,
+   "sha256": "0fc192f78ce41be77fe4d49d59fa9cfe91d38e484d1fe7b4071f78135e6ec49c",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_menu_open.mp3",
+   "bytes": 5791,
+   "sha256": "599f37074308ed4b595e28079795fd492d28cbce90d47d1e6087e9455236f229",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_menu_open.ogg",
+   "bytes": 8293,
+   "sha256": "c00d49d2ba92486f176ea7fd7610f00becae587b00c0cddaa7f1cffc6dc02a71",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_mirrorball_bounce.mp3",
+   "bytes": 6313,
+   "sha256": "400200bc887dfbd82a5359c14ee73d3d179ec070cf1191ac1238891dc20aa370",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_mirrorball_bounce.ogg",
+   "bytes": 6866,
+   "sha256": "f6b24f75af58c38e92e61a335a009bd799ce690cf86fdbe385d7e1773080b11c",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_popup.mp3",
+   "bytes": 4746,
+   "sha256": "0be135ece46cdb518879144c48b75b39b2fc5ff6c25fb9bf555306f8a0ea0232",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_popup.ogg",
+   "bytes": 7644,
+   "sha256": "6127ed8e046ed910228ae1ad74071d54ec8d6dc9e3be9fc28761621ffcdae2cd",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_reveal_grey.mp3",
+   "bytes": 7358,
+   "sha256": "b4b62f1fab826a2f0b7a3a2245f0d007438feb131a6b8286cd13a59c316a2e8c",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_reveal_grey.ogg",
+   "bytes": 7696,
+   "sha256": "34d680e7b436bc233205d324acde4bbb6670c01b349aa34990807cdc85c793f0",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_rocket.mp3",
+   "bytes": 19374,
+   "sha256": "5f50f7fde25786f90d9edb8c53c2baac757265ab2972f54e0195d2ee5919be58",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_rocket.ogg",
+   "bytes": 19769,
+   "sha256": "3fb781f967247f0796d91d0933abf8cf043ccf2649f4ed4a5fd919a15f6048d3",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_spotlight_prompt.mp3",
+   "bytes": 17284,
+   "sha256": "b987f80f133feb82cbddce97d3dadd8b33cca9da02f1282dff8fcee2eea46310",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_spotlight_prompt.ogg",
+   "bytes": 17973,
+   "sha256": "cd3ba731e155a6465749d9fcca3b0ab788acbf1464046f7dfa9e324df14436a0",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_spotlight_tick.mp3",
+   "bytes": 3178,
+   "sha256": "a3bd264e5d929d5f8e9c5ecbda6f2a4281ab03b199febcbd2b193174546a9e0b",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_spotlight_tick.ogg",
+   "bytes": 5381,
+   "sha256": "fac75841e51d4993386ebab31c33c1764862e504ae2fc04e60223fb421eba8b8",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_ui_tap.mp3",
+   "bytes": 2133,
+   "sha256": "543b14dd3ae424fdbdf7bf2822dc6f9f65f92c535f17ba05351cca190b62b391",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_ui_tap.ogg",
+   "bytes": 5375,
+   "sha256": "506d39535cb8eb6f249e3279e12b4a6fda9deb5375afc94dc6e27c8d35d36e0b",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_vinyl_arm.mp3",
+   "bytes": 13105,
+   "sha256": "186a9e4782634024762021259add3f18a1681b3516c9d937a36bf76f51d38f5d",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_vinyl_arm.ogg",
+   "bytes": 13310,
+   "sha256": "2a823c3267edc419274fb9350f6d83bb043bce42d7b1cba924a9d741df816d4b",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_vinyl_slice.mp3",
+   "bytes": 3701,
+   "sha256": "8ab245d292674b8b2e1a6db3b12dd3b2d76a8a83e5ecdf4a27c4361be63cd925",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_vinyl_slice.ogg",
+   "bytes": 6978,
+   "sha256": "52dfdb5d6e84cefe08d2e50fab61d7503fde4c3bab66bb0ffdcc7deaac338d58",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_vinyl_throw.mp3",
+   "bytes": 8403,
+   "sha256": "9a9ddd02981611611cd8a1a420e9836ab9ef9b8dd2c36e5206ec1f7300213a0f",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_vinyl_throw.ogg",
+   "bytes": 10472,
+   "sha256": "7595a146ff5618a73079fff62401d86d6c047814901fc26f5217c72a4d6669e6",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_whirl_loop.mp3",
+   "bytes": 41317,
+   "sha256": "bdd727d02fb98cdf1cf1392b964b4872472717503d41c23c34caa0bf8510bc5b",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/audio/sfx_whirl_loop.ogg",
+   "bytes": 40071,
+   "sha256": "1cab97ab8247b63ad07b9aa9cd24ca3975bae49f2fed665177e29cfed72d1374",
+   "purpose": "audio (see audio_manifest.json)"
+  },
+  {
+   "path": "assets/bg/bg_coral_dance_floor_l.webp",
+   "bytes": 195618,
+   "sha256": "b94fb26f302d563b9725178073b4dc8a3f0308625fd03737e609035e6e64e6e1",
+   "size": [
+    1920,
+    1080
+   ],
+   "purpose": "background coral dance floor, 1920x1080 landscape"
+  },
+  {
+   "path": "assets/bg/bg_coral_dance_floor_p.webp",
+   "bytes": 290078,
+   "sha256": "e22b9385e4f5aed5a54261a6451fb5607209f616f7cabaadb20339b375431928",
+   "size": [
+    1080,
+    2400
+   ],
+   "purpose": "background coral dance floor, 1080x2400 rotated portrait"
+  },
+  {
+   "path": "assets/bg/bg_coral_dance_floor_w.webp",
+   "bytes": 289956,
+   "sha256": "95a7d2d527786ed3d68fe4c60b34ccecfe9e7155d521fbf93ad2336fa571554a",
+   "size": [
+    2400,
+    1080
+   ],
+   "purpose": "background coral dance floor, 2400x1080 wide master"
+  },
+  {
+   "path": "assets/bg/bg_encore_l.webp",
+   "bytes": 273188,
+   "sha256": "1850f9bff1a90cd680f0d562a9eb35649aac4546764de7f8dd7dd513c0fd2fe7",
+   "size": [
+    1920,
+    1080
+   ],
+   "purpose": "background encore, 1920x1080 landscape"
+  },
+  {
+   "path": "assets/bg/bg_encore_p.webp",
+   "bytes": 382546,
+   "sha256": "77e5bb0dbe670b0c28be894634c28825549661e141bfe02dc9f6e9ae674a7cc8",
+   "size": [
+    1080,
+    2400
+   ],
+   "purpose": "background encore, 1080x2400 rotated portrait"
+  },
+  {
+   "path": "assets/bg/bg_encore_w.webp",
+   "bytes": 385672,
+   "sha256": "7614ed98015a15c97d6f766bdc3dcb0b39afb1b55e54c708f1bd2f0f3f71ec55",
+   "size": [
+    2400,
+    1080
+   ],
+   "purpose": "background encore, 2400x1080 wide master"
+  },
+  {
+   "path": "assets/bg/bg_sunken_ballroom_l.webp",
+   "bytes": 320348,
+   "sha256": "859c724b55cbe3d408c844cd4421d2912850dd2fd7440f2d68d7d5d62a458925",
+   "size": [
+    1920,
+    1080
+   ],
+   "purpose": "background sunken ballroom, 1920x1080 landscape"
+  },
+  {
+   "path": "assets/bg/bg_sunken_ballroom_p.webp",
+   "bytes": 429824,
+   "sha256": "33454b5f819419d08df2542cd6141204912545e7150e51528afe543f2b64c2da",
+   "size": [
+    1080,
+    2400
+   ],
+   "purpose": "background sunken ballroom, 1080x2400 rotated portrait"
+  },
+  {
+   "path": "assets/bg/bg_sunken_ballroom_w.webp",
+   "bytes": 427830,
+   "sha256": "cdbf608245b6a1f87270bb43e7e5b74430f5098f42bd2d013b9ed31f5726752e",
+   "size": [
+    2400,
+    1080
+   ],
+   "purpose": "background sunken ballroom, 2400x1080 wide master"
+  },
+  {
+   "path": "assets/bg/bg_velvet_kelp_lounge_l.webp",
+   "bytes": 275350,
+   "sha256": "2c8f1dee0e5555f94c2cbe583f42fee1202d519b8686f8b29a650941de5e4b46",
+   "size": [
+    1920,
+    1080
+   ],
+   "purpose": "background velvet kelp lounge, 1920x1080 landscape"
+  },
+  {
+   "path": "assets/bg/bg_velvet_kelp_lounge_p.webp",
+   "bytes": 355648,
+   "sha256": "82dd62c8bff8fb9be208ea8ff9832c6d5a7432a118607a7d9aecebda10c3b77b",
+   "size": [
+    1080,
+    2400
+   ],
+   "purpose": "background velvet kelp lounge, 1080x2400 rotated portrait"
+  },
+  {
+   "path": "assets/bg/bg_velvet_kelp_lounge_w.webp",
+   "bytes": 361886,
+   "sha256": "9a25288092b92deb08f5f3aaf4ac390b96182f12817dabda0e7734c1112efaf3",
+   "size": [
+    2400,
+    1080
+   ],
+   "purpose": "background velvet kelp lounge, 2400x1080 wide master"
+  },
+  {
+   "path": "assets/bg/layer_glitter_far.png",
+   "bytes": 35837,
+   "sha256": "7e661681a933f7a39a243f0a263e3af49d7d92b6411f038f9ffcb899fc0317ea",
+   "size": [
+    2400,
+    1080
+   ],
+   "purpose": ""
+  },
+  {
+   "path": "assets/bg/layer_glitter_near.png",
+   "bytes": 33030,
+   "sha256": "d5c17f4615db35c58098819ed45f2973f697726f4f0accf7b5af0047debaddf4",
+   "size": [
+    2400,
+    1080
+   ],
+   "purpose": ""
+  },
+  {
+   "path": "assets/bg/plates.json",
+   "bytes": 904,
+   "sha256": "18258796e3ab141610160516e1aea174b24a2dbae5b98e04bf6bf20d2a025a0e",
+   "purpose": "plate crop rects and portrait safe area"
+  },
+  {
+   "path": "assets/sprites/B1-1.json",
+   "bytes": 9048,
+   "sha256": "4cc0337ad86f7eb22380b4a5d98952e1b77c51ecadfd50a38e2887ebb864eebd",
+   "frames": 38,
+   "purpose": "Baron Glitterjaw (boss)"
+  },
+  {
+   "path": "assets/sprites/B1-1.png",
+   "bytes": 4206825,
+   "sha256": "37e5dedb0c6162efe2e6d362653926118631b7c7e2c7fbeaf10c7dced496f068",
+   "size": [
+    1982,
+    2438
+   ],
+   "purpose": "Baron Glitterjaw (boss)"
+  },
+  {
+   "path": "assets/sprites/B1.json",
+   "bytes": 13513,
+   "sha256": "267525c2df03b63ba9ce4577436d6f3f1d6126c66929aee5d56e3904ade52698",
+   "frames": 51,
+   "animations": {
+    "swim": 24,
+    "spotlight": 12,
+    "fever": 24,
+    "exit": 12,
+    "death": 16,
+    "hit": 1
+   },
+   "purpose": "Baron Glitterjaw (boss)"
+  },
+  {
+   "path": "assets/sprites/B1.png",
+   "bytes": 6373335,
+   "sha256": "82e02dae31d3805553b52e9a7aa32520e6cdc2da7ec79e266817d25b57e89490",
+   "size": [
+    2030,
+    3810
+   ],
+   "purpose": "Baron Glitterjaw (boss)"
+  },
+  {
+   "path": "assets/sprites/B1L.json",
+   "bytes": 9861,
+   "sha256": "edecce078da79c940a95beb861c30dfa17036fdbf29d40f14cdd534adc8f721c",
+   "frames": 39,
+   "animations": {
+    "idle": 16,
+    "snap": 6,
+    "death": 16,
+    "hit": 1
+   },
+   "purpose": "Glitterlure (boss)"
+  },
+  {
+   "path": "assets/sprites/B1L.png",
+   "bytes": 1220688,
+   "sha256": "b4b42a88e473cce871630b78027014fd1f565b4dd917d1d1a4ccd3d8f9e287a5",
+   "size": [
+    2042,
+    424
+   ],
+   "purpose": "Glitterlure (boss)"
+  },
+  {
+   "path": "assets/sprites/C1.json",
+   "bytes": 5493,
+   "sha256": "ba80b63e3987ea5be09705c26ec55818021f4923e175f229aadc0cedf8e32851",
+   "frames": 21,
+   "animations": {
+    "idle": 8,
+    "fire": 6,
+    "morph": 6,
+    "hit": 1
+   },
+   "purpose": "Ruby Woofer Cannon (cannon)"
+  },
+  {
+   "path": "assets/sprites/C1.png",
+   "bytes": 589058,
+   "sha256": "a6620c3656cb0f6aaba35e74041df86f3eadc374815262d3f8704a0c69a1364a",
+   "size": [
+    2002,
+    470
+   ],
+   "purpose": "Ruby Woofer Cannon (cannon)"
+  },
+  {
+   "path": "assets/sprites/C2.json",
+   "bytes": 5499,
+   "sha256": "88dad40492c7c29a31c082b5d91606d8bc29ef0790a260804086e36bd921978d",
+   "frames": 21,
+   "animations": {
+    "idle": 8,
+    "fire": 6,
+    "morph": 6,
+    "hit": 1
+   },
+   "purpose": "Chrome Tower Cannon (cannon)"
+  },
+  {
+   "path": "assets/sprites/C2.png",
+   "bytes": 807170,
+   "sha256": "11b67c348b6fa74ad300e786e3c3278cfb9c526170de0ea38553d3d8dce5e6d6",
+   "size": [
+    2018,
+    490
+   ],
+   "purpose": "Chrome Tower Cannon (cannon)"
+  },
+  {
+   "path": "assets/sprites/C3.json",
+   "bytes": 5507,
+   "sha256": "e9e7b66a56f34c14dee908366e993ca1869ff651f7ecd8d06bc64ed04817b093",
+   "frames": 21,
+   "animations": {
+    "idle": 8,
+    "fire": 6,
+    "morph": 6,
+    "hit": 1
+   },
+   "purpose": "Mirrorball Cannon (cannon)"
+  },
+  {
+   "path": "assets/sprites/C3.png",
+   "bytes": 1081935,
+   "sha256": "8d23f08c64b2c7162d00feff70eff7ab59c9ec16df01955c4ffd5dcbe5533896",
+   "size": [
+    2048,
+    534
+   ],
+   "purpose": "Mirrorball Cannon (cannon)"
+  },
+  {
+   "path": "assets/sprites/D1.json",
+   "bytes": 3157,
+   "sha256": "6949acdd89a4c2238e4318ab1645e5e27f874ab19d7ccdecf6a5c53a234edbdd",
+   "frames": 12,
+   "animations": {
+    "idle": 12
+   },
+   "purpose": "Corner speaker stack (prop)"
+  },
+  {
+   "path": "assets/sprites/D1.png",
+   "bytes": 483349,
+   "sha256": "f878909e6b4b8fcffea5748a2ceaa7ee42eb0a68474884d1b6c33370972f4bc7",
+   "size": [
+    1826,
+    534
+   ],
+   "purpose": "Corner speaker stack (prop)"
+  },
+  {
+   "path": "assets/sprites/L1.json",
+   "bytes": 6384,
+   "sha256": "b5f59cd1ee587ef21285af045c49aefb5bd22f6e1f546c2644283684abd8efb8",
+   "frames": 25,
+   "animations": {
+    "swim": 16,
+    "death": 8,
+    "hit": 1
+   },
+   "purpose": "Boombox Shark (large)"
+  },
+  {
+   "path": "assets/sprites/L1.png",
+   "bytes": 1338007,
+   "sha256": "5421ad84cae0bf01cf7dfaa9f4b50e93f529205317df6a647b719f37e905dfca",
+   "size": [
+    2022,
+    932
+   ],
+   "purpose": "Boombox Shark (large)"
+  },
+  {
+   "path": "assets/sprites/L1B.json",
+   "bytes": 6435,
+   "sha256": "157f04cb1b639b12646aeb442705c130e7a1e9363ceda016903476ea5630211e",
+   "frames": 25,
+   "animations": {
+    "swim": 16,
+    "death": 8,
+    "hit": 1
+   },
+   "purpose": "Boombox Shark (chrome) (large)"
+  },
+  {
+   "path": "assets/sprites/L1B.png",
+   "bytes": 1222714,
+   "sha256": "8fe8cd19566e603e940b4e7c7345e1be761f72394cb609eaab8b6086d0320b82",
+   "size": [
+    2022,
+    932
+   ],
+   "purpose": "Boombox Shark (chrome) (large)"
+  },
+  {
+   "path": "assets/sprites/L1C.json",
+   "bytes": 6435,
+   "sha256": "edc18e7b995b124ac5de1b33e2881f9744e637d66c00f701ac85b12d445a1911",
+   "frames": 25,
+   "animations": {
+    "swim": 16,
+    "death": 8,
+    "hit": 1
+   },
+   "purpose": "Boombox Shark (gold) (large)"
+  },
+  {
+   "path": "assets/sprites/L1C.png",
+   "bytes": 361265,
+   "sha256": "bf9811ae22ff00308e84f832dcde3ec57edbdf77ecb82c1beefc8a7baa492769",
+   "size": [
+    2022,
+    932
+   ],
+   "purpose": "Boombox Shark (gold) (large)"
+  },
+  {
+   "path": "assets/sprites/L2.json",
+   "bytes": 6384,
+   "sha256": "dd571c83bfe88933e829919f7dbe36aa6b1b03855a488155bbc161b90ee2b78f",
+   "frames": 25,
+   "animations": {
+    "swim": 16,
+    "death": 8,
+    "hit": 1
+   },
+   "purpose": "DJ Ripple (large)"
+  },
+  {
+   "path": "assets/sprites/L2.png",
+   "bytes": 1537487,
+   "sha256": "34b43ca20fed751f46ade29ddbd9afcf449f6c8c7cf72b1237409768cc141ea6",
+   "size": [
+    1878,
+    978
+   ],
+   "purpose": "DJ Ripple (large)"
+  },
+  {
+   "path": "assets/sprites/L3.json",
+   "bytes": 6384,
+   "sha256": "5fb263a97703a51590d53da1bfeea31f801a5823bc83d61c151250dc1bacc8b7",
+   "frames": 25,
+   "animations": {
+    "swim": 16,
+    "death": 8,
+    "hit": 1
+   },
+   "purpose": "Crooner Grouper (large)"
+  },
+  {
+   "path": "assets/sprites/L3.png",
+   "bytes": 2022457,
+   "sha256": "1905973ce3aac3fcac22820eba10917817c805876774db8f6aae9ee4ebe7d93f",
+   "size": [
+    1834,
+    1054
+   ],
+   "purpose": "Crooner Grouper (large)"
+  },
+  {
+   "path": "assets/sprites/L4.json",
+   "bytes": 8352,
+   "sha256": "990df2e67bdae753918d802ed97f325c6781fd4184cc70c85e992b3cde1e6f31",
+   "frames": 33,
+   "animations": {
+    "swim": 16,
+    "glow": 8,
+    "death": 8,
+    "hit": 1
+   },
+   "purpose": "Jukebox Clam (large)"
+  },
+  {
+   "path": "assets/sprites/L4.png",
+   "bytes": 4211088,
+   "sha256": "aa1989abe093e5e586e9c389e4175a655c1f5bfe702de18c5469dc5c571081e3",
+   "size": [
+    1924,
+    1770
+   ],
+   "purpose": "Jukebox Clam (large)"
+  },
+  {
+   "path": "assets/sprites/M1.json",
+   "bytes": 6351,
+   "sha256": "0b25196d57989c867046d9951636599cca89f9e7441e971f41880f28db984107",
+   "frames": 25,
+   "animations": {
+    "swim": 16,
+    "death": 8,
+    "hit": 1
+   },
+   "purpose": "Go-Go Squid (medium)"
+  },
+  {
+   "path": "assets/sprites/M1.png",
+   "bytes": 879322,
+   "sha256": "82d6f994a007af0e99a7ca788c507880fd5d9153a7db5beb0dda2ee7e606b84a",
+   "size": [
+    1934,
+    414
+   ],
+   "purpose": "Go-Go Squid (medium)"
+  },
+  {
+   "path": "assets/sprites/M2.json",
+   "bytes": 6376,
+   "sha256": "0904565ede294f5b97f21bbaba81af3183cbf154fca786a51384f43ee0b39d59",
+   "frames": 25,
+   "animations": {
+    "swim": 16,
+    "death": 8,
+    "hit": 1
+   },
+   "purpose": "Roller Turtle (medium)"
+  },
+  {
+   "path": "assets/sprites/M2.png",
+   "bytes": 1281407,
+   "sha256": "22b5ccc273bef69d4196294768b8a98b8f6a0522994efd41bb5ab492ffa775c3",
+   "size": [
+    2022,
+    608
+   ],
+   "purpose": "Roller Turtle (medium)"
+  },
+  {
+   "path": "assets/sprites/M3.json",
+   "bytes": 6361,
+   "sha256": "a89bae9d09fd607baeaace9d21a704d102e8d94ab49039cd704f240e78d684fe",
+   "frames": 25,
+   "animations": {
+    "swim": 16,
+    "death": 8,
+    "hit": 1
+   },
+   "purpose": "Funkfin Angel (medium)"
+  },
+  {
+   "path": "assets/sprites/M3.png",
+   "bytes": 1934549,
+   "sha256": "5d44d5acc6474aca5495100ce3036e1ace9bb0d25fc45476d25344d2a14ed573",
+   "size": [
+    1946,
+    732
+   ],
+   "purpose": "Funkfin Angel (medium)"
+  },
+  {
+   "path": "assets/sprites/M4.json",
+   "bytes": 6384,
+   "sha256": "bf56ab7d338fe10b50dfc1ff47d107d887f2b451d259c44f41945085d37eb07f",
+   "frames": 25,
+   "animations": {
+    "swim": 16,
+    "death": 8,
+    "hit": 1
+   },
+   "purpose": "Neon Velvet Ray (medium)"
+  },
+  {
+   "path": "assets/sprites/M4.png",
+   "bytes": 933880,
+   "sha256": "effc79fc772f7b02ee8a0408b31a1062669a7a4bbd1d2f24cc04cb0150d773f2",
+   "size": [
+    2030,
+    690
+   ],
+   "purpose": "Neon Velvet Ray (medium)"
+  },
+  {
+   "path": "assets/sprites/S1.json",
+   "bytes": 5244,
+   "sha256": "44cd702587eebb204a37141ba29069200b25a432418fb896677bf8b4faabd328",
+   "frames": 21,
+   "animations": {
+    "swim": 12,
+    "death": 8,
+    "hit": 1
+   },
+   "purpose": "Strobe Fry (small)"
+  },
+  {
+   "path": "assets/sprites/S1.png",
+   "bytes": 90635,
+   "sha256": "8106c067abe8d90137df6356555b8e1b3ee94b6eee673206421d704b622bd94a",
+   "size": [
+    1854,
+    46
+   ],
+   "purpose": "Strobe Fry (small)"
+  },
+  {
+   "path": "assets/sprites/S2.json",
+   "bytes": 5329,
+   "sha256": "7907a110d720e60e17ef8e8fb2375a37d173c337a00d2936830c1706bb0884d5",
+   "frames": 21,
+   "animations": {
+    "swim": 12,
+    "death": 8,
+    "hit": 1
+   },
+   "purpose": "Twirl Tang (small)"
+  },
+  {
+   "path": "assets/sprites/S2.png",
+   "bytes": 316676,
+   "sha256": "73c21ec908252dc2aff305480ec2f67b66e5ace6c8fc7e821a5bd951733d71d5",
+   "size": [
+    2034,
+    198
+   ],
+   "purpose": "Twirl Tang (small)"
+  },
+  {
+   "path": "assets/sprites/S3.json",
+   "bytes": 5228,
+   "sha256": "1af8206e762631345b163019b6c9d82cb663b00ea379ddc99718ea10eea63606",
+   "frames": 21,
+   "animations": {
+    "swim": 12,
+    "death": 8,
+    "hit": 1
+   },
+   "purpose": "Conga Krill (small)"
+  },
+  {
+   "path": "assets/sprites/S3.png",
+   "bytes": 142532,
+   "sha256": "fc4885123d37ce87083dc7b268c9000a48570e184c825714dc1b2613cd1a5f39",
+   "size": [
+    1720,
+    82
+   ],
+   "purpose": "Conga Krill (small)"
+  },
+  {
+   "path": "assets/sprites/S4.json",
+   "bytes": 6373,
+   "sha256": "fbfbc21ef6eebaca0a8b1adef8702fc78929e1b38cbc8791af549595ea8a9b1f",
+   "frames": 25,
+   "animations": {
+    "swim": 12,
+    "inflate": 4,
+    "death": 8,
+    "hit": 1
+   },
+   "purpose": "Bop Puffer (small)"
+  },
+  {
+   "path": "assets/sprites/S4.png",
+   "bytes": 458651,
+   "sha256": "73a02e04047f722f5c2c6e32fcced60bca9897c63621d110a122bac5b76c3bae",
+   "size": [
+    2038,
+    232
+   ],
+   "purpose": "Bop Puffer (small)"
+  },
+  {
+   "path": "assets/sprites/S5.json",
+   "bytes": 5284,
+   "sha256": "a82c3f394988285223410f8e4983da4a72704bb375ea8bf1c279a91f45f8e7fd",
+   "frames": 21,
+   "animations": {
+    "swim": 12,
+    "death": 8,
+    "hit": 1
+   },
+   "purpose": "Sequin Seahorse (small)"
+  },
+  {
+   "path": "assets/sprites/S5.png",
+   "bytes": 326295,
+   "sha256": "213c159dc4de1faeec797265dc1c98f0fbb091f3cb78869af46e63ad353859e6",
+   "size": [
+    1554,
+    136
+   ],
+   "purpose": "Sequin Seahorse (small)"
+  },
+  {
+   "path": "assets/sprites/W1.json",
+   "bytes": 7526,
+   "sha256": "d263c888328aa026673c3fbc478835010e4cfbe7aab8b9a5cc4f4747606fa2a4",
+   "frames": 29,
+   "animations": {
+    "idle": 8,
+    "fire": 6,
+    "morph": 6,
+    "arm": 8,
+    "hit": 1
+   },
+   "purpose": "Vinyl Slinger launcher (weapon)"
+  },
+  {
+   "path": "assets/sprites/W1.png",
+   "bytes": 1788516,
+   "sha256": "a338f5225366431ecd515056513e725ce8554b26f2388ab5317b43d85d6c52f4",
+   "size": [
+    2046,
+    858
+   ],
+   "purpose": "Vinyl Slinger launcher (weapon)"
+  },
+  {
+   "path": "assets/sprites/W1P.json",
+   "bytes": 4874,
+   "sha256": "46a8104b2c8b910702016ac0da39d8d08bdb49ad815eae07297dd997e8c4d445",
+   "frames": 18,
+   "animations": {
+    "spin": 12,
+    "slice": 6,
+    "idle": 12
+   },
+   "purpose": "Spinning record (weapon)"
+  },
+  {
+   "path": "assets/sprites/W1P.png",
+   "bytes": 831923,
+   "sha256": "db0f249dfbc11716cac486ec8c65792eeac55a5c9c835ebf29f8df300fdcd72b",
+   "size": [
+    2000,
+    308
+   ],
+   "purpose": "Spinning record (weapon)"
+  },
+  {
+   "path": "assets/sprites/W2.json",
+   "bytes": 4259,
+   "sha256": "a9d583b362b3522716d74fb7d08d7ebfb82ec34579959a57f5faa53897734cfe",
+   "frames": 16,
+   "animations": {
+    "spin": 8,
+    "burst": 8,
+    "idle": 8
+   },
+   "purpose": "Glitter rocket (weapon)"
+  },
+  {
+   "path": "assets/sprites/W2.png",
+   "bytes": 299677,
+   "sha256": "100181c0765868f58cb4c24956db5ffe0b371df84f9ca568012b28b3746f72f2",
+   "size": [
+    1656,
+    178
+   ],
+   "purpose": "Glitter rocket (weapon)"
+  },
+  {
+   "path": "assets/sprites/X1.json",
+   "bytes": 7842,
+   "sha256": "ba70903d211f3f4cb0af3b5a8680e8e8612b1c919364bddccb0877e46ce58e11",
+   "frames": 31,
+   "animations": {
+    "swim": 16,
+    "pump": 6,
+    "death": 8,
+    "hit": 1
+   },
+   "purpose": "Subwoofer Crab (special)"
+  },
+  {
+   "path": "assets/sprites/X1.png",
+   "bytes": 1437044,
+   "sha256": "0d9915b47dbbbd204ee636defc34440b32ddb37389bdf6825e445b007d2e630e",
+   "size": [
+    1908,
+    704
+   ],
+   "purpose": "Subwoofer Crab (special)"
+  },
+  {
+   "path": "assets/sprites/X2.json",
+   "bytes": 8330,
+   "sha256": "31ad20bd16fed7269702365313d1a512f57be46953e6d3cdad6ef9a4777b42ca",
+   "frames": 33,
+   "animations": {
+    "swim": 16,
+    "rise": 8,
+    "death": 8,
+    "hit": 1
+   },
+   "purpose": "Laser Lobster (special)"
+  },
+  {
+   "path": "assets/sprites/X2.png",
+   "bytes": 2096526,
+   "sha256": "6bbad62bc148657bb5169c42567fd00cf693f1dbcdaa4195c209d6e3369aa0a7",
+   "size": [
+    2028,
+    850
+   ],
+   "purpose": "Laser Lobster (special)"
+  },
+  {
+   "path": "assets/sprites/X3.json",
+   "bytes": 6341,
+   "sha256": "10b2c2386f248a7bdbbd2555f2a9814142b8323b549d64d904164f1098e72bd5",
+   "frames": 25,
+   "animations": {
+    "swim": 16,
+    "death": 8,
+    "hit": 1
+   },
+   "purpose": "Spotlight Shrimp (special)"
+  },
+  {
+   "path": "assets/sprites/X3.png",
+   "bytes": 683203,
+   "sha256": "60c92225dcdd7d3ca9b85604facd86a7a527630513e79f955bad4da1d8004190",
+   "size": [
+    1922,
+    356
+   ],
+   "purpose": "Spotlight Shrimp (special)"
+  },
+  {
+   "path": "assets/sprites/X4.json",
+   "bytes": 7386,
+   "sha256": "aa6e09dd22c4674ce0a7a8597c9210278cdede543717c2f34b1080e8879b0b50",
+   "frames": 29,
+   "animations": {
+    "swim": 16,
+    "inflate": 4,
+    "death": 8,
+    "hit": 1
+   },
+   "purpose": "Mirror Puffer (special)"
+  },
+  {
+   "path": "assets/sprites/X4.png",
+   "bytes": 1221759,
+   "sha256": "c92c5efb8646a1937061999c24f47d04f14087d40ed22f7ea391d131b0f23194",
+   "size": [
+    2044,
+    410
+   ],
+   "purpose": "Mirror Puffer (special)"
+  },
+  {
+   "path": "assets/sprites/X5.json",
+   "bytes": 6361,
+   "sha256": "f80018f574bc5e15afa6351cc5324bec2ef7b40858429c6e89c1cbe4589ac24b",
+   "frames": 25,
+   "animations": {
+    "swim": 16,
+    "death": 8,
+    "hit": 1
+   },
+   "purpose": "Vinyl Hermit (special)"
+  },
+  {
+   "path": "assets/sprites/X5.png",
+   "bytes": 1167929,
+   "sha256": "57b7310dd36e12fde64bbf7d376865503bf2ac4ce7b0b5ff1bff830ea819d330",
+   "size": [
+    1990,
+    466
+   ],
+   "purpose": "Vinyl Hermit (special)"
+  },
+  {
+   "path": "assets/sprites/X6.json",
+   "bytes": 8607,
+   "sha256": "0fc6b9cdd63febdea7da787f82c700b57aec077e8211e888674d808dbfda41ab",
+   "frames": 33,
+   "animations": {
+    "swim": 16,
+    "spinup": 8,
+    "death": 8,
+    "hit": 1,
+    "idle": 16
+   },
+   "purpose": "Golden Deck (special)"
+  },
+  {
+   "path": "assets/sprites/X6.png",
+   "bytes": 1533174,
+   "sha256": "5a02794a66374828a21911a6d8ef8c24657670216acef3947f6c10b873fcd3a8",
+   "size": [
+    1982,
+    600
+   ],
+   "purpose": "Golden Deck (special)"
+  },
+  {
+   "path": "assets/sprites/mirror_ball.json",
+   "bytes": 11217,
+   "sha256": "3434f2ab6409c4b1b4ccf003f26ed1f22e376d88afae16996b9da9cca8a2452c",
+   "frames": 41,
+   "animations": {
+    "idle": 12,
+    "drop": 8,
+    "open_gold": 10,
+    "grey_idle": 1,
+    "open_grey": 10
+   },
+   "purpose": ""
+  },
+  {
+   "path": "assets/sprites/mirror_ball.png",
+   "bytes": 1881811,
+   "sha256": "246564c867d10b0e8b64d0cd9d278285cd2596e26030592d7d9fb8dfc9705393",
+   "size": [
+    1942,
+    764
+   ],
+   "purpose": ""
+  },
+  {
+   "path": "assets/sprites/seahorse_statue.json",
+   "bytes": 2687,
+   "sha256": "4447b6896e07f6c7865d671bcd6633e058cb644fe91537a729bb11dd8983c7f2",
+   "frames": 9,
+   "animations": {
+    "idle": 1,
+    "shine": 8
+   },
+   "purpose": ""
+  },
+  {
+   "path": "assets/sprites/seahorse_statue.png",
+   "bytes": 917599,
+   "sha256": "fd791ad478bb1313551928b504328647642f4bc9f065fb7cd95c0d2b09aad929",
+   "size": [
+    1612,
+    406
+   ],
+   "purpose": ""
+  },
+  {
+   "path": "assets/sprites/shot_cyan.json",
+   "bytes": 1229,
+   "sha256": "cbaf6b277793ed3720f8077e7a8bf556ff1e5733ca86f2532286e5616fb822e3",
+   "frames": 4,
+   "animations": {
+    "fly": 4
+   },
+   "purpose": ""
+  },
+  {
+   "path": "assets/sprites/shot_cyan.png",
+   "bytes": 6134,
+   "sha256": "55ccd9806c14babed55f268ba89d968cb68a13663bde35b941aafd73d71ee0a5",
+   "size": [
+    284,
+    52
+   ],
+   "purpose": ""
+  },
+  {
+   "path": "assets/sprites/shot_gold.json",
+   "bytes": 1229,
+   "sha256": "a21ac97d2b6839a3961613ab2dc84bdc8e29ed787a97ada381153f7ce275ac9d",
+   "frames": 4,
+   "animations": {
+    "fly": 4
+   },
+   "purpose": ""
+  },
+  {
+   "path": "assets/sprites/shot_gold.png",
+   "bytes": 6547,
+   "sha256": "f35a174c4b8e059115fc1b014f698e7e1f613937b42d5b15d556569cf884f6c8",
+   "size": [
+    284,
+    52
+   ],
+   "purpose": ""
+  },
+  {
+   "path": "assets/sprites/shot_pink.json",
+   "bytes": 1229,
+   "sha256": "7147545fa7f3dd470def816e9b7d1f8a77ca023e0b2f3dfcc90c139d8cd45fa0",
+   "frames": 4,
+   "animations": {
+    "fly": 4
+   },
+   "purpose": ""
+  },
+  {
+   "path": "assets/sprites/shot_pink.png",
+   "bytes": 5994,
+   "sha256": "a7c3145780296087c97b92dc2eb3410525d3bc393e46f54532db4100a2f1d1bc",
+   "size": [
+    284,
+    52
+   ],
+   "purpose": ""
+  },
+  {
+   "path": "assets/sprites/spot_mark_orb.json",
+   "bytes": 2310,
+   "sha256": "ae2ee2e095a98cd68d968f92d86864dd2c3d44cfd56eb46e4b94c5940ba1cb7d",
+   "frames": 8,
+   "animations": {
+    "spin": 8
+   },
+   "purpose": ""
+  },
+  {
+   "path": "assets/sprites/spot_mark_orb.png",
+   "bytes": 36064,
+   "sha256": "2f0594248e94e6b4c0d96ac4fddeebdd9b2a0120e036188467e40b75e59a96c1",
+   "size": [
+    880,
+    122
+   ],
+   "purpose": ""
+  },
+  {
+   "path": "assets/sprites/whirl_ball.json",
+   "bytes": 3287,
+   "sha256": "84e11745188232027cf2f2c3a07ad3ca5af14248c4304b7bc1157a219810f411",
+   "frames": 12,
+   "animations": {
+    "spin": 12
+   },
+   "purpose": ""
+  },
+  {
+   "path": "assets/sprites/whirl_ball.png",
+   "bytes": 244247,
+   "sha256": "86af512c72e5a397edee7672742e084434eb6068d032f5b9049ece512beb0c6e",
+   "size": [
+    1212,
+    114
+   ],
+   "purpose": ""
+  },
+  {
+   "path": "assets/sprites/whirl_vortex.json",
+   "bytes": 1767,
+   "sha256": "782e9388c25cb9d326f9911ed6d34713eb29a320b8d3151f960c6814f1e2260b",
+   "frames": 6,
+   "animations": {
+    "spin": 6
+   },
+   "purpose": ""
+  },
+  {
+   "path": "assets/sprites/whirl_vortex.png",
+   "bytes": 75468,
+   "sha256": "952f3783069b2b10085d8101ddeb0c47de50172336804744b413697dcc0364f4",
+   "size": [
+    1150,
+    196
+   ],
+   "purpose": ""
+  },
+  {
+   "path": "assets/ui/digits.json",
+   "bytes": 3082,
+   "sha256": "f4905ec06efa95ab622538a7f442d70adf2184919ae359b3c6d46c0d69d47aea",
+   "frames": 13,
+   "purpose": "gold number glyph atlas for popups"
+  },
+  {
+   "path": "assets/ui/digits.png",
+   "bytes": 23348,
+   "sha256": "52e459403966c11e1b533c79f6f0416c7f0c3b1061fd88071901e23d91ec84aa",
+   "size": [
+    662,
+    68
+   ],
+   "purpose": "gold number glyph atlas for popups"
+  },
+  {
+   "path": "assets/ui/hud_banners.json",
+   "bytes": 1793,
+   "sha256": "6fa9b49d0efd9437f489bae4186120ad1ab7e958032d5ff9a196101be334fd30",
+   "frames": 7,
+   "purpose": "wordless banners (tide, boss, Bright, Grand, Festival Catch)"
+  },
+  {
+   "path": "assets/ui/hud_banners.png",
+   "bytes": 1547743,
+   "sha256": "0a1096d75cdbd02c2808934685741d524328eedff30857976ebc8cd10ab5525f",
+   "size": [
+    1064,
+    2564
+   ],
+   "purpose": "wordless banners (tide, boss, Bright, Grand, Festival Catch)"
+  },
+  {
+   "path": "assets/ui/hud_buttons.json",
+   "bytes": 13995,
+   "sha256": "a6f1bc57ecbbeb8b83c2b7ce73c57ad15a92dbf83857f77f08cc1d5f52877ecb",
+   "frames": 60,
+   "purpose": "HUD buttons x normal, hover, pressed, disabled"
+  },
+  {
+   "path": "assets/ui/hud_buttons.png",
+   "bytes": 183386,
+   "sha256": "bcab94edc464ef966315962a5750b16814711051fb86d7a00cef8e26d5921d45",
+   "size": [
+    2032,
+    462
+   ],
+   "purpose": "HUD buttons x normal, hover, pressed, disabled"
+  },
+  {
+   "path": "assets/ui/hud_frames.json",
+   "bytes": 3132,
+   "sha256": "e03010232c6a5a80633a66522eb82274723ff8ef8a5569e0e87fcee2f6849a42",
+   "frames": 13,
+   "purpose": "HUD plates, panels, dock, marquee strip, gear radial, lantern ring counter, AIM reticle, medallion"
+  },
+  {
+   "path": "assets/ui/hud_frames.png",
+   "bytes": 304526,
+   "sha256": "e91706a292d16ebb9a5fb66474f368776a61a0f8a78e6232c4eb16690e9ffeb0",
+   "size": [
+    1884,
+    1060
+   ],
+   "purpose": "HUD plates, panels, dock, marquee strip, gear radial, lantern ring counter, AIM reticle, medallion"
+  },
+  {
+   "path": "assets/vfx/aim_line.json",
+   "bytes": 1250,
+   "sha256": "46259e295a80f10b64aeb6bc1a7f892cf477599c4a56af2ef01342a9dff2e881",
+   "frames": 4,
+   "animations": {
+    "loop": 4
+   },
+   "purpose": "AIM lock-on light line (tiles on X)"
+  },
+  {
+   "path": "assets/vfx/aim_line.png",
+   "bytes": 9252,
+   "sha256": "bdb56094e8f25bb82fc8dfeae4ae7f7e0364e6e510c76d383998b72afe3112b5",
+   "size": [
+    1034,
+    36
+   ],
+   "purpose": "AIM lock-on light line (tiles on X)"
+  },
+  {
+   "path": "assets/vfx/bassdrop_wave.json",
+   "bytes": 3375,
+   "sha256": "87dc1f770fb1777b97ce499c44fc3878545fbd473814dc3cc44760430e0ef7eb",
+   "frames": 12,
+   "animations": {
+    "wave": 12
+   },
+   "purpose": ""
+  },
+  {
+   "path": "assets/vfx/bassdrop_wave.png",
+   "bytes": 135285,
+   "sha256": "ae121e3c7fd201185c09f284288add6b137fa62dffd13320f0e81b62e8e0719d",
+   "size": [
+    2036,
+    418
+   ],
+   "purpose": ""
+  },
+  {
+   "path": "assets/vfx/beat_wall.json",
+   "bytes": 3376,
+   "sha256": "35b3a9746b264fcdadcc7ce28fb2dfb086f485171e54bcc00f7903d00dbb0094",
+   "frames": 12,
+   "animations": {
+    "loop": 12
+   },
+   "purpose": ""
+  },
+  {
+   "path": "assets/vfx/beat_wall.png",
+   "bytes": 748278,
+   "sha256": "06223ee7376af13e56343c47e071f7a1fc71901ef39c8589e6b578d1641a4b53",
+   "size": [
+    1934,
+    1086
+   ],
+   "purpose": ""
+  },
+  {
+   "path": "assets/vfx/bubbles_rise.json",
+   "bytes": 4403,
+   "sha256": "065017defa9d05237640d4bb3565a0538595611ad85a2ac5eb0e66f9510ab698",
+   "frames": 16,
+   "animations": {
+    "loop": 16
+   },
+   "purpose": "ambient rising bubbles"
+  },
+  {
+   "path": "assets/vfx/bubbles_rise.png",
+   "bytes": 31540,
+   "sha256": "b48ac51997635c43937e93acf5afad23b6f652370f37a67ac530fc63af9fe745",
+   "size": [
+    1748,
+    260
+   ],
+   "purpose": "ambient rising bubbles"
+  },
+  {
+   "path": "assets/vfx/caustics.json",
+   "bytes": 4313,
+   "sha256": "ea4faaa48b925375f1deb05045cca21aa44aec76a25bf3c2ed1d38dc2e490dc6",
+   "frames": 16,
+   "animations": {
+    "loop": 16
+   },
+   "purpose": "caustic light overlay (add blend)"
+  },
+  {
+   "path": "assets/vfx/caustics.png",
+   "bytes": 522253,
+   "sha256": "789a1c6d942ad11e48e433473a01e9a72654ae6146f8a9440af5c16d39a3a82f",
+   "size": [
+    1808,
+    776
+   ],
+   "purpose": "caustic light overlay (add blend)"
+  },
+  {
+   "path": "assets/vfx/coin_burst.json",
+   "bytes": 4369,
+   "sha256": "0556b63f36afee19998a3310391f5e841417fd2d5eb4d6ffeac641d827ccd81b",
+   "frames": 16,
+   "animations": {
+    "burst": 16
+   },
+   "purpose": "capture burst: coins and festival paper"
+  },
+  {
+   "path": "assets/vfx/coin_burst.png",
+   "bytes": 386042,
+   "sha256": "454c20f3d90eceb45225672dd1f5588fa46f286896629d9691aad2394e69f0fb",
+   "size": [
+    2038,
+    358
+   ],
+   "purpose": "capture burst: coins and festival paper"
+  },
+  {
+   "path": "assets/vfx/coin_fountain.json",
+   "bytes": 4445,
+   "sha256": "ccd531acf3737ed777f291fe5bf72ea305859121a56078bb2e4ed67d7d05ca71",
+   "frames": 16,
+   "animations": {
+    "loop": 16
+   },
+   "purpose": "Bronze Guardian Statue coin fountain loop"
+  },
+  {
+   "path": "assets/vfx/coin_fountain.png",
+   "bytes": 493203,
+   "sha256": "21acb9d5d482afad9707799fa26f3b66deda1e32da5a98a9e17c50543f5d6b06",
+   "size": [
+    1490,
+    288
+   ],
+   "purpose": "Bronze Guardian Statue coin fountain loop"
+  },
+  {
+   "path": "assets/vfx/coin_spin.json",
+   "bytes": 3183,
+   "sha256": "3ddf00cebaea195b1e87e9599b8088f06789c7feedbea693ab62b6b5416ebd60",
+   "frames": 12,
+   "animations": {
+    "spin": 12
+   },
+   "purpose": "gold coin spin"
+  },
+  {
+   "path": "assets/vfx/coin_spin.png",
+   "bytes": 32805,
+   "sha256": "149d8c427c4776fc7743655a0e5f740cc6cdd9135dda70697fe6f6dadfc2107b",
+   "size": [
+    704,
+    86
+   ],
+   "purpose": "gold coin spin"
+  },
+  {
+   "path": "assets/vfx/confetti.json",
+   "bytes": 5389,
+   "sha256": "fb6f28c1ac2ae08ee1589c349134bbd37b37992ba3472b3c2d51ff16fcf238ff",
+   "frames": 20,
+   "animations": {
+    "burst": 20
+   },
+   "purpose": ""
+  },
+  {
+   "path": "assets/vfx/confetti.png",
+   "bytes": 80734,
+   "sha256": "ec96a467445ecad019512e6e29290e3188f92b989c3cd19b5f3ce369906737a5",
+   "size": [
+    2042,
+    180
+   ],
+   "purpose": ""
+  },
+  {
+   "path": "assets/vfx/flash_burst.json",
+   "bytes": 4390,
+   "sha256": "8aa604238db6a238348d7115133facc4e84a1264da46688a9a71ede700aabcb9",
+   "frames": 16,
+   "animations": {
+    "burst": 16
+   },
+   "purpose": ""
+  },
+  {
+   "path": "assets/vfx/flash_burst.png",
+   "bytes": 115911,
+   "sha256": "575aacba2663e040f8223bcbdaddfc91f31ef5d608c1d071cbf85fe8e410a6de",
+   "size": [
+    1988,
+    440
+   ],
+   "purpose": ""
+  },
+  {
+   "path": "assets/vfx/hit_spark.json",
+   "bytes": 2249,
+   "sha256": "1d941a46c88d1a5966c05db9fea05d91108f7934a3139306dedd2e729dd4fac6",
+   "frames": 8,
+   "animations": {
+    "spark": 8
+   },
+   "purpose": "bolt hit sparks"
+  },
+  {
+   "path": "assets/vfx/hit_spark.png",
+   "bytes": 30909,
+   "sha256": "02c8275d11d3cbcd345b6d737e6310b7331a2ae0933152226eb9a3ad1b3740de",
+   "size": [
+    890,
+    132
+   ],
+   "purpose": "bolt hit sparks"
+  },
+  {
+   "path": "assets/vfx/laser_beam.json",
+   "bytes": 2287,
+   "sha256": "1e0d65dcef73604b7092abf8e5a716f52743ffe60f4f46d143cd6cc49b75cb64",
+   "frames": 8,
+   "animations": {
+    "loop": 8
+   },
+   "purpose": ""
+  },
+  {
+   "path": "assets/vfx/laser_beam.png",
+   "bytes": 38399,
+   "sha256": "506a353fdd90fe872bc14b7b8042b185db02e8639274033a62c7b5984d71a4ca",
+   "size": [
+    1808,
+    134
+   ],
+   "purpose": ""
+  },
+  {
+   "path": "assets/vfx/laser_zap.json",
+   "bytes": 2263,
+   "sha256": "b2c33edce1aa3cb39f56070756986958998e5e545831b90e763d85c4b339d876",
+   "frames": 8,
+   "animations": {
+    "zap": 8
+   },
+   "purpose": ""
+  },
+  {
+   "path": "assets/vfx/laser_zap.png",
+   "bytes": 59597,
+   "sha256": "aadbc38b6eca3f1391f2cca88cbdb5be7ec984c64b119dce31c4d6319c599a73",
+   "size": [
+    1808,
+    154
+   ],
+   "purpose": ""
+  },
+  {
+   "path": "assets/vfx/light_fans.json",
+   "bytes": 3298,
+   "sha256": "d65399646510ef1dc85f83a94474ea9f30276000d8b35fe28465d9185a63424c",
+   "frames": 12,
+   "animations": {
+    "loop": 12
+   },
+   "purpose": ""
+  },
+  {
+   "path": "assets/vfx/light_fans.png",
+   "bytes": 202070,
+   "sha256": "a7d4f819516614a3b935a93a301f8e3574b2aed39eade300ef2666349fb43873",
+   "size": [
+    1808,
+    518
+   ],
+   "purpose": ""
+  },
+  {
+   "path": "assets/vfx/light_spots.json",
+   "bytes": 4417,
+   "sha256": "61df587f44ab9ab15de03b48bc2f06c4526d6736ef44b6ee5c03bef77b70b007",
+   "frames": 16,
+   "animations": {
+    "loop": 16
+   },
+   "purpose": ""
+  },
+  {
+   "path": "assets/vfx/light_spots.png",
+   "bytes": 361209,
+   "sha256": "de80b2fcea83b87815753367a4b7bb8ef8ddf22201487b5258e96baf97bbf5da",
+   "size": [
+    2046,
+    1452
+   ],
+   "purpose": ""
+  },
+  {
+   "path": "assets/vfx/muzzle_flash.json",
+   "bytes": 1828,
+   "sha256": "5cddd56c53489c211ca2f1707a9fbcb4041569e6c8633b747ef2a0daa102b334",
+   "frames": 6,
+   "animations": {
+    "flash": 6
+   },
+   "purpose": "cannon muzzle flash"
+  },
+  {
+   "path": "assets/vfx/muzzle_flash.png",
+   "bytes": 9772,
+   "sha256": "3d514fef0118c50948e9fe89740501e51f6427afeb40d91092f2ae9ea50db7d0",
+   "size": [
+    650,
+    94
+   ],
+   "purpose": "cannon muzzle flash"
+  },
+  {
+   "path": "assets/vfx/record_trail.json",
+   "bytes": 2347,
+   "sha256": "848bbbff5bf5168216380e1593d715429322776e894a426ae8216d4ca1a1f505",
+   "frames": 8,
+   "animations": {
+    "loop": 8
+   },
+   "purpose": ""
+  },
+  {
+   "path": "assets/vfx/record_trail.png",
+   "bytes": 22227,
+   "sha256": "a638d14d5cdd48b211451650e88756b8e98b91cbdbeeec70dca9980fa6923e3f",
+   "size": [
+    1946,
+    44
+   ],
+   "purpose": ""
+  },
+  {
+   "path": "assets/vfx/rocket_trail.json",
+   "bytes": 2349,
+   "sha256": "3f5df2e7906f6330e7c186b6020ac2cd1f0ebbff77783dd58729f958e60bdfa9",
+   "frames": 8,
+   "animations": {
+    "loop": 8
+   },
+   "purpose": ""
+  },
+  {
+   "path": "assets/vfx/rocket_trail.png",
+   "bytes": 25396,
+   "sha256": "9ef96a5fb43b4862ad1dbcfa6dae9d8f88ef977c42e66626577be5671e3a1c99",
+   "size": [
+    1954,
+    44
+   ],
+   "purpose": ""
+  },
+  {
+   "path": "assets/vfx/shockwave_ring.json",
+   "bytes": 3400,
+   "sha256": "18c2d0a44cb31322e90149772c45da87197a823a4f39b42c23f9d10c998f4ffc",
+   "frames": 12,
+   "animations": {
+    "wave": 12
+   },
+   "purpose": "shockwave ring (Gong Shockwave, captures)"
+  },
+  {
+   "path": "assets/vfx/shockwave_ring.png",
+   "bytes": 121631,
+   "sha256": "385ab57b785b49d02b49a9f410288c13f5b29eebd2ec8621f8af4d7325987b4f",
+   "size": [
+    2036,
+    418
+   ],
+   "purpose": "shockwave ring (Gong Shockwave, captures)"
+  },
+  {
+   "path": "assets/vfx/spot_mark_target.json",
+   "bytes": 3439,
+   "sha256": "adffe8e3f0b68239f48f1aac21397031f21c1b148748e5703e46bed94cfd042e",
+   "frames": 12,
+   "animations": {
+    "lock": 12
+   },
+   "purpose": ""
+  },
+  {
+   "path": "assets/vfx/spot_mark_target.png",
+   "bytes": 100928,
+   "sha256": "e92091b7bc900af47fb7ae0b183265916f3c0433784552cc14dcfeda10efdbbc",
+   "size": [
+    1898,
+    164
+   ],
+   "purpose": ""
+  },
+  {
+   "path": "assets/vfx/spotlight_beam.json",
+   "bytes": 2355,
+   "sha256": "aff8bf3fd288b7f6f6e9fe4230bfe667918b97ec8ed608d265fa8a9516289b62",
+   "frames": 8,
+   "animations": {
+    "loop": 8
+   },
+   "purpose": ""
+  },
+  {
+   "path": "assets/vfx/spotlight_beam.png",
+   "bytes": 43126,
+   "sha256": "98626e6736b44c9afea99d5eccb22a08efc22db1a904a92ad56b5b3847c6ccba",
+   "size": [
+    1808,
+    134
+   ],
+   "purpose": ""
+  },
+  {
+   "path": "assets/vfx/tile_wave.json",
+   "bytes": 3315,
+   "sha256": "57a932a8fe2b0c13be7254adac3b34cfdb7fd4a2e6da87a1bb221857cfb70e9d",
+   "frames": 12,
+   "animations": {
+    "wave": 12
+   },
+   "purpose": ""
+  },
+  {
+   "path": "assets/vfx/tile_wave.png",
+   "bytes": 102734,
+   "sha256": "b867aac45d0d3ade5e0a58f443728bf8c730baf00a5814b4b2b74ed6ba49dc6b",
+   "size": [
+    1544,
+    522
+   ],
+   "purpose": ""
+  }
+ ],
+ "total_bytes": 62762795,
+ "compression": {
+  "bg/layer_glitter_far.png": {
+   "before": 116959,
+   "after": 35837,
+   "mode": "quant"
+  },
+  "bg/layer_glitter_near.png": {
+   "before": 98045,
+   "after": 33030,
+   "mode": "quant"
+  },
+  "bg_coral_dance_floor_l.jpg": {
+   "before": 413947,
+   "after": 195618,
+   "mode": "webp90"
+  },
+  "bg_coral_dance_floor_p.jpg": {
+   "before": 579214,
+   "after": 290078,
+   "mode": "webp90"
+  },
+  "bg_coral_dance_floor_w.jpg": {
+   "before": 578073,
+   "after": 289956,
+   "mode": "webp90"
+  },
+  "bg_encore_l.jpg": {
+   "before": 573529,
+   "after": 273188,
+   "mode": "webp90"
+  },
+  "bg_encore_p.jpg": {
+   "before": 763101,
+   "after": 382546,
+   "mode": "webp90"
+  },
+  "bg_encore_w.jpg": {
+   "before": 759654,
+   "after": 385672,
+   "mode": "webp90"
+  },
+  "bg_sunken_ballroom_l.jpg": {
+   "before": 626389,
+   "after": 320348,
+   "mode": "webp90"
+  },
+  "bg_sunken_ballroom_p.jpg": {
+   "before": 807770,
+   "after": 429824,
+   "mode": "webp90"
+  },
+  "bg_sunken_ballroom_w.jpg": {
+   "before": 809590,
+   "after": 427830,
+   "mode": "webp90"
+  },
+  "bg_velvet_kelp_lounge_l.jpg": {
+   "before": 545499,
+   "after": 275350,
+   "mode": "webp90"
+  },
+  "bg_velvet_kelp_lounge_p.jpg": {
+   "before": 706309,
+   "after": 355648,
+   "mode": "webp90"
+  },
+  "bg_velvet_kelp_lounge_w.jpg": {
+   "before": 707992,
+   "after": 361886,
+   "mode": "webp90"
+  },
+  "sprites/B1-1.png": {
+   "before": 4300893,
+   "after": 4206825,
+   "mode": "lossless"
+  },
+  "sprites/B1.png": {
+   "before": 6519380,
+   "after": 6373335,
+   "mode": "lossless"
+  },
+  "sprites/B1L.png": {
+   "before": 1233366,
+   "after": 1220688,
+   "mode": "lossless"
+  },
+  "sprites/C1.png": {
+   "before": 609379,
+   "after": 589058,
+   "mode": "lossless"
+  },
+  "sprites/C2.png": {
+   "before": 830656,
+   "after": 807170,
+   "mode": "lossless"
+  },
+  "sprites/C3.png": {
+   "before": 1114581,
+   "after": 1081935,
+   "mode": "lossless"
+  },
+  "sprites/D1.png": {
+   "before": 505192,
+   "after": 483349,
+   "mode": "lossless"
+  },
+  "sprites/L1.png": {
+   "before": 1375811,
+   "after": 1338007,
+   "mode": "lossless"
+  },
+  "sprites/L1B.png": {
+   "before": 1268585,
+   "after": 1222714,
+   "mode": "lossless"
+  },
+  "sprites/L1C.png": {
+   "before": 1260154,
+   "after": 361265,
+   "mode": "quant"
+  },
+  "sprites/L2.png": {
+   "before": 1580211,
+   "after": 1537487,
+   "mode": "lossless"
+  },
+  "sprites/L3.png": {
+   "before": 2066972,
+   "after": 2022457,
+   "mode": "lossless"
+  },
+  "sprites/L4.png": {
+   "before": 4296796,
+   "after": 4211088,
+   "mode": "lossless"
+  },
+  "sprites/M1.png": {
+   "before": 893125,
+   "after": 879322,
+   "mode": "lossless"
+  },
+  "sprites/M2.png": {
+   "before": 1297646,
+   "after": 1281407,
+   "mode": "lossless"
+  },
+  "sprites/M3.png": {
+   "before": 1967611,
+   "after": 1934549,
+   "mode": "lossless"
+  },
+  "sprites/M4.png": {
+   "before": 952737,
+   "after": 933880,
+   "mode": "lossless"
+  },
+  "sprites/S1.png": {
+   "before": 92894,
+   "after": 90635,
+   "mode": "lossless"
+  },
+  "sprites/S2.png": {
+   "before": 322864,
+   "after": 316676,
+   "mode": "lossless"
+  },
+  "sprites/S3.png": {
+   "before": 149214,
+   "after": 142532,
+   "mode": "lossless"
+  },
+  "sprites/S4.png": {
+   "before": 467041,
+   "after": 458651,
+   "mode": "lossless"
+  },
+  "sprites/S5.png": {
+   "before": 331182,
+   "after": 326295,
+   "mode": "lossless"
+  },
+  "sprites/W1.png": {
+   "before": 1830184,
+   "after": 1788516,
+   "mode": "lossless"
+  },
+  "sprites/W1P.png": {
+   "before": 853005,
+   "after": 831923,
+   "mode": "lossless"
+  },
+  "sprites/W2.png": {
+   "before": 306522,
+   "after": 299677,
+   "mode": "lossless"
+  },
+  "sprites/X1.png": {
+   "before": 1469247,
+   "after": 1437044,
+   "mode": "lossless"
+  },
+  "sprites/X2.png": {
+   "before": 2129026,
+   "after": 2096526,
+   "mode": "lossless"
+  },
+  "sprites/X3.png": {
+   "before": 693859,
+   "after": 683203,
+   "mode": "lossless"
+  },
+  "sprites/X4.png": {
+   "before": 1234705,
+   "after": 1221759,
+   "mode": "lossless"
+  },
+  "sprites/X5.png": {
+   "before": 1198510,
+   "after": 1167929,
+   "mode": "lossless"
+  },
+  "sprites/X6.png": {
+   "before": 1556478,
+   "after": 1533174,
+   "mode": "lossless"
+  },
+  "sprites/mirror_ball.png": {
+   "before": 1922355,
+   "after": 1881811,
+   "mode": "lossless"
+  },
+  "sprites/seahorse_statue.png": {
+   "before": 937087,
+   "after": 917599,
+   "mode": "lossless"
+  },
+  "sprites/shot_cyan.png": {
+   "before": 14061,
+   "after": 6134,
+   "mode": "quant"
+  },
+  "sprites/shot_gold.png": {
+   "before": 14751,
+   "after": 6547,
+   "mode": "quant"
+  },
+  "sprites/shot_pink.png": {
+   "before": 13350,
+   "after": 5994,
+   "mode": "quant"
+  },
+  "sprites/spot_mark_orb.png": {
+   "before": 130502,
+   "after": 36064,
+   "mode": "quant"
+  },
+  "sprites/whirl_ball.png": {
+   "before": 247098,
+   "after": 244247,
+   "mode": "lossless"
+  },
+  "sprites/whirl_vortex.png": {
+   "before": 203542,
+   "after": 75468,
+   "mode": "quant"
+  },
+  "ui/digits.png": {
+   "before": 74180,
+   "after": 23348,
+   "mode": "quant"
+  },
+  "ui/hud_banners.png": {
+   "before": 1654545,
+   "after": 1547743,
+   "mode": "lossless"
+  },
+  "ui/hud_buttons.png": {
+   "before": 947593,
+   "after": 183386,
+   "mode": "quant"
+  },
+  "ui/hud_frames.png": {
+   "before": 1186395,
+   "after": 304526,
+   "mode": "quant"
+  },
+  "vfx/aim_line.png": {
+   "before": 28290,
+   "after": 9252,
+   "mode": "quant"
+  },
+  "vfx/bassdrop_wave.png": {
+   "before": 373869,
+   "after": 135285,
+   "mode": "quant"
+  },
+  "vfx/beat_wall.png": {
+   "before": 2584581,
+   "after": 748278,
+   "mode": "quant"
+  },
+  "vfx/bubbles_rise.png": {
+   "before": 110616,
+   "after": 31540,
+   "mode": "quant"
+  },
+  "vfx/caustics.png": {
+   "before": 1921302,
+   "after": 522253,
+   "mode": "quant"
+  },
+  "vfx/coin_burst.png": {
+   "before": 394002,
+   "after": 386042,
+   "mode": "lossless"
+  },
+  "vfx/coin_fountain.png": {
+   "before": 495802,
+   "after": 493203,
+   "mode": "lossless"
+  },
+  "vfx/coin_spin.png": {
+   "before": 94463,
+   "after": 32805,
+   "mode": "quant"
+  },
+  "vfx/confetti.png": {
+   "before": 273388,
+   "after": 80734,
+   "mode": "quant"
+  },
+  "vfx/flash_burst.png": {
+   "before": 322274,
+   "after": 115911,
+   "mode": "quant"
+  },
+  "vfx/hit_spark.png": {
+   "before": 71969,
+   "after": 30909,
+   "mode": "quant"
+  },
+  "vfx/laser_beam.png": {
+   "before": 106193,
+   "after": 38399,
+   "mode": "quant"
+  },
+  "vfx/laser_zap.png": {
+   "before": 131689,
+   "after": 59597,
+   "mode": "quant"
+  },
+  "vfx/light_fans.png": {
+   "before": 1008447,
+   "after": 202070,
+   "mode": "quant"
+  },
+  "vfx/light_spots.png": {
+   "before": 1165243,
+   "after": 361209,
+   "mode": "quant"
+  },
+  "vfx/muzzle_flash.png": {
+   "before": 27850,
+   "after": 9772,
+   "mode": "quant"
+  },
+  "vfx/record_trail.png": {
+   "before": 58110,
+   "after": 22227,
+   "mode": "quant"
+  },
+  "vfx/rocket_trail.png": {
+   "before": 63994,
+   "after": 25396,
+   "mode": "quant"
+  },
+  "vfx/shockwave_ring.png": {
+   "before": 358643,
+   "after": 121631,
+   "mode": "quant"
+  },
+  "vfx/spot_mark_target.png": {
+   "before": 386100,
+   "after": 100928,
+   "mode": "quant"
+  },
+  "vfx/spotlight_beam.png": {
+   "before": 106590,
+   "after": 43126,
+   "mode": "quant"
+  },
+  "vfx/tile_wave.png": {
+   "before": 587482,
+   "after": 102734,
+   "mode": "quant"
+  }
+ }
+}
