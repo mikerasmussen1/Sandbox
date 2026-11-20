@@ -541,5 +541,216 @@
         300
       ]
     }
+  },
+  "rules": {
+    "version": 1,
+    "title": "Emberfall Citadel",
+    "sections": [
+      {
+        "heading": "How to play",
+        "paragraphs": [
+          "Choose a hall, then a shot value, and press and hold on the arena to fire, or press Fire. The shot values are 0.04, 0.09, 0.18, 0.36, 0.72, 1.44 and 2.88.",
+          "Ember Hall offers 0.04 and 0.09; Ash Hall offers 0.18, 0.36 and 0.72; Inferno Hall offers 1.44 and 2.88. You can change the shot value at any time while you play.",
+          "Each ember bolt costs the shot value. Only a bolt that strikes a target is played and charged; a bolt that strikes nothing costs nothing.",
+          "When a bolt strikes a target, the server decides whether it is captured. A capture pays the shot value times the target's multiple.",
+          "Aim locks the cannon on one target. Auto fire aims at the strongest target in view and stops when you press it again or your balance cannot cover the next shot. Swift shortens the gap between bolts; every bolt is still one shot at your shot value."
+        ]
+      },
+      {
+        "heading": "The ember bolt",
+        "paragraphs": [
+          "The table has one weapon. An ember bolt strikes one target and costs 1x the shot value.",
+          "The cannons that appear during a feature show a capture the server has already paid. They are never fired or charged on their own."
+        ],
+        "table": {
+          "columns": [
+            "Weapon",
+            "Cost"
+          ],
+          "rows": [
+            [
+              "Ember bolt",
+              "1x"
+            ]
+          ]
+        }
+      },
+      {
+        "heading": "Targets",
+        "paragraphs": [
+          "What a capture pays, as a multiple of the shot value, and the chance that one bolt striking that target captures it. A target with a range draws its multiple from the chances listed."
+        ],
+        "table": {
+          "columns": [
+            "Target",
+            "Pays",
+            "Capture chance",
+            "Drawn multiple"
+          ],
+          "rows": [
+            [
+              "Cinderkin Raider",
+              "2x",
+              "48.25%",
+              "-"
+            ],
+            [
+              "Bloodcap Raider",
+              "4x",
+              "24.13%",
+              "-"
+            ],
+            [
+              "Ash Imp",
+              "5x",
+              "19.30%",
+              "-"
+            ],
+            [
+              "Gloomwing Gargoyle",
+              "8x",
+              "12.06%",
+              "-"
+            ],
+            [
+              "Ember Crawler",
+              "4x",
+              "24.13%",
+              "-"
+            ],
+            [
+              "Brimstone Scorpion",
+              "5x",
+              "19.30%",
+              "-"
+            ],
+            [
+              "Bone Skitter",
+              "2x",
+              "48.25%",
+              "-"
+            ],
+            [
+              "Ironhide Brute",
+              "20x",
+              "4.83%",
+              "-"
+            ],
+            [
+              "Hexflame Cultist",
+              "10x",
+              "9.65%",
+              "-"
+            ],
+            [
+              "Ember Hound",
+              "20x",
+              "4.83%",
+              "-"
+            ],
+            [
+              "Magma Golem",
+              "25x",
+              "3.86%",
+              "-"
+            ],
+            [
+              "Grave Knight",
+              "25x",
+              "3.86%",
+              "-"
+            ],
+            [
+              "Rime Revenant",
+              "40x",
+              "2.41%",
+              "-"
+            ],
+            [
+              "Cinder Wyrmling",
+              "40x",
+              "2.41%",
+              "-"
+            ],
+            [
+              "Obsidian Ogre",
+              "50x",
+              "1.93%",
+              "-"
+            ],
+            [
+              "Cinder Basilisk",
+              "100x",
+              "0.97%",
+              "-"
+            ],
+            [
+              "Siege Beetle",
+              "125x",
+              "0.77%",
+              "-"
+            ],
+            [
+              "Hoard Goblin",
+              "50x to 500x",
+              "0.97%",
+              "50x (60%), 100x (25%), 200x (10%), 500x (5%)"
+            ],
+            [
+              "Soul Lantern Wraith",
+              "50x to 1,000x",
+              "0.48%",
+              "50x (20%), 100x (40%), 200x (25%), 500x (10%), 1,000x (5%)"
+            ],
+            [
+              "Rime Wisp",
+              "20x to 500x",
+              "0.97%",
+              "20x (25%), 50x (30%), 100x (30%), 250x (10%), 500x (5%)"
+            ],
+            [
+              "Halo Relic",
+              "50x to 500x",
+              "0.77%",
+              "50x (40%), 100x (30%), 200x (25%), 500x (5%)"
+            ],
+            [
+              "Ashen Wyrm",
+              "250x to 1,000x",
+              "0.19%",
+              "250x (40%), 500x (40%), 1,000x (20%)"
+            ],
+            [
+              "Pit Warden",
+              "200x to 500x",
+              "0.39%",
+              "200x (50%), 250x (40%), 500x (10%)"
+            ]
+          ]
+        }
+      },
+      {
+        "heading": "Features",
+        "paragraphs": [
+          "A capture of the Hoard Goblin, Soul Lantern Wraith, Rime Wisp, Halo Relic, Ashen Wyrm or Pit Warden plays a feature.",
+          "A feature shows the capture's pay in parts. The parts add up to exactly what the capture pays, so a feature never adds to it or takes from it.",
+          "A capture of 50x or more shows the Ember banner, 200x or more Blaze, and 500x or more Inferno. The banners do not change the pay."
+        ]
+      },
+      {
+        "heading": "Return to player",
+        "paragraphs": [
+          "The published return to player is 96.50 percent of the shot value on every target: a target's capture chance is 0.965 divided by its average multiple, computed exactly on the game's math sheet. Any one session can be higher or lower.",
+          "One shot pays at most the lesser of 1,000x the shot value and 2,880.00. At 0.04 that cap is 40.00; at 2.88 it is 2,880.00. The largest multiple on the table is 1,000x, so the cap never cuts a capture short."
+        ]
+      },
+      {
+        "heading": "Good to know",
+        "paragraphs": [
+          "The server decides every result before anything moves on screen. What you see is the result it sent, and your balance is the server's balance.",
+          "Gold Coins are for promotional play. Sweeps Coins entries and prizes are recorded separately. Both play the same game with the same chances."
+        ]
+      }
+    ]
   }
 }
