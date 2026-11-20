@@ -37,6 +37,7 @@ jobs:
           cp -a gilded-deck sunstone-siege/dist/gilded-deck
           cp -a groove-reef sunstone-siege/dist/groove-reef
           cp -a emberfall-citadel sunstone-siege/dist/emberfall-citadel
+          cp -a _shared sunstone-siege/dist/_shared
       - uses: actions/upload-pages-artifact@v3
         with:
           path: sunstone-siege/dist
