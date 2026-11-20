@@ -1,0 +1,33 @@
+{
+  "fireIntervalMs": 167,
+  "swiftIntervalMs": 111,
+  "maxBounces": 3,
+  "boltSpeed": 900,
+  "waveSeconds": 90,
+  "bossEvery": 3,
+  "species": [
+    {"id": "S1", "name": "Cinderkin Raider", "motion": "walk", "radius": 28, "speed": 74, "flier": false, "group": "ring"},
+    {"id": "S2", "name": "Bloodcap Raider", "motion": "walk", "radius": 28, "speed": 74, "flier": false, "group": "ring"},
+    {"id": "S3", "name": "Ash Imp", "motion": "fly", "radius": 22, "speed": 118, "flier": true, "group": "swarm"},
+    {"id": "S4", "name": "Gloomwing Gargoyle", "motion": "fly", "radius": 24, "speed": 104, "flier": true, "group": "pair"},
+    {"id": "S5", "name": "Ember Crawler", "motion": "crawl", "radius": 20, "speed": 62, "flier": false, "group": "line"},
+    {"id": "S6", "name": "Brimstone Scorpion", "motion": "crawl", "radius": 22, "speed": 58, "flier": false, "group": "line"},
+    {"id": "S7", "name": "Bone Skitter", "motion": "crawl", "radius": 14, "speed": 86, "flier": false, "group": "stream"},
+    {"id": "M1", "name": "Ironhide Brute", "motion": "walk", "radius": 40, "speed": 48, "flier": false, "group": "single"},
+    {"id": "M2", "name": "Hexflame Cultist", "motion": "walk", "radius": 34, "speed": 56, "flier": false, "group": "pair"},
+    {"id": "M3", "name": "Ember Hound", "motion": "run", "radius": 32, "speed": 132, "flier": false, "group": "pack"},
+    {"id": "M4", "name": "Magma Golem", "motion": "walk", "radius": 44, "speed": 40, "flier": false, "group": "single"},
+    {"id": "M5", "name": "Grave Knight", "motion": "walk", "radius": 38, "speed": 52, "flier": false, "group": "pair"},
+    {"id": "M5F", "name": "Rime Revenant", "motion": "walk", "radius": 38, "speed": 50, "flier": false, "group": "single"},
+    {"id": "M6", "name": "Cinder Wyrmling", "motion": "fly", "radius": 36, "speed": 96, "flier": true, "group": "single"},
+    {"id": "L1", "name": "Obsidian Ogre", "motion": "walk", "radius": 56, "speed": 36, "flier": false, "group": "single"},
+    {"id": "L2", "name": "Cinder Basilisk", "motion": "crawl", "radius": 60, "speed": 42, "flier": false, "group": "single"},
+    {"id": "L3", "name": "Siege Beetle", "motion": "walk", "radius": 58, "speed": 34, "flier": false, "group": "single"},
+    {"id": "X1", "name": "Hoard Goblin", "motion": "walk", "radius": 30, "speed": 110, "flier": false, "group": "single"},
+    {"id": "X2", "name": "Soul Lantern Wraith", "motion": "hover", "radius": 34, "speed": 70, "flier": true, "group": "single"},
+    {"id": "X3", "name": "Rime Wisp", "motion": "hover", "radius": 28, "speed": 80, "flier": true, "group": "single"},
+    {"id": "X4", "name": "Halo Relic", "motion": "hover", "radius": 30, "speed": 64, "flier": true, "group": "single"},
+    {"id": "B1", "name": "Ashen Wyrm", "motion": "hover", "radius": 84, "speed": 46, "flier": true, "group": "boss"},
+    {"id": "B2", "name": "Pit Warden", "motion": "walk", "radius": 72, "speed": 32, "flier": false, "group": "boss"}
+  ]
+}

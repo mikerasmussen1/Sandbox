@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://biab.local/games/emberfall-citadel/assets/art/manifest.schema.json",
+  "title": "Emberfall Citadel handoff manifest",
+  "description": "Documentation for assets/art/handoff_manifest.json. The loader does not fetch this schema. Paths are relative to apps/player/public/games/emberfall-citadel/.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["version", "slug", "assets"],
+  "properties": {
+    "version": { "const": 1 },
+    "slug": { "const": "emberfall-citadel" },
+    "assets": {
+      "type": "array",
+      "minItems": 1,
+      "items": { "$ref": "#/$defs/asset" }
+    }
+  },
+  "$defs": {
+    "asset": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "kind", "anchor", "frame"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "kind": {
+          "enum": ["target", "turret", "bolt", "vfx", "ui", "plate", "splash", "brand", "banner"]
+        },
+        "sheet": { "type": "string", "minLength": 1 },
+        "image": { "type": "string", "minLength": 1 },
+        "anchor": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 2,
+          "items": { "type": "number", "minimum": 0, "maximum": 1 }
+        },
+        "frame": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["w", "h"],
+          "properties": {
+            "w": { "type": "integer", "minimum": 1 },
+            "h": { "type": "integer", "minimum": 1 }
+          }
+        },
+        "fps": { "type": "number", "exclusiveMinimum": 0 },
+        "clips": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/clip" }
+        }
+      }
+    },
+    "clip": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["name", "frames", "fps"],
+      "properties": {
+        "name": { "type": "string", "minLength": 1 },
+        "frames": { "type": "integer", "minimum": 1 },
+        "fps": { "type": "number", "exclusiveMinimum": 0 },
+        "headings": {
+          "type": "array",
+          "items": { "enum": ["e", "ne", "n", "se", "s"] }
+        },
+        "mirror": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    }
+  },
+  "x-runtime-path": "apps/player/public/games/emberfall-citadel/assets/art/handoff_manifest.json",
+  "x-tile-path": "apps/player/public/games/emberfall-citadel/art/tile.jpg",
+  "x-expected-ids": [
+    "S1", "S2", "S3", "S4", "S5", "S6", "S7",
+    "M1", "M2", "M3", "M4", "M5", "M5F", "M6",
+    "L1", "L2", "L3",
+    "X1", "X2", "X3", "X4",
+    "B1", "B2",
+    "turret-1", "turret-2", "turret-3", "turret-wyrmlock", "turret-seraph", "turret-rime", "turret-frost",
+    "bolt-1", "bolt-2", "bolt-3", "beam",
+    "muzzle", "hit", "death-burst", "coin", "coin-burst", "lance", "ice", "ice-shatter",
+    "rune-circle", "sigil", "reticle", "chest", "chest-crack", "chest-burst", "tally-frame",
+    "wipe", "lava", "embers", "smoke", "haze",
+    "banner-ember", "banner-blaze", "banner-inferno",
+    "btn-lock", "btn-crosshair", "btn-auto", "btn-speed", "btn-minus", "btn-plus",
+    "btn-back", "btn-menu", "btn-sound", "bet-plate", "seat-wait", "seat-player",
+    "frame-avatar", "dialogue", "progress-frame", "progress-fill", "hall-card",
+    "logo", "keyart", "tile", "arena-land", "arena-port",
+    "splash-wyrm", "splash-reaper", "splash-seraph", "splash-oracle"
+  ]
+}

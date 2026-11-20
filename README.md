@@ -29,3 +29,7 @@ Play: https://mikerasmussen1.github.io/Sandbox/starlift-fever/
 Gilded Deck lives in `gilded-deck/`. It is a static demo-play preview. Demo credits stay in this browser. There is no wallet and no real money.
 
 Play: https://mikerasmussen1.github.io/Sandbox/gilded-deck/
+
+Emberfall Citadel lives in `emberfall-citadel/`. It is a static demo-play preview. Shots spend demo credits that stay in this browser. There is no wallet and no real money.
+
+Play: https://mikerasmussen1.github.io/Sandbox/emberfall-citadel/

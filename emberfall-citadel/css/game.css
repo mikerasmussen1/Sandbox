@@ -1,0 +1,14 @@
+@font-face { font-family: "Lilita One"; src: url("../assets/fonts/LilitaOne-Regular.ttf") format("truetype"); font-display: block; }
+@font-face { font-family: "Exo 2"; src: url("../assets/fonts/Exo2.ttf") format("truetype"); font-weight: 100 900; font-display: block; }
+html, body { margin: 0; padding: 0; width: 100%; height: 100%; background: #140804; overflow: hidden; touch-action: none; user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; -webkit-tap-highlight-color: transparent; overscroll-behavior: none; color: #f6e2c4; }
+#game { position: absolute; inset: 0; }
+#game canvas { display: block; }
+#ec-help { position: fixed; inset: 0; z-index: 20; display: none; background: rgba(8, 3, 2, 0.82); }
+#ec-help.open { display: block; }
+#ec-help .panel { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: min(640px, calc(100% - 32px)); max-height: min(78vh, 720px); overflow: auto; padding: 22px 22px 28px; background: #1a0c08; color: #f6e2c4; border: 1px solid rgba(232, 164, 74, 0.45); font-family: "Exo 2", sans-serif; }
+#ec-help h2 { font-family: "Lilita One", sans-serif; font-weight: 400; letter-spacing: 0.04em; margin: 0 0 8px; color: #ffd59a; }
+#ec-help h3 { font-family: "Lilita One", sans-serif; font-weight: 400; margin: 16px 0 4px; color: #f0b56a; }
+#ec-help p, #ec-help li { font-size: 15px; line-height: 1.45; }
+#ec-help table { width: 100%; border-collapse: collapse; font-size: 14px; }
+#ec-help td { padding: 3px 6px 3px 0; border-bottom: 1px solid rgba(255, 213, 154, 0.12); }
+#ec-help button { font-family: "Lilita One", sans-serif; font-size: 16px; background: transparent; color: #ffd59a; border: 1px solid rgba(232, 164, 74, 0.6); padding: 6px 14px; cursor: pointer; }

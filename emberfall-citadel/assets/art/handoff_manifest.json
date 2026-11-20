@@ -1,0 +1,2690 @@
+{
+ "version": 1,
+ "slug": "emberfall-citadel",
+ "assets": [
+  {
+   "id": "S1",
+   "kind": "target",
+   "sheet": "assets/art/targets/S1.json",
+   "anchor": [
+    0.4054,
+    0.4088
+   ],
+   "frame": {
+    "w": 148,
+    "h": 148
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "move",
+     "frames": 16,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "death",
+     "frames": 8,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    }
+   ]
+  },
+  {
+   "id": "S2",
+   "kind": "target",
+   "sheet": "assets/art/targets/S2.json",
+   "anchor": [
+    0.4054,
+    0.4088
+   ],
+   "frame": {
+    "w": 148,
+    "h": 148
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "move",
+     "frames": 16,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "death",
+     "frames": 8,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    }
+   ]
+  },
+  {
+   "id": "S3",
+   "kind": "target",
+   "sheet": "assets/art/targets/S3.json",
+   "anchor": [
+    0.5,
+    0.4923
+   ],
+   "frame": {
+    "w": 94,
+    "h": 130
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "move",
+     "frames": 12,
+     "fps": 24
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12
+    },
+    {
+     "name": "death",
+     "frames": 8,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "S4",
+   "kind": "target",
+   "sheet": "assets/art/targets/S4.json",
+   "anchor": [
+    0.5,
+    0.4767
+   ],
+   "frame": {
+    "w": 118,
+    "h": 150
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "move",
+     "frames": 12,
+     "fps": 24
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12
+    },
+    {
+     "name": "death",
+     "frames": 8,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "S5",
+   "kind": "target",
+   "sheet": "assets/art/targets/S5.json",
+   "anchor": [
+    0.5,
+    0.6321
+   ],
+   "frame": {
+    "w": 120,
+    "h": 106
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "move",
+     "frames": 12,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "death",
+     "frames": 8,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    }
+   ]
+  },
+  {
+   "id": "S6",
+   "kind": "target",
+   "sheet": "assets/art/targets/S6.json",
+   "anchor": [
+    0.5,
+    0.6765
+   ],
+   "frame": {
+    "w": 130,
+    "h": 102
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "move",
+     "frames": 12,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "death",
+     "frames": 8,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    }
+   ]
+  },
+  {
+   "id": "S7",
+   "kind": "target",
+   "sheet": "assets/art/targets/S7.json",
+   "anchor": [
+    0.495,
+    0.675
+   ],
+   "frame": {
+    "w": 100,
+    "h": 80
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "move",
+     "frames": 12,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "death",
+     "frames": 8,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    }
+   ]
+  },
+  {
+   "id": "M1",
+   "kind": "target",
+   "sheet": "assets/art/targets/M1.json",
+   "anchor": [
+    0.3968,
+    0.4509
+   ],
+   "frame": {
+    "w": 218,
+    "h": 224
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "move",
+     "frames": 16,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "death",
+     "frames": 8,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    }
+   ]
+  },
+  {
+   "id": "M2",
+   "kind": "target",
+   "sheet": "assets/art/targets/M2.json",
+   "anchor": [
+    0.3342,
+    0.3762
+   ],
+   "frame": {
+    "w": 187,
+    "h": 206
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "move",
+     "frames": 16,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "death",
+     "frames": 8,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    }
+   ]
+  },
+  {
+   "id": "M3",
+   "kind": "target",
+   "sheet": "assets/art/targets/M3.json",
+   "anchor": [
+    0.4915,
+    0.5679
+   ],
+   "frame": {
+    "w": 234,
+    "h": 184
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "move",
+     "frames": 16,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "death",
+     "frames": 8,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    }
+   ]
+  },
+  {
+   "id": "M4",
+   "kind": "target",
+   "sheet": "assets/art/targets/M4.json",
+   "anchor": [
+    0.4055,
+    0.3975
+   ],
+   "frame": {
+    "w": 238,
+    "h": 244
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "move",
+     "frames": 16,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "death",
+     "frames": 8,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    }
+   ]
+  },
+  {
+   "id": "M5",
+   "kind": "target",
+   "sheet": "assets/art/targets/M5.json",
+   "anchor": [
+    0.4167,
+    0.4679
+   ],
+   "frame": {
+    "w": 234,
+    "h": 234
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "move",
+     "frames": 16,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "death",
+     "frames": 8,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    }
+   ]
+  },
+  {
+   "id": "M5F",
+   "kind": "target",
+   "sheet": "assets/art/targets/M5F.json",
+   "anchor": [
+    0.4167,
+    0.4679
+   ],
+   "frame": {
+    "w": 234,
+    "h": 234
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "move",
+     "frames": 16,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "death",
+     "frames": 8,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    }
+   ]
+  },
+  {
+   "id": "M6",
+   "kind": "target",
+   "sheet": "assets/art/targets/M6.json",
+   "anchor": [
+    0.5,
+    0.4918
+   ],
+   "frame": {
+    "w": 186,
+    "h": 243
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "move",
+     "frames": 16,
+     "fps": 24
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12
+    },
+    {
+     "name": "death",
+     "frames": 8,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "L1",
+   "kind": "target",
+   "sheet": "assets/art/targets/L1.json",
+   "anchor": [
+    0.3976,
+    0.4102
+   ],
+   "frame": {
+    "w": 376,
+    "h": 384
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "move",
+     "frames": 16,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "death",
+     "frames": 8,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    }
+   ]
+  },
+  {
+   "id": "L2",
+   "kind": "target",
+   "sheet": "assets/art/targets/L2.json",
+   "anchor": [
+    0.4834,
+    0.616
+   ],
+   "frame": {
+    "w": 422,
+    "h": 349
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "move",
+     "frames": 16,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "death",
+     "frames": 8,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    }
+   ]
+  },
+  {
+   "id": "L3",
+   "kind": "target",
+   "sheet": "assets/art/targets/L3.json",
+   "anchor": [
+    0.5,
+    0.6677
+   ],
+   "frame": {
+    "w": 404,
+    "h": 313
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "move",
+     "frames": 16,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "death",
+     "frames": 8,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    }
+   ]
+  },
+  {
+   "id": "X1",
+   "kind": "target",
+   "sheet": "assets/art/targets/X1.json",
+   "anchor": [
+    0.426,
+    0.3901
+   ],
+   "frame": {
+    "w": 196,
+    "h": 191
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "move",
+     "frames": 16,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "death",
+     "frames": 8,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    }
+   ]
+  },
+  {
+   "id": "X2",
+   "kind": "target",
+   "sheet": "assets/art/targets/X2.json",
+   "anchor": [
+    0.5,
+    0.3611
+   ],
+   "frame": {
+    "w": 80,
+    "h": 216
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "move",
+     "frames": 16,
+     "fps": 24
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12
+    },
+    {
+     "name": "death",
+     "frames": 8,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "X3",
+   "kind": "target",
+   "sheet": "assets/art/targets/X3.json",
+   "anchor": [
+    0.4948,
+    0.3265
+   ],
+   "frame": {
+    "w": 96,
+    "h": 196
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "move",
+     "frames": 16,
+     "fps": 24
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12
+    },
+    {
+     "name": "death",
+     "frames": 8,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "X4",
+   "kind": "target",
+   "sheet": "assets/art/targets/X4.json",
+   "anchor": [
+    0.5,
+    0.4337
+   ],
+   "frame": {
+    "w": 182,
+    "h": 196
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "move",
+     "frames": 16,
+     "fps": 24
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12
+    },
+    {
+     "name": "death",
+     "frames": 8,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "B1",
+   "kind": "target",
+   "sheet": "assets/art/targets/B1.json",
+   "anchor": [
+    0.5036,
+    0.5394
+   ],
+   "frame": {
+    "w": 688,
+    "h": 635
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "move",
+     "frames": 12,
+     "fps": 24
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12
+    },
+    {
+     "name": "death",
+     "frames": 9,
+     "fps": 24
+    },
+    {
+     "name": "flinch",
+     "frames": 6,
+     "fps": 24
+    },
+    {
+     "name": "roar",
+     "frames": 8,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "B2",
+   "kind": "target",
+   "sheet": "assets/art/targets/B2.json",
+   "anchor": [
+    0.3955,
+    0.3953
+   ],
+   "frame": {
+    "w": 493,
+    "h": 492
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "move",
+     "frames": 16,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    },
+    {
+     "name": "death",
+     "frames": 12,
+     "fps": 24,
+     "headings": [
+      "e",
+      "ne",
+      "n",
+      "se",
+      "s"
+     ],
+     "mirror": {
+      "w": "e",
+      "nw": "ne",
+      "sw": "se"
+     }
+    }
+   ]
+  },
+  {
+   "id": "turret-1",
+   "kind": "turret",
+   "sheet": "assets/art/turrets/turret-1.json",
+   "anchor": [
+    0.5031,
+    0.5
+   ],
+   "frame": {
+    "w": 159,
+    "h": 206
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "idle",
+     "frames": 8,
+     "fps": 24
+    },
+    {
+     "name": "fire",
+     "frames": 6,
+     "fps": 24
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12
+    }
+   ]
+  },
+  {
+   "id": "turret-2",
+   "kind": "turret",
+   "sheet": "assets/art/turrets/turret-2.json",
+   "anchor": [
+    0.5,
+    0.5022
+   ],
+   "frame": {
+    "w": 150,
+    "h": 225
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "idle",
+     "frames": 8,
+     "fps": 24
+    },
+    {
+     "name": "fire",
+     "frames": 6,
+     "fps": 24
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12
+    }
+   ]
+  },
+  {
+   "id": "turret-3",
+   "kind": "turret",
+   "sheet": "assets/art/turrets/turret-3.json",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 244,
+    "h": 142
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "idle",
+     "frames": 8,
+     "fps": 24
+    },
+    {
+     "name": "fire",
+     "frames": 6,
+     "fps": 24
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12
+    }
+   ]
+  },
+  {
+   "id": "turret-wyrmlock",
+   "kind": "turret",
+   "sheet": "assets/art/turrets/turret-wyrmlock.json",
+   "anchor": [
+    0.5,
+    0.4979
+   ],
+   "frame": {
+    "w": 148,
+    "h": 243
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "idle",
+     "frames": 8,
+     "fps": 24
+    },
+    {
+     "name": "fire",
+     "frames": 6,
+     "fps": 24
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12
+    }
+   ]
+  },
+  {
+   "id": "turret-seraph",
+   "kind": "turret",
+   "sheet": "assets/art/turrets/turret-seraph.json",
+   "anchor": [
+    0.5029,
+    0.5
+   ],
+   "frame": {
+    "w": 171,
+    "h": 244
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "idle",
+     "frames": 8,
+     "fps": 24
+    },
+    {
+     "name": "fire",
+     "frames": 6,
+     "fps": 24
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12
+    }
+   ]
+  },
+  {
+   "id": "turret-rime",
+   "kind": "turret",
+   "sheet": "assets/art/turrets/turret-rime.json",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 142,
+    "h": 244
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "idle",
+     "frames": 8,
+     "fps": 24
+    },
+    {
+     "name": "fire",
+     "frames": 6,
+     "fps": 24
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12
+    }
+   ]
+  },
+  {
+   "id": "turret-frost",
+   "kind": "turret",
+   "sheet": "assets/art/turrets/turret-frost.json",
+   "anchor": [
+    0.5031,
+    0.5
+   ],
+   "frame": {
+    "w": 159,
+    "h": 206
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "idle",
+     "frames": 8,
+     "fps": 24
+    },
+    {
+     "name": "fire",
+     "frames": 6,
+     "fps": 24
+    },
+    {
+     "name": "hit",
+     "frames": 1,
+     "fps": 12
+    }
+   ]
+  },
+  {
+   "id": "bolt-1",
+   "kind": "bolt",
+   "sheet": "assets/art/bolts/bolt-1.json",
+   "anchor": [
+    0.5714,
+    0.5
+   ],
+   "frame": {
+    "w": 84,
+    "h": 52
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "shimmer",
+     "frames": 6,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "bolt-2",
+   "kind": "bolt",
+   "sheet": "assets/art/bolts/bolt-2.json",
+   "anchor": [
+    0.5714,
+    0.5
+   ],
+   "frame": {
+    "w": 84,
+    "h": 52
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "shimmer",
+     "frames": 6,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "bolt-3",
+   "kind": "bolt",
+   "sheet": "assets/art/bolts/bolt-3.json",
+   "anchor": [
+    0.5714,
+    0.5
+   ],
+   "frame": {
+    "w": 84,
+    "h": 52
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "shimmer",
+     "frames": 6,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "beam",
+   "kind": "bolt",
+   "sheet": "assets/art/bolts/beam.json",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 256,
+    "h": 64
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "loop",
+     "frames": 8,
+     "fps": 24
+    },
+    {
+     "name": "seraph",
+     "frames": 8,
+     "fps": 24
+    },
+    {
+     "name": "rime",
+     "frames": 8,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "muzzle",
+   "kind": "vfx",
+   "sheet": "assets/art/vfx/muzzle.json",
+   "anchor": [
+    0.5,
+    1
+   ],
+   "frame": {
+    "w": 128,
+    "h": 121
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "burst",
+     "frames": 6,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "hit",
+   "kind": "vfx",
+   "sheet": "assets/art/vfx/hit.json",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 128,
+    "h": 128
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "spark",
+     "frames": 8,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "death-burst",
+   "kind": "vfx",
+   "sheet": "assets/art/vfx/death-burst.json",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 192,
+    "h": 192
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "burst",
+     "frames": 14,
+     "fps": 24
+    },
+    {
+     "name": "boss",
+     "frames": 14,
+     "fps": 24
+    },
+    {
+     "name": "frost",
+     "frames": 14,
+     "fps": 24
+    },
+    {
+     "name": "soul",
+     "frames": 14,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "coin",
+   "kind": "vfx",
+   "sheet": "assets/art/vfx/coin.json",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 96,
+    "h": 94
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "spin",
+     "frames": 12,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "coin-burst",
+   "kind": "vfx",
+   "sheet": "assets/art/vfx/coin-burst.json",
+   "anchor": [
+    0.5205,
+    0.4615
+   ],
+   "frame": {
+    "w": 219,
+    "h": 286
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "burst",
+     "frames": 16,
+     "fps": 24
+    },
+    {
+     "name": "fountain",
+     "frames": 16,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "lance",
+   "kind": "vfx",
+   "sheet": "assets/art/vfx/lance.json",
+   "anchor": [
+    0.5,
+    0.4754
+   ],
+   "frame": {
+    "w": 160,
+    "h": 305
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "fall",
+     "frames": 6,
+     "fps": 24
+    },
+    {
+     "name": "impact",
+     "frames": 12,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "ice",
+   "kind": "vfx",
+   "sheet": "assets/art/vfx/ice.json",
+   "anchor": [
+    0.5,
+    0.3846
+   ],
+   "frame": {
+    "w": 130,
+    "h": 156
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "form",
+     "frames": 8,
+     "fps": 24
+    },
+    {
+     "name": "hold",
+     "frames": 8,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "ice-shatter",
+   "kind": "vfx",
+   "sheet": "assets/art/vfx/ice-shatter.json",
+   "anchor": [
+    0.5,
+    0.5266
+   ],
+   "frame": {
+    "w": 192,
+    "h": 169
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "shatter",
+     "frames": 11,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "rune-circle",
+   "kind": "vfx",
+   "sheet": "assets/art/vfx/rune-circle.json",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 236,
+    "h": 236
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "loop",
+     "frames": 16,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "sigil",
+   "kind": "vfx",
+   "sheet": "assets/art/vfx/sigil.json",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 236,
+    "h": 236
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "loop",
+     "frames": 16,
+     "fps": 24
+    },
+    {
+     "name": "soul",
+     "frames": 16,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "reticle",
+   "kind": "vfx",
+   "image": "assets/art/vfx/reticle.webp",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 180,
+    "h": 180
+   }
+  },
+  {
+   "id": "chest",
+   "kind": "vfx",
+   "sheet": "assets/art/vfx/chest.json",
+   "anchor": [
+    0.4554,
+    0.4181
+   ],
+   "frame": {
+    "w": 213,
+    "h": 299
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "idle",
+     "frames": 16,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "chest-crack",
+   "kind": "vfx",
+   "sheet": "assets/art/vfx/chest-crack.json",
+   "anchor": [
+    0.5,
+    0.5116
+   ],
+   "frame": {
+    "w": 302,
+    "h": 344
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "crack",
+     "frames": 8,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "chest-burst",
+   "kind": "vfx",
+   "sheet": "assets/art/vfx/chest-burst.json",
+   "anchor": [
+    0.5,
+    0.5116
+   ],
+   "frame": {
+    "w": 302,
+    "h": 344
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "open",
+     "frames": 8,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "tally-frame",
+   "kind": "vfx",
+   "sheet": "assets/art/vfx/tally-frame.json",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 256,
+    "h": 160
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "pulse",
+     "frames": 12,
+     "fps": 24
+    },
+    {
+     "name": "link",
+     "frames": 8,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "wipe",
+   "kind": "vfx",
+   "sheet": "assets/art/vfx/wipe.json",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 256,
+    "h": 128
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "loop",
+     "frames": 8,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "lava",
+   "kind": "vfx",
+   "sheet": "assets/art/vfx/lava.json",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 256,
+    "h": 256
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "loop",
+     "frames": 16,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "embers",
+   "kind": "vfx",
+   "sheet": "assets/art/vfx/embers.json",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 192,
+    "h": 384
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "loop",
+     "frames": 24,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "smoke",
+   "kind": "vfx",
+   "sheet": "assets/art/vfx/smoke.json",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 256,
+    "h": 256
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "loop",
+     "frames": 16,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "haze",
+   "kind": "vfx",
+   "sheet": "assets/art/vfx/haze.json",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 256,
+    "h": 256
+   },
+   "fps": 24,
+   "clips": [
+    {
+     "name": "loop",
+     "frames": 16,
+     "fps": 24
+    }
+   ]
+  },
+  {
+   "id": "banner-ember",
+   "kind": "banner",
+   "image": "assets/art/banners/banner-ember.webp",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 1200,
+    "h": 446
+   }
+  },
+  {
+   "id": "banner-blaze",
+   "kind": "banner",
+   "image": "assets/art/banners/banner-blaze.webp",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 1200,
+    "h": 446
+   }
+  },
+  {
+   "id": "banner-inferno",
+   "kind": "banner",
+   "image": "assets/art/banners/banner-inferno.webp",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 1200,
+    "h": 446
+   }
+  },
+  {
+   "id": "btn-lock",
+   "kind": "ui",
+   "sheet": "assets/art/ui/btn-lock.json",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 120,
+    "h": 120
+   },
+   "fps": 1,
+   "clips": [
+    {
+     "name": "normal",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "hover",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "pressed",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "disabled",
+     "frames": 1,
+     "fps": 1
+    }
+   ]
+  },
+  {
+   "id": "btn-crosshair",
+   "kind": "ui",
+   "sheet": "assets/art/ui/btn-crosshair.json",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 120,
+    "h": 120
+   },
+   "fps": 1,
+   "clips": [
+    {
+     "name": "normal",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "hover",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "pressed",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "disabled",
+     "frames": 1,
+     "fps": 1
+    }
+   ]
+  },
+  {
+   "id": "btn-auto",
+   "kind": "ui",
+   "sheet": "assets/art/ui/btn-auto.json",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 120,
+    "h": 120
+   },
+   "fps": 1,
+   "clips": [
+    {
+     "name": "normal",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "hover",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "pressed",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "disabled",
+     "frames": 1,
+     "fps": 1
+    }
+   ]
+  },
+  {
+   "id": "btn-speed",
+   "kind": "ui",
+   "sheet": "assets/art/ui/btn-speed.json",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 120,
+    "h": 120
+   },
+   "fps": 1,
+   "clips": [
+    {
+     "name": "normal",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "hover",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "pressed",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "disabled",
+     "frames": 1,
+     "fps": 1
+    }
+   ]
+  },
+  {
+   "id": "btn-minus",
+   "kind": "ui",
+   "sheet": "assets/art/ui/btn-minus.json",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 120,
+    "h": 120
+   },
+   "fps": 1,
+   "clips": [
+    {
+     "name": "normal",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "hover",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "pressed",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "disabled",
+     "frames": 1,
+     "fps": 1
+    }
+   ]
+  },
+  {
+   "id": "btn-plus",
+   "kind": "ui",
+   "sheet": "assets/art/ui/btn-plus.json",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 120,
+    "h": 120
+   },
+   "fps": 1,
+   "clips": [
+    {
+     "name": "normal",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "hover",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "pressed",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "disabled",
+     "frames": 1,
+     "fps": 1
+    }
+   ]
+  },
+  {
+   "id": "btn-back",
+   "kind": "ui",
+   "sheet": "assets/art/ui/btn-back.json",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 120,
+    "h": 120
+   },
+   "fps": 1,
+   "clips": [
+    {
+     "name": "normal",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "hover",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "pressed",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "disabled",
+     "frames": 1,
+     "fps": 1
+    }
+   ]
+  },
+  {
+   "id": "btn-menu",
+   "kind": "ui",
+   "sheet": "assets/art/ui/btn-menu.json",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 120,
+    "h": 120
+   },
+   "fps": 1,
+   "clips": [
+    {
+     "name": "normal",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "hover",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "pressed",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "disabled",
+     "frames": 1,
+     "fps": 1
+    }
+   ]
+  },
+  {
+   "id": "btn-sound",
+   "kind": "ui",
+   "sheet": "assets/art/ui/btn-sound.json",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 120,
+    "h": 120
+   },
+   "fps": 1,
+   "clips": [
+    {
+     "name": "normal",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "hover",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "pressed",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "disabled",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "off_normal",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "off_hover",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "off_pressed",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "off_disabled",
+     "frames": 1,
+     "fps": 1
+    }
+   ]
+  },
+  {
+   "id": "bet-plate",
+   "kind": "ui",
+   "image": "assets/art/ui/bet-plate.webp",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 640,
+    "h": 174
+   }
+  },
+  {
+   "id": "seat-wait",
+   "kind": "ui",
+   "image": "assets/art/ui/seat-wait.webp",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 460,
+    "h": 115
+   }
+  },
+  {
+   "id": "seat-player",
+   "kind": "ui",
+   "image": "assets/art/ui/seat-player.webp",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 460,
+    "h": 115
+   }
+  },
+  {
+   "id": "frame-avatar",
+   "kind": "ui",
+   "image": "assets/art/ui/frame-avatar.webp",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 160,
+    "h": 160
+   }
+  },
+  {
+   "id": "dialogue",
+   "kind": "ui",
+   "image": "assets/art/ui/dialogue.webp",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 720,
+    "h": 228
+   }
+  },
+  {
+   "id": "progress-frame",
+   "kind": "ui",
+   "image": "assets/art/ui/progress-frame.webp",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 900,
+    "h": 100
+   }
+  },
+  {
+   "id": "progress-fill",
+   "kind": "ui",
+   "image": "assets/art/ui/progress-fill.webp",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 900,
+    "h": 100
+   }
+  },
+  {
+   "id": "hall-card",
+   "kind": "ui",
+   "sheet": "assets/art/ui/hall-card.json",
+   "anchor": [
+    0.5017,
+    0.547
+   ],
+   "frame": {
+    "w": 303,
+    "h": 457
+   },
+   "fps": 1,
+   "clips": [
+    {
+     "name": "ember",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "ash",
+     "frames": 1,
+     "fps": 1
+    },
+    {
+     "name": "inferno",
+     "frames": 1,
+     "fps": 1
+    }
+   ]
+  },
+  {
+   "id": "logo",
+   "kind": "brand",
+   "image": "assets/art/brand/logo.webp",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 1836,
+    "h": 735
+   }
+  },
+  {
+   "id": "keyart",
+   "kind": "brand",
+   "image": "assets/art/brand/keyart.jpg",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 1920,
+    "h": 1080
+   }
+  },
+  {
+   "id": "tile",
+   "kind": "brand",
+   "image": "art/tile.jpg",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 900,
+    "h": 1200
+   }
+  },
+  {
+   "id": "arena-land",
+   "kind": "plate",
+   "image": "assets/art/plates/arena-land.jpg",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 1920,
+    "h": 1080
+   }
+  },
+  {
+   "id": "arena-port",
+   "kind": "plate",
+   "image": "assets/art/plates/arena-port.jpg",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 1080,
+    "h": 2400
+   }
+  },
+  {
+   "id": "splash-wyrm",
+   "kind": "splash",
+   "image": "assets/art/splash/splash-wyrm.webp",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 658,
+    "h": 613
+   }
+  },
+  {
+   "id": "splash-reaper",
+   "kind": "splash",
+   "image": "assets/art/splash/splash-reaper.webp",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 855,
+    "h": 905
+   }
+  },
+  {
+   "id": "splash-seraph",
+   "kind": "splash",
+   "image": "assets/art/splash/splash-seraph.webp",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 863,
+    "h": 747
+   }
+  },
+  {
+   "id": "splash-oracle",
+   "kind": "splash",
+   "image": "assets/art/splash/splash-oracle.webp",
+   "anchor": [
+    0.5,
+    0.5
+   ],
+   "frame": {
+    "w": 651,
+    "h": 893
+   }
+  }
+ ]
+}

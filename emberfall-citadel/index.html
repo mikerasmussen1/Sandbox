@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Emberfall Citadel">
+<meta name="theme-color" content="#140804">
+<meta name="description" content="Emberfall Citadel, a target shooting table on a fallen fortress">
+<link rel="icon" href="data:,">
+<title>Emberfall Citadel</title>
+<link rel="stylesheet" href="css/game.css">
+  <link rel="stylesheet" href="_shared/boot.css">
+  <script src="_shared/load-gate.js"></script>
+</head>
+<body>
+<div id="biab-boot" role="status" aria-live="polite">
+  <div class="biab-boot-card">
+    <p class="biab-boot-title">Emberfall Citadel</p>
+    <p id="biab-boot-label" class="biab-boot-label">Loading</p>
+    <div class="biab-boot-track" aria-hidden="true"><div id="biab-boot-fill" class="biab-boot-fill"></div></div>
+    <button type="button" id="biab-boot-retry" hidden>Try again</button>
+  </div>
+</div>
+
+<div id="game"></div>
+<script>window.__EC_DEMO = true;</script>
+<script type="module" src="js/game.js"></script>
+</body>
+</html>
