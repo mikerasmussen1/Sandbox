@@ -1,7 +1,6 @@
 <!doctype html>
 <html lang="en">
 <head>
-<base href="./">
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="theme-color" content="#070b10" />
@@ -10,30 +9,43 @@
 <link rel="manifest" href="manifest.webmanifest" />
 <title>Auric Dynamo</title>
 <link rel="stylesheet" href="css/game.css" />
+  <link rel="stylesheet" href="../_shared/boot.css">
+  <script src="../_shared/load-gate.js"></script>
 <style>
 #demo-note { position: fixed; left: 12px; bottom: 8px; z-index: 80; margin: 0; color: #fff6d8; font: 600 12px sans-serif; letter-spacing: 0.02em; text-shadow: 0 1px 2px #000; pointer-events: none; }
 </style>
 </head>
   <body>
 <p id="demo-note">Demo preview, no real money</p>
+
+<div id="biab-boot" role="status" aria-live="polite">
+  <div class="biab-boot-card">
+    <p class="biab-boot-title">Auric Dynamo</p>
+    <p id="biab-boot-label" class="biab-boot-label">Loading</p>
+    <div class="biab-boot-track" aria-hidden="true"><div id="biab-boot-fill" class="biab-boot-fill"></div></div>
+    <button type="button" id="biab-boot-retry" hidden>Try again</button>
+  </div>
+</div>
+
     <div id="boot" aria-hidden="true"><img src="art/icon-180.png" alt="" /></div>
+    <!-- ADR-0022 top bar (WI-535): the balance, the session clock and the menu, in CSS pixels, never under the dock. -->
+    <header id="bar" aria-label="Machine status">
+      <div id="bar-balance" class="bar-read"><span id="balance-label">Credits</span><strong id="balance">0</strong></div>
+      <div id="bar-time" class="bar-read bar-time"><span>Time</span><strong id="time">0:00</strong></div>
+      <div class="bar-buttons">
+        <button type="button" id="help-open" aria-label="Paytable and rules">?</button>
+        <button type="button" id="sound-btn" aria-pressed="true" aria-label="Sound">♪</button>
+        <button type="button" id="settings-open" aria-label="Settings" aria-haspopup="dialog">⚙</button>
+        <button type="button" id="board-open" aria-label="Standings">★</button>
+      </div>
+    </header>
     <div id="viewport">
     <div id="cabinet" data-energy="idle" data-motion="allow">
   <div id="rivets" aria-hidden="true"></div>
   <div id="bulb-rim" aria-hidden="true"></div>
   <header class="marquee">
     <h1><img id="wordmark" alt="Auric Dynamo" /></h1>
-    <div class="leds">
-      <div class="led"><span id="balance-label">Credits</span><strong id="balance">100,000</strong></div>
-      <div class="led"><span>Session</span><strong id="session">0</strong></div>
-      <div class="led"><span>Time</span><strong id="time">0:00</strong></div>
-    </div>
-    <div id="currency" hidden>
-      <button type="button" id="cur-gc" aria-pressed="false" aria-label="Gold Coins">GC</button>
-      <button type="button" id="cur-sc" aria-pressed="true" aria-label="Sweeps Coins">SC</button>
-    </div>
   </header>
-  <p id="account-line" hidden></p>
   <p id="banner" class="banner" hidden></p>
   <main id="play-surface">
     <div class="window">
@@ -51,44 +63,23 @@
     </div>
     <section class="deck" aria-label="Machine deck">
       <div class="meters">
-        <div class="led win">
-          <span id="total-label">Total</span>
+        <div class="led win" id="win-led">
+          <span id="total-label">Win</span>
           <strong id="hero"></strong>
           <span id="net">Net pending</span>
         </div>
-        <div class="led"><span>Cost</span><strong id="cost-read">10</strong></div>
-        <div class="led"><span>Energy</span><strong id="meter">0/10</strong></div>
+        <div class="led energy"><span>Surge</span><strong id="meter">0/10</strong></div>
       </div>
       <div id="lines"></div>
-      <div class="spin-row">
-        <button type="button" id="cost-down" aria-label="Lower cost">−</button>
-        <button type="button" id="spin">Spin</button>
-        <button type="button" id="cost-up" aria-label="Raise cost">+</button>
-      </div>
-      <div class="cost cost-radios" role="radiogroup" aria-label="Play cost">
-        <label><input type="radio" name="cost" value="10" checked /> 10</label>
-        <label><input type="radio" name="cost" value="20" /> 20</label>
-        <label><input type="radio" name="cost" value="50" /> 50</label>
-        <label><input type="radio" name="cost" value="100" /> 100</label>
-      </div>
-      <div class="icon-row">
-        <button type="button" id="reveal" aria-label="Skip">▸</button>
-        <button type="button" id="turbo-btn" aria-pressed="false" aria-label="Turbo">⚡</button>
-        <button type="button" id="start-auto" aria-label="Autoplay">↻</button>
-        <button type="button" id="stop-auto" aria-label="Stop autoplay">■</button>
-        <button type="button" id="sound-btn" aria-pressed="true" aria-label="Sound">♪</button>
-        <button type="button" id="music-btn" aria-pressed="true" aria-label="Music">♫</button>
-        <button type="button" id="settings-open" aria-label="Settings" aria-haspopup="dialog">⚙</button>
-        <button type="button" id="help-open" aria-label="Help">?</button>
-        <button type="button" id="board-open" aria-label="Standings">★</button>
-      </div>
-      <p id="auto-status">Autoplay off</p>
-      <p id="short" class="short" hidden><span id="short-text">Not enough for this cost.</span> <button type="button" id="short-reset">Reset demo credits</button></p>
+      <p id="session-line"><span>Session net</span> <b id="session">0</b></p>
+      <p id="short" class="short" hidden><span id="short-text">Insufficient balance</span> <button type="button" id="short-reset">Reset demo credits</button></p>
       <p id="note"></p>
     </section>
   </main>
 </div>
 </div>
+<!-- The paytable summary in a landscape side gutter wide enough to read it (ADR-0022: no black bars). -->
+<aside id="side-pay" aria-label="Paytable summary" hidden></aside>
 <div id="overlay"></div>
 <p id="live" aria-live="polite"></p>
 <dialog id="settings-dialog" aria-labelledby="settings-title">
@@ -100,6 +91,12 @@
       <option value="allow">Allow</option>
     </select>
   </label>
+  <div class="panel-row" id="currency" hidden>Coins
+    <span class="coin-pick">
+      <button type="button" id="cur-gc" aria-pressed="false" aria-label="Gold Coins">GC</button>
+      <button type="button" id="cur-sc" aria-pressed="true" aria-label="Sweeps Coins">SC</button>
+    </span>
+  </div>
   <label class="panel-row">Effects <input type="checkbox" id="effects" checked /></label>
   <label class="panel-row">Autoplay count
     <select id="auto-count">
@@ -112,7 +109,7 @@
   <label class="panel-row">Music <input type="checkbox" id="music" checked /></label>
   <label class="panel-row">Turbo <input type="checkbox" id="turbo" /></label>
   <div class="dialog-actions">
-    <button type="button" id="reset">Reset demo credits</button>
+    <button type="button" id="reset" hidden>Reset demo credits</button>
     <button type="button" id="exit">Exit</button>
     <button type="button" id="settings-close">Close</button>
   </div>
@@ -126,19 +123,10 @@
   <div id="board-body"></div>
   <div class="dialog-actions"><button type="button" id="board-close">Close</button></div>
 </dialog>
-<dialog id="help-dialog" aria-labelledby="help-title">
-  <div id="help-head">
-    <img id="help-logo" alt="" />
-    <img id="help-wheel" alt="" />
-  </div>
-  <h2 id="help-title" tabindex="-1">Help</h2>
-  <div id="help-body"></div>
-  <div class="dialog-actions"><button type="button" id="help-close">Close</button></div>
-</dialog>
 <dialog id="onboard-dialog" aria-labelledby="onboard-title">
   <img id="onboard-logo" alt="" />
   <h2 id="onboard-title">Auric Dynamo</h2>
-  <p>Choose a cost, then spin. The three number tokens are read as one number unless any of them is blank, which makes that number zero. A modifier can multiply, replace, bank and add, or open a wheel. Opened from the lobby, each spin uses your Gold Coins or Sweeps Coins and the server decides the result.</p>
+  <p>Choose an entry, then spin. The three number reels are read from left to right as one number. A blank is skipped, so 10, a blank and 10 read as 1010. Charge fills a blank between two numbers. A modifier can multiply, replace, bank and add, or open a wheel. Every tenth play, Dynamo Surge pays. Opened from the lobby, each spin uses your Gold Coins or Sweeps Coins and the server decides the result.</p>
   <div class="dialog-actions">
     <button type="button" id="onboard-help">Open Help</button>
     <button type="button" id="onboard-start">Start</button>
@@ -154,10 +142,11 @@
 </dialog>
 <div id="splash" hidden>
   <img id="splash-art" alt="" />
-  <button type="button" id="splash-start">Start</button>
+  <button type="button" id="splash-start" data-biab-start>Start</button>
 </div>
 <p id="state-overlay" hidden></p>
-<noscript><p>Auric Dynamo needs JavaScript to run this demo.</p></noscript>
+<p id="toast" role="status" hidden></p>
+<noscript><p>Auric Dynamo needs JavaScript to run.</p></noscript>
 <script type="module" src="js/game.js"></script>
 </body>
 </html>

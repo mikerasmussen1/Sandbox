@@ -15,7 +15,36 @@
 
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; background: #05070b; color: var(--text); overflow: hidden; }
-#viewport { position: fixed; inset: 0; overflow: hidden; background: #05070b; }
+/* ADR-0022 (WI-535): the layout module places the bar, the stage (#viewport), the splash and the overlay. */
+#viewport { position: fixed; left: 0; top: 0; width: 100%; height: 100%; overflow: hidden; background: radial-gradient(ellipse at 50% 45%, #0c2420, #05070b 75%); touch-action: manipulation; overscroll-behavior: none; }
+#bar {
+  position: fixed; left: 0; top: 0; z-index: 20; box-sizing: border-box;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px; padding: 4px 8px;
+  background: rgba(5, 7, 11, 0.94); border-bottom: 1px solid rgba(224, 177, 90, 0.45);
+}
+.bar-read { display: flex; flex-direction: column; justify-content: center; min-height: 44px; line-height: 1.1; }
+.bar-read span { font: 700 12px "Auric Serif", serif; color: #f3d48a; letter-spacing: 0.08em; text-transform: uppercase; }
+.bar-read strong { font-size: 18px; color: #fff6d8; font-variant-numeric: tabular-nums; }
+#bar-balance { flex: 0 1 auto; min-width: 0; }
+.bar-time strong { font-size: 15px; }
+.bar-buttons { display: flex; gap: 8px; margin-left: auto; }
+.bar-buttons button {
+  width: 44px; height: 44px; border: none; border-radius: 50%; color: transparent; box-shadow: none;
+  background: transparent center / contain no-repeat;
+}
+.bar-buttons button:active { transform: scale(0.92); }
+.bar-buttons button[aria-pressed="false"] { filter: grayscale(0.7) brightness(0.75); }
+#side-pay {
+  position: fixed; z-index: 10; box-sizing: border-box; overflow: auto; padding: 10px 12px;
+  background: rgba(7, 11, 16, 0.9); border: 1px solid rgba(224, 177, 90, 0.6); border-radius: 12px;
+  color: #f4efe6; font: 400 13px/1.35 "Auric Sans", sans-serif;
+}
+#side-pay[hidden] { display: none; }
+#side-pay h2 { font: 700 14px "Auric Serif", serif; color: #f3d48a; margin: 0 0 6px; }
+#side-pay dl { display: grid; grid-template-columns: auto 1fr; gap: 2px 10px; margin: 0 0 6px; font-variant-numeric: tabular-nums; }
+#side-pay dt { font: 700 14px "Auric Serif", serif; color: #fff6d8; }
+#side-pay dd { margin: 0; }
+#side-pay p { margin: 4px 0 0; }
 button, select, input { font: inherit; color: inherit; }
 button { cursor: pointer; font-weight: 700; }
 button:disabled { opacity: 0.45; cursor: default; }
@@ -56,30 +85,21 @@ h1, h2, h3, p { margin: 0; }
 #wordmark {
   position: absolute;
   z-index: 4;
-  left: 450px;
-  top: 8px;
-  width: 380px;
-  height: 230px;
+  left: 465px;
+  top: 98px;
+  width: 350px;
+  height: 84px;
   object-fit: contain;
   filter: drop-shadow(0 0 8px rgba(255, 220, 140, 0.85));
   animation: wordglow 2.8s ease-in-out infinite;
   pointer-events: none;
-}
-.leds {
-  position: absolute;
-  z-index: 4;
-  left: 24px;
-  top: 108px;
-  width: 248px;
-  flex-direction: column;
 }
 #cabinet[data-motion="reduce"] #wordmark { animation: none; }
 @keyframes wordglow {
   50% { filter: drop-shadow(0 0 16px rgba(255, 244, 210, 1)); }
 }
 
-.leds, .meters { display: flex; flex-wrap: wrap; gap: 8px; align-items: stretch; }
-.leds .led { width: 100%; min-height: 68px; }
+.meters { display: flex; flex-wrap: nowrap; gap: 10px; align-items: stretch; }
 .led {
   display: flex;
   flex-direction: column;
@@ -98,9 +118,9 @@ h1, h2, h3, p { margin: 0; }
 .led span {
   color: #f3d48a;
   font-family: "Auric Serif", serif;
-  font-size: 0.92rem;
+  font-size: 22px;
   font-weight: 700;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.12em;
   line-height: 1.1;
   text-transform: uppercase;
   text-shadow: 0 1px 0 #2a1804, 0 -1px 0 rgba(255, 244, 210, 0.28), 0 0 8px rgba(243, 212, 138, 0.35);
@@ -110,9 +130,26 @@ h1, h2, h3, p { margin: 0; }
   color: #fff6d8;
   text-shadow: 0 0 8px rgba(224, 177, 90, 0.55);
 }
-.led strong { font-size: 1.7rem; line-height: 1; }
-.led.win { min-width: 168px; }
-.led.win #net { font-size: 0.78rem; letter-spacing: 0.1em; }
+.led strong { font-size: 34px; line-height: 1; }
+/* The win readout is two rows (the word and the net, then the amount), so it fits under the reels in both designs. */
+.led.win {
+  flex: 2 1 0;
+  display: grid;
+  grid-template-columns: auto auto;
+  grid-template-areas: "label net" "hero hero";
+  justify-content: center;
+  align-items: baseline;
+  column-gap: 16px;
+  row-gap: 2px;
+  padding: 4px 14px;
+}
+.led.win #total-label { grid-area: label; }
+.led.win #net { grid-area: net; white-space: nowrap; letter-spacing: 0.02em; }
+.led.win #total-label { white-space: nowrap; }
+.led.win #hero { grid-area: hero; justify-self: center; }
+.led.energy { padding: 4px 14px; }
+.led.energy { flex: 1 1 0; }
+.led.win #net { font-size: 22px; letter-spacing: 0.06em; }
 #hero, #plate-amount { display: inline-flex; gap: 0; min-height: 1.2em; }
 .digit, .mark { display: inline-block; }
 
@@ -141,25 +178,36 @@ h1, h2, h3, p { margin: 0; }
 #build {
   position: absolute;
   left: 273px;
-  top: 206px;
+  top: 196px;
   width: 422px;
-  z-index: 3;
+  z-index: 4;
   display: grid;
   justify-items: center;
+  align-content: center;
   pointer-events: none;
   text-align: center;
 }
-#feature-banner { min-height: 0; color: #9fffe0; letter-spacing: 0.16em; text-transform: uppercase; font-size: 0.95rem; text-shadow: 0 0 10px rgba(159, 255, 224, 0.7); }
+#feature-banner { min-height: 0; color: #9fffe0; letter-spacing: 0.16em; text-transform: uppercase; font-size: 22px; text-shadow: 0 0 10px rgba(159, 255, 224, 0.7); }
 #feature-banner:not(:empty) { animation: banner-in 0.35s ease-out; }
 @keyframes banner-in { from { opacity: 0; transform: translateY(10px); } }
 #build-digits {
   font-family: "Auric Serif", "Noto Serif", serif;
-  font-size: 40px;
+  font-size: 56px;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
   line-height: 0.95;
   color: #fff6d8;
   text-shadow: 0 0 18px rgba(224, 177, 90, 0.9), 0 3px 0 #1a1208;
 }
 #build-digits.flash { animation: pop 0.28s ease-out; }
+/* QA row 9: the caption and the number sat on the bulbs at 2.16:1; each now has its own dark plate. */
+#feature-banner:not(:empty), #build-digits:not(:empty) {
+  background: rgba(8, 6, 3, 0.88);
+  border: 1px solid rgba(224, 177, 90, 0.9);
+  box-shadow: 0 0 22px rgba(224, 177, 90, 0.4), inset 0 0 14px rgba(0, 0, 0, 0.5);
+  border-radius: 12px;
+  padding: 0 16px;
+}
 @keyframes pop { 40% { transform: scale(1.12); filter: brightness(2); } }
 #build.slam #build-digits { animation: slam 0.38s ease-out; }
 #shock {
@@ -215,8 +263,15 @@ h1, h2, h3, p { margin: 0; }
   pointer-events: none;
   z-index: 1;
   background:
-    linear-gradient(180deg, rgba(2, 8, 8, 0.72) 0%, rgba(2, 8, 8, 0.08) 16%, transparent 34%, transparent 66%, rgba(2, 8, 8, 0.12) 84%, rgba(2, 8, 8, 0.78) 100%),
-    radial-gradient(ellipse at 50% 45%, transparent 42%, rgba(0, 0, 0, 0.38) 100%);
+    linear-gradient(180deg, #06110e 0%, #06110e 8%, rgba(6, 17, 14, 0.72) 16%, transparent 26%, transparent 74%, rgba(6, 17, 14, 0.72) 84%, #06110e 92%, #06110e 100%),
+    radial-gradient(ellipse at 50% 48%, transparent 46%, rgba(0, 0, 0, 0.42) 100%);
+}
+.reel-slot {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: calc(25% - 2px);
+  pointer-events: none;
 }
 #reels {
   position: absolute;
@@ -254,8 +309,10 @@ h1, h2, h3, p { margin: 0; }
   transition: opacity 0.35s ease;
   z-index: 3;
 }
-#cabinet[data-phase="wheel"] #wheel-dim { opacity: 1; }
-#cabinet[data-phase="wheel"] #wheel-host { z-index: 4; }
+#cabinet[data-phase="wheel"] #wheel-dim,
+#cabinet[data-phase="surge"] #wheel-dim { opacity: 1; }
+#cabinet[data-phase="wheel"] #wheel-host,
+#cabinet[data-phase="surge"] #wheel-host { z-index: 4; }
 #wheel-host {
   position: absolute;
   left: 773px;
@@ -268,7 +325,8 @@ h1, h2, h3, p { margin: 0; }
   height: 100%;
   filter: drop-shadow(0 0 12px rgba(224, 177, 90, 0.35));
 }
-#cabinet[data-phase="wheel"] #wheel-view { filter: brightness(1.35) drop-shadow(0 0 18px #fff1c9); }
+#cabinet[data-phase="wheel"] #wheel-view,
+#cabinet[data-phase="surge"] #wheel-view { filter: brightness(1.35) drop-shadow(0 0 18px #fff1c9); }
 #cabinet[data-motion="reduce"] #wheel-view { filter: none; }
 
 #fly { position: absolute; z-index: 6; color: #fff6d8; font: 800 28px "Auric Serif", serif; pointer-events: none; text-shadow: 0 2px 0 #3a2200, 0 0 12px #fff1c8; }
@@ -285,80 +343,28 @@ h1, h2, h3, p { margin: 0; }
   box-shadow: none;
 }
 .deck button, .deck a, .deck input { pointer-events: auto; }
-.meters { position: absolute; left: 36px; top: 548px; width: 470px; }
-.led.win strong, #hero { font-family: "Auric Serif", serif; font-size: 1.85rem; }
+/* Landscape: the win readout directly under the reels; the account and the session net under the wheel; a
+   refusal or notice in the arch beside the wordmark. Sizes are design pixels, chosen so they read at least
+   12 CSS px at the scales the cabinet is drawn at on a phone (about 0.58 and up). */
+.meters { position: absolute; left: 236px; top: 548px; width: 500px; }
+.led.win strong, #hero { font-family: "Auric Serif", serif; font-size: 36px; }
 #cabinet[data-energy="win"] #hero { text-shadow: 0 0 14px #9fffe0; }
-#lines { position: absolute; left: 36px; top: 688px; width: 420px; display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 0; color: #f3d48a; font-variant-numeric: tabular-nums; font-size: 0.85rem; letter-spacing: 0.03em; text-shadow: 0 1px 0 #2a1804; }
+#lines { position: absolute; left: 770px; top: 552px; width: 360px; display: flex; flex-wrap: wrap; gap: 2px 14px; margin: 0; color: #f3d48a; font-variant-numeric: tabular-nums; font-size: 22px; letter-spacing: 0.02em; text-shadow: 0 1px 0 #2a1804, 0 0 6px #000; }
 .line { display: inline-flex; gap: 6px; }
 .line.strike span:last-child { text-decoration: line-through; }
-.spin-row { display: contents; }
-.icon-row { position: absolute; left: 800px; top: 600px; width: 450px; display: flex; flex-wrap: nowrap; gap: 6px; align-items: center; justify-content: flex-end; }
-#spin {
-  position: absolute;
-  left: 527px;
-  top: 580px;
-  width: 116px;
-  height: 116px;
-  border: none;
-  border-radius: 50%;
-  background: transparent center / contain no-repeat;
-  color: transparent;
-  box-shadow: none;
-  transition: transform 0.08s ease-out, filter 0.12s ease-out;
-}
-#spin:hover:not(:disabled) { transform: scale(1.05); filter: brightness(1.08); }
-#spin:active:not(:disabled) { transform: scale(0.94); }
-#cabinet[data-energy="idle"][data-motion="allow"] #spin { animation: attract 2.6s ease-in-out infinite; }
-#cabinet[data-energy="spin"] #spin { animation: spinpulse 0.8s ease-in-out infinite; }
-@keyframes attract { 50% { box-shadow: 0 0 40px rgba(255, 220, 140, 0.95), inset 0 -10px 0 rgba(0, 0, 0, 0.25); filter: brightness(1.1); } }
-@keyframes spinpulse { 50% { box-shadow: 0 0 36px rgba(159, 255, 224, 0.85), inset 0 -10px 0 rgba(0, 0, 0, 0.25); } }
-#cost-down, #cost-up, .icon-row button {
-  width: 44px;
-  height: 44px;
-  transition: transform 0.08s ease-out;
-  border-radius: 50%;
-  border: 2px solid var(--brass);
-  background: radial-gradient(circle at 50% 30%, #3a2a16, #120e0a);
-  color: #fff6d8;
-  font-size: 1rem;
-}
-#cost-down, #cost-up, #turbo-btn, #start-auto, #stop-auto, #sound-btn, #music-btn, #settings-open, #reveal, #help-open, #board-open {
-  border: none;
-  background-color: transparent;
-  background-repeat: no-repeat;
-  background-position: center;
-  background-size: contain;
-  color: transparent;
-  box-shadow: none;
-}
-#cost-down { position: absolute; left: 456px; top: 608px; width: 58px; height: 58px; }
-#cost-up { position: absolute; left: 666px; top: 606px; width: 64px; height: 64px; }
-#cost-down:active, #cost-up:active, .icon-row button:active { transform: scale(0.92); }
-.icon-row button[aria-pressed="true"] { box-shadow: 0 0 0 3px #9fffe0; }
-#note, #short { position: absolute; left: 470px; top: 688px; width: 480px; text-align: right; color: var(--brass); font-size: 0.85rem; letter-spacing: 0.04em; }
-#auto-status {
-  position: absolute;
-  left: 980px;
-  top: 656px;
-  width: 270px;
-  min-height: 44px;
-  margin: 0;
-  padding: 8px 12px;
-  text-align: center;
-  color: #f3d48a;
-  font-family: "Auric Serif", serif;
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.12em;
-  text-shadow: 0 1px 0 #2a1804, 0 0 8px rgba(243, 212, 138, 0.35);
-  pointer-events: none;
-}
-#note { pointer-events: none; }
-#short { z-index: 2; }
+/* Session net: what this visit has netted, deliberately not on a balance plate (QA row 2: it read as a second balance). */
+#session-line { position: absolute; left: 770px; top: 616px; width: 360px; margin: 0; color: #d5dbe3; font-size: 22px; letter-spacing: 0.04em; text-shadow: 0 1px 0 #000, 0 0 6px #000; }
+#session-line span { text-transform: uppercase; letter-spacing: 0.1em; font-size: 22px; }
+#session-line b { color: #f4efe6; font-variant-numeric: tabular-nums; }
+#note, #short { position: absolute; left: 158px; top: 104px; width: 290px; text-align: left; font-size: 22px; letter-spacing: 0.02em; z-index: 6; }
+#note:not([hidden]):not(:empty) { background: rgba(7, 11, 16, 0.88); color: #f4efe6; border-radius: 10px; padding: 8px 10px; pointer-events: none; }
+#note:empty { display: none; }
+#banner { position: absolute; left: 158px; top: 186px; width: 290px; z-index: 6; font-size: 22px; }
+#cabinet[data-orient="portrait"] #banner { left: 160px; top: 380px; width: 400px; font-size: 15px; }
 .banner, .short { background: var(--teal); color: var(--teal-text); border-radius: 10px; padding: 8px 10px; }
-.cost-radios { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+#short-reset { min-height: 44px; border-radius: 999px; border: 2px solid var(--brass); background: #120e0a; padding: 6px 12px; pointer-events: auto; }
 
-#overlay { position: fixed; inset: 0; z-index: 30; pointer-events: none; }
+#overlay { position: fixed; left: 0; top: 0; width: 100%; height: 100%; z-index: 30; pointer-events: none; overflow: hidden; }
 #bigwin {
   position: absolute;
   inset: 0;
@@ -380,7 +386,7 @@ h1, h2, h3, p { margin: 0; }
   100% { transform: translate(-8px, 4px); }
 }
 #cabinet[data-motion="reduce"] #play-surface { animation: none; }
-#coin-burst { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
+#coin-burst { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
 #board-star { display: block; width: 72px; height: 72px; margin: 0 auto 8px; }
 @keyframes cabinet-shake {
   25% { transform: translate(1px, -1px); }
@@ -389,7 +395,7 @@ h1, h2, h3, p { margin: 0; }
 }
 #cabinet[data-motion="reduce"] #stage { animation: none; }
 #coins { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 1; }
-#bigwin-art { position: relative; z-index: 3; width: min(72vw, 760px); filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.75)); }
+#bigwin-art { position: relative; z-index: 3; width: min(92%, 760px); filter: drop-shadow(0 18px 24px rgba(0, 0, 0, 0.75)); }
 #plate-amount {
   position: absolute;
   left: 50%;
@@ -398,14 +404,28 @@ h1, h2, h3, p { margin: 0; }
   z-index: 8;
   font-family: "Auric Serif", serif;
   font-weight: 800;
-  font-size: clamp(72px, 10vw, 124px);
+  font-size: clamp(40px, 12vmin, 124px);
   letter-spacing: 0.02em;
   color: #ffe08a;
   -webkit-text-stroke: 3px #3a2200;
   paint-order: stroke fill;
   text-shadow: 0 6px 0 #3a2200, 0 0 22px #fff1c8;
   pointer-events: none;
+  /* A plate drawn in code under the figure (portrait audit AD-3): it counted in pale gold over a wall of gold coins.
+     The figure's own colour on this plate is far above 4.5:1, whatever the coins behind it are doing. */
+  padding: 4px 26px 10px;
+  border-radius: 22px;
+  background: rgba(12, 8, 3, 0.94);
+  border: 3px solid #e0b15a;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  white-space: nowrap;
 }
+/* Portrait: the banner spans the stage's width, over a darker scrim (AD-3). */
+@media (orientation: portrait) {
+  #bigwin { background: rgba(5, 7, 11, 0.62); }
+  #bigwin-art { width: 100%; max-width: 640px; }
+}
+#bigwin-skip[hidden] { display: none; }
 #bigwin-skip { position: absolute; bottom: 18px; min-width: 72px; min-height: 44px; border-radius: 999px; border: 2px solid var(--brass); background: #120e0a; z-index: 8; pointer-events: auto; }
 #cabinet[data-energy="win"][data-motion="allow"] #stage { animation: punch 0.48s ease-out; }
 @keyframes punch {
@@ -427,21 +447,6 @@ dialog {
   padding: 18px 16px 16px;
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45);
 }
-#help-head {
-  position: sticky;
-  top: 0;
-  z-index: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 16px;
-  margin: -6px 0 8px;
-  padding: 4px 0 8px;
-  background: #10241f;
-}
-#help-logo, #help-wheel { display: block; }
-#help-logo { width: min(58%, 220px); height: auto; }
-#help-wheel { width: 84px; height: auto; }
 #boot {
   position: fixed;
   inset: 0;
@@ -451,27 +456,26 @@ dialog {
   background: #070b10;
 }
 #boot img { width: 96px; height: 96px; }
-#currency { position: absolute; z-index: 6; left: 18px; top: 52px; display: flex; gap: 4px; }
+.coin-pick { display: flex; gap: 8px; }
 #currency button {
   min-width: 64px;
-  min-height: 36px;
-  border-radius: 0;
-  border-style: solid;
-  border-color: transparent;
-  background: transparent;
+  min-height: 44px;
+  border-radius: 999px;
+  border: 2px solid var(--brass);
+  background: #070b10;
   color: #c9a56a;
-  padding: 2px 6px;
+  padding: 2px 10px;
   font-family: "Auric Serif", serif;
-  font-size: 0.95rem;
   letter-spacing: 0.14em;
-  text-shadow: 0 1px 0 #2a1804;
 }
-#currency button[aria-pressed="false"] { filter: saturate(0.75) brightness(0.82); }
-#currency button[aria-pressed="true"] { color: #fff6d8; filter: brightness(1.12); }
+#currency[hidden] { display: none; }
+#currency button[aria-pressed="true"] { color: #1a1204; background: var(--brass); }
 dialog::backdrop { background: rgba(7, 11, 16, 0.72); }
 .panel-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; min-height: 48px; margin-top: 8px; }
 .panel-row select, .panel-row input { min-height: 44px; border-radius: 999px; border: 2px solid var(--brass); background: #070b10; padding: 6px 12px; }
-#help-body p { white-space: pre-wrap; margin: 8px 0 16px; color: var(--muted); }
+#help-open.hint { animation: help-hint 1.6s ease-in-out infinite; border-radius: 50%; }
+@keyframes help-hint { 50% { box-shadow: 0 0 0 4px rgba(159, 255, 224, 0.9), 0 0 22px rgba(159, 255, 224, 0.8); } }
+#cabinet[data-motion="reduce"] #help-open.hint { animation: none; box-shadow: 0 0 0 3px #9fffe0; }
 .dialog-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
 .dialog-actions button { min-height: 44px; border-radius: 999px; border: 2px solid var(--brass); background: #120e0a; padding: 8px 14px; }
 #board-body { display: grid; gap: 12px; margin-top: 12px; }
@@ -482,14 +486,18 @@ dialog::backdrop { background: rgba(7, 11, 16, 0.72); }
 
 #cabinet[data-motion="reduce"] .window::after,
 #cabinet[data-motion="reduce"] #feature-banner,
-#cabinet[data-motion="reduce"] #spin { animation: none; }
+#cabinet[data-motion="reduce"] #feature-banner { animation: none; }
 
 #onboard-logo { display: block; width: min(100%, 420px); height: auto; margin: 0 auto 12px; }
 
 #splash {
   position: fixed;
-  inset: 0;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
   z-index: 50;
+  cursor: pointer;
   background: #06110f;
   opacity: 1;
   transition: opacity 1s ease;
@@ -503,6 +511,7 @@ dialog::backdrop { background: rgba(7, 11, 16, 0.72); }
   bottom: 9%;
   transform: translateX(-50%);
   min-width: 180px;
+  min-height: 56px;
   padding: 14px 28px;
   border: 0;
   border-radius: 999px;
@@ -531,27 +540,40 @@ dialog::backdrop { background: rgba(7, 11, 16, 0.72); }
 #state-overlay.show.bye { opacity: 0; transition: opacity 1s ease; }
 #state-overlay[hidden] { display: none !important; }
 
+/* Portrait stack: logo, the number plaque, the four reels, the wheel, then the meter. */
 #cabinet[data-orient="portrait"] { width: 720px; height: 1280px; }
 #cabinet[data-orient="portrait"] #wordmark { left: 110px; top: 158px; width: 500px; height: 148px; }
-#cabinet[data-orient="portrait"] .leds { left: 36px; top: 318px; width: 648px; flex-direction: row; flex-wrap: nowrap; }
-#cabinet[data-orient="portrait"] .leds .led { width: auto; flex: 1 1 0; min-width: 0; min-height: 58px; padding: 6px 8px; }
-#cabinet[data-orient="portrait"] .meters .led { min-height: 64px; min-width: 0; flex: 1 1 0; }
-#cabinet[data-orient="portrait"] .led strong, #cabinet[data-orient="portrait"] #hero { font-size: 1.28rem; }
-#cabinet[data-orient="portrait"] #build { left: 167px; top: 408px; width: 389px; }
+#cabinet[data-orient="portrait"] .meters { left: 120px; top: 948px; width: 480px; gap: 8px; }
+#cabinet[data-orient="portrait"] .meters .led { min-height: 56px; min-width: 0; padding: 4px 8px; }
+#cabinet[data-orient="portrait"] .led span { font-size: 16px; letter-spacing: 0.06em; }
+#cabinet[data-orient="portrait"] .led strong, #cabinet[data-orient="portrait"] #hero { font-size: 28px; }
+#cabinet[data-orient="portrait"] .led.win #net { font-size: 15px; }
+#cabinet[data-orient="portrait"] #feature-banner { font-size: 16px; }
+#cabinet[data-orient="portrait"] #build { left: 70px; top: 308px; width: 580px; height: 108px; }
+#cabinet[data-orient="portrait"] #build-digits { font-size: 76px; }
 #cabinet[data-orient="portrait"] #stage,
 #cabinet[data-orient="portrait"] #stage.lp-stage,
-#cabinet[data-orient="portrait"] #reel-sweep { left: 167px; top: 464px; width: 389px; height: 125px; }
+#cabinet[data-orient="portrait"] #reel-sweep { left: 148px; top: 424px; width: 424px; height: 176px; }
 #cabinet[data-orient="portrait"] #wheel-host { left: 230px; top: 676px; width: 260px; height: 260px; }
-#cabinet[data-orient="portrait"] .meters { left: 36px; top: 960px; width: 648px; }
-#cabinet[data-orient="portrait"] #lines { left: 36px; top: 938px; width: 648px; }
-#cabinet[data-orient="portrait"] #currency { left: 16px; top: 748px; flex-direction: column; gap: 2px; }
-#cabinet[data-orient="portrait"] .leds .led:first-child { flex: 1.45 1 0; }
-#cabinet[data-orient="portrait"] .led span { font-size: 0.64rem; letter-spacing: 0.05em; }
-#cabinet[data-orient="portrait"] #spin { left: 304px; top: 1014px; width: 112px; height: 112px; }
-#cabinet[data-orient="portrait"] #cost-down { left: 200px; top: 1036px; width: 68px; height: 68px; }
-#cabinet[data-orient="portrait"] #cost-up { left: 448px; top: 1036px; width: 68px; height: 68px; }
-#cabinet[data-orient="portrait"] .icon-row { left: 24px; top: 1160px; width: 672px; justify-content: center; gap: 6px; }
-#cabinet[data-orient="portrait"] .icon-row button { width: 56px; height: 56px; }
-#cabinet[data-orient="portrait"] #auto-status { left: 200px; top: 1224px; width: 320px; text-align: center; }
-#cabinet[data-orient="portrait"] #note { left: 36px; top: 1132px; width: 648px; text-align: center; }
-#cabinet[data-orient="portrait"] #short { left: 200px; top: 1224px; width: 320px; text-align: center; }
+/* The wheel feature opens across the field's full width while it spins and lands (it grows; it closes at once). */
+#cabinet[data-orient="portrait"][data-phase="wheel"] #wheel-host,
+#cabinet[data-orient="portrait"][data-phase="surge"] #wheel-host { left: 155px; top: 600px; width: 410px; height: 410px; transition: left 0.35s ease, top 0.35s ease, width 0.35s ease, height 0.35s ease; }
+#cabinet[data-orient="portrait"][data-motion="reduce"] #wheel-host { transition: none; }
+#cabinet[data-orient="portrait"] #lines { left: 152px; top: 942px; width: 416px; justify-content: center; font-size: 15px; gap: 2px 8px; }
+/* The round breakdown on its own plate (AD-4): it sat on ornate brass with lit bulbs behind it. */
+#lines, #session-line { display: none !important; }
+.led.win #net { display: none !important; }
+#cabinet[data-orient="portrait"] #session-line { left: 150px; top: 986px; width: 420px; font-size: 15px; text-align: center; }
+#cabinet[data-orient="portrait"] #session-line span { font-size: 14px; }
+#cabinet[data-orient="portrait"] #note,
+#cabinet[data-orient="portrait"] #short { left: 150px; top: 1008px; width: 420px; text-align: center; font-size: 16px; }
+
+/* WI-535: a sound notice is a short toast laid over the top bar's free middle, never over the reel window. */
+#toast {
+  position: fixed; z-index: 25; box-sizing: border-box; margin: 0; overflow: hidden;
+  display: flex; align-items: center; justify-content: center; padding: 2px 10px; text-align: center;
+  background: var(--teal); color: var(--teal-text); border-radius: 10px; font: 600 12px/1.2 "Auric Sans", sans-serif;
+  animation: toast-in 0.25s ease-out;
+}
+#toast[hidden] { display: none; }
+@keyframes toast-in { from { opacity: 0; transform: translateY(-6px); } }

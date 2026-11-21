@@ -1,0 +1,281 @@
+{
+  "rules": {
+    "version": 1,
+    "title": "Auric Dynamo",
+    "sections": [
+      {
+        "heading": "How to play",
+        "paragraphs": [
+          "Choose your entry, then press Spin. Entries: 0.10, 0.20, 0.50 or 1.00. Three number reels stop, then the modifier reel.",
+          "The three reels are read from left to right as one number. A blank is skipped, so it does not zero the others. 1, 5 and 00 read as 1500. 10, a blank and 10 read as 1010. 0, 10 and 1 read as 101. A result that reads as 0 pays nothing.",
+          "Charge can land only on a blank that sits between two number tokens. That cell then spins once more into 0, 1, 5, 10 or 00. 10, Charge and 10 can become 10, 10 and 10, which reads as 101010.",
+          "The base win is that number times one tenth of the entry. One round pays at most 10,000.00. A larger natural result is paid at that ceiling, and the receipt says so.",
+          "The modifier then decides what the round pays. Only the Wheel modifier opens the prize wheel. Every feature is available at every entry."
+        ]
+      },
+      {
+        "heading": "Number tokens",
+        "paragraphs": [
+          "The chance of each token on each reel. The reels are independent, and the weights are not the same.",
+          "Charge replaces an eligible blank on 150 of 10,000 draws. The fill it spins into is its own draw."
+        ],
+        "table": {
+          "columns": [
+            "Token",
+            "Left",
+            "Middle",
+            "Right"
+          ],
+          "rows": [
+            [
+              "blank",
+              "24.00%",
+              "99.60%",
+              "34.00%"
+            ],
+            [
+              "0",
+              "20.00%",
+              "0.08%",
+              "0.30%"
+            ],
+            [
+              "1",
+              "54.00%",
+              "0.20%",
+              "59.00%"
+            ],
+            [
+              "5",
+              "1.20%",
+              "0.06%",
+              "6.00%"
+            ],
+            [
+              "10",
+              "0.60%",
+              "0.04%",
+              "0.50%"
+            ],
+            [
+              "00",
+              "0.20%",
+              "0.02%",
+              "0.20%"
+            ]
+          ]
+        }
+      },
+      {
+        "heading": "Charge fill",
+        "paragraphs": [
+          "The number token Charge spins into. There is no blank on this draw."
+        ],
+        "table": {
+          "columns": [
+            "Token",
+            "Chance"
+          ],
+          "rows": [
+            [
+              "0",
+              "2.00%"
+            ],
+            [
+              "1",
+              "86.00%"
+            ],
+            [
+              "5",
+              "10.00%"
+            ],
+            [
+              "10",
+              "1.60%"
+            ],
+            [
+              "00",
+              "0.40%"
+            ]
+          ]
+        }
+      },
+      {
+        "heading": "Modifiers",
+        "paragraphs": [
+          "One modifier per round. Feature numbers never draw another modifier. A replacement or a bank face can also Charge."
+        ],
+        "table": {
+          "columns": [
+            "Modifier",
+            "Pays",
+            "Chance"
+          ],
+          "rows": [
+            [
+              "1x",
+              "The base",
+              "81.00%"
+            ],
+            [
+              "2x",
+              "2 times the base",
+              "12.00%"
+            ],
+            [
+              "5x",
+              "5 times the base",
+              "1.20%"
+            ],
+            [
+              "10x",
+              "10 times the base",
+              "0.30%"
+            ],
+            [
+              "Replace",
+              "One new number instead of the base",
+              "2.50%"
+            ],
+            [
+              "Bank + Add",
+              "The base plus two new numbers",
+              "1.80%"
+            ],
+            [
+              "Wheel",
+              "The base plus one wheel prize",
+              "1.20%"
+            ]
+          ]
+        }
+      },
+      {
+        "heading": "Wheel",
+        "paragraphs": [
+          "The prize is a multiple of the entry. The wedges are not equal. The wedge is chosen before the wheel moves."
+        ],
+        "table": {
+          "columns": [
+            "Wedge",
+            "Prize",
+            "Chance"
+          ],
+          "rows": [
+            [
+              "1",
+              "1x",
+              "55.00%"
+            ],
+            [
+              "2",
+              "2x",
+              "22.00%"
+            ],
+            [
+              "3",
+              "4x",
+              "11.00%"
+            ],
+            [
+              "4",
+              "6x",
+              "5.00%"
+            ],
+            [
+              "5",
+              "10x",
+              "3.50%"
+            ],
+            [
+              "6",
+              "16x",
+              "2.00%"
+            ],
+            [
+              "7",
+              "40x",
+              "1.00%"
+            ],
+            [
+              "8",
+              "110x",
+              "0.50%"
+            ]
+          ]
+        }
+      },
+      {
+        "heading": "Dynamo Surge",
+        "paragraphs": [
+          "The meter gains one charge for each settled paid play, including a miss. Feature steps do not charge it. At 10 of 10 it draws this wheel and returns to 0.",
+          "A Surge prize is a count of units, and one unit is one tenth of the entry. A 1 pays one unit. A 5 pays half the entry. A 25 pays two and a half times the entry. Paying these as multiples of the whole entry would put at least a tenth of every entry into a wheel that fires every ten plays."
+        ],
+        "table": {
+          "columns": [
+            "Wedge",
+            "Units",
+            "Chance"
+          ],
+          "rows": [
+            [
+              "1",
+              "1",
+              "68.00%"
+            ],
+            [
+              "2",
+              "2",
+              "18.00%"
+            ],
+            [
+              "3",
+              "3",
+              "7.00%"
+            ],
+            [
+              "4",
+              "5",
+              "3.50%"
+            ],
+            [
+              "5",
+              "8",
+              "1.80%"
+            ],
+            [
+              "6",
+              "10",
+              "1.00%"
+            ],
+            [
+              "7",
+              "15",
+              "0.45%"
+            ],
+            [
+              "8",
+              "25",
+              "0.25%"
+            ]
+          ]
+        }
+      },
+      {
+        "heading": "Return to player",
+        "paragraphs": [
+          "The published return is 96.27 percent, the lowest of the four entries, because the 10,000.00 ceiling binds more as the entry rises. 0.10 pays 96.28 percent, 0.20 pays 96.28 percent, 0.50 pays 96.28 percent, 1.00 pays 96.27 percent. Each fraction is on the math sheet. Any one session can be higher or lower.",
+          "About 38.70% of rounds pay more than the entry. The paid maximum is the 10,000.00 ceiling: 100,000x the entry at 0.10, and 10,000x the entry at 1.00.",
+          "Dynamo Surge pays. It is included in the return above."
+        ]
+      },
+      {
+        "heading": "Good to know",
+        "paragraphs": [
+          "The server decides every result before anything moves on screen. What you see is the result it sent, and your balance is the server's balance.",
+          "Gold Coins are for promotional play. Sweeps Coins entries and prizes are recorded separately. Both play the same game with the same chances."
+        ]
+      }
+    ]
+  }
+}
